@@ -3,6 +3,8 @@ import "leaflet/dist/leaflet.css";
 import type { Metadata } from "next";
 import { Source_Serif_4, Inter, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
+import { api } from "@/lib/api";
+import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 
 const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
@@ -29,10 +31,24 @@ const navLinks = [
   { href: "/analysis", label: "Agency Analysis" },
 ];
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// Never lets a data-freshness hiccup break the whole page - render a plain
+// fallback string on any fetch/shape failure rather than a bare null or crash.
+async function freshnessLine(): Promise<string> {
+  try {
+    const f = await api.dataFreshness();
+    if (!f.finished_at) return "Data freshness unavailable";
+    const scored = f.rows_scored ? ` · ${formatCount(f.rows_scored)} works scored` : "";
+    return `Data last refreshed ${formatFreshnessTimestamp(f.finished_at)}${scored}`;
+  } catch {
+    return "Data freshness unavailable";
+  }
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const freshness = await freshnessLine();
   return (
     <html lang="en" className={`${sourceSerif.variable} ${inter.variable} ${plexMono.variable}`}>
-      <body>
+      <body className="flex min-h-screen flex-col">
         <header className="border-b border-[color:var(--line)] bg-[color:var(--surface)]">
           <div className="mx-auto max-w-7xl px-6 py-3 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
@@ -62,7 +78,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </nav>
           </div>
         </header>
-        {children}
+        <div className="flex-1">{children}</div>
+        <footer className="mt-8 border-t border-[color:var(--line)] bg-[color:var(--surface)]">
+          <div className="mx-auto max-w-7xl px-6 py-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-1.5 text-xs text-[color:var(--muted)]">
+            <span className="font-mono" style={{ fontFamily: "var(--font-data)" }}>
+              {freshness}
+            </span>
+            <span>
+              Data sourced from the MPLADS programme via{" "}
+              <a
+                href="https://empoweredindian.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-[color:var(--line)] underline-offset-2 hover:text-[color:var(--ink)]"
+              >
+                Empowered Indian
+              </a>
+              , which aggregates the official MoSPI MPLADS portal.
+            </span>
+          </div>
+        </footer>
       </body>
     </html>
   );

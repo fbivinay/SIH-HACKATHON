@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
+import ProjectFilters from "@/components/ProjectFilters";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
 
 export default async function ProjectsPage({
@@ -11,11 +12,22 @@ export default async function ProjectsPage({
   // api.projects() takes Record<string, string> — flatten and drop undefined/array values.
   const filters: Record<string, string> = {};
   for (const [k, v] of Object.entries(sp)) {
-    if (typeof v === "string") filters[k] = v;
+    if (typeof v === "string" && v !== "") filters[k] = v;
   }
-  const projects = await api.projects(filters);
 
-  const activeFilters = Object.entries(filters);
+  // Fetch in parallel; a filter-options failure must not blank the whole page,
+  // so fall back to an empty option set and still render the table.
+  const [projects, filterOptions] = await Promise.all([
+    api.projects(filters),
+    api.filters().catch(() => ({ states: [], risk_levels: [] })),
+  ]);
+
+  // Human-readable summary of what's applied, rather than raw "state=Bihar" pairs.
+  const applied: string[] = [];
+  if (filters.q) applied.push(`matching “${filters.q}”`);
+  if (filters.state) applied.push(`in ${filters.state}`);
+  if (filters.district) applied.push(`in ${filters.district}`);
+  if (filters.risk_level) applied.push(`at ${riskLevelLabel(filters.risk_level)} risk`);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
@@ -27,15 +39,15 @@ export default async function ProjectsPage({
         Projects
       </h1>
       <p className="mt-1.5 max-w-2xl text-sm text-[color:var(--muted)]">
-        Showing {formatCount(projects.length)} of up to 200 works, ranked by risk score
-        (highest first).
-        {activeFilters.length > 0 && (
-          <>
-            {" "}
-            Filtered by {activeFilters.map(([k, v]) => `${k}=${v}`).join(", ")}.
-          </>
-        )}
+        {`Showing ${formatCount(projects.length)} ${projects.length === 1 ? "work" : "works"}${
+          applied.length > 0 ? " " + applied.join(", ") : ""
+        }, ranked by risk score (highest first).`}{" "}
+        Results are capped at 200 — narrow the filters to see more specific works.
       </p>
+
+      <div className="mt-5">
+        <ProjectFilters filterOptions={filterOptions} />
+      </div>
 
       <div className="mt-6 data-table-wrap">
         <table className="data-table">
@@ -53,7 +65,9 @@ export default async function ProjectsPage({
             {projects.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-center text-[color:var(--muted)] py-6">
-                  No works match these filters.
+                  {applied.length > 0
+                    ? "No works match these filters. Try widening or clearing them."
+                    : "No works available."}
                 </td>
               </tr>
             )}

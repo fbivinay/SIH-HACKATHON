@@ -57,6 +57,21 @@ export type AgencyStat = {
   avg_risk_score: number;
 };
 
+export type FilterOptions = {
+  states: Array<{ state: string; count: number }>;
+  risk_levels: string[];
+};
+
+// Empty object when no successful run has ever completed (see
+// GET /api/data-freshness in api/main.py) - every field is then absent.
+export type DataFreshness = {
+  finished_at?: string;
+  rows_loaded?: number;
+  rows_scored?: number;
+  rows_rejected?: number;
+  source?: string;
+};
+
 // If the API's own Vercel deployment is behind Vercel Deployment Protection,
 // set API_PROTECTION_BYPASS (server-only env var, not NEXT_PUBLIC_) to that
 // project's automation bypass secret so server-side fetches aren't redirected
@@ -79,4 +94,6 @@ export const api = {
   project: (id: number) => get<ProjectDetail>(`/api/projects/${id}`),
   mapStates: () => get<StateStat[]>("/api/map/states"),
   agencies: () => get<AgencyStat[]>("/api/agencies"),
+  dataFreshness: () => get<DataFreshness>("/api/data-freshness"),
+  filters: () => get<FilterOptions>("/api/filters"),
 };

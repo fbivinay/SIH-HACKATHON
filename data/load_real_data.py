@@ -163,6 +163,41 @@ def build_rows():
     return df, rejects
 
 
+def start_refresh_run(conn, source):
+    """Insert a 'running' data_refresh row and return its id, or None on any
+    failure. Audit bookkeeping must never block the pipeline itself."""
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO data_refresh (status, source) VALUES ('running', %s) RETURNING id",
+                [source],
+            )
+            run_id = cur.fetchone()[0]
+        conn.commit()
+        return run_id
+    except Exception as e:  # noqa: BLE001 - audit trail is best-effort
+        print(f"data_refresh: failed to insert running row: {e}")
+        conn.rollback()
+        return None
+
+
+def finish_load_run(conn, run_id, status, rows_loaded, rows_rejected):
+    if run_id is None:
+        return
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """UPDATE data_refresh
+                   SET finished_at = now(), status = %s, rows_loaded = %s, rows_rejected = %s
+                   WHERE id = %s""",
+                [status, rows_loaded, rows_rejected, run_id],
+            )
+        conn.commit()
+    except Exception as e:  # noqa: BLE001
+        print(f"data_refresh: failed to update run {run_id}: {e}")
+        conn.rollback()
+
+
 def load(conn, df, rejects):
     rows = [
         (
@@ -192,9 +227,20 @@ def load(conn, df, rejects):
 
 
 if __name__ == "__main__":
-    df, rejects = build_rows()
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
-    inserted, rejected = load(conn, df, rejects)
+    run_id = start_refresh_run(conn, source=f"{RECOMMENDED_CSV.name}, {COMPLETED_CSV.name}")
+    try:
+        df, rejects = build_rows()
+        inserted, rejected = load(conn, df, rejects)
+    except Exception:
+        # Loader failed before scoring ever ran - the row stays honest as
+        # 'failed' rather than parked at 'running' forever. scoring.py's own
+        # bookkeeping is unaffected since it never finds this run to update.
+        finish_load_run(conn, run_id, "failed", None, None)
+        conn.close()
+        raise
+    # Still 'running': scoring.py finishes this same row once it completes.
+    finish_load_run(conn, run_id, "running", inserted, rejected)
     conn.close()
     print(f"Inserted {inserted} real projects, rejected {rejected} rows.")
     print(f"Total expenditure (completed works' Final Amount): "

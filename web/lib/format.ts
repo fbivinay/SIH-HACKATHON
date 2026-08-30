@@ -83,6 +83,33 @@ export function isAggregateScoringPending(
  * GeoJSON's ST_NM property), which differ on "&" vs "and", a leading "The", and a
  * trailing "Islands" (e.g. DB "Andaman And Nicobar Islands" vs. GeoJSON "Andaman & Nicobar").
  */
+/**
+ * Data-freshness timestamps (GET /api/data-freshness) render in IST — the
+ * dashboard's whole audience (MPs' offices, districts, oversight bodies) is
+ * India-based, and every other timestamp-shaped figure on the site is
+ * already Indian-formatted (en-IN locale, ₹ Cr/L). Intl's own "IST" timezone
+ * name is ambiguous (India/Israel/Ireland all claim it) and some runtimes
+ * render "GMT+5:30" instead, so the label is appended literally.
+ */
+export function formatFreshnessTimestamp(iso: string | null | undefined): string {
+  if (!iso) return "unknown";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "unknown";
+  const datePart = new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Kolkata",
+  }).format(d);
+  const timePart = new Intl.DateTimeFormat("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Kolkata",
+  }).format(d);
+  return `${datePart}, ${timePart} IST`;
+}
+
 export function normalizeStateName(s: string | null | undefined): string {
   if (!s) return "";
   return s

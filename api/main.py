@@ -27,6 +27,7 @@ def overview():
 
 @app.get("/api/projects")
 def list_projects(
+    q: Optional[str] = None,
     state: Optional[str] = None,
     district: Optional[str] = None,
     risk_level: Optional[str] = None,
@@ -34,6 +35,13 @@ def list_projects(
     offset: int = 0,
 ):
     filters, params = [], []
+    if q:
+        filters.append(
+            "(work_name ILIKE %s OR mp_name ILIKE %s OR district ILIKE %s "
+            "OR state ILIKE %s OR implementing_agency ILIKE %s)"
+        )
+        pattern = f"%{q}%"
+        params += [pattern] * 5
     if state:
         filters.append("state = %s")
         params.append(state)
@@ -57,6 +65,21 @@ def list_projects(
         """,
         params,
     )
+
+
+@app.get("/api/filters")
+def filters():
+    # Small, cacheable payload for the projects-page dropdowns: states with
+    # counts, and whichever risk levels actually appear. Districts (773) and
+    # agencies (776) are intentionally left out — see /api/districts, which
+    # a district dropdown could filter client-side by state if one is added.
+    states = query(
+        "SELECT state, COUNT(*) AS count FROM projects GROUP BY state ORDER BY state"
+    )
+    risk_levels = query(
+        "SELECT DISTINCT risk_level FROM projects WHERE risk_level IS NOT NULL ORDER BY risk_level"
+    )
+    return {"states": states, "risk_levels": [r["risk_level"] for r in risk_levels]}
 
 
 @app.get("/api/projects/{project_id}")
@@ -93,6 +116,23 @@ def agencies():
         ORDER BY avg_risk_score DESC
         """
     )
+
+
+@app.get("/api/data-freshness")
+def data_freshness():
+    """Latest successful load+score run, for the UI's freshness indicator.
+    See data_refresh in data/schema.sql / task-12-refresh-report.md."""
+    row = query(
+        """
+        SELECT finished_at, rows_loaded, rows_scored, rows_rejected, source
+        FROM data_refresh
+        WHERE status = 'success'
+        ORDER BY finished_at DESC NULLS LAST
+        LIMIT 1
+        """,
+        one=True,
+    )
+    return row or {}
 
 
 @app.get("/api/districts")

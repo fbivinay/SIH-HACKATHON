@@ -214,6 +214,40 @@ def score_dataframe(df):
     return df
 
 
+def current_refresh_run_id(conn):
+    """Find the 'running' data_refresh row load_real_data.py started, so this
+    run's rows_scored/status lands on the same audit row. Best-effort: audit
+    bookkeeping must never block scoring itself."""
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id FROM data_refresh WHERE status = 'running' "
+                "ORDER BY started_at DESC LIMIT 1"
+            )
+            row = cur.fetchone()
+        return row[0] if row else None
+    except Exception as e:  # noqa: BLE001
+        print(f"data_refresh: failed to look up running run: {e}")
+        return None
+
+
+def finish_scoring_run(conn, run_id, status, rows_scored):
+    if run_id is None:
+        return
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """UPDATE data_refresh
+                   SET finished_at = now(), status = %s, rows_scored = %s
+                   WHERE id = %s""",
+                [status, rows_scored, run_id],
+            )
+        conn.commit()
+    except Exception as e:  # noqa: BLE001
+        print(f"data_refresh: failed to update run {run_id}: {e}")
+        conn.rollback()
+
+
 def write_scores(conn, df):
     """Bulk-write scored columns via a temp table + single UPDATE...FROM.
 
@@ -277,6 +311,7 @@ if __name__ == "__main__":
     # the time we get to write_scores. Fetch on one connection, close it,
     # compute, then open a fresh connection to write.
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    run_id = current_refresh_run_id(conn)
     df = fetch_projects(conn)
     conn.close()
 
@@ -288,9 +323,16 @@ if __name__ == "__main__":
     for col in ("sanctioned_amount", "expenditure", "recommended_amount"):
         if col in df.columns:
             df[col] = df[col].astype(float)
-    scored = score_dataframe(df)
+    try:
+        scored = score_dataframe(df)
+    except Exception:
+        conn = psycopg2.connect(os.environ["DATABASE_URL"])
+        finish_scoring_run(conn, run_id, "failed", None)
+        conn.close()
+        raise
 
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     write_scores(conn, scored)
+    finish_scoring_run(conn, run_id, "success", len(scored))
     conn.close()
     print(f"Scored {len(scored)} projects.")
