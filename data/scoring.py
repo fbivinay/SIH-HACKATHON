@@ -122,6 +122,16 @@ def compliance_risk_score(row):
     if row["work_status"] == "completed" and pd.isna(row["actual_completion"]):
         score += 20
         reasons.append("Marked completed with no actual completion date")
+    # has_images can arrive as object dtype (True/False/None) once it's round-
+    # tripped through psycopg2 + pandas, so NaN/None must not read as truthy
+    # False. Require it to be exactly False - pd.notna guards NaN/None first,
+    # then compare, rather than relying on `not row["has_images"]` which would
+    # treat NULL (unknown) the same as a recorded absence of images. row.get
+    # keeps this safe against hand-built test Series that omit the column.
+    has_images = row.get("has_images")
+    if row["work_status"] == "completed" and pd.notna(has_images) and has_images == False:  # noqa: E712
+        score += 30
+        reasons.append("Completed work has no photographic documentation on record")
     return min(score, 100.0), reasons
 
 
