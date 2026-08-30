@@ -1,0 +1,133 @@
+# Nightly MPLADS data refresh.
+#
+# Reloads the MPLADS snapshot and re-runs risk scoring, so the dashboard's
+# "Data last refreshed" figure stays true rather than frozen at whenever the
+# data was last loaded by hand.
+#
+# WHY NOT VERCEL CRON: scoring embeds ~127,000 work descriptions with
+# sentence-transformers and takes 15-20 minutes. Vercel Functions cap at 300s.
+# GitHub Actions allows 6h per job, so the pipeline runs here and writes to the
+# same Neon database the deployed API reads.
+#
+# TO MAKE THIS LIVE, a maintainer must configure two repository secrets
+# (Settings -> Secrets and variables -> Actions):
+#
+#   DATABASE_URL      required. The same Neon connection string the API uses.
+#                     Get it with: vercel env pull
+#   MPLADS_DATA_URL   required. A URL serving a .zip of the MPLADS CSV
+#                     snapshots (mplads_recommended_works_*.csv and
+#                     mplads_completed_works_*.csv). The CSVs are ~60MB and are
+#                     deliberately not committed to this repository.
+#
+# Without MPLADS_DATA_URL the job SKIPS with an explanatory message rather than
+# failing, so an unconfigured repository does not show a permanently red badge.
+
+name: Refresh MPLADS data
+
+on:
+  schedule:
+    # 19:30 UTC = 01:00 IST. Runs after the Indian working day so a refresh that
+    # takes 20 minutes never overlaps a live demo or someone's browsing.
+    - cron: "30 19 * * *"
+  workflow_dispatch:
+
+# Two refreshes writing to the same tables would race, exactly as happened once
+# during development. Never run this concurrently with itself.
+concurrency:
+  group: mplads-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    # Scoring is 15-20 min; the default 360 is plenty, but be explicit so a hang
+    # is killed rather than burning the full 6h allowance.
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check configuration
+        id: config
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          MPLADS_DATA_URL: ${{ secrets.MPLADS_DATA_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$MPLADS_DATA_URL" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Refresh skipped — not configured"
+              echo ""
+              echo "This workflow needs two repository secrets before it can run:"
+              echo ""
+              echo "- \`DATABASE_URL\` — ${DATABASE_URL:+set}${DATABASE_URL:-**missing**}"
+              echo "- \`MPLADS_DATA_URL\` — ${MPLADS_DATA_URL:+set}${MPLADS_DATA_URL:-**missing**}"
+              echo ""
+              echo "Add them under Settings → Secrets and variables → Actions."
+              echo "Skipping rather than failing so the repository does not show a red badge."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        if: steps.config.outputs.configured == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        if: steps.config.outputs.configured == 'true'
+        run: pip install -r data/requirements.txt
+
+      - name: Download MPLADS snapshot
+        if: steps.config.outputs.configured == 'true'
+        env:
+          MPLADS_DATA_URL: ${{ secrets.MPLADS_DATA_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p mplads-data
+          curl --fail --silent --show-error --location \
+               --max-time 600 --output snapshot.zip "$MPLADS_DATA_URL"
+          unzip -j -o snapshot.zip '*.csv' -d mplads-data
+          echo "Downloaded:"
+          ls -la mplads-data
+
+      - name: Load data
+        if: steps.config.outputs.configured == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          MPLADS_DATA_DIR: mplads-data
+        run: python data/load_real_data.py
+
+      - name: Score works
+        if: steps.config.outputs.configured == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        # 15-20 minutes: embeds ~127k descriptions. Not hung.
+        run: python data/scoring.py
+
+      - name: Report result
+        if: steps.config.outputs.configured == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import os, psycopg2
+          conn = psycopg2.connect(os.environ["DATABASE_URL"])
+          cur = conn.cursor()
+          cur.execute("""SELECT finished_at, rows_loaded, rows_scored, rows_rejected
+                         FROM data_refresh WHERE status = 'success'
+                         ORDER BY finished_at DESC LIMIT 1;""")
+          row = cur.fetchone()
+          print("### Refresh complete\n")
+          if row:
+              print(f"- Finished: {row[0]}")
+              print(f"- Loaded: {row[1]:,}")
+              print(f"- Scored: {row[2]:,}")
+              print(f"- Rejected: {row[3]:,}")
+          else:
+              print("No successful run recorded — check the logs above.")
+          conn.close()
+          PY
