@@ -3,7 +3,7 @@ from datetime import date
 from pathlib import Path
 import pandas as pd
 import psycopg2
-from psycopg2.extras import RealDictCursor, Json
+from psycopg2.extras import RealDictCursor, Json, execute_values
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
@@ -109,7 +109,14 @@ def compliance_risk_score(row):
     if row["expenditure"] > row["sanctioned_amount"]:
         score += 60
         reasons.append("Expenditure exceeds sanctioned amount")
-    if pd.isna(row["start_date"]) or pd.isna(row["expected_completion"]):
+    # Only recommended works are guaranteed a recommendation date in the source
+    # data (see load_real_data.py); most completed works simply have none on
+    # record, so this rule would misreport a data gap as an agency compliance
+    # failure if applied to them. Scope it to rows where the date should be
+    # knowable.
+    if row["work_status"] == "recommended" and (
+        pd.isna(row["start_date"]) or pd.isna(row["expected_completion"])
+    ):
         score += 20
         reasons.append("Missing start or expected completion date")
     if row["work_status"] == "completed" and pd.isna(row["actual_completion"]):
@@ -178,36 +185,71 @@ def score_dataframe(df):
 
 
 def write_scores(conn, df):
+    """Bulk-write scored columns via a temp table + single UPDATE...FROM.
+
+    127k row-by-row UPDATEs against a remote Neon DB took hours; loading all
+    rows into an unlogged TEMP TABLE with execute_values then joining in one
+    UPDATE is a couple of round trips instead of 127k.
+    """
+    rows = [
+        (
+            int(row["id"]), int(row["delay_days"]), float(row["cost_deviation_pct"]),
+            float(row["expenditure_ratio"]), float(row["district_avg_cost"]),
+            float(row["agency_delay_rate"]), float(row["max_similarity_score"]),
+            row["similar_work_id"], float(row["cost_risk"]),
+            float(row["delay_risk"]), float(row["duplicate_risk"]),
+            float(row["agency_risk"]), float(row["compliance_risk"]),
+            float(row["overall_risk_score"]), row["risk_level"],
+            Json(row["flagged_reasons"]),
+        )
+        for _, row in df.iterrows()
+    ]
     with conn.cursor() as cur:
-        for _, row in df.iterrows():
-            cur.execute(
-                """
-                UPDATE projects SET
-                  delay_days=%s, cost_deviation_pct=%s, expenditure_ratio=%s,
-                  district_avg_cost=%s, agency_delay_rate=%s,
-                  max_similarity_score=%s, similar_work_id=%s,
-                  cost_risk=%s, delay_risk=%s, duplicate_risk=%s,
-                  agency_risk=%s, compliance_risk=%s,
-                  overall_risk_score=%s, risk_level=%s, flagged_reasons=%s
-                WHERE id=%s
-                """,
-                (
-                    int(row["delay_days"]), float(row["cost_deviation_pct"]),
-                    float(row["expenditure_ratio"]), float(row["district_avg_cost"]),
-                    float(row["agency_delay_rate"]), float(row["max_similarity_score"]),
-                    row["similar_work_id"], float(row["cost_risk"]),
-                    float(row["delay_risk"]), float(row["duplicate_risk"]),
-                    float(row["agency_risk"]), float(row["compliance_risk"]),
-                    float(row["overall_risk_score"]), row["risk_level"],
-                    Json(row["flagged_reasons"]), int(row["id"]),
-                ),
-            )
+        cur.execute(
+            """
+            CREATE TEMP TABLE _score_updates (
+                id INTEGER, delay_days INTEGER, cost_deviation_pct NUMERIC,
+                expenditure_ratio NUMERIC, district_avg_cost NUMERIC,
+                agency_delay_rate NUMERIC, max_similarity_score NUMERIC,
+                similar_work_id INTEGER, cost_risk NUMERIC, delay_risk NUMERIC,
+                duplicate_risk NUMERIC, agency_risk NUMERIC, compliance_risk NUMERIC,
+                overall_risk_score NUMERIC, risk_level TEXT, flagged_reasons JSONB
+            ) ON COMMIT DROP
+            """
+        )
+        execute_values(
+            cur,
+            "INSERT INTO _score_updates VALUES %s",
+            rows,
+            page_size=1000,
+        )
+        cur.execute(
+            """
+            UPDATE projects SET
+              delay_days = u.delay_days, cost_deviation_pct = u.cost_deviation_pct,
+              expenditure_ratio = u.expenditure_ratio, district_avg_cost = u.district_avg_cost,
+              agency_delay_rate = u.agency_delay_rate, max_similarity_score = u.max_similarity_score,
+              similar_work_id = u.similar_work_id, cost_risk = u.cost_risk,
+              delay_risk = u.delay_risk, duplicate_risk = u.duplicate_risk,
+              agency_risk = u.agency_risk, compliance_risk = u.compliance_risk,
+              overall_risk_score = u.overall_risk_score, risk_level = u.risk_level,
+              flagged_reasons = u.flagged_reasons
+            FROM _score_updates u
+            WHERE projects.id = u.id
+            """
+        )
     conn.commit()
 
 
 if __name__ == "__main__":
+    # Neon drops idle connections; score_dataframe takes ~18 minutes of pure
+    # CPU with no DB activity, so a connection held open across it is dead by
+    # the time we get to write_scores. Fetch on one connection, close it,
+    # compute, then open a fresh connection to write.
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     df = fetch_projects(conn)
+    conn.close()
+
     # Controller-approved deviation: RealDictCursor returns NUMERIC columns as
     # decimal.Decimal, which makes these columns object-dtype and breaks
     # pandas arithmetic (/, .round(), groupby().transform("mean")) used below.
@@ -217,6 +259,8 @@ if __name__ == "__main__":
         if col in df.columns:
             df[col] = df[col].astype(float)
     scored = score_dataframe(df)
+
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
     write_scores(conn, scored)
-    print(f"Scored {len(scored)} projects.")
     conn.close()
+    print(f"Scored {len(scored)} projects.")

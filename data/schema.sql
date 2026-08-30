@@ -50,3 +50,10 @@ CREATE INDEX IF NOT EXISTS idx_projects_state ON projects(state);
 CREATE INDEX IF NOT EXISTS idx_projects_district ON projects(district);
 CREATE INDEX IF NOT EXISTS idx_projects_agency ON projects(implementing_agency);
 CREATE INDEX IF NOT EXISTS idx_projects_risk_level ON projects(risk_level);
+
+-- Required, not an optimisation. similar_work_id carries a self-referencing FK
+-- to projects(id); without an index on the referencing column, deleting N rows
+-- makes Postgres scan the whole table once per deleted row to check the
+-- constraint. At 127k rows that is ~1.6e10 comparisons and the reload in
+-- load_real_data.py never finishes. With this index the same delete is instant.
+CREATE INDEX IF NOT EXISTS idx_projects_similar_work_id ON projects(similar_work_id);
