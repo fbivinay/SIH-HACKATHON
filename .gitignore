@@ -1,0 +1,8 @@
+.vercel
+.env*
+!.env.example
+__pycache__/
+*.pyc
+node_modules/
+web/.next/
+.superpowers/
