@@ -58,8 +58,27 @@ from psycopg2.extras import Json, execute_values
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 DATA_DIR = Path(os.environ.get("MPLADS_DATA_DIR", "/home/rvina/projects/SIH HACKATHON/MPLADS DATA"))
-RECOMMENDED_CSV = DATA_DIR / "mplads_recommended_works_2026-08-30.csv"
-COMPLETED_CSV = DATA_DIR / "mplads_completed_works_2026-08-30.csv"
+
+
+def _newest(pattern):
+    """Newest CSV matching the pattern, by the date in its filename.
+
+    Snapshots are named mplads_<kind>_YYYY-MM-DD.csv. Pinning an exact date
+    would make a scheduled refresh fail the moment a newer snapshot lands, so
+    resolve the latest one instead. Sorting lexically is safe: ISO dates sort
+    chronologically.
+    """
+    matches = sorted(DATA_DIR.glob(pattern))
+    if not matches:
+        raise FileNotFoundError(
+            f"No file matching {pattern!r} in {DATA_DIR}. "
+            "Set MPLADS_DATA_DIR to the directory holding the MPLADS CSV snapshots."
+        )
+    return matches[-1]
+
+
+RECOMMENDED_CSV = _newest("mplads_recommended_works_*.csv")
+COMPLETED_CSV = _newest("mplads_completed_works_*.csv")
 
 EXPECTED_DURATION_DAYS = 365
 # Amounts below this are data-entry noise, not works: the source has 39 rows
