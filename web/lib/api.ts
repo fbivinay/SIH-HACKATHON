@@ -56,8 +56,17 @@ export type AgencyStat = {
   avg_risk_score: number;
 };
 
+// If the API's own Vercel deployment is behind Vercel Deployment Protection,
+// set API_PROTECTION_BYPASS (server-only env var, not NEXT_PUBLIC_) to that
+// project's automation bypass secret so server-side fetches aren't redirected
+// to the SSO login page. No-op once the API is public.
+const API_BYPASS = process.env.API_PROTECTION_BYPASS;
+
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
+  const res = await fetch(`${API_BASE}${path}`, {
+    cache: "no-store",
+    headers: API_BYPASS ? { "x-vercel-protection-bypass": API_BYPASS } : undefined,
+  });
   if (!res.ok) throw new Error(`API error ${res.status} on ${path}`);
   return res.json();
 }
