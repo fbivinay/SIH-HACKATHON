@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS projects (
     expected_completion DATE,
     actual_completion DATE,
     source TEXT NOT NULL DEFAULT 'synthetic',
+    has_images BOOLEAN,
 
     delay_days INTEGER,
     cost_deviation_pct NUMERIC(6,2),

@@ -82,3 +82,49 @@ def test_missing_dates_flagged_only_for_recommended_works():
     score, reasons = compliance_risk_score(completed_missing_dates)
     assert score == 0.0
     assert reasons == []
+
+
+def test_missing_photo_documentation_flagged_only_for_completed_works():
+    """29% of completed works have Has Images = False in the source data - a
+    real compliance signal. NULL (unknown) must not be treated as a violation,
+    and the rule must not fire on recommended works (which have no images to
+    document yet)."""
+    completed_no_images = pd.Series({
+        "expenditure": 100.0, "sanctioned_amount": 100.0,
+        "work_status": "completed",
+        "start_date": date(2024, 1, 1), "expected_completion": date(2024, 6, 1),
+        "actual_completion": date(2024, 6, 1), "has_images": False,
+    })
+    score, reasons = compliance_risk_score(completed_no_images)
+    assert score == 30.0
+    assert "Completed work has no photographic documentation on record" in reasons
+
+    completed_with_images = pd.Series({
+        "expenditure": 100.0, "sanctioned_amount": 100.0,
+        "work_status": "completed",
+        "start_date": date(2024, 1, 1), "expected_completion": date(2024, 6, 1),
+        "actual_completion": date(2024, 6, 1), "has_images": True,
+    })
+    score, reasons = compliance_risk_score(completed_with_images)
+    assert score == 0.0
+    assert reasons == []
+
+    completed_unknown_images = pd.Series({
+        "expenditure": 100.0, "sanctioned_amount": 100.0,
+        "work_status": "completed",
+        "start_date": date(2024, 1, 1), "expected_completion": date(2024, 6, 1),
+        "actual_completion": date(2024, 6, 1), "has_images": None,
+    })
+    score, reasons = compliance_risk_score(completed_unknown_images)
+    assert score == 0.0
+    assert reasons == []
+
+    recommended_no_images = pd.Series({
+        "expenditure": 0.0, "sanctioned_amount": 100.0,
+        "work_status": "recommended",
+        "start_date": date(2024, 1, 1), "expected_completion": date(2025, 1, 1),
+        "actual_completion": pd.NaT, "has_images": False,
+    })
+    score, reasons = compliance_risk_score(recommended_no_images)
+    assert score == 0.0
+    assert reasons == []

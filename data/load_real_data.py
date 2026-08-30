@@ -72,7 +72,7 @@ INSERT_COLUMNS = [
     "work_name", "description", "mp_name", "constituency", "state", "district",
     "category", "implementing_agency", "recommended_amount", "sanctioned_amount",
     "expenditure", "work_status", "start_date", "expected_completion",
-    "actual_completion", "source",
+    "actual_completion", "source", "has_images",
 ]
 
 
@@ -112,7 +112,7 @@ def build_rows():
     keep = {"Work Description": "description", "Category": "category", "MP Name": "mp_name",
             "Constituency": "constituency", "State": "state", "IDA": "implementing_agency",
             "amount": "amount", "work_status": "work_status", "start_date": "start_date",
-            "actual_completion": "actual_completion"}
+            "actual_completion": "actual_completion", "Has Images": "has_images"}
     df = pd.concat(
         [rec[list(keep)].rename(columns=keep), com[list(keep)].rename(columns=keep)],
         ignore_index=True,
@@ -153,6 +153,11 @@ def build_rows():
         for d in df["start_date"]
     ]
     df["actual_completion"] = [None if pd.isna(d) else d for d in df["actual_completion"]]
+    # Has Images arrives as a plain bool column with no NaN in the source CSVs,
+    # but treat missing/non-boolean values as unknown (SQL NULL) rather than
+    # silently coercing them to False - absent information isn't a recorded
+    # absence of images.
+    df["has_images"] = [None if pd.isna(v) else bool(v) for v in df["has_images"]]
     df["district"] = df["implementing_agency"].map(parse_district)
     df["category"] = df["category"].fillna("Unknown")
     return df, rejects
@@ -163,7 +168,7 @@ def load(conn, df, rejects):
         (
             r.description[:60], r.description, r.mp_name, r.constituency, r.state, r.district,
             r.category, r.implementing_agency, r.amount, r.amount, r.expenditure, r.work_status,
-            r.start_date, r.expected_completion, r.actual_completion, "real",
+            r.start_date, r.expected_completion, r.actual_completion, "real", r.has_images,
         )
         for r in df.itertuples(index=False)
     ]
