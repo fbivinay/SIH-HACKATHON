@@ -13,7 +13,15 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 RISK_WEIGHTS = {"cost": 0.25, "delay": 0.25, "duplicate": 0.20, "agency": 0.15, "compliance": 0.15}
 RISK_LEVEL_THRESHOLDS = {"LOW": 40, "MEDIUM": 70}
-DUPLICATE_SIMILARITY_THRESHOLD = 0.85
+# Calibrated against the observed max_similarity_score distribution (see
+# task-3-report.md). Descriptions are only ever compared within the same
+# (district, category) group, so every pair is already about the same kind of
+# work in the same place and all-MiniLM-L6-v2 cosine similarity has a ~0.90
+# median baseline there — 0.85 sat in the noise and fired on 1212/1500 rows.
+# 0.94 (~p82) is the foot of the genuine near-duplicate tail; combined with the
+# rescaling in duplicate_risk_score it puts the "> 40" reporting line at
+# similarity ~0.964 (~p97.5), which fires on 52/1500 rows.
+DUPLICATE_SIMILARITY_THRESHOLD = 0.94
 
 
 def fetch_projects(conn):
@@ -79,9 +87,17 @@ def delay_risk_score(row):
 
 
 def duplicate_risk_score(row):
-    if row["max_similarity_score"] >= DUPLICATE_SIMILARITY_THRESHOLD:
-        return float(min(row["max_similarity_score"] * 100, 100))
-    return 0.0
+    """Map similarity [THRESHOLD, 1.0] onto risk [0, 100].
+
+    Returning raw similarity * 100 made a barely-over-threshold match score ~94,
+    indistinguishable from a verbatim copy. Rescaling means crossing the line by
+    a hair scores near 0 and only a near-identical description scores near 100.
+    """
+    sim = row["max_similarity_score"]
+    if sim < DUPLICATE_SIMILARITY_THRESHOLD:
+        return 0.0
+    scaled = (sim - DUPLICATE_SIMILARITY_THRESHOLD) / (1.0 - DUPLICATE_SIMILARITY_THRESHOLD) * 100
+    return float(min(max(scaled, 0.0), 100.0))
 
 
 def agency_risk_score(row):
