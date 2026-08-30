@@ -58,3 +58,17 @@ CREATE INDEX IF NOT EXISTS idx_projects_risk_level ON projects(risk_level);
 -- constraint. At 127k rows that is ~1.6e10 comparisons and the reload in
 -- load_real_data.py never finishes. With this index the same delete is instant.
 CREATE INDEX IF NOT EXISTS idx_projects_similar_work_id ON projects(similar_work_id);
+
+-- Audit trail for load_real_data.py / scoring.py runs. Also what the UI's
+-- freshness indicator reads (GET /api/data-freshness) — see task-12.
+CREATE TABLE IF NOT EXISTS data_refresh (
+    id SERIAL PRIMARY KEY,
+    started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    finished_at TIMESTAMPTZ,
+    status TEXT NOT NULL,            -- 'running' | 'success' | 'failed'
+    rows_loaded INTEGER,
+    rows_scored INTEGER,
+    rows_rejected INTEGER,
+    source TEXT,                     -- where the data came from this run
+    notes TEXT
+);
