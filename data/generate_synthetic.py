@@ -20,13 +20,72 @@ STATES_DISTRICTS = {
 CATEGORIES = ["Drinking Water", "Road Construction", "School Infrastructure",
               "Community Hall", "Street Lighting", "Health Facility"]
 AGENCIES = [f"Agency {c}" for c in "ABCDEFGH"]
+# Each list covers genuinely distinct sub-scopes of work within the category (not
+# synonym-swapped phrasings of one scope) — verified against all-MiniLM-L6-v2 that
+# distinct sub-scopes embed far enough apart to stay under scoring.py's 0.85
+# duplicate-similarity threshold; synonym-swapped single-scope phrasing does not
+# (see task-3-report.md for the measurements).
 WORK_TEMPLATES = {
-    "Drinking Water": "Installation of drinking water supply system in {place}",
-    "Road Construction": "Construction/repair of road connecting {place}",
-    "School Infrastructure": "Construction of additional classroom at {place} school",
-    "Community Hall": "Construction of community hall at {place}",
-    "Street Lighting": "Installation of solar street lights in {place}",
-    "Health Facility": "Upgradation of primary health centre at {place}",
+    "Drinking Water": [
+        "Installation of a new drinking water supply pipeline in {place}",
+        "Repair and augmentation of the overhead water tank at {place}",
+        "Installation of hand pumps and bore wells near {place}",
+        "Provision of household water connections in {place}",
+        "Construction of an underground water storage sump at {place}",
+        "Replacement of corroded water supply pipes along {place}",
+        "Installation of water purification units at {place}",
+        "Repair of the water distribution network serving {place}",
+    ],
+    "Road Construction": [
+        "Construction of a new concrete road connecting {place}",
+        "Widening and resurfacing of the approach road near {place}",
+        "Construction of a culvert and drainage channel at {place}",
+        "Repair of potholes and patchwork on the road at {place}",
+        "Construction of a footpath and pedestrian crossing near {place}",
+        "Installation of road safety signage and speed breakers at {place}",
+        "Construction of a retaining wall along the road at {place}",
+        "Widening of the bridge approach road near {place}",
+    ],
+    "School Infrastructure": [
+        "Construction of additional classrooms at the school in {place}",
+        "Renovation of the toilet block and boundary wall at the school near {place}",
+        "Provision of furniture and a computer lab for the school in {place}",
+        "Construction of a school playground and boundary fencing at {place}",
+        "Repair of the school roof and flooring near {place}",
+        "Installation of drinking water and handwash facilities at the school in {place}",
+        "Construction of a library room at the school near {place}",
+        "Provision of solar power backup for the school at {place}",
+    ],
+    "Community Hall": [
+        "Construction of a new community hall at {place}",
+        "Renovation and extension of the existing community hall near {place}",
+        "Construction of a marriage and function hall for residents of {place}",
+        "Repair of the roof and flooring of the community hall at {place}",
+        "Provision of furniture and seating for the community hall in {place}",
+        "Construction of a stage and public address facility at the community hall near {place}",
+        "Installation of backup power for the community hall at {place}",
+        "Construction of a boundary wall around the community hall in {place}",
+    ],
+    "Street Lighting": [
+        "Installation of solar street lights along {place}",
+        "Replacement of old streetlights with LED fixtures near {place}",
+        "Provision of high-mast lighting at the junction near {place}",
+        "Installation of streetlights on the internal roads of {place}",
+        "Repair and maintenance of the existing streetlight network at {place}",
+        "Installation of decorative lighting at the public square near {place}",
+        "Provision of solar lighting for the park at {place}",
+        "Extension of the streetlight line to cover {place}",
+    ],
+    "Health Facility": [
+        "Upgradation of the primary health centre at {place}",
+        "Construction of a new sub-health centre building near {place}",
+        "Provision of additional beds and OPD facilities at the health centre in {place}",
+        "Installation of solar backup power at the health facility in {place}",
+        "Construction of a boundary wall and drainage around the health centre at {place}",
+        "Renovation of staff quarters attached to the health centre in {place}",
+        "Procurement of diagnostic equipment for the health centre at {place}",
+        "Construction of an ambulance parking bay at the health centre near {place}",
+    ],
 }
 BASE_COST = {
     "Drinking Water": 800000, "Road Construction": 1500000,
@@ -39,7 +98,7 @@ def make_project(force_anomaly=None):
     state = random.choice(list(STATES_DISTRICTS))
     district = random.choice(STATES_DISTRICTS[state])
     category = random.choice(CATEGORIES)
-    place = f"{fake.city_suffix()} {district}"
+    place = f"{fake.street_name()}, {district}"
     base = BASE_COST[category]
     agency = random.choice(AGENCIES)
 
@@ -58,7 +117,7 @@ def make_project(force_anomaly=None):
         actual_delay = random.randint(150, 300)
 
     actual_completion = expected_completion + timedelta(days=actual_delay)
-    description = WORK_TEMPLATES[category].format(place=place)
+    description = random.choice(WORK_TEMPLATES[category]).format(place=place)
 
     return {
         "work_name": description[:60],
