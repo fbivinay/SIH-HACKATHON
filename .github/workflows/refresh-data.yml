@@ -47,7 +47,9 @@ jobs:
     timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v4
+      # v4/v5 target Node 20, which the runners now force onto Node 24 with a
+      # deprecation warning. v7 targets a supported runtime, so runs stay clean.
+      - uses: actions/checkout@v7
 
       - name: Check configuration
         id: config
@@ -76,7 +78,7 @@ jobs:
 
       - name: Set up Python
         if: steps.config.outputs.configured == 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
