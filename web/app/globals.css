@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+:root {
+  /* Institutional palette: cool paper + navy ink + bronze seal accent.
+     Risk semantics (low/medium/high/pending) are shared tokens — reuse
+     these across the map, project list, and analysis screens rather
+     than picking colors per-component. */
+  --paper: #f5f6f8;
+  --surface: #ffffff;
+  --line: #dfe3e9;
+  --ink: #0e1c33;
+  --muted: #5b6472;
+
+  --accent: #96723b;
+  --accent-ring: #c9a874;
+
+  --risk-low: #1e7a4b;
+  --risk-low-bg: #e7f3ec;
+  --risk-medium: #b3720e;
+  --risk-medium-bg: #faf1de;
+  --risk-high: #ac2b23;
+  --risk-high-bg: #fbeae8;
+  --risk-pending: #6b7280;
+  --risk-pending-bg: #eef0f3;
+
+  --font-display: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-ui: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-data: var(--font-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-display: var(--font-display);
+  --font-ui: var(--font-ui);
+  --font-data: var(--font-data);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+
+/* ---- Masthead seal: the one signature element on the page. ---- */
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--ink);
+  color: var(--accent-ring);
+  border: 1.5px solid var(--accent);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.eyebrow {
+  font-family: var(--font-data);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---- Stat cards ---- */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  border-top-width: 3px;
+  padding: 1.1rem 1.15rem 1.25rem;
+  min-width: 0;
+}
+
+.stat-card__label {
+  font-family: var(--font-data);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat-card__value {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.85rem;
+  line-height: 1.15;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 0.35rem;
+  word-break: break-word;
+}
+
+.stat-card__note {
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.stat-card--neutral { border-top-color: var(--ink); }
+.stat-card--accent { border-top-color: var(--accent); }
+.stat-card--low { border-top-color: var(--risk-low); }
+.stat-card--medium { border-top-color: var(--risk-medium); }
+.stat-card--high { border-top-color: var(--risk-high); }
+
+/* ---- Risk pill (shared across screens) ---- */
+.risk-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-data);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+
+.risk-pill--low { color: var(--risk-low); background: var(--risk-low-bg); border-color: color-mix(in srgb, var(--risk-low) 35%, transparent); }
+.risk-pill--medium { color: var(--risk-medium); background: var(--risk-medium-bg); border-color: color-mix(in srgb, var(--risk-medium) 35%, transparent); }
+.risk-pill--high { color: var(--risk-high); background: var(--risk-high-bg); border-color: color-mix(in srgb, var(--risk-high) 35%, transparent); }
+.risk-pill--pending { color: var(--risk-pending); background: var(--risk-pending-bg); border-color: color-mix(in srgb, var(--risk-pending) 35%, transparent); }
+
+.notice {
+  border: 1px solid color-mix(in srgb, var(--risk-medium) 40%, transparent);
+  background: var(--risk-medium-bg);
+  color: var(--ink);
+  border-radius: 0.5rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
