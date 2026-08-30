@@ -1,0 +1,6 @@
+pandas
+scikit-learn
+sentence-transformers
+psycopg2-binary
+python-dotenv
+Faker
