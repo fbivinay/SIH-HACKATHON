@@ -128,3 +128,42 @@ def test_missing_photo_documentation_flagged_only_for_completed_works():
     score, reasons = compliance_risk_score(recommended_no_images)
     assert score == 0.0
     assert reasons == []
+
+
+def test_cost_reason_never_contradicts_itself():
+    """A work can be a delay/spend outlier without being expensive.
+
+    cost_risk blends the Isolation Forest score (fit on sanctioned_amount,
+    delay_days, expenditure_ratio), so it can exceed 40 while cost_deviation_pct
+    is negative. Gating the sentence on cost_risk once produced "Cost is -56%
+    above similar projects" on 3,539 real works. The cost sentence must key off
+    the deviation itself; the multivariate signal gets its own honest wording.
+    """
+    outlier_but_cheap = pd.Series({
+        "compliance_reasons": [],
+        "cost_risk": 100.0,           # pushed up purely by the IF blend
+        "cost_deviation_pct": -56.0,  # actually CHEAPER than its peers
+        "iso_anomaly": 100.0,
+        "delay_risk": 100.0, "delay_days": 696,
+        "duplicate_risk": 0.0, "max_similarity_score": 0.1,
+        "agency_risk": 0.0, "agency_delay_rate": 0.0,
+    })
+    reasons = build_flagged_reasons(outlier_but_cheap)
+    assert not any("above similar projects" in r for r in reasons), reasons
+    # the real signal is still explained, not silently dropped
+    assert any("Unusual combination" in r for r in reasons), reasons
+    assert any("696 days beyond expected completion" in r for r in reasons), reasons
+
+    genuinely_expensive = pd.Series({
+        "compliance_reasons": [],
+        "cost_risk": 100.0,
+        "cost_deviation_pct": 134.0,
+        "iso_anomaly": 100.0,
+        "delay_risk": 0.0, "delay_days": 0,
+        "duplicate_risk": 0.0, "max_similarity_score": 0.1,
+        "agency_risk": 0.0, "agency_delay_rate": 0.0,
+    })
+    reasons = build_flagged_reasons(genuinely_expensive)
+    assert "Cost is 134% above similar projects" in reasons, reasons
+    # the cost sentence wins; we don't also emit the generic anomaly line
+    assert not any("Unusual combination" in r for r in reasons), reasons

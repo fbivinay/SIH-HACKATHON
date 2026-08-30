@@ -30,6 +30,7 @@ export type ProjectDetail = ProjectSummary & {
   description: string | null;
   mp_name: string | null;
   constituency: string | null;
+  work_status: string | null;
   cost_risk: number | null;
   delay_risk: number | null;
   duplicate_risk: number | null;

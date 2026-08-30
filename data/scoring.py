@@ -137,8 +137,23 @@ def compliance_risk_score(row):
 
 def build_flagged_reasons(row):
     reasons = list(row["compliance_reasons"])
-    if row["cost_risk"] > 40:
+    # Gate the cost sentence on the cost deviation itself, NOT on cost_risk.
+    # cost_risk is deliberately blended with the Isolation Forest score (see
+    # score_dataframe), which is fit on sanctioned_amount + delay_days +
+    # expenditure_ratio — so a work that is only a delay/spend outlier can push
+    # cost_risk over 40 while its actual cost deviation is negative. Gating the
+    # text on cost_risk produced "Cost is -56% above similar projects" on 3,539
+    # real works. A flagged reason that contradicts itself is worse than no
+    # reason at all when the whole premise is explainable alerts.
+    if row["cost_deviation_pct"] > 40:
         reasons.append(f"Cost is {row['cost_deviation_pct']:.0f}% above similar projects")
+    elif row.get("iso_anomaly", 0) > 40:
+        # The multivariate signal is real and is driving this work's score, so
+        # narrate it honestly rather than silently dropping the explanation.
+        reasons.append(
+            "Unusual combination of sanctioned amount, delay and spending "
+            "pattern compared with all works"
+        )
     if row["delay_risk"] > 40:
         reasons.append(f"{row['delay_days']:.0f} days beyond expected completion")
     if row["duplicate_risk"] > 40:
@@ -180,6 +195,11 @@ def score_dataframe(df):
         / (anomaly_score.max() - anomaly_score.min() + 1e-9)
         * 100
     )
+    # Keep the blend for scoring (the IF genuinely detects outliers the cost
+    # rule misses), but retain the raw IF score so build_flagged_reasons can
+    # tell "expensive vs peers" apart from "statistically odd overall" and
+    # narrate each accurately. Not persisted — write_scores names its columns.
+    df["iso_anomaly"] = normalized
     df["cost_risk"] = df[["cost_risk"]].assign(iso=normalized).max(axis=1)
 
     df["overall_risk_score"] = (
