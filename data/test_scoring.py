@@ -3,7 +3,7 @@ from datetime import date
 from scoring import (
     compute_delay_days, cost_risk_score, delay_risk_score,
     duplicate_risk_score, agency_risk_score, risk_level,
-    build_flagged_reasons,
+    build_flagged_reasons, compliance_risk_score,
 )
 
 
@@ -57,3 +57,28 @@ def test_clean_project_lands_in_low_band():
         + row["duplicate_risk"] * 0.20 + row["agency_risk"] * 0.15
     )
     assert risk_level(overall) == "LOW"
+
+
+def test_missing_dates_flagged_only_for_recommended_works():
+    """Most completed works genuinely have no recommendation date on record
+    (see load_real_data.py); the rule must not treat that as a compliance
+    failure. It should still fire for a recommended work missing dates."""
+    recommended_missing_dates = pd.Series({
+        "expenditure": 0.0, "sanctioned_amount": 100.0,
+        "work_status": "recommended",
+        "start_date": pd.NaT, "expected_completion": pd.NaT,
+        "actual_completion": pd.NaT,
+    })
+    score, reasons = compliance_risk_score(recommended_missing_dates)
+    assert score == 20.0
+    assert "Missing start or expected completion date" in reasons
+
+    completed_missing_dates = pd.Series({
+        "expenditure": 100.0, "sanctioned_amount": 100.0,
+        "work_status": "completed",
+        "start_date": pd.NaT, "expected_completion": pd.NaT,
+        "actual_completion": date(2024, 1, 5),
+    })
+    score, reasons = compliance_risk_score(completed_missing_dates)
+    assert score == 0.0
+    assert reasons == []
