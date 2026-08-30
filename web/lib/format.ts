@@ -38,6 +38,14 @@ export function riskLevelLabel(level: string | null | undefined): string {
   return normalizeRiskLevel(level) ?? "Pending";
 }
 
+// projects.work_status is 'recommended' or 'completed' (see data/load_real_data.py).
+// Keep MPLADS' own terminology rather than renaming it — officials reading this
+// screen use these words, and "recommended" is not a synonym for "pending".
+export function workStatusLabel(status: string | null | undefined): string {
+  if (!status) return "—";
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
 // Same thresholds as data/scoring.py RISK_LEVEL_THRESHOLDS (LOW: <40, MEDIUM: <70, HIGH: >=70).
 // Hex values match the --risk-* custom properties in globals.css — for contexts (Leaflet
 // inline styles, canvas) that can't consume a CSS class.

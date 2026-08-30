@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
-import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
+import { formatCount, formatINR, riskLevelClass, riskLevelLabel, workStatusLabel } from "@/lib/format";
 
 function RiskMeter({ label, value }: { label: string; value: number | null }) {
   const pct = value === null ? 0 : Math.max(0, Math.min(100, value));
@@ -141,9 +141,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
         <div className="stat-card stat-card--neutral">
-          <div className="stat-card__label">Status</div>
+          <div className="stat-card__label">Work Status</div>
           <div className="stat-card__value" style={{ fontSize: "1.15rem" }}>
-            {riskLevelLabel(p.risk_level)}
+            {workStatusLabel(p.work_status)}
           </div>
         </div>
       </section>
