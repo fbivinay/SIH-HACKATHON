@@ -9,6 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 
+import vendors
 from sectors import classify_sector
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -37,6 +38,45 @@ def fetch_projects(conn):
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute("SELECT * FROM projects")
         return pd.DataFrame(cur.fetchall())
+
+
+def fetch_expenditures(conn):
+    """Raw expenditure transactions, or an empty frame if none were loaded.
+
+    A snapshot without an expenditure file is a supported case (the 2026-08-30
+    one had none), so this must not be the thing that fails a scoring run.
+    """
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(
+            "SELECT implementing_agency, vendor, expenditure_amount, "
+            "expenditure_date, payment_status FROM expenditures"
+        )
+        df = pd.DataFrame(cur.fetchall())
+    if not df.empty:
+        df["expenditure_amount"] = df["expenditure_amount"].astype(float)
+    return df
+
+
+def write_agency_vendor_profile(conn, profile):
+    columns = [
+        "implementing_agency", "vendor_count", "transaction_count", "total_spend",
+        "vendor_hhi", "top_vendor", "top_vendor_share_pct", "pending_count",
+        "oldest_pending_days", "concentration_risk",
+    ]
+    rows = [
+        tuple(None if pd.isna(v) else v for v in row)
+        for row in profile[columns].itertuples(index=False, name=None)
+    ]
+    with conn.cursor() as cur:
+        cur.execute("TRUNCATE agency_vendor_profile")
+        if rows:
+            execute_values(
+                cur,
+                f"INSERT INTO agency_vendor_profile ({', '.join(columns)}) VALUES %s",
+                rows,
+                page_size=500,
+            )
+    conn.commit()
 
 
 def compute_delay_days(row):
@@ -131,7 +171,23 @@ def duplicate_risk_score(row):
 
 
 def agency_risk_score(row):
-    return float(min(row["agency_delay_rate"], 100))
+    """Worst of the agency's signals, not a weighted blend.
+
+    Blending would dilute: an agency with a 70% delay rate would drop to 35
+    the moment a second component was added at half weight, silently lowering
+    every score in the system in a change that was supposed to be additive.
+    Taking the max keeps the existing delay behaviour intact and lets a newly
+    measured signal only ever raise a score - the same choice score_dataframe
+    already makes when folding the Isolation Forest into cost_risk.
+
+    It also stays explainable: exactly one component is responsible for the
+    number, and build_flagged_reasons names it.
+    """
+    return round(max(
+        float(min(row.get("agency_delay_rate") or 0.0, 100.0)),
+        float(row.get("agency_concentration_risk") or 0.0),
+        vendors.pending_risk(row.get("agency_oldest_pending_days")),
+    ), 2)
 
 
 def compliance_risk_score(row):
@@ -209,10 +265,32 @@ def build_flagged_reasons(row):
     if row["duplicate_risk"] > 40:
         reasons.append(f"{row['max_similarity_score'] * 100:.0f}% similarity with another nearby work")
     if row["agency_risk"] > 40:
-        reasons.append(
-            f"Implementing agency has a {row['agency_delay_rate']:.0f}% delay rate across its projects"
-        )
-    return reasons
+        # Name the component actually responsible. agency_risk is a max, so
+        # attributing it to the delay rate unconditionally would have reported
+        # a delay problem on an agency flagged purely for vendor concentration.
+        delay = float(min(row.get("agency_delay_rate") or 0.0, 100.0))
+        concentration = float(row.get("agency_concentration_risk") or 0.0)
+        pending = vendors.pending_risk(row.get("agency_oldest_pending_days"))
+        driver = max(delay, concentration, pending)
+        if driver == delay:
+            reasons.append(
+                f"Implementing agency has a {delay:.0f}% delay rate across its projects"
+            )
+        elif driver == concentration:
+            reasons.append(vendors.concentration_reason({
+                "concentration_risk": concentration,
+                "top_vendor_share_pct": row.get("agency_top_vendor_share_pct"),
+                "total_spend": row.get("agency_total_spend"),
+                "top_vendor": row.get("agency_top_vendor"),
+                "vendor_count": row.get("agency_vendor_count"),
+                "transaction_count": row.get("agency_transaction_count"),
+            }))
+        else:
+            reasons.append(vendors.pending_reason({
+                "oldest_pending_days": row.get("agency_oldest_pending_days"),
+                "pending_count": row.get("agency_pending_count"),
+            }))
+    return [r for r in reasons if r]
 
 
 def risk_level(score):
@@ -223,8 +301,32 @@ def risk_level(score):
     return "HIGH"
 
 
-def score_dataframe(df):
+AGENCY_PROFILE_COLUMNS = [
+    "concentration_risk", "oldest_pending_days", "pending_count", "top_vendor",
+    "top_vendor_share_pct", "total_spend", "vendor_count", "transaction_count",
+]
+
+
+def attach_agency_profile(df, profile):
+    """Left-join the per-agency vendor profile onto works as agency_* columns.
+
+    Left, not inner: an agency with no expenditure rows keeps its works and
+    scores concentration 0, rather than dropping them out of the dataset.
+    """
+    for col in AGENCY_PROFILE_COLUMNS:
+        df[f"agency_{col}"] = None
+    if profile is None or profile.empty:
+        return df
+    indexed = profile.set_index("implementing_agency")
+    for col in AGENCY_PROFILE_COLUMNS:
+        if col in indexed.columns:
+            df[f"agency_{col}"] = df["implementing_agency"].map(indexed[col])
+    return df
+
+
+def score_dataframe(df, agency_profile=None):
     df = add_base_features(df)
+    df = attach_agency_profile(df, agency_profile)
     df = add_duplicate_features(df)
 
     df["cost_risk"] = df.apply(cost_risk_score, axis=1)
@@ -366,7 +468,15 @@ if __name__ == "__main__":
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     run_id = current_refresh_run_id(conn)
     df = fetch_projects(conn)
+    expenditures = fetch_expenditures(conn)
     conn.close()
+
+    agency_profile = vendors.build_agency_vendor_profile(expenditures, as_of=date.today())
+    if agency_profile.empty:
+        print("No expenditure rows loaded - agency concentration scores 0 for every agency.")
+    else:
+        print(f"Profiled {len(agency_profile)} agencies over "
+              f"{len(expenditures):,} expenditure transactions.")
 
     # Controller-approved deviation: RealDictCursor returns NUMERIC columns as
     # decimal.Decimal, which makes these columns object-dtype and breaks
@@ -377,7 +487,7 @@ if __name__ == "__main__":
         if col in df.columns:
             df[col] = df[col].astype(float)
     try:
-        scored = score_dataframe(df)
+        scored = score_dataframe(df, agency_profile=agency_profile)
     except Exception:
         conn = psycopg2.connect(os.environ["DATABASE_URL"])
         finish_scoring_run(conn, run_id, "failed", None)
@@ -385,6 +495,7 @@ if __name__ == "__main__":
         raise
 
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    write_agency_vendor_profile(conn, agency_profile)
     write_scores(conn, scored)
     finish_scoring_run(conn, run_id, "success", len(scored))
     conn.close()

@@ -1466,20 +1466,20 @@ with roads.
       reason now states amount, peer median, sector, district and peer count.
 - [x] Verified against the full extract — see spec §14.3 for the before/after.
 
-### Task 12: Score vendor concentration at the agency grain
+### Task 12: Score vendor concentration at the agency grain — DONE
 
 Spec §14.4. `load_real_data.py` already says the expenditure file is kept for
 this.
 
-- [ ] Load `mplads_expenditures_*.csv` into its own table at its own grain — it
-      does not join to works (spec §14.2), so do not attempt to attach it to
-      `projects`.
-- [ ] Per `(IDA, ls_term)`: vendor count, Herfindahl index of vendor share of
-      spend, largest vendor and its share, count and age of in-progress payments.
-- [ ] Feed that into `agency_risk` alongside the existing delay rate, and surface
-      it on the agency analysis screen with the reason text spelled out.
-- [ ] Verify: an agency flagged for concentration should be traceable to specific
-      vendor rows in the CSV.
+- [x] `expenditures` table at its own grain, loaded by `load_real_data.py`. No
+      join to works is attempted.
+- [x] `agency_vendor_profile` per IDA (terms pooled — `projects` has no
+      `ls_term` to join back on): vendor count, HHI, top vendor and share,
+      pending count and age. `MIN_TRANSACTIONS = 20` suppresses thin agencies.
+- [x] `agency_risk` is the max of delay / concentration / pending, so the new
+      signal can only raise a score. Surfaced on the agency screen, and the
+      flagged reason names whichever component drove it.
+- [x] Verified against all 270,934 transactions — see spec §14.4.
 
 ### Task 13: Normalize MP identity
 

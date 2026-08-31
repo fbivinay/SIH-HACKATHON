@@ -256,18 +256,34 @@ Sector coverage on the loaded set is 80.3%, with 19.7% in `Other`.
 `sectors.verify()` raises if `Other` ever exceeds 40%, so the rules going stale
 fails the load rather than quietly restoring the original bug.
 
-### 14.4 Open — signals present in the data and not yet used
+### 14.4 Fixed — vendor concentration and payment ageing
 
-**Vendor concentration.** The expenditure file carries a `Vendor` column with
-62,680 distinct vendors across 772 implementing agencies. Share of an agency's
-spend going to its largest vendor is the closest thing in this dataset to a
-procurement-capture indicator, and it is the one signal here that is about the
-agency rather than the work. `load_real_data.py` already notes the file is kept
-"for later vendor-level analysis"; this is that analysis.
+The expenditure file now loads into its own `expenditures` table at its own
+grain, and `data/vendors.py` derives `agency_vendor_profile`: one row per
+implementing agency with vendor count, transaction count, total spend, the
+Herfindahl index of vendor share of spend, the largest vendor and its share,
+and the age of the oldest in-progress payment.
 
-**Payment ageing.** 4,480 of 270,934 transactions are `Payment In-Progress`
-rather than `Payment Success` — a narrow but high-precision signal, scoreable at
-the agency and MP grain.
+Concentration is the closest thing this dataset holds to a procurement-capture
+indicator, and it is the only signal here about the agency rather than the work.
+Measured over all 270,934 transactions and 772 agencies: median HHI 0.075, p90
+0.359. 74 agencies score above 40, 13 at 100. `MIN_TRANSACTIONS = 20` suppresses
+the 64 agencies too small for an HHI to mean anything — two payments to one
+vendor is an HHI of 1.0 and says nothing.
+
+Payment ageing rides alongside it: 420 agencies hold an in-progress payment, 30
+old enough to score above 40.
+
+`agency_risk` is the **max** of delay rate, concentration and payment ageing,
+not a weighted blend. A blend would have halved every agency's existing
+delay-driven score the moment a second component was added, silently lowering
+scores in a change that was meant to be additive. The max also stays
+explainable: exactly one component is responsible, and the flagged reason names
+it rather than reporting a delay problem on an agency flagged for concentration.
+
+Terms are pooled, because `projects` carries no `ls_term` column and a per-term
+profile could not be joined back to a work. The raw `expenditures` rows keep
+theirs for when that changes.
 
 **MP identity.** `MP Name` carries 1,262 distinct strings across the two terms
 against 773 (LS17) and 774 (LS18) actual MPs: entries append a term marker

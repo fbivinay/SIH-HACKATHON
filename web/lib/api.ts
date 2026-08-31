@@ -61,6 +61,14 @@ export type AgencyStat = {
   delayed_count: number;
   anomaly_count: number;
   avg_risk_score: number;
+  // From agency_vendor_profile (data/vendors.py). Null for an agency with no
+  // expenditure rows — the join is a LEFT one, so those agencies still appear.
+  vendor_count: number | null;
+  transaction_count: number | null;
+  total_spend: number | null;
+  top_vendor: string | null;
+  top_vendor_share_pct: number | null;
+  concentration_risk: number;
 };
 
 export type FilterOptions = {

@@ -41,6 +41,40 @@ CREATE TABLE IF NOT EXISTS projects (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Expenditure transactions, at their own grain. They do NOT join to a work:
+-- the file has no Work ID and its Work Description holds one of 119 coarse
+-- category labels across all 270,934 rows. Kept raw so a concentration flag on
+-- an agency can be traced back to the payments behind it.
+CREATE TABLE IF NOT EXISTS expenditures (
+    id SERIAL PRIMARY KEY,
+    ls_term SMALLINT,
+    mp_name TEXT,
+    constituency TEXT,
+    state TEXT,
+    work_type_text TEXT,
+    vendor TEXT NOT NULL,
+    implementing_agency TEXT NOT NULL,
+    district TEXT NOT NULL,
+    expenditure_amount NUMERIC(16,2) NOT NULL,
+    expenditure_date DATE,
+    payment_status TEXT NOT NULL
+);
+
+-- One row per implementing agency, derived from expenditures by
+-- data/vendors.py. Rebuilt from scratch on every scoring run.
+CREATE TABLE IF NOT EXISTS agency_vendor_profile (
+    implementing_agency TEXT PRIMARY KEY,
+    vendor_count INTEGER NOT NULL,
+    transaction_count INTEGER NOT NULL,
+    total_spend NUMERIC(18,2) NOT NULL,
+    vendor_hhi NUMERIC(6,4) NOT NULL,
+    top_vendor TEXT,
+    top_vendor_share_pct NUMERIC(5,2),
+    pending_count INTEGER NOT NULL DEFAULT 0,
+    oldest_pending_days INTEGER NOT NULL DEFAULT 0,
+    concentration_risk NUMERIC(5,2) NOT NULL DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS rejected_rows (
     id SERIAL PRIMARY KEY,
     raw_row JSONB NOT NULL,
@@ -62,6 +96,8 @@ ALTER TABLE projects DROP COLUMN IF EXISTS district_avg_cost;
 
 CREATE INDEX IF NOT EXISTS idx_projects_state ON projects(state);
 CREATE INDEX IF NOT EXISTS idx_projects_sector ON projects(sector);
+CREATE INDEX IF NOT EXISTS idx_expenditures_agency ON expenditures(implementing_agency);
+CREATE INDEX IF NOT EXISTS idx_expenditures_vendor ON expenditures(vendor);
 CREATE INDEX IF NOT EXISTS idx_projects_district ON projects(district);
 CREATE INDEX IF NOT EXISTS idx_projects_agency ON projects(implementing_agency);
 CREATE INDEX IF NOT EXISTS idx_projects_risk_level ON projects(risk_level);
