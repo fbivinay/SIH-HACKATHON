@@ -21,9 +21,9 @@ description. There is no join to an individual work and none is attempted (see
 load_real_data.py's own note). Concentration is therefore computed per
 implementing agency and reaches a work only through that work's agency.
 
-Terms are pooled. The `projects` table carries no ls_term column, so a
-per-term profile could not be joined back to a work anyway; the raw
-`expenditures` rows keep theirs for when that changes.
+The profile is per (agency, term). An agency's vendor mix in the 17th Lok Sabha
+says nothing about its mix in the 18th, and pooling them diluted both: a vendor
+taking everything in one term looked like a minority share across the pair.
 """
 
 import pandas as pd
@@ -81,27 +81,33 @@ def pending_risk(oldest_pending_days):
     return round(ramp(oldest_pending_days, PENDING_FLOOR_DAYS, PENDING_CEILING_DAYS), 2)
 
 
-def build_agency_vendor_profile(expenditures, as_of):
-    """One row per implementing agency, from raw expenditure transactions.
+PROFILE_COLUMNS = [
+    "implementing_agency", "ls_term", "vendor_count", "transaction_count",
+    "total_spend", "vendor_hhi", "top_vendor", "top_vendor_share_pct",
+    "pending_count", "oldest_pending_days", "concentration_risk",
+]
 
-    `expenditures` needs columns: implementing_agency, vendor,
+
+def build_agency_vendor_profile(expenditures, as_of):
+    """One row per implementing agency per Lok Sabha term.
+
+    `expenditures` needs columns: implementing_agency, ls_term, vendor,
     expenditure_amount, expenditure_date, payment_status.
     """
     if expenditures.empty:
-        return pd.DataFrame(
-            columns=[
-                "implementing_agency", "vendor_count", "transaction_count",
-                "total_spend", "vendor_hhi", "top_vendor", "top_vendor_share_pct",
-                "pending_count", "oldest_pending_days", "concentration_risk",
-            ]
-        )
+        return pd.DataFrame(columns=PROFILE_COLUMNS)
 
     as_of = pd.Timestamp(as_of)
     dates = pd.to_datetime(expenditures["expenditure_date"], errors="coerce")
     pending_mask = expenditures["payment_status"] != PAYMENT_SUCCESS
+    if "ls_term" not in expenditures.columns:
+        expenditures = expenditures.assign(ls_term=0)
+    expenditures = expenditures.assign(ls_term=expenditures["ls_term"].fillna(0).astype(int))
 
     rows = []
-    for agency, group in expenditures.groupby("implementing_agency", sort=False):
+    for (agency, term), group in expenditures.groupby(
+        ["implementing_agency", "ls_term"], sort=False
+    ):
         by_vendor = group.groupby("vendor")["expenditure_amount"].sum().sort_values(ascending=False)
         total = float(by_vendor.sum())
         pending = group[pending_mask.loc[group.index]]
@@ -110,6 +116,7 @@ def build_agency_vendor_profile(expenditures, as_of):
         transaction_count = int(len(group))
         rows.append({
             "implementing_agency": agency,
+            "ls_term": int(term),
             "vendor_count": int(by_vendor.size),
             "transaction_count": transaction_count,
             "total_spend": round(total, 2),
@@ -120,7 +127,7 @@ def build_agency_vendor_profile(expenditures, as_of):
             "oldest_pending_days": 0 if pd.isna(oldest) else int((as_of - oldest).days),
             "concentration_risk": concentration_risk(hhi, transaction_count),
         })
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows, columns=PROFILE_COLUMNS)
 
 
 def _plural(n, word):

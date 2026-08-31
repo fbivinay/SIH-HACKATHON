@@ -281,9 +281,9 @@ scores in a change that was meant to be additive. The max also stays
 explainable: exactly one component is responsible, and the flagged reason names
 it rather than reporting a delay problem on an agency flagged for concentration.
 
-Terms are pooled, because `projects` carries no `ls_term` column and a per-term
-profile could not be joined back to a work. The raw `expenditures` rows keep
-theirs for when that changes.
+Profiles are per (agency, term) — see §14.7. Pooling the two terms diluted
+both: a vendor taking everything in one Lok Sabha looked like a minority share
+across the pair.
 
 ### 14.5 Fixed — MP identity
 
@@ -310,8 +310,8 @@ real — that extract lists `Manne Srinivas Reddy(17th Lok Sabha)` and `Shri Man
 Srinivas Reddy (17th Lok Sabha)` as two rows for one MP, and the loader collapses
 them, which is the point of the key.
 
-Surfaced as an MPs section on the existing analysis screen, ranked by unspent
-amount rather than by utilisation: the lowest utilisation figures belong to
+Works are counted per (mp_id, term). Surfaced as an MPs section on the existing
+analysis screen, ranked by unspent amount rather than by utilisation: the lowest utilisation figures belong to
 Rajya Sabha members sworn in during 2025–26 who have had no time to spend
 anything, and ranking them as the worst would be wrong. No MP risk score is
 computed — these are the source's numbers, presented.
@@ -328,3 +328,28 @@ The scoring run now also builds `agency_vendor_profile` from 270,934
 expenditure rows and the loader writes the `mps` and `expenditures` tables;
 both are seconds of work next to the embedding pass and do not move the
 estimate.
+
+### 14.7 Fixed — works now carry their Lok Sabha term
+
+Works from both terms lived in one table with nothing to tell them apart, so
+every per-agency and per-MP aggregate had to pool them. `projects` now carries
+`ls_term`, and both derived profiles are keyed per term.
+
+This was not cosmetic. Vendor concentration measured per term flags **181
+agency-terms above 40 against 74 pooled**, and 68 of those were invisible to the
+pooled view entirely:
+
+| | per term | pooled |
+|---|---:|---:|
+| KAUSHAMBI (DISTRICT MAGISTRAE), LS17 | 100 | 18 |
+| JALAUN (DISTRICT MAGISTRATE), LS17 | 100 | 38 |
+| SONITPUR (Deputy Commissioner), LS17 | 100 | 28 |
+
+An agency that routed everything through one vendor in the 17th Lok Sabha and
+spread its spending in the 18th averaged out to nothing. That is the exact
+finding the signal exists to surface.
+
+Loaded works split 119,397 (LS17) and 127,090 (LS18). The API takes an optional
+`ls_term` on works and agencies, and the works screen has a term filter. A
+snapshot predating the column loads as term 0 — "unknown" rather than a false
+claim of one term or the other.

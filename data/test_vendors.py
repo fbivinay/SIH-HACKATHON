@@ -7,8 +7,8 @@ from vendors import (
 )
 
 
-def _exp(agency, vendor, amount, day="2026-01-01", status="Payment Success"):
-    return {"implementing_agency": agency, "vendor": vendor,
+def _exp(agency, vendor, amount, day="2026-01-01", status="Payment Success", term=18):
+    return {"implementing_agency": agency, "ls_term": term, "vendor": vendor,
             "expenditure_amount": float(amount), "expenditure_date": day,
             "payment_status": status}
 
@@ -104,3 +104,35 @@ def test_reasons_name_the_vendor_and_the_basis():
 def test_no_reason_when_there_is_nothing_to_say():
     assert concentration_reason({"concentration_risk": 0.0}) is None
     assert pending_reason({"oldest_pending_days": 10, "pending_count": 1}) is None
+
+
+def test_terms_are_profiled_separately():
+    """An agency's vendor mix in one Lok Sabha says nothing about the other.
+
+    Pooling diluted both: a vendor taking everything in one term looked like a
+    minority share across the pair.
+    """
+    df = pd.DataFrame([
+        *[_exp("IDA-A", "Sole Ltd", 100, term=17) for _ in range(25)],
+        *[_exp("IDA-A", f"Vendor {i}", 100, term=18) for i in range(25)],
+    ])
+    profile = build_agency_vendor_profile(df, as_of="2026-08-31")
+    assert len(profile) == 2
+
+    by_term = profile.set_index("ls_term")
+    assert by_term.loc[17, "concentration_risk"] == 100.0   # one vendor took it all
+    assert by_term.loc[17, "vendor_count"] == 1
+    assert by_term.loc[18, "concentration_risk"] == 0.0     # 25 equal vendors
+    assert by_term.loc[18, "vendor_count"] == 25
+
+
+def test_expenditures_without_a_term_column_still_profile():
+    """Snapshots predating ls_term hold one term; they must not fail the run."""
+    df = pd.DataFrame([
+        {"implementing_agency": "IDA-A", "vendor": "V", "expenditure_amount": 100.0,
+         "expenditure_date": "2026-01-01", "payment_status": "Payment Success"}
+        for _ in range(25)
+    ])
+    profile = build_agency_vendor_profile(df, as_of="2026-08-31")
+    assert len(profile) == 1
+    assert profile.iloc[0]["ls_term"] == 0

@@ -363,10 +363,11 @@ def test_works_of_an_agency_with_no_expenditures_keep_scoring():
     df = pd.DataFrame({
         "id": [1, 2],
         "implementing_agency": ["IDA-A", "IDA-UNKNOWN"],
+        "ls_term": [18, 18],
         "agency_delay_rate": [0.0, 0.0],
     })
     profile = pd.DataFrame([{
-        "implementing_agency": "IDA-A", "concentration_risk": 75.0,
+        "implementing_agency": "IDA-A", "ls_term": 18, "concentration_risk": 75.0,
         "oldest_pending_days": 0, "pending_count": 0, "top_vendor": "V",
         "top_vendor_share_pct": 70.0, "total_spend": 100.0,
         "vendor_count": 3, "transaction_count": 50,
@@ -378,8 +379,35 @@ def test_works_of_an_agency_with_no_expenditures_keep_scoring():
     assert agency_risk_score(out.iloc[1]) == 0.0
 
 
+def test_a_work_takes_its_own_terms_agency_profile():
+    """The same agency, two terms, two different vendor mixes. A work must be
+    matched against its own term or it inherits the wrong one."""
+    df = pd.DataFrame({
+        "id": [1, 2],
+        "implementing_agency": ["IDA-A", "IDA-A"],
+        "ls_term": [17, 18],
+        "agency_delay_rate": [0.0, 0.0],
+    })
+    profile = pd.DataFrame([
+        {"implementing_agency": "IDA-A", "ls_term": 17, "concentration_risk": 95.0,
+         "oldest_pending_days": 0, "pending_count": 0, "top_vendor": "Sole Ltd",
+         "top_vendor_share_pct": 99.0, "total_spend": 100.0,
+         "vendor_count": 1, "transaction_count": 50},
+        {"implementing_agency": "IDA-A", "ls_term": 18, "concentration_risk": 0.0,
+         "oldest_pending_days": 0, "pending_count": 0, "top_vendor": "Vendor 1",
+         "top_vendor_share_pct": 4.0, "total_spend": 100.0,
+         "vendor_count": 25, "transaction_count": 50},
+    ])
+    out = attach_agency_profile(df, profile)
+    assert out.loc[0, "agency_concentration_risk"] == 95.0
+    assert out.loc[1, "agency_concentration_risk"] == 0.0
+    assert agency_risk_score(out.iloc[0]) == 95.0
+    assert agency_risk_score(out.iloc[1]) == 0.0
+
+
 def test_attach_agency_profile_without_any_expenditure_data():
-    df = pd.DataFrame({"id": [1], "implementing_agency": ["IDA-A"], "agency_delay_rate": [0.0]})
+    df = pd.DataFrame({"id": [1], "implementing_agency": ["IDA-A"],
+                       "ls_term": [18], "agency_delay_rate": [0.0]})
     out = attach_agency_profile(df, pd.DataFrame())
     assert out.loc[0, "agency_concentration_risk"] is None
     assert agency_risk_score(out.iloc[0]) == 0.0
@@ -395,7 +423,7 @@ def test_insert_columns_match_what_the_loader_builds():
         "description": ["Construction of CC road"], "category": ["Normal/Others"],
         "sector": ["Roads & Paving"], "mp_name": ["Ram Kumar"], "mp_id": ["abc123"],
         "house": ["Lok Sabha"], "constituency": ["Somewhere"], "state": ["Bihar"],
-        "district": ["PATNA"], "implementing_agency": ["PATNA(DM_IDA)"],
+        "district": ["PATNA"], "implementing_agency": ["PATNA(DM_IDA)"], "ls_term": [18],
         "amount": [300000.0], "expenditure": [300000.0], "work_status": ["completed"],
         "start_date": [None], "expected_completion": [None],
         "actual_completion": [None], "has_images": [True],

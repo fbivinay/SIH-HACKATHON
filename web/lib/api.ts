@@ -11,6 +11,8 @@ export type Overview = {
 export type ProjectSummary = {
   id: number;
   work_name: string;
+  // 17 or 18. 0 marks a work from a snapshot taken before the column existed.
+  ls_term: number | null;
   state: string;
   district: string;
   category: string;
@@ -57,6 +59,9 @@ export type StateStat = {
 
 export type AgencyStat = {
   implementing_agency: string;
+  // Agencies are reported per term: a vendor mix in one Lok Sabha says nothing
+  // about the other, so the two are not pooled.
+  ls_term: number | null;
   total_projects: number;
   delayed_count: number;
   anomaly_count: number;
@@ -124,7 +129,8 @@ export const api = {
     get<ProjectSummary[]>(`/api/projects?${new URLSearchParams(params)}`),
   project: (id: number) => get<ProjectDetail>(`/api/projects/${id}`),
   mapStates: () => get<StateStat[]>("/api/map/states"),
-  agencies: () => get<AgencyStat[]>("/api/agencies"),
+  agencies: (params: Record<string, string> = {}) =>
+    get<AgencyStat[]>(`/api/agencies?${new URLSearchParams(params)}`),
   mps: () => get<MpStat[]>("/api/mps"),
   dataFreshness: () => get<DataFreshness>("/api/data-freshness"),
   filters: () => get<FilterOptions>("/api/filters"),

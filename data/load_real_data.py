@@ -108,7 +108,8 @@ EXPECTED_DURATION_DAYS = 365
 MIN_SANCTIONED_AMOUNT = 1000
 
 INSERT_COLUMNS = [
-    "work_name", "description", "mp_name", "mp_id", "house", "constituency", "state", "district",
+    "work_name", "description", "ls_term", "mp_name", "mp_id", "house",
+    "constituency", "state", "district",
     "category", "sector", "implementing_agency", "recommended_amount",
     "sanctioned_amount", "expenditure", "work_status", "start_date",
     "expected_completion", "actual_completion", "source", "has_images",
@@ -145,6 +146,11 @@ def build_rows():
     """Return (rows_df, rejects) where rejects is a list of (raw_row, reason, file)."""
     rec = pd.read_csv(RECOMMENDED_CSV)
     com = pd.read_csv(COMPLETED_CSV)
+    # Snapshots predating the column hold one term only; 0 marks "term unknown"
+    # rather than silently claiming one of them.
+    for frame in (rec, com):
+        if "ls_term" not in frame.columns:
+            frame["ls_term"] = 0
 
     # Works present in both files: keep only the completed row, but carry the
     # recommendation date over as its start date.
@@ -167,7 +173,7 @@ def build_rows():
     com["amount"] = com["Final Amount (₹)"]
 
     keep = {"Work Description": "description", "Category": "category", "MP Name": "mp_name",
-            "House": "house",
+            "House": "house", "ls_term": "ls_term",
             "Constituency": "constituency", "State": "state", "IDA": "implementing_agency",
             "amount": "amount", "work_status": "work_status", "start_date": "start_date",
             "actual_completion": "actual_completion", "Has Images": "has_images"}

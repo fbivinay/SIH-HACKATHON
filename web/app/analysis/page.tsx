@@ -15,7 +15,9 @@ export default async function AnalysisPage() {
         Agency Analysis
       </h1>
       <p className="mt-1.5 max-w-2xl text-sm text-[color:var(--muted)]">
-        {formatCount(agencies.length)} implementing agencies, ranked by average risk score.
+        {formatCount(agencies.length)} agency-terms, ranked by average risk score. An
+        agency is reported once per Lok Sabha term — its vendor mix in one says
+        nothing about the other.
         Vendor share is the portion of an agency&apos;s recorded spend going to its single
         largest vendor. A high share is not wrongdoing — it is a reason to look.
       </p>
@@ -46,8 +48,11 @@ export default async function AnalysisPage() {
           </thead>
           <tbody>
             {agencies.map((a) => (
-              <tr key={a.implementing_agency}>
-                <td className="max-w-[24rem] truncate">{a.implementing_agency}</td>
+              <tr key={`${a.implementing_agency}-${a.ls_term}`}>
+                <td className="max-w-[24rem] truncate">
+                  {a.implementing_agency}
+                  <span className="ml-2 text-xs text-[color:var(--muted)]">LS{a.ls_term}</span>
+                </td>
                 <td className="num">{formatCount(a.total_projects)}</td>
                 <td className="num">{scoringPending ? "—" : formatCount(a.delayed_count)}</td>
                 <td className="num">{scoringPending ? "—" : formatCount(a.anomaly_count)}</td>
