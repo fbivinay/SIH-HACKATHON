@@ -57,6 +57,7 @@ from dotenv import load_dotenv
 from psycopg2.extras import Json, execute_values
 
 import sectors
+from mps import safe_mp_key
 from sectors import classify_sector
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -97,6 +98,7 @@ def _newest_optional(pattern):
 RECOMMENDED_CSV = _newest("mplads_recommended_works_*.csv")
 COMPLETED_CSV = _newest("mplads_completed_works_*.csv")
 EXPENDITURES_CSV = _newest_optional("mplads_expenditures_*.csv")
+MP_SUMMARY_CSV = _newest_optional("mplads_mp_summary_*.csv")
 
 EXPECTED_DURATION_DAYS = 365
 # Amounts below this are data-entry noise, not works: the source has 39 rows
@@ -106,7 +108,7 @@ EXPECTED_DURATION_DAYS = 365
 MIN_SANCTIONED_AMOUNT = 1000
 
 INSERT_COLUMNS = [
-    "work_name", "description", "mp_name", "constituency", "state", "district",
+    "work_name", "description", "mp_name", "mp_id", "house", "constituency", "state", "district",
     "category", "sector", "implementing_agency", "recommended_amount",
     "sanctioned_amount", "expenditure", "work_status", "start_date",
     "expected_completion", "actual_completion", "source", "has_images",
@@ -165,6 +167,7 @@ def build_rows():
     com["amount"] = com["Final Amount (₹)"]
 
     keep = {"Work Description": "description", "Category": "category", "MP Name": "mp_name",
+            "House": "house",
             "Constituency": "constituency", "State": "state", "IDA": "implementing_agency",
             "amount": "amount", "work_status": "work_status", "start_date": "start_date",
             "actual_completion": "actual_completion", "Has Images": "has_images"}
@@ -221,6 +224,13 @@ def build_rows():
     # scoring quietly compare every work against every other work again.
     df["sector"] = df["description"].map(classify_sector)
     sectors.verify(df["description"])
+    # mp_name is not a key (see data/mps.py). safe_mp_key rather than mp_key:
+    # a work whose MP name is unusable is still a work worth loading, it just
+    # cannot take part in per-MP aggregates.
+    df["mp_id"] = [
+        safe_mp_key(n, st, h)
+        for n, st, h in zip(df["mp_name"], df["state"], df["house"])
+    ]
     return df, rejects
 
 
@@ -315,14 +325,90 @@ def load_expenditures(conn, df):
     return len(rows)
 
 
+MP_COLUMNS = [
+    "mp_id", "ls_term", "mp_name", "constituency", "state", "house",
+    "allocated_amount", "total_expenditure", "utilization_pct", "completed_works",
+    "recommended_works", "completion_rate_pct", "unspent_amount",
+    "transaction_count", "successful_payments", "pending_payments",
+]
+
+
+def build_mp_rows():
+    """The source's own per-MP-per-term aggregates.
+
+    Loaded as published rather than recomputed from the works: these are the
+    numbers Empowered Indian shows, so a utilisation figure in this dashboard
+    can be checked against theirs.
+    """
+    mp = pd.read_csv(MP_SUMMARY_CSV)
+    num = lambda col: pd.to_numeric(mp[col], errors="coerce")
+    out = pd.DataFrame({
+        "mp_id": [safe_mp_key(n, s, h) for n, s, h in zip(mp["MP Name"], mp["State"], mp["House"])],
+        "ls_term": mp["ls_term"] if "ls_term" in mp.columns else 0,
+        "mp_name": mp["MP Name"],
+        "constituency": mp["Constituency"],
+        "state": mp["State"],
+        "house": mp["House"],
+        "allocated_amount": num("Allocated Amount (₹)"),
+        "total_expenditure": num("Total Expenditure (₹)"),
+        "utilization_pct": num("Utilization %"),
+        "completed_works": num("Completed Works"),
+        "recommended_works": num("Recommended Works"),
+        "completion_rate_pct": num("Completion Rate %"),
+        "unspent_amount": num("Unspent Amount (₹)"),
+        "transaction_count": num("Transaction Count"),
+        "successful_payments": num("Successful Payments"),
+        "pending_payments": num("Pending Payments"),
+    })
+    dropped = int(out["mp_id"].isna().sum())
+    out = out[out["mp_id"].notna()]
+    # The LS17 extract lists one MP twice - 'Manne Srinivas Reddy(17th Lok
+    # Sabha)' and 'Shri Manne Srinivas Reddy (17th Lok Sabha)'. Resolving them
+    # to one id is the point of mp_id, so collapse rather than fail the load.
+    collapsed = int(out.duplicated(subset=["mp_id", "ls_term"]).sum())
+    out = out.drop_duplicates(subset=["mp_id", "ls_term"], keep="first")
+    return out, dropped, collapsed
+
+
+def load_mps(conn, df):
+    rows = [
+        tuple(None if pd.isna(v) else v for v in row)
+        for row in df[MP_COLUMNS].itertuples(index=False, name=None)
+    ]
+    with conn.cursor() as cur:
+        cur.execute("TRUNCATE mps")
+        execute_values(
+            cur, f"INSERT INTO mps ({', '.join(MP_COLUMNS)}) VALUES %s", rows, page_size=500
+        )
+    conn.commit()
+    return len(rows)
+
+
+def prepare_insert_frame(df):
+    """Add the derived columns INSERT_COLUMNS names, and select them in order.
+
+    Built by column name rather than as a positional tuple. The positional form
+    silently fell one value short when `sector` was added to INSERT_COLUMNS -
+    the kind of mismatch that only surfaces against a live database, and only
+    after a full load has already run.
+    """
+    df = df.copy()
+    df["work_name"] = df["description"].str[:60]
+    # A completed work's Final Amount is both what was recommended and what it
+    # cost; the source records one figure (see the module docstring).
+    df["recommended_amount"] = df["amount"]
+    df["sanctioned_amount"] = df["amount"]
+    df["source"] = "real"
+    missing = [c for c in INSERT_COLUMNS if c not in df.columns]
+    if missing:
+        raise KeyError(f"INSERT_COLUMNS names columns the frame does not have: {missing}")
+    return df[INSERT_COLUMNS]
+
+
 def load(conn, df, rejects):
     rows = [
-        (
-            r.description[:60], r.description, r.mp_name, r.constituency, r.state, r.district,
-            r.category, r.implementing_agency, r.amount, r.amount, r.expenditure, r.work_status,
-            r.start_date, r.expected_completion, r.actual_completion, "real", r.has_images,
-        )
-        for r in df.itertuples(index=False)
+        tuple(None if pd.isna(v) else v for v in row)
+        for row in prepare_insert_frame(df).itertuples(index=False, name=None)
     ]
     with conn.cursor() as cur:
         cur.execute("DELETE FROM projects WHERE source = 'real'")
@@ -356,6 +442,14 @@ if __name__ == "__main__":
         finish_load_run(conn, run_id, "failed", None, None)
         conn.close()
         raise
+    if MP_SUMMARY_CSV is None:
+        print("No mplads_mp_summary_*.csv in the snapshot - skipping MP aggregates.")
+    else:
+        mp_df, mp_dropped, mp_collapsed = build_mp_rows()
+        print(f"Inserted {load_mps(conn, mp_df)} MP-terms "
+              f"({mp_collapsed} duplicate name(s) collapsed onto one mp_id, "
+              f"{mp_dropped} dropped for an unusable name).")
+
     if EXPENDITURES_CSV is None:
         print("No mplads_expenditures_*.csv in the snapshot - skipping vendor data. "
               "Agency risk will score concentration as 0.")

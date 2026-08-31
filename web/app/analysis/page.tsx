@@ -1,8 +1,8 @@
 import { api } from "@/lib/api";
-import { formatCount, isAggregateScoringPending, riskLevelClass, riskLevelLabel, riskScoreToLevel } from "@/lib/format";
+import { formatCount, formatINR, isAggregateScoringPending, riskLevelClass, riskLevelLabel, riskScoreToLevel } from "@/lib/format";
 
 export default async function AnalysisPage() {
-  const agencies = await api.agencies();
+  const [agencies, mps] = await Promise.all([api.agencies(), api.mps()]);
   const scoringPending = isAggregateScoringPending(agencies, "anomaly_count");
 
   return (
@@ -72,6 +72,57 @@ export default async function AnalysisPage() {
           </tbody>
         </table>
       </div>
+
+      <section className="mt-12">
+        <div className="eyebrow">Members of Parliament</div>
+        <h2
+          className="mt-1 text-xl sm:text-2xl font-semibold tracking-tight"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Allocation still unspent
+        </h2>
+        <p className="mt-1.5 max-w-2xl text-sm text-[color:var(--muted)]">
+          Utilisation and unspent figures are the source&apos;s own published
+          per-MP aggregates, not computed here, so they can be checked against
+          empoweredindian.in for the same MP. Ranked by unspent amount rather
+          than by utilisation: the lowest utilisation belongs to members sworn in
+          during 2025&ndash;26 who have had no time to spend anything.
+        </p>
+
+        <div className="mt-6 data-table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>MP</th>
+                <th>Constituency</th>
+                <th className="text-right">Allocated</th>
+                <th className="text-right">Unspent</th>
+                <th className="text-right">Utilisation</th>
+                <th className="text-right">Works</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mps.map((m) => (
+                <tr key={`${m.mp_id}-${m.ls_term}`}>
+                  <td className="max-w-[20rem] truncate">
+                    {m.mp_name}
+                    <span className="ml-2 text-xs text-[color:var(--muted)]">
+                      {m.house} &middot; LS{m.ls_term}
+                    </span>
+                  </td>
+                  <td className="max-w-[14rem] truncate">{m.constituency ?? "—"}</td>
+                  <td className="num">{formatINR(m.allocated_amount)}</td>
+                  <td className="num">{formatINR(m.unspent_amount)}</td>
+                  <td className="num">
+                    {m.utilization_pct === null ? "—" : `${m.utilization_pct.toFixed(0)}%`}
+                  </td>
+                  <td className="num">{formatCount(m.total_projects)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
   );
 }

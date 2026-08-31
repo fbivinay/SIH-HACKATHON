@@ -285,18 +285,46 @@ Terms are pooled, because `projects` carries no `ls_term` column and a per-term
 profile could not be joined back to a work. The raw `expenditures` rows keep
 theirs for when that changes.
 
-**MP identity.** `MP Name` carries 1,262 distinct strings across the two terms
-against 773 (LS17) and 774 (LS18) actual MPs: entries append a term marker
-(`(2022-28)`, `(17th Lok Sabha)`) and honorifics vary. Any future MP-level
-aggregate needs a normalized key, or one MP's record splits across two
-identities. Note the LS17 extract itself lists one MP twice
-(`Manne Srinivas Reddy(17th Lok Sabha)` and `Shri Manne Srinivas Reddy (17th Lok
-Sabha)`), so LS17 has 774 rows for 773 MPs.
+### 14.5 Fixed — MP identity
 
-### 14.5 Operational note
+`MP Name` carries 1,262 distinct strings across the two terms against 773
+(LS17) and 774 (LS18) actual MPs: entries append a term marker (`(2022-28)`,
+`(17th Lok Sabha)`, `(17LS)`), honorifics vary, and initials are written
+inconsistently. Grouped by the raw name, one MP's record splits in two.
+
+`data/mps.py` derives `mp_id` by stripping the term marker and honorifics,
+casefolding, collapsing whitespace and hashing that with state and house. State
+and house are part of the key because names repeat across both.
+
+The source's own per-MP-per-term aggregates now load into an `mps` table
+as published — allocation, expenditure, utilisation, completion rate, unspent
+amount. Keeping them as published rather than recomputing from the works is
+deliberate: a utilisation figure in this dashboard can be checked against
+empoweredindian.in for the same MP, which is the most persuasive verification
+available.
+
+Verified on the snapshot: 773 distinct ids for LS17, 774 for LS18, 1,110 across
+both terms with 437 MPs serving in each, zero works with an unresolvable MP
+name, and zero work `mp_id`s absent from the MP summary. The LS17 shortfall is
+real — that extract lists `Manne Srinivas Reddy(17th Lok Sabha)` and `Shri Manne
+Srinivas Reddy (17th Lok Sabha)` as two rows for one MP, and the loader collapses
+them, which is the point of the key.
+
+Surfaced as an MPs section on the existing analysis screen, ranked by unspent
+amount rather than by utilisation: the lowest utilisation figures belong to
+Rajya Sabha members sworn in during 2025–26 who have had no time to spend
+anything, and ranking them as the worst would be wrong. No MP risk score is
+computed — these are the source's numbers, presented.
+
+### 14.6 Operational note
 
 Scoring embeds every work description, so the two-term snapshot roughly doubles
 the batch: ~127k descriptions to ~246k, or 15–20 minutes to an estimated 30–40.
 The nightly workflow's `timeout-minutes: 60` still covers it with a thinner
 margin. Memory is not the constraint — the largest `(district, category)`
 similarity group is 3,293 works, a 10.8M-cell matrix.
+
+The scoring run now also builds `agency_vendor_profile` from 270,934
+expenditure rows and the loader writes the `mps` and `expenditures` tables;
+both are seconds of work next to the embedding pass and do not move the
+estimate.

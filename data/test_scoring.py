@@ -383,3 +383,26 @@ def test_attach_agency_profile_without_any_expenditure_data():
     out = attach_agency_profile(df, pd.DataFrame())
     assert out.loc[0, "agency_concentration_risk"] is None
     assert agency_risk_score(out.iloc[0]) == 0.0
+
+
+def test_insert_columns_match_what_the_loader_builds():
+    """A positional insert tuple fell one value short when `sector` was added
+    to INSERT_COLUMNS - a mismatch that only shows up against a live database,
+    after a full load has already run. Build by name and check it here."""
+    import load_real_data as lrd
+
+    df = pd.DataFrame({
+        "description": ["Construction of CC road"], "category": ["Normal/Others"],
+        "sector": ["Roads & Paving"], "mp_name": ["Ram Kumar"], "mp_id": ["abc123"],
+        "house": ["Lok Sabha"], "constituency": ["Somewhere"], "state": ["Bihar"],
+        "district": ["PATNA"], "implementing_agency": ["PATNA(DM_IDA)"],
+        "amount": [300000.0], "expenditure": [300000.0], "work_status": ["completed"],
+        "start_date": [None], "expected_completion": [None],
+        "actual_completion": [None], "has_images": [True],
+    })
+    prepared = lrd.prepare_insert_frame(df)
+    assert list(prepared.columns) == lrd.INSERT_COLUMNS
+    assert len(prepared.iloc[0]) == len(lrd.INSERT_COLUMNS)
+    assert prepared.iloc[0]["sector"] == "Roads & Paving"
+    assert prepared.iloc[0]["work_name"] == "Construction of CC road"
+    assert prepared.iloc[0]["source"] == "real"

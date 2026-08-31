@@ -71,6 +71,23 @@ export type AgencyStat = {
   concentration_risk: number;
 };
 
+export type MpStat = {
+  mp_id: string;
+  ls_term: number;
+  mp_name: string;
+  constituency: string | null;
+  state: string | null;
+  house: string | null;
+  allocated_amount: number | null;
+  total_expenditure: number | null;
+  utilization_pct: number | null;
+  unspent_amount: number | null;
+  completion_rate_pct: number | null;
+  pending_payments: number | null;
+  total_projects: number;
+  high_risk_works: number;
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -108,6 +125,7 @@ export const api = {
   project: (id: number) => get<ProjectDetail>(`/api/projects/${id}`),
   mapStates: () => get<StateStat[]>("/api/map/states"),
   agencies: () => get<AgencyStat[]>("/api/agencies"),
+  mps: () => get<MpStat[]>("/api/mps"),
   dataFreshness: () => get<DataFreshness>("/api/data-freshness"),
   filters: () => get<FilterOptions>("/api/filters"),
 };
