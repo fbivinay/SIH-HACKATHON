@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS projects (
     state TEXT NOT NULL,
     district TEXT NOT NULL,
     category TEXT NOT NULL,
+    sector TEXT,
     implementing_agency TEXT NOT NULL,
     recommended_amount NUMERIC(14,2),
     sanctioned_amount NUMERIC(14,2) NOT NULL,
@@ -22,7 +23,8 @@ CREATE TABLE IF NOT EXISTS projects (
     delay_days INTEGER,
     cost_deviation_pct NUMERIC(6,2),
     expenditure_ratio NUMERIC(6,2),
-    district_avg_cost NUMERIC(14,2),
+    peer_median_cost NUMERIC(14,2),
+    peer_count INTEGER,
     agency_delay_rate NUMERIC(5,2),
     max_similarity_score NUMERIC(5,4),
     similar_work_id INTEGER REFERENCES projects(id),
@@ -47,7 +49,19 @@ CREATE TABLE IF NOT EXISTS rejected_rows (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Added 2026-08-31. Cost peers are (district, sector), not (district, category):
+-- category is 'Normal/Others' for 98.1% of rows and never stratified anything.
+-- ALTER ... IF (NOT) EXISTS so this file stays runnable against a database that
+-- already holds the old shape. district_avg_cost is dropped rather than kept:
+-- it is recomputed from scratch on every scoring run and nothing reads it
+-- outside scoring.py, so there is no history to preserve.
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS sector TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS peer_median_cost NUMERIC(14,2);
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS peer_count INTEGER;
+ALTER TABLE projects DROP COLUMN IF EXISTS district_avg_cost;
+
 CREATE INDEX IF NOT EXISTS idx_projects_state ON projects(state);
+CREATE INDEX IF NOT EXISTS idx_projects_sector ON projects(sector);
 CREATE INDEX IF NOT EXISTS idx_projects_district ON projects(district);
 CREATE INDEX IF NOT EXISTS idx_projects_agency ON projects(implementing_agency);
 CREATE INDEX IF NOT EXISTS idx_projects_risk_level ON projects(risk_level);

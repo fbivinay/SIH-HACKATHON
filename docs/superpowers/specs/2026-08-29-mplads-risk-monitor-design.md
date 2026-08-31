@@ -217,7 +217,7 @@ now on 2.1× the rows.
 **Recommended and completed remain near-disjoint.** 611 shared works out of
 124,353 completed. The union-not-join model in `load_real_data.py` holds.
 
-### 14.3 Open — the cost baseline is measuring almost nothing
+### 14.3 Fixed — the cost baseline was measuring almost nothing
 
 `scoring.py` groups `district_avg_cost` by `(district, category)`. On the full
 extract, `category` is `Normal/Others` for 241,767 of 246,487 loaded rows
@@ -226,16 +226,35 @@ The category half of that key is therefore inert: cost deviation is effectively
 measured against a district-wide average that mixes a ₹30,000 street light with
 a ₹40,00,000 road.
 
-The cheapest fix is a keyword classifier over `work_description` — a prototype
-over the completed works assigns 82.9% of them to a real sector (Street Lighting
-24.5%, Roads & Paving 22.4%, Water 9.7%, Community Buildings 7.6%, Education
-7.0%), leaving 17.1% in `Other`. Grouping on `(district, derived_sector)` would
-make cost deviation mean what §7 says it means. Not implemented here.
+`data/sectors.py` now derives a sector from the description with ordered
+keyword rules, and `add_base_features` groups on `(district, sector)` using the
+**median** rather than the mean — one ₹7.5 crore work was dragging a district
+mean far enough that the works either side of it both read as normal.
 
-Two guards worth adding alongside it: a minimum peer count before any cost
-deviation is scored (a median over three works is not a baseline), and a
-matching guard in the explanation text, so a work never carries a "cost is N%
-above similar projects" reason whose comparison group cannot be shown.
+Two guards ship with it: `MIN_PEERS = 8`, below which a work scores no cost risk
+rather than being compared against a median of three; and the same threshold on
+the explanation text, so a work never carries a cost reason whose comparison
+group cannot be shown. The reason now states the basis in full — the amount, the
+peer median, the sector, the district and the peer count.
+
+Measured over the 246,487 loaded works, old key against new:
+
+| | `(district, category)`, mean | `(district, sector)`, median |
+|---|---:|---:|
+| peer groups | 1,517 | 7,057 |
+| median group size | 20 | 9 |
+| flagged >40% above peers | 41,999 | 48,154 |
+| reads >40% below peers | 99,440 | 30,226 |
+| suppressed, under 8 peers | — | 9,785 |
+
+The second-to-last row is the point: 40% of the dataset used to read as
+suspiciously cheap, because it was being compared against a mean inflated by
+more expensive kinds of work in the same district. 14,922 works the old key
+flagged are no longer flagged and 21,077 newly are.
+
+Sector coverage on the loaded set is 80.3%, with 19.7% in `Other`.
+`sectors.verify()` raises if `Other` ever exceeds 40%, so the rules going stale
+fails the load rather than quietly restoring the original bug.
 
 ### 14.4 Open — signals present in the data and not yet used
 
