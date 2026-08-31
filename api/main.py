@@ -31,6 +31,7 @@ def list_projects(
     state: Optional[str] = None,
     district: Optional[str] = None,
     risk_level: Optional[str] = None,
+    ls_term: Optional[int] = Query(None, ge=17, le=18),
     limit: int = Query(50, le=200),
     offset: int = 0,
 ):
@@ -51,13 +52,16 @@ def list_projects(
     if risk_level:
         filters.append("risk_level = %s")
         params.append(risk_level)
+    if ls_term:
+        filters.append("ls_term = %s")
+        params.append(ls_term)
     where = f"WHERE {' AND '.join(filters)}" if filters else ""
     params += [limit, offset]
 
     return query(
         f"""
-        SELECT id, work_name, state, district, category, sector, implementing_agency,
-               sanctioned_amount, overall_risk_score, risk_level
+        SELECT id, work_name, ls_term, state, district, category, sector,
+               implementing_agency, sanctioned_amount, overall_risk_score, risk_level
         FROM projects
         {where}
         ORDER BY overall_risk_score DESC NULLS LAST
@@ -104,18 +108,31 @@ def map_states():
 
 
 @app.get("/api/agencies")
-def agencies():
+def agencies(ls_term: Optional[int] = Query(None, ge=17, le=18)):
+    """One row per agency per Lok Sabha term.
+
+    An agency's vendor mix in one term says nothing about its mix in the other,
+    so the two are not pooled.
+    """
+    params = []
+    where = ""
+    if ls_term:
+        where = "WHERE ls_term = %s"
+        params = [ls_term, ls_term]
     return query(
-        """
+        f"""
         WITH work_stats AS (
-            SELECT implementing_agency,
+            SELECT implementing_agency, ls_term,
                    COUNT(*) AS total_projects,
                    COUNT(*) FILTER (WHERE delay_days > 60) AS delayed_count,
                    COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS anomaly_count,
                    COALESCE(AVG(overall_risk_score), 0) AS avg_risk_score
-            FROM projects GROUP BY implementing_agency
+            FROM projects {where} GROUP BY implementing_agency, ls_term
+        ),
+        vendor_stats AS (
+            SELECT * FROM agency_vendor_profile {where}
         )
-        SELECT w.implementing_agency, w.total_projects, w.delayed_count,
+        SELECT w.implementing_agency, w.ls_term, w.total_projects, w.delayed_count,
                w.anomaly_count, w.avg_risk_score,
                v.vendor_count, v.transaction_count, v.total_spend,
                v.top_vendor, v.top_vendor_share_pct,
@@ -123,9 +140,10 @@ def agencies():
         -- LEFT: an agency with no expenditure rows keeps its works and simply
         -- has no vendor data, rather than dropping off the screen.
         FROM work_stats w
-        LEFT JOIN agency_vendor_profile v USING (implementing_agency)
+        LEFT JOIN vendor_stats v USING (implementing_agency, ls_term)
         ORDER BY w.avg_risk_score DESC
-        """
+        """,
+        params,
     )
 
 
@@ -140,16 +158,14 @@ def mps(limit: int = Query(100, le=1000)):
     Sorted by unspent amount rather than by utilisation: the lowest utilisation
     figures belong to Rajya Sabha members sworn in during 2025-26 who have had
     no time to spend anything, and ranking them as the worst would be wrong.
-    Works are counted per mp_id across both terms, because `projects` carries no
-    ls_term to split them by.
     """
     return query(
         """
         WITH work_stats AS (
-            SELECT mp_id,
+            SELECT mp_id, ls_term,
                    COUNT(*) AS total_projects,
                    COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_works
-            FROM projects WHERE mp_id IS NOT NULL GROUP BY mp_id
+            FROM projects WHERE mp_id IS NOT NULL GROUP BY mp_id, ls_term
         )
         SELECT m.mp_id, m.ls_term, m.mp_name, m.constituency, m.state, m.house,
                m.allocated_amount, m.total_expenditure, m.utilization_pct,
@@ -157,7 +173,7 @@ def mps(limit: int = Query(100, le=1000)):
                COALESCE(w.total_projects, 0) AS total_projects,
                COALESCE(w.high_risk_works, 0) AS high_risk_works
         FROM mps m
-        LEFT JOIN work_stats w USING (mp_id)
+        LEFT JOIN work_stats w USING (mp_id, ls_term)
         WHERE COALESCE(m.allocated_amount, 0) > 0
         ORDER BY m.unspent_amount DESC NULLS LAST
         LIMIT %s

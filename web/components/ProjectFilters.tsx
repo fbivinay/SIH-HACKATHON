@@ -15,6 +15,7 @@ export default function ProjectFilters({ filterOptions }: { filterOptions: Filte
   const q = searchParams.get("q") ?? "";
   const state = searchParams.get("state") ?? "";
   const riskLevel = searchParams.get("risk_level") ?? "";
+  const lsTerm = searchParams.get("ls_term") ?? "";
 
   // Local echo of the search box so typing feels instant; URL (source of truth)
   // updates on a debounce so we don't fire a query per keystroke over 127k rows.
@@ -52,7 +53,7 @@ export default function ProjectFilters({ filterOptions }: { filterOptions: Filte
     router.replace(pathname, { scroll: false });
   }
 
-  const hasFilters = Boolean(q || state || riskLevel);
+  const hasFilters = Boolean(q || state || riskLevel || lsTerm);
 
   return (
     <div className="filter-bar">
@@ -105,6 +106,22 @@ export default function ProjectFilters({ filterOptions }: { filterOptions: Filte
               {riskLevelLabel(r)}
             </option>
           ))}
+        </select>
+      </div>
+
+      <div className="filter-field">
+        <label htmlFor="project-term" className="sr-only">
+          Filter by Lok Sabha term
+        </label>
+        <select
+          id="project-term"
+          value={lsTerm}
+          onChange={(e) => updateParams({ ls_term: e.target.value })}
+          className="filter-select"
+        >
+          <option value="">Both terms</option>
+          <option value="17">17th Lok Sabha</option>
+          <option value="18">18th Lok Sabha</option>
         </select>
       </div>
 
