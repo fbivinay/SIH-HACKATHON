@@ -129,6 +129,43 @@ def agencies():
     )
 
 
+@app.get("/api/mps")
+def mps(limit: int = Query(100, le=1000)):
+    """MPs by the value of their allocation still unspent.
+
+    utilization_pct and unspent_amount come straight from the source's own
+    published per-MP aggregates, not from anything computed here, so they can be
+    checked against empoweredindian.in for the same MP.
+
+    Sorted by unspent amount rather than by utilisation: the lowest utilisation
+    figures belong to Rajya Sabha members sworn in during 2025-26 who have had
+    no time to spend anything, and ranking them as the worst would be wrong.
+    Works are counted per mp_id across both terms, because `projects` carries no
+    ls_term to split them by.
+    """
+    return query(
+        """
+        WITH work_stats AS (
+            SELECT mp_id,
+                   COUNT(*) AS total_projects,
+                   COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_works
+            FROM projects WHERE mp_id IS NOT NULL GROUP BY mp_id
+        )
+        SELECT m.mp_id, m.ls_term, m.mp_name, m.constituency, m.state, m.house,
+               m.allocated_amount, m.total_expenditure, m.utilization_pct,
+               m.unspent_amount, m.completion_rate_pct, m.pending_payments,
+               COALESCE(w.total_projects, 0) AS total_projects,
+               COALESCE(w.high_risk_works, 0) AS high_risk_works
+        FROM mps m
+        LEFT JOIN work_stats w USING (mp_id)
+        WHERE COALESCE(m.allocated_amount, 0) > 0
+        ORDER BY m.unspent_amount DESC NULLS LAST
+        LIMIT %s
+        """,
+        [limit],
+    )
+
+
 @app.get("/api/data-freshness")
 def data_freshness():
     """Latest successful load+score run, for the UI's freshness indicator.
