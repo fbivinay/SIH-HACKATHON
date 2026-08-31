@@ -4,6 +4,7 @@ from scoring import (
     compute_delay_days, cost_risk_score, delay_risk_score,
     duplicate_risk_score, agency_risk_score, risk_level,
     build_flagged_reasons, compliance_risk_score, add_base_features,
+    attach_agency_profile,
 )
 
 
@@ -306,3 +307,79 @@ def test_no_cost_reason_without_a_basis():
     stale = _priced()
     del stale["peer_median_cost"]
     assert not any("median" in r for r in build_flagged_reasons(stale))
+
+
+def test_agency_risk_takes_the_worst_signal_not_a_blend():
+    """Adding a component must never lower an existing score.
+
+    A weighted blend would have halved every agency's delay-driven risk the
+    moment concentration was added, silently changing scores in a change that
+    was supposed to be additive.
+    """
+    delay_only = pd.Series({"agency_delay_rate": 70.0})
+    assert agency_risk_score(delay_only) == 70.0
+
+    also_concentrated = pd.Series({
+        "agency_delay_rate": 70.0, "agency_concentration_risk": 90.0,
+    })
+    assert agency_risk_score(also_concentrated) == 90.0
+
+    concentration_only = pd.Series({
+        "agency_delay_rate": 0.0, "agency_concentration_risk": 90.0,
+    })
+    assert agency_risk_score(concentration_only) == 90.0
+
+
+def test_agency_reason_names_the_component_that_drove_the_score():
+    """agency_risk is a max, so attributing it to the delay rate
+    unconditionally reported a delay problem on an agency flagged purely for
+    vendor concentration."""
+    concentrated = pd.Series({
+        "compliance_reasons": [], "cost_deviation_pct": 0.0, "iso_anomaly": 0.0,
+        "delay_risk": 0.0, "delay_days": 0,
+        "duplicate_risk": 0.0, "max_similarity_score": 0.1,
+        "agency_delay_rate": 5.0,
+        "agency_concentration_risk": 88.0,
+        "agency_top_vendor_share_pct": 71.0, "agency_total_spend": 9400000.0,
+        "agency_top_vendor": "KRIDL BHUSIRI", "agency_vendor_count": 6,
+        "agency_transaction_count": 120, "agency_oldest_pending_days": 0,
+        "agency_pending_count": 0,
+    })
+    concentrated["agency_risk"] = agency_risk_score(concentrated)
+    reasons = build_flagged_reasons(concentrated)
+    assert any("KRIDL BHUSIRI" in r for r in reasons), reasons
+    assert not any("delay rate" in r for r in reasons), reasons
+
+    delayed = concentrated.copy()
+    delayed["agency_delay_rate"] = 92.0
+    delayed["agency_risk"] = agency_risk_score(delayed)
+    reasons = build_flagged_reasons(delayed)
+    assert any("92% delay rate" in r for r in reasons), reasons
+    assert not any("KRIDL BHUSIRI" in r for r in reasons), reasons
+
+
+def test_works_of_an_agency_with_no_expenditures_keep_scoring():
+    """Left join, not inner: no vendor data must cost the signal, not the rows."""
+    df = pd.DataFrame({
+        "id": [1, 2],
+        "implementing_agency": ["IDA-A", "IDA-UNKNOWN"],
+        "agency_delay_rate": [0.0, 0.0],
+    })
+    profile = pd.DataFrame([{
+        "implementing_agency": "IDA-A", "concentration_risk": 75.0,
+        "oldest_pending_days": 0, "pending_count": 0, "top_vendor": "V",
+        "top_vendor_share_pct": 70.0, "total_spend": 100.0,
+        "vendor_count": 3, "transaction_count": 50,
+    }])
+    out = attach_agency_profile(df, profile)
+    assert len(out) == 2
+    assert out.loc[0, "agency_concentration_risk"] == 75.0
+    assert pd.isna(out.loc[1, "agency_concentration_risk"])
+    assert agency_risk_score(out.iloc[1]) == 0.0
+
+
+def test_attach_agency_profile_without_any_expenditure_data():
+    df = pd.DataFrame({"id": [1], "implementing_agency": ["IDA-A"], "agency_delay_rate": [0.0]})
+    out = attach_agency_profile(df, pd.DataFrame())
+    assert out.loc[0, "agency_concentration_risk"] is None
+    assert agency_risk_score(out.iloc[0]) == 0.0
