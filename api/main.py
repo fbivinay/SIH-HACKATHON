@@ -56,7 +56,7 @@ def list_projects(
 
     return query(
         f"""
-        SELECT id, work_name, state, district, category, implementing_agency,
+        SELECT id, work_name, state, district, category, sector, implementing_agency,
                sanctioned_amount, overall_risk_score, risk_level
         FROM projects
         {where}

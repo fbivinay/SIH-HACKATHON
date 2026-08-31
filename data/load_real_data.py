@@ -56,6 +56,9 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extras import Json, execute_values
 
+import sectors
+from sectors import classify_sector
+
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 DATA_DIR = Path(os.environ.get("MPLADS_DATA_DIR", "/home/rvina/projects/SIH HACKATHON/MPLADS DATA"))
@@ -90,9 +93,9 @@ MIN_SANCTIONED_AMOUNT = 1000
 
 INSERT_COLUMNS = [
     "work_name", "description", "mp_name", "constituency", "state", "district",
-    "category", "implementing_agency", "recommended_amount", "sanctioned_amount",
-    "expenditure", "work_status", "start_date", "expected_completion",
-    "actual_completion", "source", "has_images",
+    "category", "sector", "implementing_agency", "recommended_amount",
+    "sanctioned_amount", "expenditure", "work_status", "start_date",
+    "expected_completion", "actual_completion", "source", "has_images",
 ]
 
 
@@ -198,6 +201,12 @@ def build_rows():
     df["has_images"] = [None if pd.isna(v) else bool(v) for v in df["has_images"]]
     df["district"] = df["implementing_agency"].map(parse_district)
     df["category"] = df["category"].fillna("Unknown")
+    # The source `category` is 'Normal/Others' for 98.1% of rows, so the cost
+    # baseline needs a stratifier that carries information. sectors.verify
+    # raises if the keyword rules stop matching this data, rather than letting
+    # scoring quietly compare every work against every other work again.
+    df["sector"] = df["description"].map(classify_sector)
+    sectors.verify(df["description"])
     return df, rejects
 
 

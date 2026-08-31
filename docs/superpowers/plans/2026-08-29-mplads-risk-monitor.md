@@ -1452,22 +1452,19 @@ Tasks 0–10 are complete and deployed. These follow from the two-term extract;
 see spec §14 for the measurements behind each. They are independent of each
 other and none of them block the demo.
 
-### Task 11: Derive a sector and fix the cost baseline
+### Task 11: Derive a sector and fix the cost baseline — DONE
 
 Spec §14.3. `scoring.py` groups cost deviation by `(district, category)`, and
 `category` is one value for 98.1% of rows, so the baseline mixes street lights
 with roads.
 
-- [ ] Add a keyword classifier over `work_description` producing a `sector`
-      column (a prototype reaches 82.9% coverage; rules are ordered, first match
-      wins, so lighting is tested before roads).
-- [ ] Group `district_avg_cost` on `(district, sector)`; prefer the median over
-      the mean, since a single ₹7.5 crore work drags a district mean badly.
-- [ ] Add a minimum peer count below which `cost_risk` scores 0, and guard the
-      "cost is N% above similar projects" reason on the same threshold so no
-      explanation quotes a comparison group too thin to show.
-- [ ] Verify: the highest-scoring works should change, and each should be
-      checkable by hand against the CSV.
+- [x] `data/sectors.py`: ordered keyword rules, first match wins, matching whole
+      words with an optional plural. 80.3% coverage, 19.7% `Other`.
+- [x] `peer_median_cost` / `peer_count` on `(district, sector)`, median not mean.
+      `district_avg_cost` is dropped.
+- [x] `MIN_PEERS = 8` guards both `cost_risk` and the explanation text; the
+      reason now states amount, peer median, sector, district and peer count.
+- [x] Verified against the full extract — see spec §14.3 for the before/after.
 
 ### Task 12: Score vendor concentration at the agency grain
 

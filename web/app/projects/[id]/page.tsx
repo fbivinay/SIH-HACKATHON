@@ -67,7 +67,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       </Link>
 
       <div className="eyebrow mt-4">
-        {p.category} · Work #{p.id}
+        {p.sector ?? p.category} · Work #{p.id}
       </div>
       <h1
         className="mt-1 text-xl sm:text-2xl font-semibold tracking-tight"

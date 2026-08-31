@@ -14,6 +14,10 @@ export type ProjectSummary = {
   state: string;
   district: string;
   category: string;
+  // Derived from the work description (data/sectors.py). `category` is
+  // 'Normal/Others' for 98.1% of works, so `sector` is the one that carries
+  // information. Nullable: rows scored before sector existed have none.
+  sector: string | null;
   implementing_agency: string;
   sanctioned_amount: number;
   overall_risk_score: number | null;
@@ -39,6 +43,8 @@ export type ProjectDetail = ProjectSummary & {
   flagged_reasons: string[];
   delay_days: number | null;
   cost_deviation_pct: number | null;
+  peer_median_cost: number | null;
+  peer_count: number | null;
   similar_work_id: number | null;
 };
 

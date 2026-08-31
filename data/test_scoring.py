@@ -3,7 +3,7 @@ from datetime import date
 from scoring import (
     compute_delay_days, cost_risk_score, delay_risk_score,
     duplicate_risk_score, agency_risk_score, risk_level,
-    build_flagged_reasons, compliance_risk_score,
+    build_flagged_reasons, compliance_risk_score, add_base_features,
 )
 
 
@@ -141,6 +141,9 @@ def test_cost_reason_never_contradicts_itself():
     """
     outlier_but_cheap = pd.Series({
         "compliance_reasons": [],
+        "sanctioned_amount": 132000.0,
+        "peer_median_cost": 300000.0, "peer_count": 40,
+        "district": "PATNA", "sector": "Water",
         "cost_risk": 100.0,           # pushed up purely by the IF blend
         "cost_deviation_pct": -56.0,  # actually CHEAPER than its peers
         "iso_anomaly": 100.0,
@@ -149,13 +152,16 @@ def test_cost_reason_never_contradicts_itself():
         "agency_risk": 0.0, "agency_delay_rate": 0.0,
     })
     reasons = build_flagged_reasons(outlier_but_cheap)
-    assert not any("above similar projects" in r for r in reasons), reasons
+    assert not any("above" in r for r in reasons), reasons
     # the real signal is still explained, not silently dropped
     assert any("Unusual combination" in r for r in reasons), reasons
     assert any("696 days beyond expected completion" in r for r in reasons), reasons
 
     genuinely_expensive = pd.Series({
         "compliance_reasons": [],
+        "sanctioned_amount": 702000.0,
+        "peer_median_cost": 300000.0, "peer_count": 40,
+        "district": "PATNA", "sector": "Water",
         "cost_risk": 100.0,
         "cost_deviation_pct": 134.0,
         "iso_anomaly": 100.0,
@@ -164,6 +170,139 @@ def test_cost_reason_never_contradicts_itself():
         "agency_risk": 0.0, "agency_delay_rate": 0.0,
     })
     reasons = build_flagged_reasons(genuinely_expensive)
-    assert "Cost is 134% above similar projects" in reasons, reasons
+    assert any("134% above" in r and "median" in r for r in reasons), reasons
     # the cost sentence wins; we don't also emit the generic anomaly line
     assert not any("Unusual combination" in r for r in reasons), reasons
+
+
+def _priced(**kw):
+    """A row with a complete cost basis: amount, peer median, peer count."""
+    base = {
+        "compliance_reasons": [],
+        "sanctioned_amount": 900000.0,
+        "peer_median_cost": 300000.0,
+        "peer_count": 40,
+        "district": "JAUNPUR",
+        "sector": "Street Lighting",
+        "cost_deviation_pct": 200.0,
+        "iso_anomaly": 0.0,
+        "delay_risk": 0.0, "delay_days": 0,
+        "duplicate_risk": 0.0, "max_similarity_score": 0.1,
+        "agency_risk": 0.0, "agency_delay_rate": 0.0,
+    }
+    base.update(kw)
+    return pd.Series(base)
+
+
+def test_cost_baseline_groups_on_sector_not_category():
+    """The whole point of the fix.
+
+    Two districts' worth of works, all with category 'Normal/Others' as 98.1% of
+    the real data is. Grouping on category compares a street light against the
+    district's roads; grouping on sector compares lights with lights.
+    """
+    df = pd.DataFrame({
+        "id": range(1, 9),
+        "description": ["high mast light"] * 4 + ["cc road construction"] * 4,
+        "category": ["Normal/Others"] * 8,
+        "sector": ["Street Lighting"] * 4 + ["Roads & Paving"] * 4,
+        "district": ["JAUNPUR"] * 8,
+        "sanctioned_amount": [100000.0, 100000.0, 100000.0, 100000.0,
+                              4000000.0, 4000000.0, 4000000.0, 4000000.0],
+        "expenditure": [0.0] * 8,
+        "implementing_agency": ["A"] * 8,
+        "expected_completion": [None] * 8,
+        "actual_completion": [None] * 8,
+    })
+    out = add_base_features(df)
+
+    # Each work sits at its own sector's median, so nothing is a cost outlier.
+    assert out["peer_median_cost"].tolist() == [100000.0] * 4 + [4000000.0] * 4
+    assert out["cost_deviation_pct"].abs().max() == 0.0
+    # Had this grouped on (district, category) every row would deviate wildly
+    # from the single blended baseline.
+    blended = df["sanctioned_amount"].median()
+    assert blended not in set(out["peer_median_cost"])
+
+
+def test_peer_median_resists_one_huge_work():
+    """A single Rs 7.5 crore work must not drag the baseline for its neighbours.
+
+    With a mean, the four normal works would each read as far below baseline and
+    the outlier itself would look only moderately above it.
+    """
+    amounts = [300000.0] * 8 + [75000000.0]
+    df = pd.DataFrame({
+        "id": range(1, 10),
+        "description": ["cc road"] * 9,
+        "sector": ["Roads & Paving"] * 9,
+        "district": ["PATNA"] * 9,
+        "sanctioned_amount": amounts,
+        "expenditure": [0.0] * 9,
+        "implementing_agency": ["A"] * 9,
+        "expected_completion": [None] * 9,
+        "actual_completion": [None] * 9,
+    })
+    out = add_base_features(df)
+    assert out["peer_median_cost"].iloc[0] == 300000.0
+    assert out["cost_deviation_pct"].iloc[0] == 0.0      # a normal work reads normal
+    assert out["cost_deviation_pct"].iloc[-1] > 1000.0   # the outlier reads as one
+
+
+def test_thin_peer_groups_score_no_cost_risk():
+    """A median over three works is not a baseline."""
+    df = pd.DataFrame({
+        "id": [1, 2, 3],
+        "description": ["borewell"] * 3,
+        "sector": ["Water"] * 3,
+        "district": ["RANCHI"] * 3,
+        "sanctioned_amount": [100000.0, 100000.0, 5000000.0],
+        "expenditure": [0.0] * 3,
+        "implementing_agency": ["A"] * 3,
+        "expected_completion": [None] * 3,
+        "actual_completion": [None] * 3,
+    })
+    out = add_base_features(df)
+    assert out["peer_count"].tolist() == [3, 3, 3]
+    # The 50x work is real, but with two peers we cannot say so responsibly.
+    assert out["cost_deviation_pct"].tolist() == [0.0, 0.0, 0.0]
+    assert cost_risk_score(out.iloc[2]) == 0.0
+
+
+def test_sector_is_recomputed_when_missing():
+    """Scoring a database loaded before the sector column must not group
+    every work in a district together."""
+    df = pd.DataFrame({
+        "id": [1, 2],
+        "description": ["high mast light near temple", "cc road paver block"],
+        "district": ["JAUNPUR"] * 2,
+        "sanctioned_amount": [100000.0, 900000.0],
+        "expenditure": [0.0] * 2,
+        "implementing_agency": ["A"] * 2,
+        "expected_completion": [None] * 2,
+        "actual_completion": [None] * 2,
+    })
+    out = add_base_features(df)
+    assert out["sector"].tolist() == ["Street Lighting", "Roads & Paving"]
+
+
+def test_cost_reason_states_its_comparison_basis():
+    """A verifier who cannot see the basis cannot act on the flag."""
+    reasons = build_flagged_reasons(_priced())
+    cost = [r for r in reasons if "median" in r]
+    assert len(cost) == 1, reasons
+    assert "Rs 900,000" in cost[0]          # this work
+    assert "Rs 300,000" in cost[0]          # what it is compared against
+    assert "Street Lighting" in cost[0]     # the peer group
+    assert "JAUNPUR" in cost[0]
+    assert "40 peer works" in cost[0]       # how many peers stand behind it
+    assert "200% above" in cost[0]
+
+
+def test_no_cost_reason_without_a_basis():
+    # Thin peer group: scored 0 upstream, and no sentence claiming otherwise.
+    assert not any("median" in r for r in build_flagged_reasons(_priced(peer_count=3)))
+    # Row predating the columns: silence, not a crash and not a vague claim.
+    stale = _priced()
+    del stale["peer_median_cost"]
+    assert not any("median" in r for r in build_flagged_reasons(stale))
