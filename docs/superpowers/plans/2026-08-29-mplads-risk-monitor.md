@@ -1481,12 +1481,17 @@ this.
       flagged reason names whichever component drove it.
 - [x] Verified against all 270,934 transactions — see spec §14.4.
 
-### Task 13: Normalize MP identity
+### Task 13: Normalize MP identity — DONE
 
-Spec §14.4. Only needed if MP-level aggregates are added; the current dashboard
-does not group by MP.
+Spec §14.5.
 
-- [ ] Derive an `mp_id` from a normalized name (strip the term marker and
-      honorifics, casefold, collapse whitespace) plus state and house.
-- [ ] Verify: distinct `mp_id` per term should be 773 for LS17 and 774 for LS18,
-      and every work's `mp_id` should exist in the MP summary.
+- [x] `data/mps.py` derives `mp_id` from the normalized name plus state and
+      house. `projects` gains `mp_id` and `house`.
+- [x] The source's per-MP-per-term aggregates load into an `mps` table as
+      published, so a utilisation figure is checkable against
+      empoweredindian.in.
+- [x] Verified: 773 distinct ids for LS17, 774 for LS18, 1,110 across both
+      terms, zero unresolvable works, zero orphan `mp_id`s.
+- [x] Surfaced as an MPs section on the existing analysis screen. No MP risk
+      score is computed — this presents the source's numbers, it does not
+      invent a judgement on top of them.
