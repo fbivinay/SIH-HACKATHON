@@ -185,3 +185,83 @@ near the end, never a dependency for the demo to function.
 - Frontend: manual click-through of all 4 screens before calling the
   demo ready (per standard workflow — no automated UI test given the
   time budget).
+
+## 14. Addendum — 2026-08-31 data findings
+
+Measured against the full two-term extract (`data/snapshot/mplads_2026-08-31.zip`),
+which is 2.8× the data this spec was implemented against. Sections 1–13 describe
+the system as built and are unchanged; this section records what the larger
+dataset shows and what it does not yet address.
+
+### 14.1 Fixed in the snapshot that carries this addendum
+
+**The earlier extract was half the data.** The source API defaults to
+`ls_term=18` when the parameter is omitted, so the 2026-08-30 pull captured the
+18th Lok Sabha alone — 43,735 completed works against 124,353 that exist.
+`scripts/fetch_mplads.py` now requests both terms explicitly and merges them,
+adding an `ls_term` column to every file.
+
+**Work IDs are not unique across terms.** 9,862 completed Work IDs appear in
+both terms as different works. Matching on Work ID alone finds 804 shared IDs
+between the recommended and completed files where only 611 are real; the other
+193 would silently swap start dates between unrelated works. `load_real_data.py`
+now keys on `(Work ID, ls_term)`, and still resolves the old snapshot's 440.
+
+### 14.2 Confirmed at larger scale, no change needed
+
+**Expenditures still cannot be joined to works.** The expenditure file's
+`Work Description` holds 119 distinct values across 270,934 rows — coarse
+category labels, not per-work identifiers. §12's decision not to join it stands,
+now on 2.1× the rows.
+
+**Recommended and completed remain near-disjoint.** 611 shared works out of
+124,353 completed. The union-not-join model in `load_real_data.py` holds.
+
+### 14.3 Open — the cost baseline is measuring almost nothing
+
+`scoring.py` groups `district_avg_cost` by `(district, category)`. On the full
+extract, `category` is `Normal/Others` for 241,767 of 246,487 loaded rows
+(98.1%), and the API's `/mplads/sectors` endpoint returns the same four buckets.
+The category half of that key is therefore inert: cost deviation is effectively
+measured against a district-wide average that mixes a ₹30,000 street light with
+a ₹40,00,000 road.
+
+The cheapest fix is a keyword classifier over `work_description` — a prototype
+over the completed works assigns 82.9% of them to a real sector (Street Lighting
+24.5%, Roads & Paving 22.4%, Water 9.7%, Community Buildings 7.6%, Education
+7.0%), leaving 17.1% in `Other`. Grouping on `(district, derived_sector)` would
+make cost deviation mean what §7 says it means. Not implemented here.
+
+Two guards worth adding alongside it: a minimum peer count before any cost
+deviation is scored (a median over three works is not a baseline), and a
+matching guard in the explanation text, so a work never carries a "cost is N%
+above similar projects" reason whose comparison group cannot be shown.
+
+### 14.4 Open — signals present in the data and not yet used
+
+**Vendor concentration.** The expenditure file carries a `Vendor` column with
+62,680 distinct vendors across 772 implementing agencies. Share of an agency's
+spend going to its largest vendor is the closest thing in this dataset to a
+procurement-capture indicator, and it is the one signal here that is about the
+agency rather than the work. `load_real_data.py` already notes the file is kept
+"for later vendor-level analysis"; this is that analysis.
+
+**Payment ageing.** 4,480 of 270,934 transactions are `Payment In-Progress`
+rather than `Payment Success` — a narrow but high-precision signal, scoreable at
+the agency and MP grain.
+
+**MP identity.** `MP Name` carries 1,262 distinct strings across the two terms
+against 773 (LS17) and 774 (LS18) actual MPs: entries append a term marker
+(`(2022-28)`, `(17th Lok Sabha)`) and honorifics vary. Any future MP-level
+aggregate needs a normalized key, or one MP's record splits across two
+identities. Note the LS17 extract itself lists one MP twice
+(`Manne Srinivas Reddy(17th Lok Sabha)` and `Shri Manne Srinivas Reddy (17th Lok
+Sabha)`), so LS17 has 774 rows for 773 MPs.
+
+### 14.5 Operational note
+
+Scoring embeds every work description, so the two-term snapshot roughly doubles
+the batch: ~127k descriptions to ~246k, or 15–20 minutes to an estimated 30–40.
+The nightly workflow's `timeout-minutes: 60` still covers it with a thinner
+margin. Memory is not the constraint — the largest `(district, category)`
+similarity group is 3,293 works, a 10.8M-cell matrix.

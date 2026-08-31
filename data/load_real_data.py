@@ -1,13 +1,13 @@
 """Load the real MPLADS CSV extracts into the `projects` table.
 
-Source: /home/rvina/projects/SIH HACKATHON/MPLADS DATA/ (four CSVs pulled from
-the public MPLADS portal, dated 2026-08-30). Every row written here gets
-source='real'.
+Source: the four CSVs in MPLADS_DATA_DIR, pulled from the public MPLADS portal
+via scripts/fetch_mplads.py. Every row written here gets source='real'.
 
 UNION, NOT JOIN
 ---------------
-Recommended works (83,968) and completed works (43,735) share only 440 Work IDs,
-so they are two near-disjoint populations, not two ends of one lifecycle. The
+Recommended works (123,146) and completed works (124,353) across both Lok Sabha
+terms share only 611 works, so they are two near-disjoint populations, not two
+ends of one lifecycle. The
 table is therefore a union: one row per recommended work (work_status
 'recommended') plus one row per completed work (work_status 'completed'). Where a
 Work ID appears in both, only the completed row is kept and the recommendation
@@ -21,8 +21,8 @@ the MPLADS guideline that a sanctioned work is expected to be executed within a
 year of recommendation.
 
   * recommended works -> Recommendation Date + 365d.
-  * completed works with a recoverable recommendation date (the 440 shared Work
-    IDs) -> Recommendation Date + 365d.
+  * completed works with a recoverable recommendation date (the 611 shared
+    works) -> Recommendation Date + 365d.
   * every other completed work -> NULL.
 
 We deliberately do NOT derive it backwards from the completion date (e.g.
@@ -36,9 +36,10 @@ EXPENDITURE
 -----------
 The expenditures CSV has no Work ID, so the only available join key would be
 (MP Name, Work Description). That doesn't work: the expenditures file's "Work
-Description" holds one of just 112 MPLADS *category labels* ("Construction of
-roads, link roads, pathways..."), not a per-work description, so joining on it
-matched under 1% of works, all coincidentally. We don't join it at all.
+Description" holds one of just 119 MPLADS *category labels* ("Construction of
+roads, link roads, pathways...") across 270,934 rows, not a per-work
+description, so joining on it matched under 1% of works, all coincidentally.
+We don't join it at all.
 
 Instead: for a completed work, its Final Amount IS what it cost, so
 expenditure = sanctioned_amount (= Final Amount) for completed works.
@@ -105,21 +106,39 @@ def to_date(series):
     return pd.to_datetime(series, format="ISO8601", errors="coerce", utc=True).dt.date
 
 
+def work_key(df):
+    """A work's identity is (Work ID, ls_term), not Work ID alone.
+
+    Work IDs restart per Lok Sabha term: 9,862 completed Work IDs appear in both
+    the 17th and 18th term extracts as different works. Matching on Work ID
+    alone finds 804 shared IDs between recommended and completed, of which only
+    611 are real - the other 193 are two unrelated works that happen to share a
+    number across terms, and would silently take each other's start date.
+
+    Snapshots taken before the ls_term column existed hold one term only, so
+    treat a missing column as a single term and keep their behaviour unchanged.
+    """
+    term = df["ls_term"].astype(str) if "ls_term" in df.columns else "0"
+    return df["Work ID"].astype(str) + "|" + pd.Series(term, index=df.index).astype(str)
+
+
 def build_rows():
     """Return (rows_df, rejects) where rejects is a list of (raw_row, reason, file)."""
     rec = pd.read_csv(RECOMMENDED_CSV)
     com = pd.read_csv(COMPLETED_CSV)
 
-    # The 440 Work IDs present in both files: keep only the completed row, but
-    # carry the recommendation date over as its start date.
+    # Works present in both files: keep only the completed row, but carry the
+    # recommendation date over as its start date.
+    rec_key = work_key(rec)
+    com_key = work_key(com)
     rec_date = to_date(rec["Recommendation Date"])
-    shared = pd.Series(rec_date.values, index=rec["Work ID"]).groupby(level=0).first()
-    shared = shared[shared.index.isin(set(com["Work ID"]))]
-    rec = rec[~rec["Work ID"].isin(shared.index)].copy()
+    shared = pd.Series(rec_date.values, index=rec_key).groupby(level=0).first()
+    shared = shared[shared.index.isin(set(com_key))]
+    rec = rec[~rec_key.isin(shared.index)].copy()
     rec["start_date"] = to_date(rec["Recommendation Date"])
 
     com = com.copy()
-    com["start_date"] = com["Work ID"].map(shared)
+    com["start_date"] = com_key.map(shared)
     com["actual_completion"] = to_date(com["Completed Date"])
 
     rec["work_status"] = "recommended"

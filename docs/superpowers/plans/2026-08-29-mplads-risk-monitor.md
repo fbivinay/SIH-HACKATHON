@@ -1443,3 +1443,53 @@ Overview → Risk Map → a HIGH-risk project's investigation page → Agency An
 - [ ] **Step 3: Note any rough edges as a short list**
 
 Anything visibly broken or confusing goes in a plain list in the PR/commit description — not fixed silently at this stage unless it's a one-line fix.
+
+---
+
+## Addendum — follow-up tasks from the 2026-08-31 data (Track: data)
+
+Tasks 0–10 are complete and deployed. These follow from the two-term extract;
+see spec §14 for the measurements behind each. They are independent of each
+other and none of them block the demo.
+
+### Task 11: Derive a sector and fix the cost baseline
+
+Spec §14.3. `scoring.py` groups cost deviation by `(district, category)`, and
+`category` is one value for 98.1% of rows, so the baseline mixes street lights
+with roads.
+
+- [ ] Add a keyword classifier over `work_description` producing a `sector`
+      column (a prototype reaches 82.9% coverage; rules are ordered, first match
+      wins, so lighting is tested before roads).
+- [ ] Group `district_avg_cost` on `(district, sector)`; prefer the median over
+      the mean, since a single ₹7.5 crore work drags a district mean badly.
+- [ ] Add a minimum peer count below which `cost_risk` scores 0, and guard the
+      "cost is N% above similar projects" reason on the same threshold so no
+      explanation quotes a comparison group too thin to show.
+- [ ] Verify: the highest-scoring works should change, and each should be
+      checkable by hand against the CSV.
+
+### Task 12: Score vendor concentration at the agency grain
+
+Spec §14.4. `load_real_data.py` already says the expenditure file is kept for
+this.
+
+- [ ] Load `mplads_expenditures_*.csv` into its own table at its own grain — it
+      does not join to works (spec §14.2), so do not attempt to attach it to
+      `projects`.
+- [ ] Per `(IDA, ls_term)`: vendor count, Herfindahl index of vendor share of
+      spend, largest vendor and its share, count and age of in-progress payments.
+- [ ] Feed that into `agency_risk` alongside the existing delay rate, and surface
+      it on the agency analysis screen with the reason text spelled out.
+- [ ] Verify: an agency flagged for concentration should be traceable to specific
+      vendor rows in the CSV.
+
+### Task 13: Normalize MP identity
+
+Spec §14.4. Only needed if MP-level aggregates are added; the current dashboard
+does not group by MP.
+
+- [ ] Derive an `mp_id` from a normalized name (strip the term marker and
+      honorifics, casefold, collapse whitespace) plus state and house.
+- [ ] Verify: distinct `mp_id` per term should be 773 for LS17 and 774 for LS18,
+      and every work's `mp_id` should exist in the MP summary.
