@@ -9,6 +9,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 
+from sectors import classify_sector
+
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 RISK_WEIGHTS = {"cost": 0.25, "delay": 0.25, "duplicate": 0.20, "agency": 0.15, "compliance": 0.15}
@@ -22,6 +24,13 @@ RISK_LEVEL_THRESHOLDS = {"LOW": 40, "MEDIUM": 70}
 # rescaling in duplicate_risk_score it puts the "> 40" reporting line at
 # similarity ~0.964 (~p97.5), which fires on 52/1500 rows.
 DUPLICATE_SIMILARITY_THRESHOLD = 0.94
+
+# A cost baseline needs enough peers to be a baseline. Below this, a work scores
+# no cost risk at all rather than being compared against a median of three. The
+# floor matters most in the long tail: 40% of (district, sector) groups hold
+# fewer than 8 works, and before this guard every one of them produced a
+# confident-looking deviation from noise.
+MIN_PEERS = 8
 
 
 def fetch_projects(conn):
@@ -41,12 +50,25 @@ def add_base_features(df):
     df["delay_days"] = df.apply(compute_delay_days, axis=1)
     df["expenditure_ratio"] = (df["expenditure"] / df["sanctioned_amount"]).round(4)
 
-    df["district_avg_cost"] = (
-        df.groupby(["district", "category"])["sanctioned_amount"].transform("mean").round(2)
-    )
+    # Peers are (district, sector), not (district, category). `category` is
+    # 'Normal/Others' for 98.1% of rows, so the old key compared a street light
+    # against a district average containing roads. sector comes from the
+    # description via sectors.py; recompute it here if the rows predate the
+    # column, so scoring a stale database degrades to correct-but-slower rather
+    # than silently grouping every work in a district together.
+    if "sector" not in df.columns or df["sector"].isna().any():
+        df["sector"] = df["description"].map(classify_sector)
+
+    peers = df.groupby(["district", "sector"])["sanctioned_amount"]
+    # Median, not mean: a single Rs 7.5 crore work drags a district mean far
+    # enough that the works either side of it both look normal.
+    df["peer_median_cost"] = peers.transform("median").round(2)
+    df["peer_count"] = peers.transform("size")
     df["cost_deviation_pct"] = (
-        (df["sanctioned_amount"] - df["district_avg_cost"]) / df["district_avg_cost"] * 100
+        (df["sanctioned_amount"] - df["peer_median_cost"]) / df["peer_median_cost"] * 100
     ).round(2)
+    # Too few peers to compare against: no claim, rather than a confident one.
+    df.loc[df["peer_count"] < MIN_PEERS, "cost_deviation_pct"] = 0.0
 
     df["agency_delay_rate"] = (
         df.groupby("implementing_agency")["delay_days"]
@@ -61,7 +83,7 @@ def add_duplicate_features(df):
     df["max_similarity_score"] = 0.0
     df["similar_work_id"] = None
 
-    for (_district, _category), group in df.groupby(["district", "category"]):
+    for (_district, _sector), group in df.groupby(["district", "sector"]):
         if len(group) < 2:
             continue
         embeddings = model.encode(group["description"].fillna("").tolist())
@@ -78,6 +100,14 @@ def add_duplicate_features(df):
 
 
 def cost_risk_score(row):
+    """Cost risk from deviation above the peer median, 0 when peers are thin.
+
+    add_base_features already zeroes cost_deviation_pct below MIN_PEERS; the
+    guard is repeated here so the function is correct when called directly, as
+    the tests do.
+    """
+    if row.get("peer_count") is not None and row["peer_count"] < MIN_PEERS:
+        return 0.0
     dev = row["cost_deviation_pct"]
     return float(min(max(dev, 0), 100)) if dev > 0 else 0.0
 
@@ -145,8 +175,28 @@ def build_flagged_reasons(row):
     # text on cost_risk produced "Cost is -56% above similar projects" on 3,539
     # real works. A flagged reason that contradicts itself is worse than no
     # reason at all when the whole premise is explainable alerts.
-    if row["cost_deviation_pct"] > 40:
-        reasons.append(f"Cost is {row['cost_deviation_pct']:.0f}% above similar projects")
+    # State the comparison basis. "40% above similar projects" is unactionable
+    # if the verifier cannot see which projects, how many, or what the median
+    # was - and the peer guard means a reason is only ever emitted where that
+    # basis exists.
+    peer_count = row.get("peer_count")
+    peer_median = row.get("peer_median_cost")
+    amount = row.get("sanctioned_amount")
+    # No basis, no claim. In a scored run add_base_features always supplies all
+    # three, so this only bites on rows that predate the columns - where saying
+    # nothing beats quoting a comparison we cannot show.
+    has_basis = (
+        peer_median is not None and not pd.isna(peer_median)
+        and amount is not None and not pd.isna(amount)
+        and (peer_count is None or pd.isna(peer_count) or peer_count >= MIN_PEERS)
+    )
+    if row["cost_deviation_pct"] > 40 and has_basis:
+        peers = "" if peer_count is None or pd.isna(peer_count) else f", {int(peer_count)} peer works"
+        reasons.append(
+            f"Rs {float(amount):,.0f} against a Rs {float(peer_median):,.0f} median "
+            f"for {row.get('sector') or 'similar'} works in {row['district']} "
+            f"({row['cost_deviation_pct']:.0f}% above{peers})"
+        )
     elif row.get("iso_anomaly", 0) > 40:
         # The multivariate signal is real and is driving this work's score, so
         # narrate it honestly rather than silently dropping the explanation.
@@ -258,7 +308,8 @@ def write_scores(conn, df):
     rows = [
         (
             int(row["id"]), int(row["delay_days"]), float(row["cost_deviation_pct"]),
-            float(row["expenditure_ratio"]), float(row["district_avg_cost"]),
+            float(row["expenditure_ratio"]), row["sector"],
+            float(row["peer_median_cost"]), int(row["peer_count"]),
             float(row["agency_delay_rate"]), float(row["max_similarity_score"]),
             row["similar_work_id"], float(row["cost_risk"]),
             float(row["delay_risk"]), float(row["duplicate_risk"]),
@@ -273,7 +324,8 @@ def write_scores(conn, df):
             """
             CREATE TEMP TABLE _score_updates (
                 id INTEGER, delay_days INTEGER, cost_deviation_pct NUMERIC,
-                expenditure_ratio NUMERIC, district_avg_cost NUMERIC,
+                expenditure_ratio NUMERIC, sector TEXT,
+                peer_median_cost NUMERIC, peer_count INTEGER,
                 agency_delay_rate NUMERIC, max_similarity_score NUMERIC,
                 similar_work_id INTEGER, cost_risk NUMERIC, delay_risk NUMERIC,
                 duplicate_risk NUMERIC, agency_risk NUMERIC, compliance_risk NUMERIC,
@@ -291,7 +343,8 @@ def write_scores(conn, df):
             """
             UPDATE projects SET
               delay_days = u.delay_days, cost_deviation_pct = u.cost_deviation_pct,
-              expenditure_ratio = u.expenditure_ratio, district_avg_cost = u.district_avg_cost,
+              expenditure_ratio = u.expenditure_ratio, sector = u.sector,
+              peer_median_cost = u.peer_median_cost, peer_count = u.peer_count,
               agency_delay_rate = u.agency_delay_rate, max_similarity_score = u.max_similarity_score,
               similar_work_id = u.similar_work_id, cost_risk = u.cost_risk,
               delay_risk = u.delay_risk, duplicate_risk = u.duplicate_risk,
