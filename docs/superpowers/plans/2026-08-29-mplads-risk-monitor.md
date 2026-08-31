@@ -1495,3 +1495,16 @@ Spec §14.5.
 - [x] Surfaced as an MPs section on the existing analysis screen. No MP risk
       score is computed — this presents the source's numbers, it does not
       invent a judgement on top of them.
+
+### Task 14: Carry the Lok Sabha term on works — DONE
+
+Spec §14.7. Named as a known limitation by Tasks 12 and 13; this closes it.
+
+- [x] `projects.ls_term`, written by the loader from the extract.
+- [x] `agency_vendor_profile` keyed on (agency, term); the scoring join matches
+      a work against its own term's profile.
+- [x] `/api/mps` counts works per (mp_id, term); `/api/works` and
+      `/api/agencies` take an optional `ls_term`.
+- [x] Term filter on the works screen; agency rows labelled by term.
+- [x] Verified: 181 agency-terms flag above 40 against 74 pooled, 68 of them
+      invisible to the pooled view.

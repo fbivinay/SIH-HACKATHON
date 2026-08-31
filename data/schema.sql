@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,
     work_name TEXT NOT NULL,
     description TEXT,
+    ls_term SMALLINT,
     mp_name TEXT,
     mp_id TEXT,
     house TEXT,
@@ -88,7 +89,8 @@ CREATE TABLE IF NOT EXISTS expenditures (
 -- One row per implementing agency, derived from expenditures by
 -- data/vendors.py. Rebuilt from scratch on every scoring run.
 CREATE TABLE IF NOT EXISTS agency_vendor_profile (
-    implementing_agency TEXT PRIMARY KEY,
+    implementing_agency TEXT NOT NULL,
+    ls_term SMALLINT NOT NULL,
     vendor_count INTEGER NOT NULL,
     transaction_count INTEGER NOT NULL,
     total_spend NUMERIC(18,2) NOT NULL,
@@ -97,7 +99,8 @@ CREATE TABLE IF NOT EXISTS agency_vendor_profile (
     top_vendor_share_pct NUMERIC(5,2),
     pending_count INTEGER NOT NULL DEFAULT 0,
     oldest_pending_days INTEGER NOT NULL DEFAULT 0,
-    concentration_risk NUMERIC(5,2) NOT NULL DEFAULT 0
+    concentration_risk NUMERIC(5,2) NOT NULL DEFAULT 0,
+    PRIMARY KEY (implementing_agency, ls_term)
 );
 
 CREATE TABLE IF NOT EXISTS rejected_rows (
@@ -119,6 +122,11 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS sector TEXT;
 -- term, because the source appends term markers and varies honorifics. mp_id
 -- is derived by data/mps.py. house is carried because the same name in the
 -- same state can belong to a Lok Sabha and a Rajya Sabha member.
+-- Added 2026-08-31. Works from both Lok Sabha terms live in one table and
+-- were indistinguishable, so every per-agency and per-MP aggregate had to pool
+-- them. Work IDs also restart per term, which makes (work_id, ls_term) the
+-- natural key even though the surrogate id is the primary one.
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS ls_term SMALLINT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS mp_id TEXT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS house TEXT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS peer_median_cost NUMERIC(14,2);
@@ -127,9 +135,10 @@ ALTER TABLE projects DROP COLUMN IF EXISTS district_avg_cost;
 
 CREATE INDEX IF NOT EXISTS idx_projects_state ON projects(state);
 CREATE INDEX IF NOT EXISTS idx_projects_sector ON projects(sector);
-CREATE INDEX IF NOT EXISTS idx_expenditures_agency ON expenditures(implementing_agency);
+CREATE INDEX IF NOT EXISTS idx_expenditures_agency ON expenditures(implementing_agency, ls_term);
 CREATE INDEX IF NOT EXISTS idx_expenditures_vendor ON expenditures(vendor);
 CREATE INDEX IF NOT EXISTS idx_projects_mp_id ON projects(mp_id);
+CREATE INDEX IF NOT EXISTS idx_projects_ls_term ON projects(ls_term);
 CREATE INDEX IF NOT EXISTS idx_mps_name ON mps(mp_name);
 CREATE INDEX IF NOT EXISTS idx_projects_district ON projects(district);
 CREATE INDEX IF NOT EXISTS idx_projects_agency ON projects(implementing_agency);

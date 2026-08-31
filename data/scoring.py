@@ -48,7 +48,7 @@ def fetch_expenditures(conn):
     """
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute(
-            "SELECT implementing_agency, vendor, expenditure_amount, "
+            "SELECT implementing_agency, ls_term, vendor, expenditure_amount, "
             "expenditure_date, payment_status FROM expenditures"
         )
         df = pd.DataFrame(cur.fetchall())
@@ -58,11 +58,7 @@ def fetch_expenditures(conn):
 
 
 def write_agency_vendor_profile(conn, profile):
-    columns = [
-        "implementing_agency", "vendor_count", "transaction_count", "total_spend",
-        "vendor_hhi", "top_vendor", "top_vendor_share_pct", "pending_count",
-        "oldest_pending_days", "concentration_risk",
-    ]
+    columns = vendors.PROFILE_COLUMNS
     rows = [
         tuple(None if pd.isna(v) else v for v in row)
         for row in profile[columns].itertuples(index=False, name=None)
@@ -308,7 +304,11 @@ AGENCY_PROFILE_COLUMNS = [
 
 
 def attach_agency_profile(df, profile):
-    """Left-join the per-agency vendor profile onto works as agency_* columns.
+    """Left-join the per-agency-per-term vendor profile onto works.
+
+    Keyed on (implementing_agency, ls_term): an agency's vendor mix in one Lok
+    Sabha term says nothing about its mix in the other, so a work must be
+    matched against its own term's profile.
 
     Left, not inner: an agency with no expenditure rows keeps its works and
     scores concentration 0, rather than dropping them out of the dataset.
@@ -317,10 +317,17 @@ def attach_agency_profile(df, profile):
         df[f"agency_{col}"] = None
     if profile is None or profile.empty:
         return df
-    indexed = profile.set_index("implementing_agency")
+
+    term = (df["ls_term"] if "ls_term" in df.columns else pd.Series(0, index=df.index))
+    key = pd.Series(
+        list(zip(df["implementing_agency"], term.fillna(0).astype(int))), index=df.index
+    )
+    indexed = profile.set_index(
+        pd.MultiIndex.from_arrays([profile["implementing_agency"], profile["ls_term"].astype(int)])
+    )
     for col in AGENCY_PROFILE_COLUMNS:
         if col in indexed.columns:
-            df[f"agency_{col}"] = df["implementing_agency"].map(indexed[col])
+            df[f"agency_{col}"] = key.map(indexed[col])
     return df
 
 
