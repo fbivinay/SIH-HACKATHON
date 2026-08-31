@@ -107,13 +107,24 @@ def map_states():
 def agencies():
     return query(
         """
-        SELECT implementing_agency,
-               COUNT(*) AS total_projects,
-               COUNT(*) FILTER (WHERE delay_days > 60) AS delayed_count,
-               COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS anomaly_count,
-               COALESCE(AVG(overall_risk_score), 0) AS avg_risk_score
-        FROM projects GROUP BY implementing_agency
-        ORDER BY avg_risk_score DESC
+        WITH work_stats AS (
+            SELECT implementing_agency,
+                   COUNT(*) AS total_projects,
+                   COUNT(*) FILTER (WHERE delay_days > 60) AS delayed_count,
+                   COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS anomaly_count,
+                   COALESCE(AVG(overall_risk_score), 0) AS avg_risk_score
+            FROM projects GROUP BY implementing_agency
+        )
+        SELECT w.implementing_agency, w.total_projects, w.delayed_count,
+               w.anomaly_count, w.avg_risk_score,
+               v.vendor_count, v.transaction_count, v.total_spend,
+               v.top_vendor, v.top_vendor_share_pct,
+               COALESCE(v.concentration_risk, 0) AS concentration_risk
+        -- LEFT: an agency with no expenditure rows keeps its works and simply
+        -- has no vendor data, rather than dropping off the screen.
+        FROM work_stats w
+        LEFT JOIN agency_vendor_profile v USING (implementing_agency)
+        ORDER BY w.avg_risk_score DESC
         """
     )
 

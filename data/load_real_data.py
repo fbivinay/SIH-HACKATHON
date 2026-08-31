@@ -81,8 +81,22 @@ def _newest(pattern):
     return matches[-1]
 
 
+def _newest_optional(pattern):
+    """Like _newest, but returns None instead of raising.
+
+    The 2026-08-30 snapshot shipped only the two work-level CSVs, so an older
+    snapshot legitimately has no expenditure file. Missing it should cost the
+    vendor signal, not the whole load.
+    """
+    try:
+        return _newest(pattern)
+    except FileNotFoundError:
+        return None
+
+
 RECOMMENDED_CSV = _newest("mplads_recommended_works_*.csv")
 COMPLETED_CSV = _newest("mplads_completed_works_*.csv")
+EXPENDITURES_CSV = _newest_optional("mplads_expenditures_*.csv")
 
 EXPECTED_DURATION_DAYS = 365
 # Amounts below this are data-entry noise, not works: the source has 39 rows
@@ -245,6 +259,62 @@ def finish_load_run(conn, run_id, status, rows_loaded, rows_rejected):
         conn.rollback()
 
 
+def build_expenditure_rows():
+    """Expenditure transactions, at their own grain.
+
+    No join to works is attempted: the file carries no Work ID and its Work
+    Description is one of 119 category labels, not a description (see the module
+    docstring). Rows without a vendor, an agency or a positive amount are
+    dropped rather than rejected into rejected_rows - that table is about works,
+    and an unusable payment row is not a work we failed to load.
+    """
+    exp = pd.read_csv(EXPENDITURES_CSV)
+    amount = pd.to_numeric(exp["Expenditure Amount (₹)"], errors="coerce")
+    vendor = exp["Vendor"].astype("string").str.strip()
+    agency = exp["IDA"].astype("string").str.strip()
+
+    usable = amount.notna() & (amount > 0) & vendor.notna() & (vendor != "") & agency.notna() & (agency != "")
+    exp = exp[usable].copy()
+    out = pd.DataFrame({
+        "ls_term": exp["ls_term"] if "ls_term" in exp.columns else None,
+        "mp_name": exp["MP Name"],
+        "constituency": exp["Constituency"],
+        "state": exp["State"],
+        "work_type_text": exp["Work Description"],
+        "vendor": vendor[usable],
+        "implementing_agency": agency[usable],
+        "district": agency[usable].map(parse_district),
+        "expenditure_amount": amount[usable].astype(float),
+        "expenditure_date": to_date(exp["Expenditure Date"]),
+        "payment_status": exp["Payment Status"],
+    })
+    return out, int((~usable).sum())
+
+
+EXPENDITURE_COLUMNS = [
+    "ls_term", "mp_name", "constituency", "state", "work_type_text", "vendor",
+    "implementing_agency", "district", "expenditure_amount", "expenditure_date",
+    "payment_status",
+]
+
+
+def load_expenditures(conn, df):
+    rows = [
+        tuple(None if pd.isna(v) else v for v in row)
+        for row in df[EXPENDITURE_COLUMNS].itertuples(index=False, name=None)
+    ]
+    with conn.cursor() as cur:
+        cur.execute("TRUNCATE expenditures RESTART IDENTITY")
+        execute_values(
+            cur,
+            f"INSERT INTO expenditures ({', '.join(EXPENDITURE_COLUMNS)}) VALUES %s",
+            rows,
+            page_size=1000,
+        )
+    conn.commit()
+    return len(rows)
+
+
 def load(conn, df, rejects):
     rows = [
         (
@@ -286,6 +356,15 @@ if __name__ == "__main__":
         finish_load_run(conn, run_id, "failed", None, None)
         conn.close()
         raise
+    if EXPENDITURES_CSV is None:
+        print("No mplads_expenditures_*.csv in the snapshot - skipping vendor data. "
+              "Agency risk will score concentration as 0.")
+    else:
+        exp_df, exp_dropped = build_expenditure_rows()
+        exp_inserted = load_expenditures(conn, exp_df)
+        print(f"Inserted {exp_inserted} expenditure transactions "
+              f"({exp_dropped} dropped for missing vendor, agency or amount).")
+
     # Still 'running': scoring.py finishes this same row once it completes.
     finish_load_run(conn, run_id, "running", inserted, rejected)
     conn.close()

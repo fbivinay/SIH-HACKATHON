@@ -16,6 +16,8 @@ export default async function AnalysisPage() {
       </h1>
       <p className="mt-1.5 max-w-2xl text-sm text-[color:var(--muted)]">
         {formatCount(agencies.length)} implementing agencies, ranked by average risk score.
+        Vendor share is the portion of an agency&apos;s recorded spend going to its single
+        largest vendor. A high share is not wrongdoing — it is a reason to look.
       </p>
 
       {scoringPending && (
@@ -36,6 +38,8 @@ export default async function AnalysisPage() {
               <th className="text-right">Works</th>
               <th className="text-right">Delayed</th>
               <th className="text-right">Anomalies</th>
+              <th className="text-right">Vendors</th>
+              <th className="text-right">Top vendor share</th>
               <th className="text-right">Avg Risk</th>
               <th>Level</th>
             </tr>
@@ -47,6 +51,16 @@ export default async function AnalysisPage() {
                 <td className="num">{formatCount(a.total_projects)}</td>
                 <td className="num">{scoringPending ? "—" : formatCount(a.delayed_count)}</td>
                 <td className="num">{scoringPending ? "—" : formatCount(a.anomaly_count)}</td>
+                <td className="num">{a.vendor_count === null ? "—" : formatCount(a.vendor_count)}</td>
+                <td className="num">
+                  {a.top_vendor_share_pct === null ? (
+                    "—"
+                  ) : (
+                    <span title={a.top_vendor ?? undefined}>
+                      {a.top_vendor_share_pct.toFixed(0)}%
+                    </span>
+                  )}
+                </td>
                 <td className="num">{scoringPending ? "—" : a.avg_risk_score.toFixed(1)}</td>
                 <td>
                   <span className={riskLevelClass(scoringPending ? null : riskScoreToLevel(a.avg_risk_score))}>
