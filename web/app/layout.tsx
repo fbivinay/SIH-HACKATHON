@@ -26,6 +26,7 @@ export const metadata: Metadata = {
 
 const navLinks = [
   { href: "/", label: "Overview" },
+  { href: "/alerts", label: "Alerts" },
   { href: "/map", label: "Risk Map" },
   { href: "/projects", label: "Projects" },
   { href: "/analysis", label: "Agency Analysis" },

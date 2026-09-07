@@ -1,6 +1,10 @@
 -- data/schema.sql
 CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,
+    -- '<Work ID>|<ls_term>|<IDA>'. The only identifier that survives a refresh:
+    -- load_real_data.py deletes and re-inserts every real row, so `id` is a new
+    -- number each night. Anything that has to outlive a reload keys on this.
+    work_key TEXT,
     work_name TEXT NOT NULL,
     description TEXT,
     ls_term SMALLINT,
@@ -132,6 +136,11 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS house TEXT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS peer_median_cost NUMERIC(14,2);
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS peer_count INTEGER;
 ALTER TABLE projects DROP COLUMN IF EXISTS district_avg_cost;
+-- Added 2026-09-07. See data/load_real_data.py:work_key. Unique only where it
+-- is set, so synthetic rows (which have no source Work ID) are unaffected.
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS work_key TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_work_key
+    ON projects(work_key) WHERE work_key IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_projects_state ON projects(state);
 CREATE INDEX IF NOT EXISTS idx_projects_sector ON projects(sector);
@@ -164,3 +173,23 @@ CREATE TABLE IF NOT EXISTS data_refresh (
     source TEXT,                     -- where the data came from this run
     notes TEXT
 );
+
+
+-- Reviewer triage state for the alert queue: which flagged works someone has
+-- actually looked at, and what they concluded. Absence of a row means
+-- 'pending', so this holds decisions (thousands) rather than a placeholder per
+-- work (127k+).
+--
+-- Keyed on work_key, NOT projects.id. The nightly reload deletes every real row
+-- and re-inserts it, so a review pinned to a serial id would silently reattach
+-- itself to an unrelated work the next morning. No foreign key for the same
+-- reason: the referenced row is legitimately absent between the DELETE and the
+-- INSERT, and a work can also disappear from a later snapshot entirely.
+CREATE TABLE IF NOT EXISTS work_reviews (
+    work_key TEXT PRIMARY KEY,
+    status TEXT NOT NULL CHECK (status IN ('verified', 'dismissed', 'escalated')),
+    note TEXT,
+    reviewer TEXT,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_work_reviews_status ON work_reviews(status);

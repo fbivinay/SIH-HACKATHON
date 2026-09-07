@@ -108,7 +108,7 @@ EXPECTED_DURATION_DAYS = 365
 MIN_SANCTIONED_AMOUNT = 1000
 
 INSERT_COLUMNS = [
-    "work_name", "description", "ls_term", "mp_name", "mp_id", "house",
+    "work_key", "work_name", "description", "ls_term", "mp_name", "mp_id", "house",
     "constituency", "state", "district",
     "category", "sector", "implementing_agency", "recommended_amount",
     "sanctioned_amount", "expenditure", "work_status", "start_date",
@@ -127,19 +127,36 @@ def to_date(series):
 
 
 def work_key(df):
-    """A work's identity is (Work ID, ls_term), not Work ID alone.
+    """A work's identity is (Work ID, ls_term, IDA). The agency is part of the
+    key, not decoration.
 
     Work IDs restart per Lok Sabha term: 9,862 completed Work IDs appear in both
-    the 17th and 18th term extracts as different works. Matching on Work ID
-    alone finds 804 shared IDs between recommended and completed, of which only
-    611 are real - the other 193 are two unrelated works that happen to share a
-    number across terms, and would silently take each other's start date.
+    the 17th and 18th term extracts as different works. But the term alone is
+    not enough, because the numbering also restarts per implementing agency.
+    Measured on the 2026-08-31 snapshot, keying on (Work ID, ls_term) alone:
+
+      - 128 recommended keys name two unrelated works, in different states;
+      - 611 completed works match a recommendation, but only 340 of those are
+        in the same state. The other 271 took a stranger's recommendation date
+        as their start_date, which feeds delay_days and a quarter of the score.
+
+    Adding IDA makes the key unique in both extracts - 0 duplicates across
+    123,146 recommended and 124,353 completed rows - and cuts the cross-file
+    matches to 328, every one of them in the same state.
+
+    Persisted as projects.work_key so a work keeps one identity across reloads:
+    the loader deletes and re-inserts every real row, so the serial id does not
+    survive a refresh and cannot anchor anything (see work_reviews).
 
     Snapshots taken before the ls_term column existed hold one term only, so
     treat a missing column as a single term and keep their behaviour unchanged.
     """
     term = df["ls_term"].astype(str) if "ls_term" in df.columns else "0"
-    return df["Work ID"].astype(str) + "|" + pd.Series(term, index=df.index).astype(str)
+    return (
+        df["Work ID"].astype(str)
+        + "|" + pd.Series(term, index=df.index).astype(str)
+        + "|" + df["IDA"].astype(str).str.strip()
+    )
 
 
 def build_rows():
@@ -161,9 +178,11 @@ def build_rows():
     shared = shared[shared.index.isin(set(com_key))]
     rec = rec[~rec_key.isin(shared.index)].copy()
     rec["start_date"] = to_date(rec["Recommendation Date"])
+    rec["work_key"] = work_key(rec)
 
     com = com.copy()
     com["start_date"] = com_key.map(shared)
+    com["work_key"] = com_key
     com["actual_completion"] = to_date(com["Completed Date"])
 
     rec["work_status"] = "recommended"
@@ -173,7 +192,7 @@ def build_rows():
     com["amount"] = com["Final Amount (₹)"]
 
     keep = {"Work Description": "description", "Category": "category", "MP Name": "mp_name",
-            "House": "house", "ls_term": "ls_term",
+            "House": "house", "ls_term": "ls_term", "work_key": "work_key",
             "Constituency": "constituency", "State": "state", "IDA": "implementing_agency",
             "amount": "amount", "work_status": "work_status", "start_date": "start_date",
             "actual_completion": "actual_completion", "Has Images": "has_images"}

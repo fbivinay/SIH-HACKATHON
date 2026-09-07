@@ -93,6 +93,40 @@ export type MpStat = {
   high_risk_works: number;
 };
 
+export type ReviewStatus = "pending" | "verified" | "dismissed" | "escalated";
+
+// One row of the verification queue. Everything a reviewer needs to decide
+// whether a work is worth a site visit, without opening a second page.
+export type Alert = ProjectDetail & {
+  // '<Work ID>|<ls_term>|<IDA>' — see data/load_real_data.py:work_key. This is
+  // what a review is pinned to, because `id` is reassigned on every reload.
+  work_key: string | null;
+  expenditure: number;
+  max_similarity_score: number | null;
+  review_status: ReviewStatus;
+  review_note: string | null;
+  review_reviewer: string | null;
+  review_updated_at: string | null;
+};
+
+export type AlertPage = {
+  total: number;
+  limit: number;
+  offset: number;
+  alerts: Alert[];
+};
+
+export type AlertSummary = {
+  in_scope: number;
+  pending: number;
+  escalated: number;
+  verified: number;
+  dismissed: number;
+  high: number;
+  medium: number;
+  pending_sanctioned_amount: number;
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -134,4 +168,47 @@ export const api = {
   mps: () => get<MpStat[]>("/api/mps"),
   dataFreshness: () => get<DataFreshness>("/api/data-freshness"),
   filters: () => get<FilterOptions>("/api/filters"),
+  alerts: (params: Record<string, string> = {}) =>
+    get<AlertPage>(`/api/alerts?${new URLSearchParams(params)}`),
+  alertSummary: (params: Record<string, string> = {}) =>
+    get<AlertSummary>(`/api/alerts/summary?${new URLSearchParams(params)}`),
 };
+
+/** Record a reviewer's decision. Server-side only: it carries REVIEW_TOKEN,
+ * which must never reach the browser (hence no NEXT_PUBLIC_ prefix). Called
+ * from the server action in app/alerts/actions.ts. */
+export async function postReview(body: {
+  work_key: string;
+  status: Exclude<ReviewStatus, "pending">;
+  note?: string;
+  reviewer?: string;
+}): Promise<void> {
+  const token = process.env.REVIEW_TOKEN;
+  if (!token) {
+    throw new Error(
+      "REVIEW_TOKEN is not set on the web server, so reviews cannot be submitted."
+    );
+  }
+  const res = await fetch(`${API_BASE}/api/alerts/review`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Review-Token": token,
+      ...(API_BYPASS ? { "x-vercel-protection-bypass": API_BYPASS } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    // Surface the API's own message — "REVIEW_TOKEN is not configured on the
+    // server" is a very different problem from a 404, and the UI shows it.
+    let detail = `API error ${res.status}`;
+    try {
+      const parsed = (await res.json()) as { detail?: string };
+      if (parsed.detail) detail = parsed.detail;
+    } catch {
+      /* non-JSON error body; keep the status line */
+    }
+    throw new Error(detail);
+  }
+}
