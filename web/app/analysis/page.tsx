@@ -6,15 +6,9 @@ export default async function AnalysisPage() {
   const scoringPending = isAggregateScoringPending(agencies, "anomaly_count");
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
-      <div className="eyebrow">Implementing agencies</div>
-      <h1
-        className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        Agency Analysis
-      </h1>
-      <p className="mt-1.5 max-w-2xl text-sm text-[color:var(--muted)]">
+    <main className="shell py-8">
+      <h1 className="display">Implementing agencies</h1>
+      <p className="lede !mx-0 !max-w-2xl">
         {formatCount(agencies.length)} agency-terms, ranked by average risk score. An
         agency is reported once per Lok Sabha term — its vendor mix in one says
         nothing about the other.
@@ -79,14 +73,8 @@ export default async function AnalysisPage() {
       </div>
 
       <section className="mt-12">
-        <div className="eyebrow">Members of Parliament</div>
-        <h2
-          className="mt-1 text-xl sm:text-2xl font-semibold tracking-tight"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Allocation still unspent
-        </h2>
-        <p className="mt-1.5 max-w-2xl text-sm text-[color:var(--muted)]">
+        <h2 className="section-head">Allocation still unspent</h2>
+        <p className="lede !mx-0 !max-w-2xl">
           Utilisation and unspent figures are the source&apos;s own published
           per-MP aggregates, not computed here, so they can be checked against
           empoweredindian.in for the same MP. Ranked by unspent amount rather

@@ -28,7 +28,13 @@ CREATE TABLE IF NOT EXISTS projects (
     has_images BOOLEAN,
 
     delay_days INTEGER,
-    cost_deviation_pct NUMERIC(6,2),
+    -- Wide on purpose. This is a ratio against a peer median, so it has no
+    -- natural ceiling: a Rs 2.08 crore street-lighting work in PRAYAGRAJ sits
+    -- 98,398% above the Rs 21,109 median of its 1,100 peers. NUMERIC(6,2)
+    -- capped it at 9,999.99 and 96 works overflowed it, failing the whole
+    -- scoring write - and those works are exactly the ones this system exists
+    -- to surface.
+    cost_deviation_pct NUMERIC(12,2),
     expenditure_ratio NUMERIC(6,2),
     peer_median_cost NUMERIC(14,2),
     peer_count INTEGER,
@@ -139,6 +145,8 @@ ALTER TABLE projects DROP COLUMN IF EXISTS district_avg_cost;
 -- Added 2026-09-07. See data/load_real_data.py:work_key. Unique only where it
 -- is set, so synthetic rows (which have no source Work ID) are unaffected.
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS work_key TEXT;
+-- Added 2026-09-07, see the column comment above.
+ALTER TABLE projects ALTER COLUMN cost_deviation_pct TYPE NUMERIC(12,2);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_work_key
     ON projects(work_key) WHERE work_key IS NOT NULL;
 

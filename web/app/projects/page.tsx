@@ -30,15 +30,9 @@ export default async function ProjectsPage({
   if (filters.risk_level) applied.push(`at ${riskLevelLabel(filters.risk_level)} risk`);
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
-      <div className="eyebrow">Works register</div>
-      <h1
-        className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        Projects
-      </h1>
-      <p className="mt-1.5 max-w-2xl text-sm text-[color:var(--muted)]">
+    <main className="shell py-8">
+      <h1 className="display">Works register</h1>
+      <p className="lede !mx-0 !max-w-2xl">
         {`Showing ${formatCount(projects.length)} ${projects.length === 1 ? "work" : "works"}${
           applied.length > 0 ? " " + applied.join(", ") : ""
         }, ranked by risk score (highest first).`}{" "}

@@ -66,15 +66,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         &larr; Back to projects
       </Link>
 
-      <div className="eyebrow mt-4">
-        {p.sector ?? p.category} · Work #{p.id}
-      </div>
-      <h1
-        className="mt-1 text-xl sm:text-2xl font-semibold tracking-tight"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        {p.work_name}
-      </h1>
+      <h1 className="section-head mt-4">{p.work_name}</h1>
+      <div className="eyebrow mt-2">{p.sector ?? p.category}</div>
       <p className="mt-1.5 text-sm text-[color:var(--muted)]">
         {p.state} / {p.district} — {p.implementing_agency}
         {p.mp_name && (
@@ -110,7 +103,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
       {/* Component breakdown */}
       <section className="mt-6">
-        <h2 className="text-sm font-semibold mb-3" style={{ fontFamily: "var(--font-display)" }}>
+        <h2 className="text-[0.95rem] font-medium mb-3">
           Risk components
         </h2>
         <div className="stat-card grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
@@ -150,7 +143,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
       {/* Why flagged — the core of this screen */}
       <section className="mt-6">
-        <h2 className="text-sm font-semibold mb-3" style={{ fontFamily: "var(--font-display)" }}>
+        <h2 className="text-[0.95rem] font-medium mb-3">
           Why was this flagged?
         </h2>
         <div className="stat-card">
