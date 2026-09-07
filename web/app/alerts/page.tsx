@@ -1,0 +1,249 @@
+import Link from "next/link";
+import { api } from "@/lib/api";
+import type { Alert } from "@/lib/api";
+import ProjectFilters from "@/components/ProjectFilters";
+import ReviewActions from "@/components/ReviewActions";
+import ReviewerName from "@/components/ReviewerName";
+import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
+
+const PAGE_SIZE = 50;
+
+// Below 40 a work is LOW (RISK_LEVEL_THRESHOLDS in data/scoring.py) and there
+// is nothing to triage, so the queue starts there rather than at every work.
+const DEFAULT_MIN_SCORE = "40";
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Not yet reviewed",
+  escalated: "Escalated",
+  verified: "Verified",
+  dismissed: "Dismissed",
+};
+
+function reviewedLine(a: Alert): string | null {
+  if (a.review_status === "pending") return null;
+  const who = a.review_reviewer?.trim() || "an unnamed reviewer";
+  const when = a.review_updated_at
+    ? new Date(a.review_updated_at).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
+  return `${STATUS_LABELS[a.review_status]} by ${who}${when ? ` on ${when}` : ""}`;
+}
+
+export default async function AlertsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const filters: Record<string, string> = {};
+  for (const [k, v] of Object.entries(sp)) {
+    if (typeof v === "string" && v !== "") filters[k] = v;
+  }
+  filters.min_score ??= DEFAULT_MIN_SCORE;
+  filters.limit = String(PAGE_SIZE);
+
+  const offset = Number.parseInt(filters.offset ?? "0", 10) || 0;
+  filters.offset = String(offset);
+
+  const [page, filterOptions, summary] = await Promise.all([
+    api.alerts(filters),
+    api.filters().catch(() => ({ states: [], risk_levels: [] })),
+    api
+      .alertSummary({ min_score: filters.min_score })
+      .catch(() => null),
+  ]);
+
+  const tiles = summary
+    ? [
+        {
+          label: "Awaiting review",
+          value: formatCount(summary.pending),
+          note: `${formatINR(summary.pending_sanctioned_amount)} sanctioned`,
+          tone: "high" as const,
+        },
+        {
+          label: "Escalated",
+          value: formatCount(summary.escalated),
+          note: "Sent for physical verification",
+          tone: "medium" as const,
+        },
+        {
+          label: "Verified",
+          value: formatCount(summary.verified),
+          note: "Checked, found in order",
+          tone: "low" as const,
+        },
+        {
+          label: "Dismissed",
+          value: formatCount(summary.dismissed),
+          note: "Flag did not hold",
+          tone: "neutral" as const,
+        },
+        {
+          label: "In scope",
+          value: formatCount(summary.in_scope),
+          note: `Score ≥ ${filters.min_score} · ${formatCount(summary.high)} high, ${formatCount(
+            summary.medium
+          )} medium`,
+          tone: "accent" as const,
+        },
+      ]
+    : [];
+
+  // Scores are NULL until scoring.py has run over a fresh load, and the queue's
+  // min_score filter excludes NULLs - so an unscored database produces an empty
+  // page that looks broken. Say what is actually happening instead.
+  const scoringPending = summary !== null && summary.in_scope === 0 && page.total === 0;
+
+  const shownTo = Math.min(offset + page.alerts.length, page.total);
+  const prevOffset = Math.max(0, offset - PAGE_SIZE);
+  const nextOffset = offset + PAGE_SIZE;
+  const pageHref = (o: number) => {
+    const params = new URLSearchParams(filters);
+    params.delete("limit");
+    if (o > 0) params.set("offset", String(o));
+    else params.delete("offset");
+    const qs = params.toString();
+    return qs ? `/alerts?${qs}` : "/alerts";
+  };
+
+  return (
+    <main className="mx-auto max-w-7xl px-6 py-8">
+      <div className="eyebrow">Verification queue</div>
+      <h1
+        className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight"
+        style={{ fontFamily: "var(--font-display)" }}
+      >
+        Alerts
+      </h1>
+      <p className="mt-1.5 max-w-3xl text-sm text-[color:var(--muted)]">
+        Works whose risk score puts them above the review threshold, highest first, with
+        the evidence that produced the score. A decision here is a record of what a
+        reviewer concluded — it never changes the score.
+      </p>
+
+      {scoringPending && (
+        <div className="notice mt-5" role="status">
+          <span aria-hidden="true">&#9679;</span>
+          <span>
+            No work has a risk score yet — the scoring pass has not finished since the
+            last data load. The queue fills in as soon as it does.
+          </span>
+        </div>
+      )}
+
+      {tiles.length > 0 && (
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {tiles.map((t) => (
+            <div key={t.label} className={`stat-card stat-card--${t.tone}`}>
+              <div className="stat-card__label">{t.label}</div>
+              <div className="stat-card__value">{t.value}</div>
+              <div className="stat-card__note">{t.note}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6">
+        <ReviewerName />
+      </div>
+
+      <div className="mt-4">
+        <ProjectFilters filterOptions={filterOptions} statuses={Object.keys(STATUS_LABELS)} />
+      </div>
+
+      <p className="mt-4 text-xs text-[color:var(--muted)]" style={{ fontFamily: "var(--font-data)" }}>
+        {page.total === 0
+          ? "No works match these filters."
+          : `Showing ${formatCount(offset + 1)}–${formatCount(shownTo)} of ${formatCount(
+              page.total
+            )}`}
+      </p>
+
+      <div className="mt-2 data-table-wrap">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Work</th>
+              <th>Where</th>
+              <th className="text-right">Sanctioned</th>
+              <th>Risk</th>
+              <th>Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            {page.alerts.length === 0 && (
+              <tr>
+                <td colSpan={5} className="text-center text-[color:var(--muted)] py-6">
+                  Nothing in the queue for these filters.
+                </td>
+              </tr>
+            )}
+            {page.alerts.map((a) => {
+              const reviewed = reviewedLine(a);
+              return (
+                <tr key={a.id} className={a.review_status !== "pending" ? "is-reviewed" : undefined}>
+                  <td className="max-w-[30rem]">
+                    <Link href={`/projects/${a.id}`} className="link-quiet">
+                      {a.work_name}
+                    </Link>
+                    <div className="cell-sub">
+                      {a.implementing_agency}
+                      {a.sector ? ` · ${a.sector}` : ""}
+                    </div>
+                    {a.flagged_reasons.length > 0 && (
+                      <ul className="reason-list">
+                        {a.flagged_reasons.map((r) => (
+                          <li key={r}>{r}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap">
+                    {a.district}
+                    <div className="cell-sub">{a.state}</div>
+                  </td>
+                  <td className="num">{formatINR(a.sanctioned_amount)}</td>
+                  <td>
+                    <span className={riskLevelClass(a.risk_level)}>
+                      {riskLevelLabel(a.risk_level)}
+                      {a.overall_risk_score !== null
+                        ? ` · ${a.overall_risk_score.toFixed(0)}`
+                        : ""}
+                    </span>
+                  </td>
+                  <td className="min-w-[15rem]">
+                    <ReviewActions workKey={a.work_key} current={a.review_status} />
+                    {reviewed && <div className="cell-sub">{reviewed}</div>}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {page.total > PAGE_SIZE && (
+        <nav className="pager" aria-label="Queue pages">
+          {offset > 0 ? (
+            <Link href={pageHref(prevOffset)} className="pager__link">
+              ← Previous
+            </Link>
+          ) : (
+            <span className="pager__link is-disabled">← Previous</span>
+          )}
+          {nextOffset < page.total ? (
+            <Link href={pageHref(nextOffset)} className="pager__link">
+              Next →
+            </Link>
+          ) : (
+            <span className="pager__link is-disabled">Next →</span>
+          )}
+        </nav>
+      )}
+    </main>
+  );
+}

@@ -53,3 +53,29 @@ def query(sql, params=None, one=False):
         raise
     finally:
         pool.putconn(conn)
+
+
+def execute(sql, params=None, returning=False):
+    """Run a statement that writes, and commit it.
+
+    Separate from query() rather than a flag on it: every caller of query() is
+    a GET handler that must never be able to commit by accident, and the two
+    have different failure handling - a failed write has to roll back the
+    partial transaction before the connection goes back in the pool.
+    """
+    pool = _get_pool()
+    conn = pool.getconn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql, params or [])
+            row = cur.fetchone() if returning else None
+        conn.commit()
+        return row
+    except Exception:
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise
+    finally:
+        pool.putconn(conn)

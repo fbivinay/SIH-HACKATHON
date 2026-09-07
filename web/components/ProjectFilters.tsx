@@ -7,7 +7,22 @@ import { formatCount, riskLevelLabel } from "@/lib/format";
 
 const DEBOUNCE_MS = 300;
 
-export default function ProjectFilters({ filterOptions }: { filterOptions: FilterOptions }) {
+const STATUS_OPTION_LABELS: Record<string, string> = {
+  pending: "Not yet reviewed",
+  escalated: "Escalated",
+  verified: "Verified",
+  dismissed: "Dismissed",
+};
+
+export default function ProjectFilters({
+  filterOptions,
+  statuses,
+}: {
+  filterOptions: FilterOptions;
+  // Only the alert queue has a review status to filter on; the works register
+  // passes nothing and renders the same bar without it.
+  statuses?: string[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -16,6 +31,7 @@ export default function ProjectFilters({ filterOptions }: { filterOptions: Filte
   const state = searchParams.get("state") ?? "";
   const riskLevel = searchParams.get("risk_level") ?? "";
   const lsTerm = searchParams.get("ls_term") ?? "";
+  const status = searchParams.get("status") ?? "";
 
   // Local echo of the search box so typing feels instant; URL (source of truth)
   // updates on a debounce so we don't fire a query per keystroke over 127k rows.
@@ -37,6 +53,10 @@ export default function ProjectFilters({ filterOptions }: { filterOptions: Filte
       if (v) params.set(k, v);
       else params.delete(k);
     }
+    // Any filter change is a new result set, so go back to its first page -
+    // keeping the old offset lands on an empty page whenever the narrowed set
+    // is shorter than the offset.
+    params.delete("offset");
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
@@ -53,7 +73,7 @@ export default function ProjectFilters({ filterOptions }: { filterOptions: Filte
     router.replace(pathname, { scroll: false });
   }
 
-  const hasFilters = Boolean(q || state || riskLevel || lsTerm);
+  const hasFilters = Boolean(q || state || riskLevel || lsTerm || status);
 
   return (
     <div className="filter-bar">
@@ -124,6 +144,27 @@ export default function ProjectFilters({ filterOptions }: { filterOptions: Filte
           <option value="18">18th Lok Sabha</option>
         </select>
       </div>
+
+      {statuses && statuses.length > 0 && (
+        <div className="filter-field">
+          <label htmlFor="project-status" className="sr-only">
+            Filter by review status
+          </label>
+          <select
+            id="project-status"
+            value={status}
+            onChange={(e) => updateParams({ status: e.target.value, offset: "" })}
+            className="filter-select"
+          >
+            <option value="">Any review status</option>
+            {statuses.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_OPTION_LABELS[s] ?? s}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {hasFilters && (
         <button type="button" onClick={clearAll} className="filter-clear">

@@ -420,6 +420,7 @@ def test_insert_columns_match_what_the_loader_builds():
     import load_real_data as lrd
 
     df = pd.DataFrame({
+        "work_key": ["4021|18|PATNA(DM_IDA)"],
         "description": ["Construction of CC road"], "category": ["Normal/Others"],
         "sector": ["Roads & Paving"], "mp_name": ["Ram Kumar"], "mp_id": ["abc123"],
         "house": ["Lok Sabha"], "constituency": ["Somewhere"], "state": ["Bihar"],
@@ -434,3 +435,4 @@ def test_insert_columns_match_what_the_loader_builds():
     assert prepared.iloc[0]["sector"] == "Roads & Paving"
     assert prepared.iloc[0]["work_name"] == "Construction of CC road"
     assert prepared.iloc[0]["source"] == "real"
+    assert prepared.iloc[0]["work_key"] == "4021|18|PATNA(DM_IDA)"

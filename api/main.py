@@ -1,11 +1,16 @@
+import os
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from db import query
+from pydantic import BaseModel, Field
+from db import execute, query
 
 app = FastAPI(title="MPLADS Risk Monitor API")
 app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 
 
@@ -210,4 +215,176 @@ def districts():
         FROM projects GROUP BY state, district
         ORDER BY avg_risk_score DESC
         """
+    )
+
+
+# ---------------------------------------------------------------- alert queue
+
+REVIEW_STATUSES = ("verified", "dismissed", "escalated")
+
+# Everything the queue needs to justify one row on screen. Deliberately wide:
+# a reviewer deciding whether a work is worth a site visit should not have to
+# open a second page to see why it was flagged, and 50 rows of this is a few
+# hundred KB.
+_ALERT_COLUMNS = """
+    p.id, p.work_key, p.work_name, p.description, p.ls_term, p.state, p.district,
+    p.sector, p.category, p.implementing_agency, p.mp_name, p.constituency,
+    p.sanctioned_amount, p.expenditure, p.work_status, p.delay_days,
+    p.cost_deviation_pct, p.peer_median_cost, p.peer_count,
+    p.max_similarity_score, p.similar_work_id,
+    p.cost_risk, p.delay_risk, p.duplicate_risk, p.agency_risk, p.compliance_risk,
+    p.overall_risk_score, p.risk_level, p.flagged_reasons,
+    COALESCE(r.status, 'pending') AS review_status,
+    r.note AS review_note, r.reviewer AS review_reviewer,
+    r.updated_at AS review_updated_at
+"""
+
+
+def _alert_filters(q, state, district, sector, risk_level, ls_term, status, min_score):
+    """Shared WHERE builder so the list and its total count can never drift."""
+    filters, params = [], []
+    if q:
+        filters.append(
+            "(p.work_name ILIKE %s OR p.description ILIKE %s OR p.mp_name ILIKE %s "
+            "OR p.district ILIKE %s OR p.state ILIKE %s OR p.implementing_agency ILIKE %s)"
+        )
+        params += [f"%{q}%"] * 6
+    for column, value in (
+        ("p.state", state),
+        ("p.district", district),
+        ("p.sector", sector),
+        ("p.risk_level", risk_level),
+        ("p.ls_term", ls_term),
+    ):
+        if value is not None:
+            filters.append(f"{column} = %s")
+            params.append(value)
+    if status == "pending":
+        # No row in work_reviews is what 'pending' means - the table holds
+        # decisions, not a placeholder for every one of 127k works.
+        filters.append("r.status IS NULL")
+    elif status:
+        filters.append("r.status = %s")
+        params.append(status)
+    if min_score is not None:
+        filters.append("p.overall_risk_score >= %s")
+        params.append(min_score)
+    return (f"WHERE {' AND '.join(filters)}" if filters else ""), params
+
+
+@app.get("/api/alerts")
+def alerts(
+    q: Optional[str] = None,
+    state: Optional[str] = None,
+    district: Optional[str] = None,
+    sector: Optional[str] = None,
+    risk_level: Optional[str] = None,
+    ls_term: Optional[int] = Query(None, ge=17, le=18),
+    status: Optional[str] = Query(None, pattern="^(pending|verified|dismissed|escalated)$"),
+    min_score: Optional[float] = Query(None, ge=0, le=100),
+    limit: int = Query(50, le=200),
+    offset: int = 0,
+):
+    """The triage queue: works ranked by risk, carrying their evidence and
+    whatever a reviewer has already concluded about them."""
+    where, params = _alert_filters(
+        q, state, district, sector, risk_level, ls_term, status, min_score
+    )
+    rows = query(
+        f"""
+        SELECT {_ALERT_COLUMNS}
+        FROM projects p
+        LEFT JOIN work_reviews r ON r.work_key = p.work_key
+        {where}
+        ORDER BY p.overall_risk_score DESC NULLS LAST, p.id
+        LIMIT %s OFFSET %s
+        """,
+        params + [limit, offset],
+    )
+    total = query(
+        f"""
+        SELECT COUNT(*) AS total
+        FROM projects p
+        LEFT JOIN work_reviews r ON r.work_key = p.work_key
+        {where}
+        """,
+        params,
+        one=True,
+    )
+    return {"total": total["total"], "limit": limit, "offset": offset, "alerts": rows}
+
+
+@app.get("/api/alerts/summary")
+def alerts_summary(min_score: float = Query(40, ge=0, le=100)):
+    """Counts for the queue header. min_score defaults to 40 because that is
+    where risk_level leaves LOW (see RISK_LEVEL_THRESHOLDS in data/scoring.py) -
+    below it there is nothing to triage."""
+    return query(
+        """
+        SELECT
+          COUNT(*) AS in_scope,
+          COUNT(*) FILTER (WHERE r.status IS NULL)          AS pending,
+          COUNT(*) FILTER (WHERE r.status = 'escalated')    AS escalated,
+          COUNT(*) FILTER (WHERE r.status = 'verified')     AS verified,
+          COUNT(*) FILTER (WHERE r.status = 'dismissed')    AS dismissed,
+          COUNT(*) FILTER (WHERE p.risk_level = 'HIGH')     AS high,
+          COUNT(*) FILTER (WHERE p.risk_level = 'MEDIUM')   AS medium,
+          COALESCE(SUM(p.sanctioned_amount) FILTER (WHERE r.status IS NULL), 0)
+            AS pending_sanctioned_amount
+        FROM projects p
+        LEFT JOIN work_reviews r ON r.work_key = p.work_key
+        WHERE p.overall_risk_score >= %s
+        """,
+        [min_score],
+        one=True,
+    )
+
+
+class ReviewIn(BaseModel):
+    work_key: str = Field(min_length=1, max_length=400)
+    status: str
+    note: Optional[str] = Field(default=None, max_length=2000)
+    reviewer: Optional[str] = Field(default=None, max_length=120)
+
+
+@app.post("/api/alerts/review")
+def set_review(body: ReviewIn, x_review_token: Optional[str] = Header(default=None)):
+    """Record a reviewer's decision about one work.
+
+    The only write endpoint in the API, so it carries the only auth: a shared
+    token in REVIEW_TOKEN. Fails closed - with the variable unset nobody can
+    write, rather than everybody. That is deliberate: this deployment is public
+    and unauthenticated otherwise, and a queue anyone can silently clear is
+    worse than a read-only one.
+    """
+    expected = os.environ.get("REVIEW_TOKEN")
+    if not expected:
+        raise HTTPException(
+            status_code=503,
+            detail="Reviews are disabled: REVIEW_TOKEN is not configured on the server.",
+        )
+    if x_review_token != expected:
+        raise HTTPException(status_code=401, detail="Invalid or missing X-Review-Token.")
+    if body.status not in REVIEW_STATUSES:
+        raise HTTPException(
+            status_code=422, detail=f"status must be one of {', '.join(REVIEW_STATUSES)}"
+        )
+    exists = query(
+        "SELECT 1 FROM projects WHERE work_key = %s LIMIT 1", [body.work_key], one=True
+    )
+    if exists is None:
+        raise HTTPException(status_code=404, detail="No work with that work_key.")
+    return execute(
+        """
+        INSERT INTO work_reviews (work_key, status, note, reviewer, updated_at)
+        VALUES (%s, %s, %s, %s, now())
+        ON CONFLICT (work_key) DO UPDATE
+          SET status = EXCLUDED.status,
+              note = EXCLUDED.note,
+              reviewer = EXCLUDED.reviewer,
+              updated_at = now()
+        RETURNING work_key, status, note, reviewer, updated_at
+        """,
+        [body.work_key, body.status, body.note, body.reviewer],
+        returning=True,
     )
