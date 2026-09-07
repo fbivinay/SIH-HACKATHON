@@ -4,6 +4,7 @@ import type { Alert } from "@/lib/api";
 import ProjectFilters from "@/components/ProjectFilters";
 import ReviewActions from "@/components/ReviewActions";
 import ReviewerName from "@/components/ReviewerName";
+import RiskBar from "@/components/RiskBar";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
 
 const PAGE_SIZE = 50;
@@ -111,22 +112,20 @@ export default async function AlertsPage({
   };
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8">
-      <div className="eyebrow">Verification queue</div>
-      <h1
-        className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        Alerts
-      </h1>
-      <p className="mt-1.5 max-w-3xl text-sm text-[color:var(--muted)]">
-        Works whose risk score puts them above the review threshold, highest first, with
-        the evidence that produced the score. A decision here is a record of what a
-        reviewer concluded — it never changes the score.
-      </p>
+    <main>
+      <section className="shell page-head">
+        <h1 className="display">What to verify next</h1>
+        <p className="lede">
+          Works scoring above the review threshold, highest first, each carrying the record
+          that flagged it. A decision here says what a reviewer concluded. It never moves
+          the score.
+        </p>
+      </section>
+
+      <section className="shell">
 
       {scoringPending && (
-        <div className="notice mt-5" role="status">
+        <div className="notice mb-5" role="status">
           <span aria-hidden="true">&#9679;</span>
           <span>
             No work has a risk score yet — the scoring pass has not finished since the
@@ -136,7 +135,7 @@ export default async function AlertsPage({
       )}
 
       {tiles.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           {tiles.map((t) => (
             <div key={t.label} className={`stat-card stat-card--${t.tone}`}>
               <div className="stat-card__label">{t.label}</div>
@@ -147,15 +146,15 @@ export default async function AlertsPage({
         </div>
       )}
 
-      <div className="mt-6">
-        <ReviewerName />
-      </div>
-
-      <div className="mt-4">
+      <div className="mt-5">
         <ProjectFilters filterOptions={filterOptions} statuses={Object.keys(STATUS_LABELS)} />
       </div>
 
-      <p className="mt-4 text-xs text-[color:var(--muted)]" style={{ fontFamily: "var(--font-data)" }}>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <ReviewerName />
+      </div>
+
+      <p className="mt-4 text-xs" style={{ fontFamily: "var(--font-data)", color: "var(--ink-3)" }}>
         {page.total === 0
           ? "No works match these filters."
           : `Showing ${formatCount(offset + 1)}–${formatCount(shownTo)} of ${formatCount(
@@ -167,9 +166,10 @@ export default async function AlertsPage({
         <table className="data-table">
           <thead>
             <tr>
+              <th className="num">#</th>
               <th>Work</th>
               <th>Where</th>
-              <th className="text-right">Sanctioned</th>
+              <th className="num">Sanctioned</th>
               <th>Risk</th>
               <th>Decision</th>
             </tr>
@@ -177,22 +177,23 @@ export default async function AlertsPage({
           <tbody>
             {page.alerts.length === 0 && (
               <tr>
-                <td colSpan={5} className="text-center text-[color:var(--muted)] py-6">
+                <td colSpan={6} className="text-center py-8" style={{ color: "var(--ink-3)" }}>
                   Nothing in the queue for these filters.
                 </td>
               </tr>
             )}
-            {page.alerts.map((a) => {
+            {page.alerts.map((a, i) => {
               const reviewed = reviewedLine(a);
               return (
                 <tr key={a.id} className={a.review_status !== "pending" ? "is-reviewed" : undefined}>
+                  <td className="rank">{formatCount(offset + i + 1)}</td>
                   <td className="max-w-[30rem]">
                     <Link href={`/projects/${a.id}`} className="link-quiet">
                       {a.work_name}
                     </Link>
                     <div className="cell-sub">
+                      {a.sector ? `${a.sector} — ` : ""}
                       {a.implementing_agency}
-                      {a.sector ? ` · ${a.sector}` : ""}
                     </div>
                     {a.flagged_reasons.length > 0 && (
                       <ul className="reason-list">
@@ -207,13 +208,16 @@ export default async function AlertsPage({
                     <div className="cell-sub">{a.state}</div>
                   </td>
                   <td className="num">{formatINR(a.sanctioned_amount)}</td>
-                  <td>
+                  <td className="min-w-[11rem]">
                     <span className={riskLevelClass(a.risk_level)}>
                       {riskLevelLabel(a.risk_level)}
                       {a.overall_risk_score !== null
-                        ? ` · ${a.overall_risk_score.toFixed(0)}`
+                        ? ` ${a.overall_risk_score.toFixed(0)}`
                         : ""}
                     </span>
+                    <div className="mt-1.5">
+                      <RiskBar p={a} />
+                    </div>
                   </td>
                   <td className="min-w-[15rem]">
                     <ReviewActions workKey={a.work_key} current={a.review_status} />
@@ -244,6 +248,7 @@ export default async function AlertsPage({
           )}
         </nav>
       )}
+      </section>
     </main>
   );
 }

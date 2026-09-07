@@ -1,324 +1,654 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   MPLADS Risk Monitor — design system
+
+   Monochrome by default. The only saturated colour on any screen is a risk
+   colour, so colour always means "this work needs attention" and never means
+   decoration. Structure comes from ground/surface contrast and rounded slabs
+   rather than from tint.
+
+   Two grounds alternate down a page: the light ground carries dense working
+   content (tables, filters, forms), and an inset near-black slab carries the
+   things that should stop you — the queue's standing numbers, the scoring
+   method, the call to act. The slab is inset with a large radius rather than
+   full-bleed, so a page reads as a stack of objects, not a run of bands.
+   ========================================================================== */
+
 :root {
-  /* Institutional palette: cool paper + navy ink + bronze seal accent.
-     Risk semantics (low/medium/high/pending) are shared tokens — reuse
-     these across the map, project list, and analysis screens rather
-     than picking colors per-component. */
-  --paper: #f5f6f8;
+  color-scheme: light;
+
+  /* Grounds */
+  --ground: #f1f1f2;
   --surface: #ffffff;
-  --line: #dfe3e9;
-  --ink: #0e1c33;
-  --muted: #5b6472;
+  --surface-2: #fafafa;
+  --line: #e3e3e6;
+  --line-strong: #d2d2d7;
 
-  --accent: #96723b;
-  --accent-ring: #c9a874;
+  /* Ink */
+  --ink: #0b0b0c;
+  --ink-2: #63636b;
+  --ink-3: #9a9aa3;
 
-  --risk-low: #1e7a4b;
-  --risk-low-bg: #e7f3ec;
-  --risk-medium: #b3720e;
-  --risk-medium-bg: #faf1de;
-  --risk-high: #ac2b23;
-  --risk-high-bg: #fbeae8;
-  --risk-pending: #6b7280;
-  --risk-pending-bg: #eef0f3;
+  /* The inset dark slab, and what sits on it */
+  --slab: #0b0b0c;
+  --slab-2: #17171a;
+  --slab-line: rgba(255, 255, 255, 0.11);
+  --on-slab: #fafafa;
+  --on-slab-2: #9d9da6;
 
-  --font-display: var(--font-source-serif), Georgia, "Times New Roman", serif;
-  --font-ui: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-data: var(--font-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Risk. The only hues in the system. Each has a light-ground and a
+     dark-slab variant because a single value cannot hold contrast on both. */
+  --risk-low: #16704a;
+  --risk-low-bg: #e6f2ec;
+  --risk-medium: #96600a;
+  --risk-medium-bg: #f8efdc;
+  --risk-high: #a82e22;
+  --risk-high-bg: #fbe9e7;
+  --risk-pending: #6b6b74;
+  --risk-pending-bg: #eeeef0;
+
+  --radius-slab: 28px;
+  --radius-card: 18px;
+  --radius-control: 10px;
+  --radius-pill: 999px;
+
+  --shell: 1180px;
+
+  --font-ui: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: var(--font-mono), ui-monospace, SFMono-Regular, "SF Mono", monospace;
+  /* Kept as an alias: pages written before the type system collapsed to one
+     family still ask for a display face. */
+  --font-display: var(--font-ui);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --ground: #0a0a0b;
+    --surface: #151517;
+    --surface-2: #1c1c1f;
+    --line: #2a2a2e;
+    --line-strong: #3a3a40;
+
+    --ink: #f5f5f6;
+    --ink-2: #9d9da6;
+    --ink-3: #6e6e77;
+
+    /* On a dark page the contrast panel has to go lighter, not darker — the
+       slab is defined by standing apart from the ground, not by being black. */
+    --slab: #17171a;
+    --slab-2: #202024;
+    --slab-line: rgba(255, 255, 255, 0.09);
+    --on-slab: #f5f5f6;
+    --on-slab-2: #9d9da6;
+
+    --risk-low: #4cc38a;
+    --risk-low-bg: rgba(76, 195, 138, 0.12);
+    --risk-medium: #e2a03f;
+    --risk-medium-bg: rgba(226, 160, 63, 0.12);
+    --risk-high: #f2695c;
+    --risk-high-bg: rgba(242, 105, 92, 0.13);
+    --risk-pending: #8a8a93;
+    --risk-pending-bg: rgba(138, 138, 147, 0.13);
+  }
 }
 
 @theme inline {
-  --color-paper: var(--paper);
+  --color-ground: var(--ground);
   --color-surface: var(--surface);
   --color-line: var(--line);
   --color-ink: var(--ink);
-  --color-muted: var(--muted);
-  --color-accent: var(--accent);
-  --font-display: var(--font-display);
+  --color-muted: var(--ink-2);
   --font-ui: var(--font-ui);
   --font-data: var(--font-data);
 }
 
+/* Legacy token names still referenced by the map and analysis screens. */
+:root {
+  --paper: var(--ground);
+  --muted: var(--ink-2);
+  --accent: var(--ink);
+  --accent-ring: var(--ink-2);
+}
+
+* {
+  border-color: var(--line);
+}
+
 body {
-  background: var(--paper);
+  background: var(--ground);
   color: var(--ink);
   font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv05" 1;
 }
 
-/* ---- Masthead seal: the one signature element on the page. ---- */
-.seal {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  flex-shrink: 0;
-  border-radius: 9999px;
+::selection {
   background: var(--ink);
-  color: var(--accent-ring);
-  border: 1.5px solid var(--accent);
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  font-weight: 600;
-}
-
-.eyebrow {
-  font-family: var(--font-data);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-/* ---- Stat cards ---- */
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  border-top-width: 3px;
-  padding: 1.1rem 1.15rem 1.25rem;
-  min-width: 0;
-}
-
-.stat-card__label {
-  font-family: var(--font-data);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.stat-card__value {
-  font-family: var(--font-data);
-  font-variant-numeric: tabular-nums;
-  font-size: 1.85rem;
-  line-height: 1.15;
-  font-weight: 600;
-  color: var(--ink);
-  margin-top: 0.35rem;
-  word-break: break-word;
-}
-
-.stat-card__note {
-  margin-top: 0.3rem;
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-.stat-card--neutral { border-top-color: var(--ink); }
-.stat-card--accent { border-top-color: var(--accent); }
-.stat-card--low { border-top-color: var(--risk-low); }
-.stat-card--medium { border-top-color: var(--risk-medium); }
-.stat-card--high { border-top-color: var(--risk-high); }
-
-/* ---- Risk pill (shared across screens) ---- */
-.risk-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-family: var(--font-data);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 0.15rem 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid transparent;
-}
-
-.risk-pill--low { color: var(--risk-low); background: var(--risk-low-bg); border-color: color-mix(in srgb, var(--risk-low) 35%, transparent); }
-.risk-pill--medium { color: var(--risk-medium); background: var(--risk-medium-bg); border-color: color-mix(in srgb, var(--risk-medium) 35%, transparent); }
-.risk-pill--high { color: var(--risk-high); background: var(--risk-high-bg); border-color: color-mix(in srgb, var(--risk-high) 35%, transparent); }
-.risk-pill--pending { color: var(--risk-pending); background: var(--risk-pending-bg); border-color: color-mix(in srgb, var(--risk-pending) 35%, transparent); }
-
-.notice {
-  border: 1px solid color-mix(in srgb, var(--risk-medium) 40%, transparent);
-  background: var(--risk-medium-bg);
-  color: var(--ink);
-  border-radius: 0.5rem;
-  padding: 0.7rem 1rem;
-  font-size: 0.85rem;
-  display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
+  color: var(--surface);
 }
 
 a:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--accent);
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
-/* ---- Data table (shared by the map, projects, and analysis screens) ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------- shell --- */
+
+.shell {
+  width: 100%;
+  max-width: var(--shell);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+/* ---------------------------------------------------------------- header -- */
+
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(12px);
+  border-bottom: 1px solid transparent;
+}
+
+.masthead__inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-block: 0.9rem;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* A filled square with the two initials. The one piece of iconography in the
+   product, so it stays flat and unornamented rather than becoming a crest. */
+.wordmark__mark {
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 7px;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-inline: auto;
+}
+
+.nav__link {
+  padding: 0.42rem 0.8rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.nav__link:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.nav__link[aria-current="page"] {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+/* ---------------------------------------------------------------- buttons - */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s, background-color 0.15s, color 0.15s;
+}
+
+.btn--solid {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.btn--solid:hover {
+  opacity: 0.86;
+}
+
+.btn--quiet {
+  background: transparent;
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.btn--quiet:hover {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+
+/* ---------------------------------------------------------- page headings - */
+
+.page-head {
+  padding-block: 3.5rem 2rem;
+  text-align: center;
+}
+
+.display {
+  font-size: clamp(2.4rem, 5.6vw, 3.9rem);
+  line-height: 1.02;
+  letter-spacing: -0.042em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+.display--hero {
+  font-size: clamp(2.9rem, 7.4vw, 5rem);
+}
+
+.section-head {
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+/* Sentence case, no tracking, no uppercase: this is a sentence that explains
+   the heading above it, not a label stamped on top of it. */
+.lede {
+  margin-top: 0.9rem;
+  margin-inline: auto;
+  max-width: 44rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.eyebrow {
+  font-size: 0.8rem;
+  color: var(--ink-3);
+}
+
+/* ------------------------------------------------------------------ slab -- */
+
+.slab {
+  background: var(--slab);
+  color: var(--on-slab);
+  border-radius: var(--radius-slab);
+  padding: clamp(1.75rem, 4vw, 3.25rem);
+}
+
+.slab .section-head,
+.slab .display {
+  color: var(--on-slab);
+}
+
+.slab .lede {
+  color: var(--on-slab-2);
+}
+
+.slab-card {
+  background: var(--slab-2);
+  border: 1px solid var(--slab-line);
+  border-radius: var(--radius-card);
+  padding: 1.25rem 1.35rem;
+}
+
+/* ------------------------------------------------------------------ card -- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 1.25rem 1.35rem;
+}
+
+/* ------------------------------------------------------------- stat card -- */
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 1.1rem 1.25rem 1.2rem;
+  min-width: 0;
+}
+
+.slab .stat-card {
+  background: var(--slab-2);
+  border-color: var(--slab-line);
+}
+
+.stat-card__label {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+
+.slab .stat-card__label {
+  color: var(--on-slab-2);
+}
+
+.stat-card__value {
+  margin-top: 0.5rem;
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.9rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.slab .stat-card__value {
+  color: var(--on-slab);
+}
+
+.stat-card__note {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+/* Tones tint only the figure, never the whole card — a red panel would make a
+   count of dismissed works look like an alarm. */
+.stat-card--low .stat-card__value { color: var(--risk-low); }
+.stat-card--medium .stat-card__value { color: var(--risk-medium); }
+.stat-card--high .stat-card__value { color: var(--risk-high); }
+
+/* -------------------------------------------------------------- risk pill - */
+
+.risk-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.risk-pill--low { color: var(--risk-low); background: var(--risk-low-bg); border-color: color-mix(in srgb, var(--risk-low) 28%, transparent); }
+.risk-pill--medium { color: var(--risk-medium); background: var(--risk-medium-bg); border-color: color-mix(in srgb, var(--risk-medium) 28%, transparent); }
+.risk-pill--high { color: var(--risk-high); background: var(--risk-high-bg); border-color: color-mix(in srgb, var(--risk-high) 30%, transparent); }
+.risk-pill--pending { color: var(--risk-pending); background: var(--risk-pending-bg); border-color: color-mix(in srgb, var(--risk-pending) 26%, transparent); }
+
+/* --------------------------------------------------------- risk breakdown - */
+
+/* The five weighted components as one bar, widths proportional to what each
+   contributed to the total. This is the thing a reviewer reads first: it says
+   whether a score came from cost, from delay, or from the agency, without
+   opening the work. */
+.riskbar {
+  display: flex;
+  width: 100%;
+  min-width: 7rem;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.riskbar__seg {
+  height: 100%;
+}
+
+.riskbar__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.7rem;
+  margin-top: 0.4rem;
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.68rem;
+  color: var(--ink-3);
+}
+
+.riskbar__legend b {
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+/* ----------------------------------------------------------------- table -- */
+
+.data-table-wrap {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow: auto;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.83rem;
-  background: var(--surface);
+  font-size: 0.85rem;
 }
 
 .data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   text-align: left;
-  font-family: var(--font-data);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 600;
-  padding: 0.55rem 0.85rem;
+  background: var(--surface-2);
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  padding: 0.65rem 0.9rem;
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
 
 .data-table td {
-  padding: 0.55rem 0.85rem;
+  padding: 0.7rem 0.9rem;
   border-bottom: 1px solid var(--line);
-  vertical-align: middle;
+  vertical-align: top;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .data-table tbody tr:hover td {
-  background: var(--paper);
+  background: var(--surface-2);
 }
 
-.data-table td.num {
+.data-table td.num,
+.data-table th.num {
   font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
   text-align: right;
+  white-space: nowrap;
 }
 
-.data-table-wrap {
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  overflow: auto;
+.data-table thead th.num {
+  font-family: var(--font-ui);
+}
+
+/* The row's position in the queue. Meaningful here — the queue is ranked, so
+   the number is the rank, not decoration. */
+.data-table td.rank {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  font-size: 0.78rem;
+  text-align: right;
+  width: 3rem;
+}
+
+.cell-sub {
+  margin-top: 0.25rem;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+
+.reason-list {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+  max-width: 34rem;
+}
+
+/* A rule in the left margin instead of a bullet: these are extracts from the
+   record, closer to a quotation than to a list. */
+.reason-list li {
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--line-strong);
+}
+
+.data-table tbody tr.is-reviewed td {
+  color: var(--ink-3);
+  background: var(--surface-2);
+}
+
+.data-table tbody tr.is-reviewed .link-quiet {
+  color: var(--ink-2);
 }
 
 .link-quiet {
   color: var(--ink);
+  font-weight: 500;
   text-decoration: underline;
-  text-decoration-color: var(--line);
-  text-underline-offset: 2px;
-}
-.link-quiet:hover {
-  color: var(--accent);
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
-/* ---- Filter bar (projects search + dropdowns) ---- */
+.link-quiet:hover {
+  text-decoration-color: currentColor;
+}
+
+/* --------------------------------------------------------------- filters -- */
+
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 0.4rem 0.45rem 0.4rem 0.9rem;
 }
 
 .filter-field--grow {
-  flex: 1 1 16rem;
+  flex: 1 1 15rem;
 }
 
 .filter-input,
 .filter-select {
   width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 0.375rem;
-  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 0.85rem;
-  padding: 0.5rem 0.7rem;
+  padding: 0.4rem 0.7rem;
 }
 
 .filter-select {
   width: auto;
-  min-width: 10rem;
+  min-width: 9rem;
+  border-color: var(--line);
+  background: var(--surface-2);
+  cursor: pointer;
 }
 
-.filter-input:focus-visible,
-.filter-select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-  border-color: var(--accent);
+.filter-input::placeholder {
+  color: var(--ink-3);
 }
 
 .filter-clear {
-  font-family: var(--font-data);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent);
+  font-size: 0.8rem;
+  color: var(--ink-2);
   background: transparent;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  border-radius: 9999px;
-  padding: 0.45rem 0.9rem;
+  border: 0;
+  padding: 0.4rem 0.7rem;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .filter-clear:hover {
-  background: var(--risk-medium-bg);
-}
-
-/* ---- Alert queue ---- */
-
-/* Secondary line inside a table cell: agency, sector, state, who reviewed. */
-.cell-sub {
-  margin-top: 0.2rem;
-  font-size: 0.72rem;
-  color: var(--muted);
-  line-height: 1.35;
-}
-
-/* The evidence behind a score. Kept in the row rather than behind a click:
-   a reviewer deciding on a site visit needs the reason, not a link to it. */
-.reason-list {
-  margin-top: 0.35rem;
-  padding-left: 0.9rem;
-  list-style: disc;
-  font-size: 0.74rem;
-  line-height: 1.45;
   color: var(--ink);
 }
 
-.reason-list li {
-  margin-top: 0.1rem;
-}
-
-/* A decided row stays legible but stops competing with the untouched ones. */
-.data-table tbody tr.is-reviewed td {
-  background: color-mix(in srgb, var(--paper) 60%, var(--surface));
-  color: var(--muted);
-}
+/* -------------------------------------------------------------- reviewer -- */
 
 .reviewer-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  background: var(--surface);
-  padding: 0.6rem 0.85rem;
 }
 
 .reviewer-bar__label {
-  font-family: var(--font-data);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  font-size: 0.85rem;
+  color: var(--ink-2);
 }
 
 .reviewer-bar__input {
   width: auto;
-  min-width: 14rem;
-  flex: 0 1 18rem;
+  min-width: 13rem;
+  flex: 0 1 17rem;
+  border-color: var(--line);
+  background: var(--surface);
+  border-radius: var(--radius-pill);
 }
 
 .reviewer-bar__hint {
-  font-size: 0.72rem;
-  color: var(--muted);
+  font-size: 0.78rem;
+  color: var(--ink-3);
 }
+
+/* --------------------------------------------------------------- actions -- */
 
 .review-actions {
   display: flex;
@@ -329,8 +659,8 @@ button:focus-visible {
 
 .review-actions__unavailable,
 .review-actions__error {
-  font-size: 0.72rem;
-  color: var(--muted);
+  font-size: 0.76rem;
+  color: var(--ink-3);
 }
 
 .review-actions__error {
@@ -339,74 +669,162 @@ button:focus-visible {
 }
 
 .review-btn {
-  font-family: var(--font-data);
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 0.28rem 0.55rem;
-  border-radius: 0.3rem;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--line);
   background: var(--surface);
-  color: var(--muted);
+  color: var(--ink-2);
   cursor: pointer;
   white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
 }
 
 .review-btn:hover:not(:disabled) {
   color: var(--ink);
-  border-color: var(--ink);
+  border-color: var(--line-strong);
 }
 
 .review-btn:disabled {
   cursor: progress;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
-/* The decision already on record, so a reviewer can see it without reading
-   the sentence underneath. */
 .review-btn--escalated.is-current {
   color: var(--risk-high);
   background: var(--risk-high-bg);
-  border-color: var(--risk-high);
+  border-color: color-mix(in srgb, var(--risk-high) 40%, transparent);
 }
 
 .review-btn--verified.is-current {
   color: var(--risk-low);
   background: var(--risk-low-bg);
-  border-color: var(--risk-low);
+  border-color: color-mix(in srgb, var(--risk-low) 40%, transparent);
 }
 
 .review-btn--dismissed.is-current {
   color: var(--risk-pending);
   background: var(--risk-pending-bg);
-  border-color: var(--risk-pending);
+  border-color: color-mix(in srgb, var(--risk-pending) 40%, transparent);
 }
+
+/* ---------------------------------------------------------------- notice -- */
+
+.notice {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 0.85rem 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.notice span[aria-hidden] {
+  color: var(--risk-medium);
+}
+
+/* ----------------------------------------------------------------- pager -- */
 
 .pager {
   display: flex;
-  gap: 0.6rem;
-  margin-top: 1rem;
-  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+  justify-content: center;
 }
 
 .pager__link {
-  font-family: var(--font-data);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+  font-size: 0.82rem;
   border: 1px solid var(--line);
-  border-radius: 0.3rem;
-  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 1rem;
   color: var(--ink);
   background: var(--surface);
 }
 
 .pager__link:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--line-strong);
 }
 
 .pager__link.is-disabled {
-  color: var(--muted);
-  opacity: 0.5;
+  color: var(--ink-3);
   pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- footer -- */
+
+.footer {
+  margin-top: 5rem;
+  padding-bottom: 2rem;
+}
+
+.footer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.6rem 2rem;
+  padding-block: 1.4rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.footer__meta a {
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+}
+
+.footer__meta a:hover {
+  color: var(--ink);
+}
+
+.footer__freshness {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The wordmark set enormous and low-contrast, closing the page the way the
+   masthead opens it. Decorative, and hidden from screen readers for that
+   reason. */
+.footer__wordmark {
+  margin-top: 1.5rem;
+  font-size: clamp(3.5rem, 15vw, 11rem);
+  line-height: 0.8;
+  letter-spacing: -0.055em;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--ink) 7%, transparent);
+  user-select: none;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------- utility -- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 7px;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--font-data);
+  font-size: 0.62rem;
 }
