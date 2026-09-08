@@ -5,8 +5,12 @@
 export function formatINR(amount: number | null | undefined): string {
   if (amount === null || amount === undefined || Number.isNaN(amount)) return "—";
   const abs = Math.abs(amount);
-  if (abs >= 1e7) return `₹${(amount / 1e7).toFixed(2)} Cr`;
-  if (abs >= 1e5) return `₹${(amount / 1e5).toFixed(2)} L`;
+  // Group the mantissa too. At programme scale this reads "₹4,629.50 Cr", and
+  // an ungrouped "₹4629.50 Cr" is the kind of number nobody can scan.
+  const two = (n: number) =>
+    n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (abs >= 1e7) return `₹${two(amount / 1e7)} Cr`;
+  if (abs >= 1e5) return `₹${two(amount / 1e5)} L`;
   return `₹${amount.toLocaleString("en-IN")}`;
 }
 

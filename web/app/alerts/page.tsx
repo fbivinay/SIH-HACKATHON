@@ -86,9 +86,9 @@ export default async function AlertsPage({
         {
           label: "In scope",
           value: formatCount(summary.in_scope),
-          note: `Score ≥ ${filters.min_score} · ${formatCount(summary.high)} high, ${formatCount(
-            summary.medium
-          )} medium`,
+          note: `Score ${filters.min_score} and above — ${formatCount(
+            summary.high
+          )} high, ${formatCount(summary.medium)} medium`,
           tone: "accent" as const,
         },
       ]
