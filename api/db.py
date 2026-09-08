@@ -36,46 +36,64 @@ def _get_pool():
     return _pool
 
 
-def query(sql, params=None, one=False):
+# A connection that died in the pool, rather than a bad statement. Neon closes
+# idle connections, and a long-running loader or a quiet night is enough to
+# leave every pooled connection unusable.
+_STALE = (psycopg2.OperationalError, psycopg2.InterfaceError)
+
+
+def _run(sql, params, fetch, commit):
+    """Borrow a connection, run one statement, and hand it back.
+
+    psycopg2's pool never checks whether a connection is still alive, and
+    putconn would return a dead one for the next request to trip over - so a
+    single expired connection becomes a rolling outage rather than one failed
+    request. A stale connection is therefore closed instead of pooled, and the
+    call is retried once against a fresh one.
+
+    The retry is safe for the one statement that writes: it is an upsert keyed
+    on work_key, so running it twice leaves the same row. Do not add a
+    non-idempotent write without revisiting this.
+    """
     pool = _get_pool()
-    conn = pool.getconn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql, params or [])
-            return cur.fetchone() if one else cur.fetchall()
-    except Exception:
-        # A connection that errored may be in an unusable transaction state;
-        # roll back before returning it so the next borrower gets it clean.
+    last = None
+    for attempt in (0, 1):
+        conn = pool.getconn()
         try:
-            conn.rollback()
+            with conn.cursor() as cur:
+                cur.execute(sql, params or [])
+                result = (cur.fetchone() if fetch == "one" else
+                          cur.fetchall() if fetch == "all" else None)
+            if commit:
+                conn.commit()
+            pool.putconn(conn)
+            return result
+        except _STALE as err:
+            # Unusable, not merely errored: drop it rather than pool it.
+            pool.putconn(conn, close=True)
+            last = err
+            if attempt == 1:
+                raise
         except Exception:
-            pass
-        raise
-    finally:
-        pool.putconn(conn)
+            # A real statement error. The connection is fine once the aborted
+            # transaction is rolled back, so keep it.
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            pool.putconn(conn)
+            raise
+    raise last  # unreachable; keeps the contract explicit
+
+
+def query(sql, params=None, one=False):
+    return _run(sql, params, "one" if one else "all", commit=False)
 
 
 def execute(sql, params=None, returning=False):
     """Run a statement that writes, and commit it.
 
     Separate from query() rather than a flag on it: every caller of query() is
-    a GET handler that must never be able to commit by accident, and the two
-    have different failure handling - a failed write has to roll back the
-    partial transaction before the connection goes back in the pool.
+    a GET handler that must never be able to commit by accident.
     """
-    pool = _get_pool()
-    conn = pool.getconn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql, params or [])
-            row = cur.fetchone() if returning else None
-        conn.commit()
-        return row
-    except Exception:
-        try:
-            conn.rollback()
-        except Exception:
-            pass
-        raise
-    finally:
-        pool.putconn(conn)
+    return _run(sql, params, "one" if returning else None, commit=True)
