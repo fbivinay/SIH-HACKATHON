@@ -803,3 +803,52 @@ def compliance():
         "works_breaching": int(breaching["n"]),
         "weight_in_score": int(RISK_WEIGHTS_COMPLIANCE_PCT),
     }
+
+
+# ------------------------------------------------------------------ provenance
+
+
+@app.get("/api/provenance")
+def provenance():
+    """How our figures compare with the official MoSPI dashboard.
+
+    The problem statement designates mplads.mospi.gov.in as the dataset. We
+    load from Empowered Indian, which aggregates it - a claim worth checking
+    rather than asserting, so scripts/verify_mospi.py checks it against the
+    portal's own pre-login endpoints and records the result here.
+    """
+    rows = query(
+        """
+        SELECT metric, ours, official, unit, gap_pct, note, checked_at
+        FROM source_reconciliation ORDER BY metric
+        """
+    )
+    freshness = query(
+        """
+        SELECT finished_at, rows_loaded, rows_scored, source
+        FROM data_refresh WHERE status = 'success'
+        ORDER BY finished_at DESC NULLS LAST LIMIT 1
+        """,
+        one=True,
+    )
+    worst = max((abs(float(r["gap_pct"])) for r in rows if r["gap_pct"] is not None),
+                default=None)
+    return {
+        "rows": rows,
+        "worst_gap_pct": worst,
+        "last_refresh": freshness or {},
+        "chain": [
+            {
+                "step": "Ministry of Statistics and Programme Implementation",
+                "what": "Publishes the MPLADS record at mplads.mospi.gov.in, the dataset this problem statement designates.",
+            },
+            {
+                "step": "Empowered Indian",
+                "what": "Aggregates that portal and publishes machine-readable exports of the works, payments and per-MP figures the official site shows only as a dashboard.",
+            },
+            {
+                "step": "This system",
+                "what": "Loads those exports nightly, scores every work against its peers, and records the comparison above so the chain can be audited rather than trusted.",
+            },
+        ],
+    }

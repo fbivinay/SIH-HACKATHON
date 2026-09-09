@@ -37,6 +37,7 @@ export const navLinks = [
   { href: "/states", label: "States" },
   { href: "/map", label: "Map" },
   { href: "/analysis", label: "Agencies" },
+  { href: "/provenance", label: "Sources" },
 ];
 
 // A freshness hiccup must not take the page with it: fall back to a plain
