@@ -140,6 +140,20 @@ def filters():
     return {"states": states, "risk_levels": [r["risk_level"] for r in risk_levels]}
 
 
+@app.get("/api/projects/by-key")
+def project_by_key(work_key: str = Query(min_length=1, max_length=400)):
+    """Look a work up by the identifier that survives a refresh.
+
+    `id` is a serial the loader reassigns every night, so a link to
+    /api/projects/12524 points at a different work tomorrow. work_key does not
+    move, which is what makes a shared or bookmarked link durable.
+    """
+    row = query("SELECT * FROM projects_scored WHERE work_key = %s", [work_key], one=True)
+    if row is None:
+        raise HTTPException(status_code=404, detail="No work with that work_key")
+    return row
+
+
 @app.get("/api/projects/{project_id}")
 def project_detail(project_id: int):
     row = query("SELECT * FROM projects_scored WHERE id = %s", [project_id], one=True)
