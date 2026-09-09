@@ -73,42 +73,51 @@ def test_benford_needs_a_sample():
 def mp_rows(rows):
     return pd.DataFrame(rows, columns=[
         "mp_id", "ls_term", "mp_name", "constituency", "state",
-        "allocated_amount", "unspent_amount", "utilization_pct", "completed_works",
-        "recommended_works"])
+        "allocated_amount", "amount_recommended", "utilization_pct",
+        "completed_works", "recommended_works"])
 
 
 def test_idle_allocation_flags_a_mostly_unspent_allocation():
-    # 95% unspent, on a ramp from 80% to 100%, is three quarters of the way up.
+    # Rs 5 crore allocated, Rs 1.25 crore committed: 75% never committed to any
+    # work, which is the top of a ramp running from 35% to 75%.
     out = d.idle_allocation(mp_rows([
-        ("mp1", 18, "A Member", "Somewhere", "Bihar", 5e7, 4.75e7, 5.0, 3, 40)]))
+        ("mp1", 18, "A Member", "Somewhere", "Bihar", 5e7, 1.25e7, 5.0, 3, 40)]))
     assert len(out) == 1 and out[0]["code"] == "D-03"
     assert out[0]["evidence"]["allocated_amount"] == 5e7
-    assert out[0]["severity"] == pytest.approx(75.0)
+    assert out[0]["severity"] == pytest.approx(100.0)
 
 
 def test_idle_allocation_ignores_the_median_mp():
-    """Half of an allocation unspent is the norm across 1,540 MP-terms, so it
-    must not be a finding - otherwise the detector flags almost everybody."""
+    """The median MP-term leaves 16.5% of its allocation uncommitted, so a
+    figure near that must not be a finding - it would flag almost everybody."""
     assert d.idle_allocation(mp_rows([
-        ("mp1", 18, "A Member", "X", "Bihar", 5e7, 2.6e7, 48.0, 20, 30)])) == []
+        ("mp1", 18, "A Member", "X", "Bihar", 5e7, 4.2e7, 48.0, 20, 30)])) == []
 
 
-def test_idle_allocation_ignores_a_spent_allocation():
+def test_idle_allocation_ignores_a_fully_committed_allocation():
     assert d.idle_allocation(mp_rows([
-        ("mp1", 18, "A Member", "X", "Bihar", 5e7, 5e5, 99.0, 40, 45)])) == []
+        ("mp1", 18, "A Member", "X", "Bihar", 5e7, 4.95e7, 99.0, 40, 45)])) == []
+
+
+def test_idle_allocation_is_silent_without_the_source_column():
+    """A snapshot from before the source published amount_recommended cannot
+    answer this question, and must not fall back to a column that measures
+    payments outstanding instead."""
+    df = mp_rows([("mp1", 18, "A Member", "X", "Bihar", 5e7, 0.0, 0.0, 3, 40)])
+    assert d.idle_allocation(df.drop(columns=["amount_recommended"])) == []
 
 
 def test_idle_allocation_ignores_an_mp_who_has_not_started():
     """No works recommended is not idle money, it is a member seated part-way
-    through the term. 88 of 385 MP-terms over the floor are in that position."""
+    through the term."""
     assert d.idle_allocation(mp_rows([
-        ("mp1", 18, "A Member", "X", "Bihar", 5e7, 5e7, 0.0, 0, 0)])) == []
+        ("mp1", 18, "A Member", "X", "Bihar", 5e7, 0.0, 0.0, 0, 0)])) == []
 
 
 def test_idle_allocation_ignores_a_token_allocation():
     """A percentage of a tiny allocation is not a finding."""
     assert d.idle_allocation(mp_rows([
-        ("mp1", 18, "A Member", "X", "Bihar", 1000.0, 1000.0, 0.0, 0, 5)])) == []
+        ("mp1", 18, "A Member", "X", "Bihar", 1000.0, 0.0, 0.0, 0, 5)])) == []
 
 
 # --- D-04 ------------------------------------------------------------------
@@ -139,7 +148,7 @@ def test_run_all_returns_rows_shaped_for_the_table():
     findings = d.run_all(
         works([("A", 18, 243000.0)] * 30),
         payments([("A", 18, 1000.0, f"2024-03-{i % 28 + 1:02d}") for i in range(40)]),
-        mp_rows([("mp1", 18, "A Member", "X", "Bihar", 5e7, 4.9e7, 2.0, 3, 40)]),
+        mp_rows([("mp1", 18, "A Member", "X", "Bihar", 5e7, 1e7, 2.0, 3, 40)]),
     )
     assert {f["code"] for f in findings} == {"D-01", "D-04", "D-03"}
     for f in findings:

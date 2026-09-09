@@ -70,6 +70,17 @@ CREATE TABLE IF NOT EXISTS mps (
     completed_works INTEGER,
     recommended_works INTEGER,
     completion_rate_pct NUMERIC(6,2),
+    -- What the MP has committed to works. Added 2026-09-09, when the source
+    -- began publishing it; it is the numerator of the utilisation figure its
+    -- own dashboard shows.
+    amount_recommended NUMERIC(16,2),
+    -- NOT "allocation not used". The source renamed this column to
+    -- "Balance Not Yet Paid to Vendors" and the name is the accurate one:
+    -- across all 1,548 rows it equals amount_recommended - total_expenditure
+    -- exactly, and equals allocated_amount - total_expenditure on only 39.
+    -- Money committed to works but not yet paid out is a far weaker finding
+    -- than money never committed at all - see idle_allocation in
+    -- data/detectors.py, which now computes the latter itself.
     unspent_amount NUMERIC(16,2),
     transaction_count INTEGER,
     successful_payments INTEGER,
@@ -147,6 +158,8 @@ ALTER TABLE projects DROP COLUMN IF EXISTS district_avg_cost;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS work_key TEXT;
 -- Added 2026-09-07, see the column comment above.
 ALTER TABLE projects ALTER COLUMN cost_deviation_pct TYPE NUMERIC(12,2);
+-- Added 2026-09-09 with the source's new column. See the note on mps.
+ALTER TABLE mps ADD COLUMN IF NOT EXISTS amount_recommended NUMERIC(16,2);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_work_key
     ON projects(work_key) WHERE work_key IS NOT NULL;
 

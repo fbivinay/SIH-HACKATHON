@@ -371,10 +371,30 @@ def load_expenditures(conn, df):
 
 MP_COLUMNS = [
     "mp_id", "ls_term", "mp_name", "constituency", "state", "house",
-    "allocated_amount", "total_expenditure", "utilization_pct", "completed_works",
+    "allocated_amount", "amount_recommended", "total_expenditure",
+    "utilization_pct", "completed_works",
     "recommended_works", "completion_rate_pct", "unspent_amount",
     "transaction_count", "successful_payments", "pending_payments",
 ]
+
+# The source renames columns between extracts. On 2026-09-09 "Unspent Amount"
+# became "Balance Not Yet Paid to Vendors" - a better name for what it always
+# was - and the load died on a KeyError after it had already committed the
+# works, leaving the database holding a new snapshot's works beside the
+# previous one's payments. Each field lists the spellings seen, newest first.
+MP_SOURCE_COLUMNS = {
+    "allocated_amount": ["Allocated Amount (₹)"],
+    "amount_recommended": ["Amount Recommended (₹)"],
+    "total_expenditure": ["Total Expenditure (₹)"],
+    "utilization_pct": ["Utilization %"],
+    "completed_works": ["Completed Works"],
+    "recommended_works": ["Recommended Works"],
+    "completion_rate_pct": ["Completion Rate %"],
+    "unspent_amount": ["Balance Not Yet Paid to Vendors (₹)", "Unspent Amount (₹)"],
+    "transaction_count": ["Transaction Count"],
+    "successful_payments": ["Successful Payments"],
+    "pending_payments": ["Pending Payments"],
+}
 
 
 def build_mp_rows():
@@ -385,7 +405,19 @@ def build_mp_rows():
     can be checked against theirs.
     """
     mp = pd.read_csv(MP_SUMMARY_CSV)
-    num = lambda col: pd.to_numeric(mp[col], errors="coerce")
+
+    def num(field):
+        """Read a numeric field by whichever spelling this extract uses.
+
+        A column the source has not published yet comes back as all-NA rather
+        than killing the load: amount_recommended did not exist before
+        2026-09-09, and a snapshot from before then is still a supported input.
+        """
+        for name in MP_SOURCE_COLUMNS[field]:
+            if name in mp.columns:
+                return pd.to_numeric(mp[name], errors="coerce")
+        return pd.Series(pd.NA, index=mp.index, dtype="Float64")
+
     out = pd.DataFrame({
         "mp_id": [safe_mp_key(n, s, h) for n, s, h in zip(mp["MP Name"], mp["State"], mp["House"])],
         "ls_term": mp["ls_term"] if "ls_term" in mp.columns else 0,
@@ -393,16 +425,7 @@ def build_mp_rows():
         "constituency": mp["Constituency"],
         "state": mp["State"],
         "house": mp["House"],
-        "allocated_amount": num("Allocated Amount (₹)"),
-        "total_expenditure": num("Total Expenditure (₹)"),
-        "utilization_pct": num("Utilization %"),
-        "completed_works": num("Completed Works"),
-        "recommended_works": num("Recommended Works"),
-        "completion_rate_pct": num("Completion Rate %"),
-        "unspent_amount": num("Unspent Amount (₹)"),
-        "transaction_count": num("Transaction Count"),
-        "successful_payments": num("Successful Payments"),
-        "pending_payments": num("Pending Payments"),
+        **{field: num(field) for field in MP_SOURCE_COLUMNS},
     })
     dropped = int(out["mp_id"].isna().sum())
     out = out[out["mp_id"].notna()]
@@ -455,7 +478,20 @@ def load(conn, df, rejects):
         for row in prepare_insert_frame(df).itertuples(index=False, name=None)
     ]
     with conn.cursor() as cur:
-        cur.execute("DELETE FROM projects WHERE source = 'real'")
+        # DELETE leaves every replaced row behind as a dead tuple, and the file
+        # never shrinks: after a few reloads of 250k works the table was 238 MB
+        # holding 114 MB of live rows, and the load eventually failed on Neon's
+        # 512 MB project limit. TRUNCATE reclaims the space in the same
+        # statement, so the table stays the size of its contents.
+        #
+        # Only when the table holds nothing but real rows, though. A database
+        # carrying synthetic rows from data/generate_synthetic.py still needs
+        # the targeted delete, which is what the source column is for.
+        cur.execute("SELECT EXISTS (SELECT 1 FROM projects WHERE source <> 'real')")
+        if cur.fetchone()[0]:
+            cur.execute("DELETE FROM projects WHERE source = 'real'")
+        else:
+            cur.execute("TRUNCATE projects RESTART IDENTITY CASCADE")
         execute_values(
             cur,
             f"INSERT INTO projects ({', '.join(INSERT_COLUMNS)}) VALUES %s",
@@ -477,35 +513,43 @@ if __name__ == "__main__":
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     run_id = start_refresh_run(conn, source=f"{RECOMMENDED_CSV.name}, {COMPLETED_CSV.name}")
     try:
+        # Every frame is built BEFORE anything is written. The works used to be
+        # committed first and the MP summary parsed afterwards, so when the
+        # source renamed a column on 2026-09-09 the load died on a KeyError
+        # having already replaced 250,839 works - leaving one snapshot's works
+        # beside the previous snapshot's payments, which is worse than either
+        # snapshot alone and looks like nothing is wrong.
         df, rejects = build_rows()
+        mp_df = mp_dropped = mp_collapsed = None
+        if MP_SUMMARY_CSV is not None:
+            mp_df, mp_dropped, mp_collapsed = build_mp_rows()
+        exp_df = exp_dropped = None
+        if EXPENDITURES_CSV is not None:
+            exp_df, exp_dropped = build_expenditure_rows()
+
         inserted, rejected = load(conn, df, rejects)
+        if mp_df is None:
+            print("No mplads_mp_summary_*.csv in the snapshot - skipping MP aggregates.")
+        else:
+            print(f"Inserted {load_mps(conn, mp_df)} MP-terms "
+                  f"({mp_collapsed} duplicate name(s) collapsed onto one mp_id, "
+                  f"{mp_dropped} dropped for an unusable name).")
+        if exp_df is None:
+            print("No mplads_expenditures_*.csv in the snapshot - skipping vendor data. "
+                  "Agency risk will score concentration as 0.")
+        else:
+            print(f"Inserted {load_expenditures(conn, exp_df)} expenditure transactions "
+                  f"({exp_dropped} dropped for missing vendor, agency or amount).")
     except Exception:
-        # Loader failed before scoring ever ran - the row stays honest as
-        # 'failed' rather than parked at 'running' forever. scoring.py's own
-        # bookkeeping is unaffected since it never finds this run to update.
+        # The row stays honest as 'failed' rather than parked at 'running'
+        # forever. scoring.py's own bookkeeping is unaffected since it never
+        # finds this run to update.
         finish_load_run(conn, run_id, "failed", None, None)
         conn.close()
         raise
-    if MP_SUMMARY_CSV is None:
-        print("No mplads_mp_summary_*.csv in the snapshot - skipping MP aggregates.")
-    else:
-        mp_df, mp_dropped, mp_collapsed = build_mp_rows()
-        print(f"Inserted {load_mps(conn, mp_df)} MP-terms "
-              f"({mp_collapsed} duplicate name(s) collapsed onto one mp_id, "
-              f"{mp_dropped} dropped for an unusable name).")
-
-    if EXPENDITURES_CSV is None:
-        print("No mplads_expenditures_*.csv in the snapshot - skipping vendor data. "
-              "Agency risk will score concentration as 0.")
-    else:
-        exp_df, exp_dropped = build_expenditure_rows()
-        exp_inserted = load_expenditures(conn, exp_df)
-        print(f"Inserted {exp_inserted} expenditure transactions "
-              f"({exp_dropped} dropped for missing vendor, agency or amount).")
 
     # Still 'running': scoring.py finishes this same row once it completes.
     finish_load_run(conn, run_id, "running", inserted, rejected)
     conn.close()
     print(f"Inserted {inserted} real projects, rejected {rejected} rows.")
-    print(f"Total expenditure (completed works' Final Amount): "
-          f"Rs {df['expenditure'].sum():,.2f}")
+    print(f"Completed works' final amounts: Rs {df['expenditure'].sum():,.2f}")

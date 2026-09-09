@@ -29,12 +29,14 @@ function evidenceLine(f: DetectorFinding): string | null {
     case "D-02":
       return `Mean absolute deviation ${e.mad} across ${formatCount(n("payments"))} payments`;
     case "D-03": {
-      const unspent = n("unspent_amount");
-      return unspent === null
+      const idle = n("idle_amount");
+      return idle === null
         ? null
-        : `${formatINR(unspent)} unspent of ${formatINR(n("allocated_amount") ?? 0)}${
-            e.constituency ? ` · ${e.constituency}` : ""
-          }${e.state ? `, ${e.state}` : ""}`;
+        : `${formatINR(idle)} of ${formatINR(
+            n("allocated_amount") ?? 0
+          )} never committed to a work${e.constituency ? ` — ${e.constituency}` : ""}${
+            e.state ? `, ${e.state}` : ""
+          }`;
     }
     case "D-04":
       return `${formatCount(n("works_at_amount"))} of ${formatCount(
