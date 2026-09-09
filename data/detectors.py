@@ -35,10 +35,17 @@ D-02 First-digit anomaly. Genuine accounting amounts spanning several orders of
      weakest of the four, it is a lead and never a finding, and the interface
      says so where it is displayed.
 
-D-03 Idle allocation. Straight from the source's own MP summary: allocation,
-     expenditure and the unspent balance. Average utilisation across 1,547
-     MP-terms is 48.6%, so the median MP-term has over half its money still
-     sitting there and only the worst quarter is surfaced. This is the "inefficiency" half of the brief rather
+D-03 Idle allocation. Allocation the MP has never committed to any work:
+     allocated_amount minus amount_recommended, both published by the source.
+
+     This used to read the column the source called "Unspent Amount", which
+     sounded like the same thing and is not. On 2026-09-09 the source renamed
+     it "Balance Not Yet Paid to Vendors", and that name is the accurate one -
+     across all 1,548 MP-terms it equals amount_recommended minus expenditure
+     exactly, and equals allocated minus expenditure on 39. Money committed to
+     works and awaiting payment is ordinary administration; money never
+     committed at all is the finding this detector is named after, and the two
+     were being reported as one. This is the "inefficiency" half of the brief rather
      than the "anomaly" half, and it carries no suspicion at all - MPLADS funds
      stay spendable after a term ends, so a low figure in a running term is
      normal and is reported as a figure, not an alarm.
@@ -91,12 +98,17 @@ BENFORD_CEILING_MAD = 15.5
 # --- D-03 ------------------------------------------------------------------
 # An MP-term with a token allocation produces a meaningless percentage.
 IDLE_MIN_ALLOCATION = 1_00_00_000  # Rs 1 crore
-# Unspent share across the 1,540 qualifying MP-terms runs p50=52.6%, p75=80.0%,
-# p90=97.9%. Half of every allocation being unspent is the norm here, so a
-# floor anywhere near it flags almost everybody and identifies nobody. p75 is
-# the floor: 385 MP-terms, the worst quarter.
-IDLE_FLOOR_PCT = 80.0
-IDLE_CEILING_PCT = 100.0
+# Share of the allocation never committed to any work. Measured on the
+# 2026-09-09 extract across the 1,465 qualifying MP-terms: p25=3.1%, p50=16.5%,
+# p75=34.5%, p90=56.8%, p95=74.4%, max 99.3%. Leaving some allocation
+# uncommitted is normal, so the floor sits at p75 and the ceiling near p95 -
+# 279 MP-terms surface, and only the worst 5% saturate.
+#
+# The previous bounds (80-100) were calibrated against the source's "Unspent
+# Amount" column, which turned out to measure something else entirely, so they
+# carried over to a different quantity and would have flagged almost nobody.
+IDLE_FLOOR_PCT = 35.0
+IDLE_CEILING_PCT = 75.0
 # An MP who has recommended nothing has not started, which is a different thing
 # from money sitting idle and mostly catches members seated part-way through a
 # term. 88 of the 385 MP-terms over the floor are in that position; excluding
@@ -292,9 +304,19 @@ def idle_allocation(mps):
     df = df[recommended >= IDLE_MIN_RECOMMENDED_WORKS]
     if df.empty:
         return []
-    unspent = pd.to_numeric(df["unspent_amount"], errors="coerce").fillna(0.0)
     allocated = pd.to_numeric(df["allocated_amount"], errors="coerce")
-    df["unspent_share"] = (unspent / allocated * 100).clip(lower=0)
+    # Allocation never committed to any work. A snapshot from before the source
+    # published amount_recommended cannot answer this, and the detector stays
+    # silent rather than falling back to a figure that means something else.
+    if "amount_recommended" not in df.columns:
+        return []
+    committed = pd.to_numeric(df["amount_recommended"], errors="coerce")
+    idle = (allocated - committed).where(committed.notna())
+    df["idle_amount"] = idle
+    df["unspent_share"] = (idle / allocated * 100).clip(lower=0)
+    df = df[df["unspent_share"].notna()]
+    if df.empty:
+        return []
 
     out = []
     for _, row in df.iterrows():
@@ -305,15 +327,16 @@ def idle_allocation(mps):
         done = 0 if pd.isna(row.get("completed_works")) else int(row["completed_works"])
         out.append(_finding(
             "D-03", "mp", row["mp_id"], row["ls_term"], None, severity,
-            f"{row['mp_name']} has recommended {rec} works and completed {done}, "
-            f"with {row['unspent_share']:.0f}% of the allocation unspent",
+            f"{row['mp_name']} has never committed {row['unspent_share']:.0f}% of the "
+            f"allocation to any work, across {rec} works recommended and {done} completed",
             {
                 "mp_name": row["mp_name"],
                 "constituency": row.get("constituency"),
                 "state": row.get("state"),
                 "allocated_amount": float(row["allocated_amount"]),
-                "unspent_amount": float(unspent.loc[row.name]),
-                "unspent_share_pct": round(float(row["unspent_share"]), 1),
+                "amount_recommended": float(committed.loc[row.name]),
+                "idle_amount": float(row["idle_amount"]),
+                "idle_share_pct": round(float(row["unspent_share"]), 1),
                 "utilization_pct": None if pd.isna(row.get("utilization_pct")) else float(row["utilization_pct"]),
                 "recommended_works": rec,
                 "completed_works": done,

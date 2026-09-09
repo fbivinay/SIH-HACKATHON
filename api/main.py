@@ -15,12 +15,35 @@ app.add_middleware(
 
 
 @app.get("/api/overview")
-def overview():
-    return query(
-        """
+def overview(ls_term: Optional[int] = Query(None, ge=17, le=18)):
+    """Headline figures, optionally for one Lok Sabha term.
+
+    The term matters for comparison as much as for correctness. The source's
+    own dashboard defaults to a single term, so pooling both here produced
+    figures that looked wrong next to it while being right - our completed
+    works came to Rs 6,340 Cr across both terms against their Rs 2,408 Cr for
+    the 18th alone.
+
+    Three different money figures live in this record and they are not
+    interchangeable:
+      - completed_works_value: what completed works finally cost. This is the
+        one that reconciles with the source's completedWorksValue.
+      - sanctioned_total: what has been sanctioned, completed or not.
+      - vendor_payments: what the expenditure extract records actually being
+        paid out. This is what the source's dashboard calls "Total
+        Expenditure".
+    """
+    where, params = ("WHERE ls_term = %s", [ls_term]) if ls_term else ("", [])
+    row = query(
+        f"""
         SELECT
           COUNT(*) AS total_projects,
+          COUNT(*) FILTER (WHERE work_status = 'completed') AS completed_count,
+          COUNT(*) FILTER (WHERE work_status = 'recommended') AS pending_count,
           COALESCE(SUM(expenditure), 0) AS total_expenditure,
+          COALESCE(SUM(expenditure) FILTER (WHERE work_status = 'completed'), 0)
+            AS completed_works_value,
+          COALESCE(SUM(sanctioned_amount), 0) AS sanctioned_total,
           COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_count,
           COUNT(*) FILTER (WHERE delay_days > 60) AS delayed_count,
           -- >= 40, not > 40. The alert queue's threshold is inclusive (it is
@@ -29,9 +52,30 @@ def overview():
           -- there, the 328 works sitting exactly on 40.
           COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS anomaly_count
         FROM projects
+        {where}
         """,
+        params,
         one=True,
     )
+    money = query(
+        f"""
+        SELECT COALESCE(SUM(expenditure_amount), 0) AS vendor_payments,
+               COUNT(*) AS payment_count
+        FROM expenditures {where}
+        """,
+        params,
+        one=True,
+    )
+    mps_row = query(
+        f"""
+        SELECT COALESCE(SUM(allocated_amount), 0) AS allocated_total,
+               COUNT(DISTINCT mp_id) AS mp_count
+        FROM mps {where}
+        """,
+        params,
+        one=True,
+    )
+    return {**row, **money, **mps_row, "ls_term": ls_term}
 
 
 @app.get("/api/projects")
@@ -171,13 +215,20 @@ def agencies(
 
 @app.get("/api/mps")
 def mps(limit: int = Query(100, le=1000)):
-    """MPs by the value of their allocation still unspent.
+    """MPs by the value of allocation they have never committed to a work.
 
-    utilization_pct and unspent_amount come straight from the source's own
-    published per-MP aggregates, not from anything computed here, so they can be
-    checked against empoweredindian.in for the same MP.
+    Every figure here is the source's own published per-MP aggregate rather
+    than anything recomputed, so each can be checked against
+    empoweredindian.in for the same MP.
 
-    Sorted by unspent amount rather than by utilisation: the lowest utilisation
+    Two different balances, easy to confuse and reported separately:
+      - idle_amount = allocated_amount - amount_recommended. Money that has
+        never been committed to any work.
+      - unspent_amount, which the source now calls "Balance Not Yet Paid to
+        Vendors" - money committed to works and awaiting payment. It equals
+        amount_recommended - total_expenditure on every one of the 1,548 rows.
+
+    Sorted by idle amount rather than by utilisation: the lowest utilisation
     figures belong to Rajya Sabha members sworn in during 2025-26 who have had
     no time to spend anything, and ranking them as the worst would be wrong.
     """
@@ -190,14 +241,16 @@ def mps(limit: int = Query(100, le=1000)):
             FROM projects WHERE mp_id IS NOT NULL GROUP BY mp_id, ls_term
         )
         SELECT m.mp_id, m.ls_term, m.mp_name, m.constituency, m.state, m.house,
-               m.allocated_amount, m.total_expenditure, m.utilization_pct,
-               m.unspent_amount, m.completion_rate_pct, m.pending_payments,
+               m.allocated_amount, m.amount_recommended, m.total_expenditure,
+               m.utilization_pct, m.unspent_amount, m.completion_rate_pct,
+               m.pending_payments,
+               m.allocated_amount - m.amount_recommended AS idle_amount,
                COALESCE(w.total_projects, 0) AS total_projects,
                COALESCE(w.high_risk_works, 0) AS high_risk_works
         FROM mps m
         LEFT JOIN work_stats w USING (mp_id, ls_term)
         WHERE COALESCE(m.allocated_amount, 0) > 0
-        ORDER BY m.unspent_amount DESC NULLS LAST
+        ORDER BY (m.allocated_amount - m.amount_recommended) DESC NULLS LAST
         LIMIT %s
         """,
         [limit],
@@ -459,8 +512,8 @@ DETECTORS = {
     "D-03": {
         "name": "Idle allocation",
         "subject": "mp",
-        "what": "How much of an MP's allocation is still unspent, from the portal's own MP summary.",
-        "limit": "Not a suspicion. MPLADS funds stay spendable after a term ends, and the median MP-term has over half its allocation unspent, so only the worst quarter appears here.",
+        "what": "Allocation an MP has never committed to any work — what the portal publishes as allocated, less what it publishes as recommended.",
+        "limit": "Not a suspicion. MPLADS funds stay spendable after a term ends, and the median MP-term leaves 16.5% uncommitted, so only well above that appears here. It is deliberately not the source's \"Balance Not Yet Paid to Vendors\", which is money already committed to works and merely awaiting payment.",
     },
     "D-04": {
         "name": "Uniform sanction amount",

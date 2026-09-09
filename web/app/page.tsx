@@ -57,8 +57,25 @@ const LIMITS = [
   },
 ];
 
-export default async function OverviewPage() {
-  const data = await api.overview();
+const TERMS = [
+  { value: "18", label: "18th Lok Sabha", note: "2024–29" },
+  { value: "17", label: "17th Lok Sabha", note: "2019–24" },
+  { value: "", label: "Both terms", note: "everything on record" },
+];
+
+export default async function OverviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  // Defaults to the 18th, because the source's own dashboard does. Pooling
+  // both terms made our figures look wrong beside it while being right.
+  const rawTerm = typeof sp.ls_term === "string" ? sp.ls_term : "18";
+  const term = ["17", "18", ""].includes(rawTerm) ? rawTerm : "18";
+  const scope = TERMS.find((t) => t.value === term) ?? TERMS[0];
+
+  const data = await api.overview(term ? { ls_term: term } : {});
 
   // Risk counts are legitimately 0 (COUNT(*) FILTER, never null) until scoring
   // has run. Say so rather than presenting a wall of zeros as "nothing flagged".
@@ -70,8 +87,31 @@ export default async function OverviewPage() {
 
   const dash = "—";
   const stats = [
-    { label: "Works tracked", value: formatCount(data.total_projects), note: "Recommended and completed" },
-    { label: "Expenditure reconciled", value: formatINR(data.total_expenditure), note: "Against the portal's own totals" },
+    {
+      label: "Works tracked",
+      value: formatCount(data.total_projects),
+      note: `${formatCount(data.completed_count)} completed, ${formatCount(
+        data.pending_count
+      )} still pending`,
+    },
+    {
+      label: "Allocated to MPs",
+      value: formatINR(data.allocated_total),
+      note: `Across ${formatCount(data.mp_count)} members`,
+    },
+    {
+      // The source's dashboard calls this "Total Expenditure". Naming it
+      // vendor payments keeps it distinct from the value of completed works,
+      // which is a different figure entirely.
+      label: "Vendor payments",
+      value: formatINR(data.vendor_payments),
+      note: `${formatCount(data.payment_count)} transactions on record`,
+    },
+    {
+      label: "Completed works value",
+      value: formatINR(data.completed_works_value),
+      note: "What finished works finally cost",
+    },
     {
       label: "High risk",
       value: scoringPending ? dash : formatCount(data.high_risk_count),
@@ -104,6 +144,20 @@ export default async function OverviewPage() {
           cost, delay, duplication, the implementing agency and the scheme&rsquo;s own rules.
           The ones that do not fit come out ranked, with the record that flagged them.
         </p>
+
+        <nav className="mt-6 flex flex-wrap justify-center gap-2" aria-label="Lok Sabha term">
+          {TERMS.map((t) => (
+            <Link
+              key={t.value || "all"}
+              href={t.value ? `/?ls_term=${t.value}` : "/?ls_term="}
+              className="review-btn"
+              aria-current={term === t.value ? "true" : undefined}
+              style={term === t.value ? { color: "var(--ink)", borderColor: "var(--ink)" } : undefined}
+            >
+              {t.label}
+            </Link>
+          ))}
+        </nav>
         <div className="mt-8 flex flex-wrap justify-center gap-2.5">
           <Link href="/alerts" className="btn btn--solid">
             Open the verification queue
@@ -124,7 +178,12 @@ export default async function OverviewPage() {
             </span>
           </div>
         )}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <p className="mb-3 text-[0.8rem]" style={{ color: "var(--ink-3)" }}>
+          {scope.label}
+          {scope.note ? ` (${scope.note})` : ""} — figures below cover this scope only, so
+          they line up with the same view on the source&rsquo;s own dashboard.
+        </p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {stats.map((s) => (
             <div key={s.label} className={`stat-card${s.tone ? ` stat-card--${s.tone}` : ""}`}>
               <div className="stat-card__label">{s.label}</div>

@@ -144,13 +144,13 @@ export default async function AnalysisPage({
       </nav>
 
       <section className="mt-12">
-        <h2 className="section-head">Allocation still unspent</h2>
+        <h2 className="section-head">Allocation never committed</h2>
         <p className="lede !mx-0 !max-w-2xl">
-          Utilisation and unspent figures are the source&apos;s own published
-          per-MP aggregates, not computed here, so they can be checked against
-          empoweredindian.in for the same MP. Ranked by unspent amount rather
-          than by utilisation: the lowest utilisation belongs to members sworn in
-          during 2025&ndash;26 who have had no time to spend anything.
+          Allocation the MP has never committed to any work — what the portal publishes as
+          allocated, less what it publishes as recommended. This is not the source&apos;s
+          &ldquo;Balance Not Yet Paid to Vendors&rdquo;, which is money already committed
+          and merely awaiting payment; both are shown. Every figure is the source&apos;s own,
+          so it can be checked against empoweredindian.in for the same MP.
         </p>
 
         <div className="mt-6 data-table-wrap">
@@ -159,9 +159,10 @@ export default async function AnalysisPage({
               <tr>
                 <th>MP</th>
                 <th>Constituency</th>
-                <th className="text-right">Allocated</th>
-                <th className="text-right">Unspent</th>
-                <th className="text-right">Utilisation</th>
+                <th className="num">Allocated</th>
+                <th className="num">Never committed</th>
+                <th className="num">Awaiting payment</th>
+                <th className="num">Utilisation</th>
                 <th className="text-right">Works</th>
               </tr>
             </thead>
@@ -176,6 +177,7 @@ export default async function AnalysisPage({
                   </td>
                   <td className="max-w-[14rem] truncate">{m.constituency ?? "—"}</td>
                   <td className="num">{formatINR(m.allocated_amount)}</td>
+                  <td className="num">{formatINR(m.idle_amount)}</td>
                   <td className="num">{formatINR(m.unspent_amount)}</td>
                   <td className="num">
                     {m.utilization_pct === null ? "—" : `${m.utilization_pct.toFixed(0)}%`}

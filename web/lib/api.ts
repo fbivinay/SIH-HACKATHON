@@ -2,10 +2,23 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
 
 export type Overview = {
   total_projects: number;
+  completed_count: number;
+  pending_count: number;
+  // Three money figures that are NOT interchangeable — see /api/overview.
+  // completed_works_value is the one that reconciles with the source's own
+  // published completedWorksValue; vendor_payments is what its dashboard
+  // calls "Total Expenditure".
   total_expenditure: number;
+  completed_works_value: number;
+  sanctioned_total: number;
+  vendor_payments: number;
+  payment_count: number;
+  allocated_total: number;
+  mp_count: number;
   high_risk_count: number;
   delayed_count: number;
   anomaly_count: number;
+  ls_term: number | null;
 };
 
 export type ProjectSummary = {
@@ -87,8 +100,13 @@ export type MpStat = {
   state: string | null;
   house: string | null;
   allocated_amount: number | null;
+  amount_recommended: number | null;
   total_expenditure: number | null;
   utilization_pct: number | null;
+  // Two different balances. idle_amount is allocation never committed to any
+  // work; unspent_amount is what the source now calls "Balance Not Yet Paid to
+  // Vendors" — committed to works, awaiting payment. Do not conflate them.
+  idle_amount: number | null;
   unspent_amount: number | null;
   completion_rate_pct: number | null;
   pending_payments: number | null;
@@ -206,7 +224,8 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export const api = {
-  overview: () => get<Overview>("/api/overview"),
+  overview: (params: Record<string, string> = {}) =>
+    get<Overview>(`/api/overview?${new URLSearchParams(params)}`),
   projects: (params: Record<string, string> = {}) =>
     get<ProjectSummary[]>(`/api/projects?${new URLSearchParams(params)}`),
   project: (id: number) => get<ProjectDetail>(`/api/projects/${id}`),

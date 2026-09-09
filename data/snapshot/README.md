@@ -19,6 +19,38 @@ Lok Sabha — see "Why the earlier snapshot was half the data".
 Committed so the pipeline is reproducible from a clone alone: no external
 hosting, no credentials beyond a database URL.
 
+## Reconciliation against the source's own dashboard
+
+Checked 2026-09-09 for the 18th Lok Sabha, the view empoweredindian.in opens on:
+
+| metric | ours | theirs |
+|---|---|---|
+| Total MPs | 774 | 774 |
+| Total allocated | Rs 11,681.9 Cr | Rs 11,681.9 Cr |
+| Vendor expenditure | Rs 3,964.3 Cr | Rs 3,995.3 Cr |
+| Fund utilisation | 66.5% | 67.7% |
+| Completed works | 43,650 | 44,028 |
+
+Every figure sat *below* theirs, never above, which is what a stale snapshot
+looks like rather than a broken pipeline - a mangled load misses in both
+directions. Allocation matched to the decimal, and allocation is the figure
+that would break first if anything were wrong. The 2026-09-09 fetch closed the
+gap: it returns exactly 44,028 completed works for the 18th term.
+
+Three different money figures live in this data and they are not
+interchangeable. Reporting the wrong one under a label implying it matched the
+source is what made ours look wrong while being right:
+
+- **completed works value** - what finished works finally cost. Reconciles
+  with the source's published `completedWorksValue`.
+- **sanctioned total** - what has been sanctioned, finished or not.
+- **vendor payments** - what the expenditure extract records being paid out.
+  This is what the source's dashboard calls "Total Expenditure".
+
+And scope matters as much as metric: the source's dashboard defaults to one
+term, so pooling both made our totals roughly double theirs. /api/overview
+takes an ls_term, and the overview page defaults to the 18th for that reason.
+
 ## Source
 
 MPLADS programme data, obtained via [Empowered Indian](https://empoweredindian.in),
