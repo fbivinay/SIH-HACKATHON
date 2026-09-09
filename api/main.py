@@ -51,7 +51,7 @@ def overview(ls_term: Optional[int] = Query(None, ge=17, le=18)):
           -- different totals for the same set: 48,359 here against 48,687
           -- there, the 328 works sitting exactly on 40.
           COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS anomaly_count
-        FROM projects
+        FROM projects_scored
         {where}
         """,
         params,
@@ -115,7 +115,7 @@ def list_projects(
         f"""
         SELECT id, work_name, ls_term, state, district, category, sector,
                implementing_agency, sanctioned_amount, overall_risk_score, risk_level
-        FROM projects
+        FROM projects_scored
         {where}
         ORDER BY overall_risk_score DESC NULLS LAST
         LIMIT %s OFFSET %s
@@ -134,14 +134,14 @@ def filters():
         "SELECT state, COUNT(*) AS count FROM projects GROUP BY state ORDER BY state"
     )
     risk_levels = query(
-        "SELECT DISTINCT risk_level FROM projects WHERE risk_level IS NOT NULL ORDER BY risk_level"
+        "SELECT DISTINCT risk_level FROM project_scores WHERE risk_level IS NOT NULL ORDER BY risk_level"
     )
     return {"states": states, "risk_levels": [r["risk_level"] for r in risk_levels]}
 
 
 @app.get("/api/projects/{project_id}")
 def project_detail(project_id: int):
-    row = query("SELECT * FROM projects WHERE id = %s", [project_id], one=True)
+    row = query("SELECT * FROM projects_scored WHERE id = %s", [project_id], one=True)
     if row is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return row
@@ -155,7 +155,7 @@ def map_states():
                COUNT(*) AS total_projects,
                COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_count,
                COALESCE(AVG(overall_risk_score), 0) AS avg_risk_score
-        FROM projects GROUP BY state
+        FROM projects_scored GROUP BY state
         """
     )
 
@@ -191,7 +191,7 @@ def agencies(
                    COUNT(*) FILTER (WHERE delay_days > 60) AS delayed_count,
                    COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS anomaly_count,
                    COALESCE(AVG(overall_risk_score), 0) AS avg_risk_score
-            FROM projects {where} GROUP BY implementing_agency, ls_term
+            FROM projects_scored {where} GROUP BY implementing_agency, ls_term
         ),
         vendor_stats AS (
             SELECT * FROM agency_vendor_profile {where}
@@ -238,7 +238,7 @@ def mps(limit: int = Query(100, le=1000)):
             SELECT mp_id, ls_term,
                    COUNT(*) AS total_projects,
                    COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_works
-            FROM projects WHERE mp_id IS NOT NULL GROUP BY mp_id, ls_term
+            FROM projects_scored WHERE mp_id IS NOT NULL GROUP BY mp_id, ls_term
         )
         SELECT m.mp_id, m.ls_term, m.mp_name, m.constituency, m.state, m.house,
                m.allocated_amount, m.amount_recommended, m.total_expenditure,
@@ -282,7 +282,7 @@ def districts():
                COUNT(*) AS total_projects,
                COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_count,
                COALESCE(AVG(overall_risk_score), 0) AS avg_risk_score
-        FROM projects GROUP BY state, district
+        FROM projects_scored GROUP BY state, district
         ORDER BY avg_risk_score DESC
         """
     )
@@ -363,7 +363,7 @@ def alerts(
     rows = query(
         f"""
         SELECT {_ALERT_COLUMNS}
-        FROM projects p
+        FROM projects_scored p
         LEFT JOIN work_reviews r ON r.work_key = p.work_key
         {where}
         ORDER BY p.overall_risk_score DESC NULLS LAST, p.id
@@ -374,7 +374,7 @@ def alerts(
     total = query(
         f"""
         SELECT COUNT(*) AS total
-        FROM projects p
+        FROM projects_scored p
         LEFT JOIN work_reviews r ON r.work_key = p.work_key
         {where}
         """,
@@ -401,7 +401,7 @@ def alerts_summary(min_score: float = Query(40, ge=0, le=100)):
           COUNT(*) FILTER (WHERE p.risk_level = 'MEDIUM')   AS medium,
           COALESCE(SUM(p.sanctioned_amount) FILTER (WHERE r.status IS NULL), 0)
             AS pending_sanctioned_amount
-        FROM projects p
+        FROM projects_scored p
         LEFT JOIN work_reviews r ON r.work_key = p.work_key
         WHERE p.overall_risk_score >= %s
         """,
@@ -637,7 +637,7 @@ def states(ls_term: int = Query(18, ge=17, le=18)):
                    COALESCE(SUM(sanctioned_amount) FILTER (WHERE overall_risk_score >= 40), 0)
                      AS flagged_amount,
                    AVG(overall_risk_score) AS avg_risk
-            FROM projects WHERE ls_term = %s GROUP BY state
+            FROM projects_scored WHERE ls_term = %s GROUP BY state
         )
         SELECT m.state, m.allocated, m.recommended, m.expenditure, m.mp_count,
                m.completed_works, m.recommended_works,
