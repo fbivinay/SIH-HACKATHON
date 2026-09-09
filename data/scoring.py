@@ -10,8 +10,10 @@ from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 
 import detectors
+import llm_sectors
 import vendors
 from sectors import classify_sector
+from sectors import normalize as sectors_normalize
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
@@ -136,6 +138,22 @@ def add_base_features(df):
     # than silently grouping every work in a district together.
     if "sector" not in df.columns or df["sector"].isna().any():
         df["sector"] = df["description"].map(classify_sector)
+
+    # Anything the keyword rules left in Other gets whatever label the model
+    # assigned on a previous run of scripts/classify_sectors.py. Reading a cache
+    # rather than calling anything keeps scoring offline, deterministic and free
+    # - the network call is a separate, deliberate step.
+    unresolved = df["sector"] == llm_sectors.OTHER
+    if unresolved.any():
+        cache = llm_sectors.load_cache()
+        if cache:
+            labelled = df.loc[unresolved, "description"].map(
+                lambda d: cache.get(sectors_normalize(d), llm_sectors.OTHER)
+            )
+            moved = int((labelled != llm_sectors.OTHER).sum())
+            df.loc[unresolved, "sector"] = labelled
+            print(f"sectors: {moved:,} works moved out of Other by the cached "
+                  f"model labels ({len(cache):,} descriptions in the cache).")
 
     peers = df.groupby(["district", "sector"])["sanctioned_amount"]
     # Median, not mean: a single Rs 7.5 crore work drags a district mean far
