@@ -1,6 +1,15 @@
-# MPLADS Risk Monitor
+# Kasauti
 
-This is the MPLADS Risk Monitor project for the SIH Hackathon. The project identifies and flags high-risk infrastructure projects based on cost, schedule, and compliance metrics.
+A kasauti (कसौटी) is the touchstone a jeweller rubs gold against to judge it.
+The stone destroys nothing and accuses nothing - it says which pieces are worth
+assaying. That is the claim this system makes about an MPLADS work, and the one
+it refuses to make.
+
+Built for Smart India Hackathon 2026, problem statement SIH26102: read the
+MPLADS record, score the works that do not resemble their peers, and hand
+officials a ranked list of what to verify.
+
+Live at https://mplads-risk-monitor-web.vercel.app
 
 See the [project specification](docs/superpowers/specs/2026-08-29-mplads-risk-monitor-design.md) and [implementation plan](docs/superpowers/plans/2026-08-29-mplads-risk-monitor.md) for details.
 

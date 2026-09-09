@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
+import Logo from "@/components/Logo";
 import NavLinks from "@/components/NavLinks";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -16,9 +17,15 @@ const mono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MPLADS Risk Monitor",
+  // Kasauti (कसौटी) is the touchstone a jeweller rubs gold against to judge it.
+  // It destroys nothing and accuses nothing; it says which pieces are worth
+  // assaying. That is the claim this system makes and the one it refuses.
+  title: {
+    default: "Kasauti — MPLADS verification",
+    template: "%s · Kasauti",
+  },
   description:
-    "Reads every MPLADS work, scores the ones that do not fit, and hands officials a ranked list of what to verify.",
+    "Reads every MPLADS work, scores the ones that do not resemble their peers, and hands officials a ranked list of what to verify.",
 };
 
 export const navLinks = [
@@ -53,10 +60,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="masthead">
           <div className="shell masthead__inner">
             <Link href="/" className="wordmark">
-              <span className="wordmark__mark" aria-hidden="true">
-                MR
+              <Logo />
+              <span className="wordmark__text">
+                Kasauti
+                <span className="wordmark__sub">MPLADS verification</span>
               </span>
-              MPLADS Risk Monitor
             </Link>
             <NavLinks links={navLinks} />
             <Link href="/alerts" className="btn btn--solid">
@@ -72,7 +80,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="footer__meta">
               <span className="footer__freshness">{freshness}</span>
               <span className="max-w-md">
-                MPLADS programme data via{" "}
+                Kasauti is the touchstone a jeweller rubs gold against: it says which
+                pieces are worth testing, never which are false. MPLADS programme data
+                via{" "}
                 <a href="https://empoweredindian.in" target="_blank" rel="noopener noreferrer">
                   Empowered Indian
                 </a>
@@ -81,7 +91,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </span>
             </div>
             <div className="footer__wordmark" aria-hidden="true">
-              MPLADS
+              Kasauti
             </div>
           </div>
         </footer>
