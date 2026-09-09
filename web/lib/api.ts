@@ -70,7 +70,11 @@ export type StateStat = {
   state: string;
   total_projects: number;
   high_risk_count: number;
+  flagged_count: number;
   avg_risk_score: number;
+  // Percent of the state's works above the review threshold. What the map
+  // colours by — average score puts all 36 states in the LOW band.
+  flagged_share: number | null;
 };
 
 export type AgencyStat = {

@@ -123,3 +123,32 @@ export function normalizeStateName(s: string | null | undefined): string {
     .replace(/\s+islands$/, "")
     .replace(/[^a-z]/g, "");
 }
+
+
+/**
+ * Sequential ramp for the state choropleth: one hue, light to dark, ending on
+ * the risk-high token the rest of the interface already uses.
+ *
+ * Lightness is monotonic by construction (OKLab L 0.956 → 0.489, every step
+ * decreasing), which is the check that applies to a sequential ramp — the
+ * categorical rules about hue separation do not, because these are steps of one
+ * quantity rather than distinct identities.
+ *
+ * Keyed on the share of a state's works above the review threshold, not average
+ * score: all 36 states average inside the LOW band, so a band-coloured map is a
+ * uniform sheet. Share runs 0% to 43.1%.
+ */
+export const CHOROPLETH_STEPS = [
+  { upTo: 5, fill: "#fdecea", label: "under 5%" },
+  { upTo: 15, fill: "#f9d2cd", label: "5–15%" },
+  { upTo: 25, fill: "#f0a79e", label: "15–25%" },
+  { upTo: 35, fill: "#d9695c", label: "25–35%" },
+  { upTo: Infinity, fill: "#a82e22", label: "35% and above" },
+] as const;
+
+export const NO_DATA_FILL = "#e4e4e7";
+
+export function choroplethFill(share: number | null | undefined): string {
+  if (share === null || share === undefined || Number.isNaN(share)) return NO_DATA_FILL;
+  return (CHOROPLETH_STEPS.find((s) => share < s.upTo) ?? CHOROPLETH_STEPS[4]).fill;
+}
