@@ -68,14 +68,32 @@ ALLOWED = SECTOR_NAMES + [OTHER]
 # re-run, not correctness.
 CACHE_PATH = pathlib.Path(__file__).with_name("sector_cache.json")
 
-# The free tier is Flash-only at 10-15 requests/minute and 100-1,000 requests
-# per day, so the batch size - not the token budget - decides whether a run
-# finishes. 150 descriptions of ~20 tokens is ~4k tokens in, far under the
-# 250k/minute ceiling, and turns 42,098 strings into ~280 requests.
-BATCH_SIZE = 150
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+# Set when a pass stops because the day's allowance is gone, so the caller can
+# tell "nothing left to do" from "cannot do any more today".
+QUOTA_EXHAUSTED = False
+
+# Measured, not guessed: Gemini rejects the bounded-array schema with a bare
+# 400 INVALID_ARGUMENT somewhere between 40 and 60 items. 40 works reliably.
+# Requests, not tokens, are the binding constraint on the free tier, so this
+# ceiling is what decides how long a full pass takes - and the runner orders
+# descriptions by how many works they cover, so a partial run buys the most.
+BATCH_SIZE = 40
+# Lite, deliberately. `gemini-flash-latest` resolves to the newest flash model,
+# which carries the tightest free-tier quota - 20 requests per DAY, measured, or
+# 800 descriptions, which would take 53 days to cover this tail. The lite models
+# answer these four-word descriptions just as well and are quota'd for volume.
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-lite-latest")
 # 15 requests/minute is the tightest published free-tier rate.
 MIN_SECONDS_BETWEEN_CALLS = 4.5
+# The free tier returns 503 UNAVAILABLE and 429 often enough that a single blip
+# would otherwise cost a whole batch of labels.
+MAX_ATTEMPTS = 4
+RETRY_BACKOFF_SECONDS = 8
+# Milliseconds, and not optional. Without it a request that is never answered
+# blocks forever: a run sat for 71 minutes on one open socket having burned 3
+# seconds of CPU, and the retry logic above could not help because a hung
+# connection never returns an error to retry.
+REQUEST_TIMEOUT_MS = 90_000
 
 PROMPT = (
     "You are labelling public works from India's MPLADS scheme by the kind of "
@@ -93,6 +111,12 @@ PROMPT = (
     "- yatri pratikshalaya, bus stop shelter, panchayat bhavan -> Community Buildings\n"
     "- nirman means construction and does not by itself indicate a sector\n"
 )
+
+
+class DailyQuotaExhausted(RuntimeError):
+    """The per-day free-tier allowance is gone. Unlike a per-minute rate limit
+    this does not recover within a run, and treating the two alike made a single
+    exhaustion fire a thousand doomed requests before giving up."""
 
 
 def _schema(count):
@@ -136,10 +160,15 @@ class GeminiClassifier:
 
         self.genai = genai
         self.model = model
-        self.client = genai.Client(api_key=api_key or os.environ["GEMINI_API_KEY"])
+        from google.genai import types
+
+        self.client = genai.Client(
+            api_key=api_key or os.environ["GEMINI_API_KEY"],
+            http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS),
+        )
         self._last_call = 0.0
 
-    def classify(self, descriptions):
+    def _call(self, descriptions):
         from google.genai import types
 
         # Free-tier RPM is the binding constraint; pace rather than retry.
@@ -149,7 +178,7 @@ class GeminiClassifier:
         self._last_call = time.monotonic()
 
         numbered = "\n".join(f"{i + 1}. {d}" for i, d in enumerate(descriptions))
-        resp = self.client.models.generate_content(
+        return self.client.models.generate_content(
             model=self.model,
             contents=numbered,
             config=types.GenerateContentConfig(
@@ -157,8 +186,31 @@ class GeminiClassifier:
                 response_mime_type="application/json",
                 response_json_schema=_schema(len(descriptions)),
                 temperature=0,
+                max_output_tokens=8192,
             ),
         )
+
+    def classify(self, descriptions):
+        last = None
+        for attempt in range(MAX_ATTEMPTS):
+            try:
+                resp = self._call(descriptions)
+                break
+            except Exception as err:  # noqa: BLE001
+                text = str(err)
+                # A per-day quota does not recover inside this run. Waiting is
+                # pointless and retrying it is abuse; stop the whole pass.
+                if "PerDay" in text or "GenerateRequestsPerDay" in text:
+                    raise DailyQuotaExhausted(text[:200]) from err
+                # 503 and per-minute 429s are what the free tier does under
+                # load; a 400 is our own request being wrong and will not
+                # improve with time.
+                if "400" in text or "INVALID_ARGUMENT" in text:
+                    raise
+                last = err
+                if attempt == MAX_ATTEMPTS - 1:
+                    raise
+                time.sleep(RETRY_BACKOFF_SECONDS * (attempt + 1))
         sectors = json.loads(resp.text)["sectors"]
         if len(sectors) != len(descriptions):
             raise ValueError(f"asked for {len(descriptions)} labels, got {len(sectors)}")
@@ -177,6 +229,7 @@ def classify_missing(descriptions, client=None, cache=None, batch_size=BATCH_SIZ
     """
     from sectors import classify_sector
 
+    globals()["QUOTA_EXHAUSTED"] = False
     cache = load_cache() if cache is None else cache
     pending = []
     seen = set()
@@ -205,6 +258,12 @@ def classify_missing(descriptions, client=None, cache=None, batch_size=BATCH_SIZ
         chunk = pending[start:start + batch_size]
         try:
             labels = client.classify([text for _, text in chunk])
+        except DailyQuotaExhausted:
+            globals()["QUOTA_EXHAUSTED"] = True
+            progress(f"llm_sectors: daily free-tier quota exhausted after "
+                     f"{len(fresh)} new labels; stopping. Everything so far is "
+                     f"cached - re-run tomorrow to continue.")
+            break
         except Exception as err:  # noqa: BLE001 - one bad batch must not lose the rest
             progress(f"llm_sectors: batch at {start} failed ({err}); "
                      f"leaving {len(chunk)} as {OTHER}")
