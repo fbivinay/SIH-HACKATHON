@@ -436,3 +436,41 @@ def test_insert_columns_match_what_the_loader_builds():
     assert prepared.iloc[0]["work_name"] == "Construction of CC road"
     assert prepared.iloc[0]["source"] == "real"
     assert prepared.iloc[0]["work_key"] == "4021|18|PATNA(DM_IDA)"
+
+
+def test_current_refresh_run_id_ignores_an_abandoned_run():
+    """A run killed by a workflow timeout leaves its row at 'running' forever.
+    Adopting it would stamp that abandoned attempt as this pass's success."""
+    import scoring
+
+    class FakeCursor:
+        def __init__(self, rows):
+            self.rows = rows
+            self.sql = ""
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def execute(self, sql, params=None):
+            self.sql = " ".join(sql.split())
+
+        def fetchone(self):
+            return self.rows
+
+    class FakeConn:
+        def __init__(self, rows):
+            self.cursor_obj = FakeCursor(rows)
+
+        def cursor(self):
+            return self.cursor_obj
+
+    conn = FakeConn((7,))
+    assert scoring.current_refresh_run_id(conn) == 7
+    # The age bound has to be in the statement, or a stale row is adopted.
+    assert "INTERVAL" in conn.cursor_obj.sql
+    assert scoring.MAX_RUN_ADOPTION_AGE in conn.cursor_obj.sql
+
+    assert scoring.current_refresh_run_id(FakeConn(None)) is None
