@@ -209,11 +209,11 @@ def main():
     restyle_pointers(s[1])
     y = TOP
     steps = [
-        ("READ", "246,765 works, 270,934\npayments, 1,547 MP-terms"),
+        ("READ", "250,839 works, 272,263\npayments, 1,547 MP-terms"),
         ("COMPARE", "Each work against its own\ndistrict-and-sector peers"),
-        ("DETECT", "5 work signals +\n4 cohort detectors"),
+        ("DETECT", "5 work signals, 4 cohort\ndetectors, 4 written rules"),
         ("SCORE", "One 0-100 number, with\nthe records behind it"),
-        ("ACT", "A ranked queue officials\ntriage and sign off"),
+        ("ACT", "A ranked queue, and a trail\nof every decision on it"),
     ]
     sw = (CW - 4 * 0.14) / 5
     for i, (name, body) in enumerate(steps):
@@ -227,19 +227,21 @@ def main():
     hs = [
         card(s[1], LEFT, y, cw3, "How it addresses the problem",
              "Reads the published MPLADS record end to end and scores every work "
-             "against comparable works in the same district and sector. 48,687 works "
-             "clear the review threshold, carrying Rs 4,618 Cr of sanction. Officials "
+             "against comparable works in the same district and sector. 48,542 works "
+             "clear the review threshold, carrying Rs 4,662 Cr of sanction. Officials "
              "get them ranked, not a spreadsheet.", BLUE, min_h=3.35, tag="s2a"),
         card(s[1], LEFT + cw3 + 0.18, y, cw3, "Innovation and uniqueness",
              "Every flag names the record that produced it. Cohort patterns are kept "
              "at cohort grain instead of being blamed on one work. Reviewer decisions "
              "are pinned to a work identity that survives the nightly reload, so a "
-             "verdict is never reattached to a different work.", GREEN, min_h=3.35, tag="s2b"),
+             "verdict is never reattached to a different work, and every decision "
+             "ever recorded on one survives the next.", GREEN, min_h=3.35, tag="s2b"),
         card(s[1], LEFT + 2 * (cw3 + 0.18), y, cw3, "What it does not claim",
              "A score is not an allegation - it means a work does not resemble its "
              "peers. No field is invented: progress %, beneficiary counts and geo-tags "
-             "are not published for MPLADS, so they are not shown. No LLM can move a "
-             "score; scoring is deterministic and auditable.", AMBER, min_h=3.35, tag="s2c"),
+             "are not published for MPLADS, so they are not shown. The rule book states "
+             "what cannot be checked at all. No LLM can move a score.", AMBER, min_h=3.35,
+             tag="s2c"),
     ]
 
     # ------------------------------------------------------------- slide 3 --
@@ -256,12 +258,12 @@ def main():
     sw = (CW - 3 * 0.18) / 4
     for i, (name, body) in enumerate(stacks):
         x = LEFT + i * (sw + 0.18)
-        h = 1.62
+        h = 1.50
         rect(s[2], x, y, sw, h, fill=SURF, line=LINE)
         rect(s[2], x, y, sw, 0.035, fill=BLUE, line=None)
         textbox(s[2], x + 0.16, y + 0.15, sw - 0.32, 0.28, [(name, 12, True, BLUE_D, UI)])
         textbox(s[2], x + 0.16, y + 0.50, sw - 0.32, 1.00, [(body, 10.5, False, MUTED, UI)], spacing=1.26)
-    y += 1.62 + 0.24
+    y += 1.50 + 0.20
 
     textbox(s[2], LEFT, y, CW, 0.22,
             [("The risk score: five weighted signals about the work itself", 12, True, INK, UI)])
@@ -278,11 +280,19 @@ def main():
               12, True, INK, UI)])
     y += 0.34
     dets = [("D-01 Year-end burst", "311"), ("D-02 First-digit", "137"),
-            ("D-03 Idle allocation", "297"), ("D-04 Uniform amount", "214")]
+            ("D-03 Idle allocation", "255"), ("D-04 Uniform amount", "209")]
     dw = (CW - 3 * 0.14) / 4
     for i, (name, n) in enumerate(dets):
         chip(s[2], LEFT + i * (dw + 0.14), y, dw, name, n + " findings", GREEN, h=0.74)
     y += 0.74 + 0.18
+
+    rect(s[2], LEFT, y, CW, 0.62, fill=SURF, line=LINE)
+    textbox(s[2], LEFT + 0.16, y + 0.12, CW - 0.32, 0.40,
+            [("Four compliance rules, each published with the exact condition it tests — "
+              "including the one that cannot fire, because the source publishes a single "
+              "figure per completed work that serves as both sanction and expenditure.",
+              10, False, MUTED, UI)], spacing=1.28)
+    y += 0.62
     PROBLEMS.append(("s3", y))
 
     # ------------------------------------------------------------- slide 4 --
@@ -293,7 +303,7 @@ def main():
     rect(s[3], LEFT, y, CW, 0.70, fill=TINT, line=BLUE_L)
     textbox(s[3], LEFT + 0.18, y + 0.17, CW - 0.36, 0.38,
             [("Not a proposal — already built, deployed and refreshing nightly: "
-              "246,765 works scored, Rs 6,341 Cr reconciled, live at mplads-risk-monitor-web.vercel.app",
+              "250,839 works scored, all 36 states reconciled against the source, live at mplads-risk-monitor-web.vercel.app",
               12.5, True, BLUE_D, UI)])
     y += 0.70 + 0.24
 
@@ -323,11 +333,11 @@ def main():
     set_team_badge(s[4])
     restyle_pointers(s[4])
     y = TOP
-    stats = [("246,765", "works scored, both terms"),
-             ("Rs 6,341 Cr", "expenditure reconciled"),
-             ("48,687", "works above the threshold"),
-             ("Rs 4,618 Cr", "sanction awaiting review"),
-             ("959", "cohort findings")]
+    stats = [("250,839", "works scored, both terms"),
+             ("Rs 11,682 Cr", "allocated, 18th Lok Sabha"),
+             ("48,542", "works above the threshold"),
+             ("Rs 4,662 Cr", "sanction awaiting review"),
+             ("912", "cohort findings")]
     sw = (CW - 4 * 0.14) / 5
     for i, (value, label) in enumerate(stats):
         chip(s[4], LEFT + i * (sw + 0.14), y, sw, label, value, BLUE_D, h=0.82)
@@ -338,7 +348,8 @@ def main():
            ("District authority",
             "Gets a ranked shortlist instead of a register, with the evidence for each flag already assembled."),
            ("State nodal officer",
-            "Compares agencies on delay, vendor concentration and year-end bunching across districts."),
+            "Ranks all 36 states and UTs on money committed against money paid, then drops "
+            "straight into that state's queue."),
            ("Ministry (MoSPI)",
             "Sees national patterns and where scheme rules are breaking, without waiting for a manual audit.")]
     cw4 = (CW - 3 * 0.16) / 4
@@ -365,11 +376,11 @@ def main():
     cw2 = (CW - 0.20) / 2
     h_data = card(s[5], LEFT, y, cw2, "Data and scheme rules",
          "MPLADS programme data via Empowered Indian (empoweredindian.in), which "
-         "aggregates the official MoSPI portal at mplads.mospi.gov.in — 246,765 works, "
-         "270,934 payments, 1,547 MP-terms across 776 districts and 62,680 vendors.\n"
+         "aggregates the official MoSPI portal at mplads.mospi.gov.in — 250,839 works, "
+         "272,263 payments, 1,547 MP-terms across 776 districts and 62,969 vendors.\n"
          "MPLADS Guidelines, Ministry of Statistics and Programme Implementation: "
          "permissible works, sanction ceilings and the annual entitlement per MP.\n"
-         "Reconciled against the source's own published totals; 3,121 rows rejected "
+         "Reconciled against the source's own published totals; 4,372 rows rejected "
          "and recorded rather than silently dropped.",
          BLUE, bs=11, min_h=3.85, tag="s6a")
     h_left = card(s[5], LEFT + cw2 + 0.20, y, cw2, "Methods",
