@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS projects (
     state TEXT NOT NULL,
     district TEXT NOT NULL,
     category TEXT NOT NULL,
-    sector TEXT,
     implementing_agency TEXT NOT NULL,
     recommended_amount NUMERIC(14,2),
     sanctioned_amount NUMERIC(14,2) NOT NULL,
@@ -26,30 +25,6 @@ CREATE TABLE IF NOT EXISTS projects (
     actual_completion DATE,
     source TEXT NOT NULL DEFAULT 'synthetic',
     has_images BOOLEAN,
-
-    delay_days INTEGER,
-    -- Wide on purpose. This is a ratio against a peer median, so it has no
-    -- natural ceiling: a Rs 2.08 crore street-lighting work in PRAYAGRAJ sits
-    -- 98,398% above the Rs 21,109 median of its 1,100 peers. NUMERIC(6,2)
-    -- capped it at 9,999.99 and 96 works overflowed it, failing the whole
-    -- scoring write - and those works are exactly the ones this system exists
-    -- to surface.
-    cost_deviation_pct NUMERIC(12,2),
-    expenditure_ratio NUMERIC(6,2),
-    peer_median_cost NUMERIC(14,2),
-    peer_count INTEGER,
-    agency_delay_rate NUMERIC(5,2),
-    max_similarity_score NUMERIC(5,4),
-    similar_work_id INTEGER REFERENCES projects(id),
-
-    cost_risk NUMERIC(5,2),
-    delay_risk NUMERIC(5,2),
-    duplicate_risk NUMERIC(5,2),
-    agency_risk NUMERIC(5,2),
-    compliance_risk NUMERIC(5,2),
-    overall_risk_score NUMERIC(5,2),
-    risk_level TEXT,
-    flagged_reasons JSONB DEFAULT '[]'::jsonb,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -138,7 +113,6 @@ CREATE TABLE IF NOT EXISTS rejected_rows (
 -- already holds the old shape. district_avg_cost is dropped rather than kept:
 -- it is recomputed from scratch on every scoring run and nothing reads it
 -- outside scoring.py, so there is no history to preserve.
-ALTER TABLE projects ADD COLUMN IF NOT EXISTS sector TEXT;
 -- Added 2026-08-31. mp_name is not a key: 1,262 name strings for ~774 MPs per
 -- term, because the source appends term markers and varies honorifics. mp_id
 -- is derived by data/mps.py. house is carried because the same name in the
@@ -150,21 +124,39 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS sector TEXT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS ls_term SMALLINT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS mp_id TEXT;
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS house TEXT;
-ALTER TABLE projects ADD COLUMN IF NOT EXISTS peer_median_cost NUMERIC(14,2);
-ALTER TABLE projects ADD COLUMN IF NOT EXISTS peer_count INTEGER;
-ALTER TABLE projects DROP COLUMN IF EXISTS district_avg_cost;
 -- Added 2026-09-07. See data/load_real_data.py:work_key. Unique only where it
 -- is set, so synthetic rows (which have no source Work ID) are unaffected.
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS work_key TEXT;
 -- Added 2026-09-07, see the column comment above.
-ALTER TABLE projects ALTER COLUMN cost_deviation_pct TYPE NUMERIC(12,2);
+-- Added 2026-09-09. Every derived column moved to project_scores; see the
+-- note on that table for why. Dropping them here is what stops `projects`
+-- being rewritten by each scoring run.
+ALTER TABLE projects
+    DROP COLUMN IF EXISTS delay_days,
+    DROP COLUMN IF EXISTS cost_deviation_pct,
+    DROP COLUMN IF EXISTS expenditure_ratio,
+    DROP COLUMN IF EXISTS sector,
+    DROP COLUMN IF EXISTS peer_median_cost,
+    DROP COLUMN IF EXISTS peer_count,
+    DROP COLUMN IF EXISTS agency_delay_rate,
+    DROP COLUMN IF EXISTS max_similarity_score,
+    DROP COLUMN IF EXISTS similar_work_id,
+    DROP COLUMN IF EXISTS cost_risk,
+    DROP COLUMN IF EXISTS delay_risk,
+    DROP COLUMN IF EXISTS duplicate_risk,
+    DROP COLUMN IF EXISTS agency_risk,
+    DROP COLUMN IF EXISTS compliance_risk,
+    DROP COLUMN IF EXISTS overall_risk_score,
+    DROP COLUMN IF EXISTS risk_level,
+    DROP COLUMN IF EXISTS flagged_reasons,
+    DROP COLUMN IF EXISTS district_avg_cost;
+
 -- Added 2026-09-09 with the source's new column. See the note on mps.
 ALTER TABLE mps ADD COLUMN IF NOT EXISTS amount_recommended NUMERIC(16,2);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_projects_work_key
     ON projects(work_key) WHERE work_key IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_projects_state ON projects(state);
-CREATE INDEX IF NOT EXISTS idx_projects_sector ON projects(sector);
 CREATE INDEX IF NOT EXISTS idx_expenditures_agency ON expenditures(implementing_agency, ls_term);
 CREATE INDEX IF NOT EXISTS idx_expenditures_vendor ON expenditures(vendor);
 CREATE INDEX IF NOT EXISTS idx_projects_mp_id ON projects(mp_id);
@@ -172,14 +164,7 @@ CREATE INDEX IF NOT EXISTS idx_projects_ls_term ON projects(ls_term);
 CREATE INDEX IF NOT EXISTS idx_mps_name ON mps(mp_name);
 CREATE INDEX IF NOT EXISTS idx_projects_district ON projects(district);
 CREATE INDEX IF NOT EXISTS idx_projects_agency ON projects(implementing_agency);
-CREATE INDEX IF NOT EXISTS idx_projects_risk_level ON projects(risk_level);
 
--- Required, not an optimisation. similar_work_id carries a self-referencing FK
--- to projects(id); without an index on the referencing column, deleting N rows
--- makes Postgres scan the whole table once per deleted row to check the
--- constraint. At 127k rows that is ~1.6e10 comparisons and the reload in
--- load_real_data.py never finishes. With this index the same delete is instant.
-CREATE INDEX IF NOT EXISTS idx_projects_similar_work_id ON projects(similar_work_id);
 
 -- Audit trail for load_real_data.py / scoring.py runs. Also what the UI's
 -- freshness indicator reads (GET /api/data-freshness) — see task-12.
@@ -262,3 +247,61 @@ CREATE TABLE IF NOT EXISTS work_review_events (
 );
 CREATE INDEX IF NOT EXISTS idx_work_review_events_work_key
     ON work_review_events(work_key, created_at DESC);
+
+
+-- Scores live apart from the works they describe.
+--
+-- Scoring used to UPDATE all 250,839 rows of `projects` in one statement.
+-- Postgres writes a new version of every row an UPDATE touches, so each run
+-- doubled the table - 161 MB to 280 MB, taking the database from 300 MB to
+-- 457 MB against Neon's 512 MB limit. The space only comes back with a
+-- VACUUM FULL, which needs room for a whole copy of the table at exactly the
+-- moment there is none.
+--
+-- Written with TRUNCATE + INSERT instead, which reclaims in the same
+-- statement, so this table is always the size of its contents and `projects`
+-- is never rewritten after the load. Same contract as agency_vendor_profile
+-- and detector_findings: derived, rebuilt every run, no history to keep.
+CREATE TABLE IF NOT EXISTS project_scores (
+    project_id INTEGER PRIMARY KEY,
+    delay_days INTEGER,
+    cost_deviation_pct NUMERIC(12,2),
+    expenditure_ratio NUMERIC(6,2),
+    sector TEXT,
+    peer_median_cost NUMERIC(14,2),
+    peer_count INTEGER,
+    agency_delay_rate NUMERIC(5,2),
+    max_similarity_score NUMERIC(5,4),
+    similar_work_id INTEGER,
+    cost_risk NUMERIC(5,2),
+    delay_risk NUMERIC(5,2),
+    duplicate_risk NUMERIC(5,2),
+    agency_risk NUMERIC(5,2),
+    compliance_risk NUMERIC(5,2),
+    overall_risk_score NUMERIC(5,2),
+    risk_level TEXT,
+    flagged_reasons JSONB NOT NULL DEFAULT '[]'::jsonb
+);
+CREATE INDEX IF NOT EXISTS idx_project_scores_overall
+    ON project_scores(overall_risk_score DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS idx_project_scores_level ON project_scores(risk_level);
+CREATE INDEX IF NOT EXISTS idx_project_scores_sector ON project_scores(sector);
+
+-- Everything reads this rather than either table. Column names match what
+-- `projects` used to carry, so the queries did not have to change shape.
+-- LEFT JOIN: a work loaded but not yet scored still appears, with nulls, which
+-- is what the "scoring pending" states in the interface are for.
+CREATE OR REPLACE VIEW projects_scored AS
+SELECT p.id, p.work_key, p.work_name, p.description, p.ls_term, p.mp_name,
+       p.mp_id, p.house, p.constituency, p.state, p.district, p.category,
+       p.implementing_agency, p.recommended_amount, p.sanctioned_amount,
+       p.expenditure, p.work_status, p.start_date, p.expected_completion,
+       p.actual_completion, p.source, p.has_images, p.created_at,
+       s.delay_days, s.cost_deviation_pct, s.expenditure_ratio, s.sector,
+       s.peer_median_cost, s.peer_count, s.agency_delay_rate,
+       s.max_similarity_score, s.similar_work_id, s.cost_risk, s.delay_risk,
+       s.duplicate_risk, s.agency_risk, s.compliance_risk,
+       s.overall_risk_score, s.risk_level,
+       COALESCE(s.flagged_reasons, '[]'::jsonb) AS flagged_reasons
+FROM projects p
+LEFT JOIN project_scores s ON s.project_id = p.id;

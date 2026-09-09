@@ -37,6 +37,8 @@ MIN_PEERS = 8
 
 def fetch_projects(conn):
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        # The base table, not the view: this is the input scoring is about to
+        # replace, and reading its own previous output would be circular.
         cur.execute("SELECT * FROM projects")
         return pd.DataFrame(cur.fetchall())
 
@@ -458,12 +460,26 @@ def finish_scoring_run(conn, run_id, status, rows_scored):
         conn.rollback()
 
 
-def write_scores(conn, df):
-    """Bulk-write scored columns via a temp table + single UPDATE...FROM.
+SCORE_COLUMNS = [
+    "project_id", "delay_days", "cost_deviation_pct", "expenditure_ratio", "sector",
+    "peer_median_cost", "peer_count", "agency_delay_rate", "max_similarity_score",
+    "similar_work_id", "cost_risk", "delay_risk", "duplicate_risk", "agency_risk",
+    "compliance_risk", "overall_risk_score", "risk_level", "flagged_reasons",
+]
 
-    127k row-by-row UPDATEs against a remote Neon DB took hours; loading all
-    rows into an unlogged TEMP TABLE with execute_values then joining in one
-    UPDATE is a couple of round trips instead of 127k.
+
+def write_scores(conn, df):
+    """Replace project_scores wholesale.
+
+    This used to UPDATE every row of `projects`. Postgres writes a new version
+    of each row an UPDATE touches, so a run doubled a 161 MB table and took the
+    database from 300 MB to 457 MB against Neon's 512 MB limit - reclaimable
+    only by a VACUUM FULL, which needs room for a whole copy of the table at
+    exactly the moment there is none.
+
+    TRUNCATE reclaims in the same statement, so this table stays the size of
+    its contents and `projects` is never rewritten after the load. Reads go
+    through the projects_scored view, which joins the two back together.
     """
     rows = [
         (
@@ -480,40 +496,12 @@ def write_scores(conn, df):
         for _, row in df.iterrows()
     ]
     with conn.cursor() as cur:
-        cur.execute(
-            """
-            CREATE TEMP TABLE _score_updates (
-                id INTEGER, delay_days INTEGER, cost_deviation_pct NUMERIC,
-                expenditure_ratio NUMERIC, sector TEXT,
-                peer_median_cost NUMERIC, peer_count INTEGER,
-                agency_delay_rate NUMERIC, max_similarity_score NUMERIC,
-                similar_work_id INTEGER, cost_risk NUMERIC, delay_risk NUMERIC,
-                duplicate_risk NUMERIC, agency_risk NUMERIC, compliance_risk NUMERIC,
-                overall_risk_score NUMERIC, risk_level TEXT, flagged_reasons JSONB
-            ) ON COMMIT DROP
-            """
-        )
+        cur.execute("TRUNCATE project_scores")
         execute_values(
             cur,
-            "INSERT INTO _score_updates VALUES %s",
+            f"INSERT INTO project_scores ({', '.join(SCORE_COLUMNS)}) VALUES %s",
             rows,
             page_size=1000,
-        )
-        cur.execute(
-            """
-            UPDATE projects SET
-              delay_days = u.delay_days, cost_deviation_pct = u.cost_deviation_pct,
-              expenditure_ratio = u.expenditure_ratio, sector = u.sector,
-              peer_median_cost = u.peer_median_cost, peer_count = u.peer_count,
-              agency_delay_rate = u.agency_delay_rate, max_similarity_score = u.max_similarity_score,
-              similar_work_id = u.similar_work_id, cost_risk = u.cost_risk,
-              delay_risk = u.delay_risk, duplicate_risk = u.duplicate_risk,
-              agency_risk = u.agency_risk, compliance_risk = u.compliance_risk,
-              overall_risk_score = u.overall_risk_score, risk_level = u.risk_level,
-              flagged_reasons = u.flagged_reasons
-            FROM _score_updates u
-            WHERE projects.id = u.id
-            """
         )
     conn.commit()
 
