@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Optional
 from fastapi import FastAPI, Header, HTTPException, Query
@@ -289,6 +290,10 @@ def districts():
 
 
 # ---------------------------------------------------------------- alert queue
+
+# The compliance component's share of the overall score, from RISK_WEIGHTS in
+# data/scoring.py.
+RISK_WEIGHTS_COMPLIANCE_PCT = 15
 
 REVIEW_STATUSES = ("verified", "dismissed", "escalated")
 
@@ -659,3 +664,110 @@ def states(ls_term: int = Query(18, ge=17, le=18)):
         """,
         [ls_term, ls_term],
     )
+
+
+# ---------------------------------------------------------------- rule book
+
+# The compliance component's rules, each with the exact predicate scoring
+# applies, so a reader can check the claim rather than take it.
+#
+# `basis` says where a rule comes from. Deliberately no clause numbers: the
+# MPLADS guidelines are not in this repository and inventing "clause 3.12.1"
+# to look authoritative is the same failure as inventing a beneficiary count.
+COMPLIANCE_RULES = [
+    {
+        "code": "C-01",
+        "name": "Spending beyond the sanction",
+        "weight": 60,
+        "predicate": "expenditure > sanctioned_amount",
+        "checks": "A work that has cost more than the amount sanctioned for it.",
+        "basis": "The scheme sanctions a specific amount per work; spending past it needs a revised sanction.",
+        "reason": "Expenditure exceeds sanctioned amount",
+    },
+    {
+        "code": "C-02",
+        "name": "Recommended work with no schedule",
+        "weight": 20,
+        "predicate": "work_status = 'recommended' AND (start_date IS NULL OR expected_completion IS NULL)",
+        "checks": "A work put forward without the dates that would let anyone tell whether it is late.",
+        "basis": "A recommendation carries a date; without an expected completion no delay can be computed.",
+        "reason": "Missing start or expected completion date",
+    },
+    {
+        "code": "C-03",
+        "name": "Completed with no completion date",
+        "weight": 20,
+        "predicate": "work_status = 'completed' AND actual_completion IS NULL",
+        "checks": "A work marked finished with nothing on record saying when.",
+        "basis": "Completion is the event that closes a work; the date is what makes it auditable.",
+        "reason": "Marked completed with no actual completion date",
+    },
+    {
+        "code": "C-04",
+        "name": "Completed with no photograph",
+        "weight": 30,
+        "predicate": "work_status = 'completed' AND has_images IS FALSE",
+        "checks": "A finished work with no photographic record that it exists.",
+        "basis": "The portal carries a photograph flag per work; a completed asset with none has no visual evidence behind it.",
+        "reason": "Completed work has no photographic documentation on record",
+    },
+]
+
+# Checks the published data cannot answer at all. Stated because a rule book
+# listing only what passes is the more misleading half.
+COMPLIANCE_BLIND_SPOTS = [
+    {
+        "name": "Whether a work overspent its sanction",
+        "why": "The source publishes one figure per completed work - the final amount - which the loader records as both the sanction and the expenditure. The two can never differ, so C-01 cannot fire on this data. It is kept because a source that later publishes them separately would make it live.",
+    },
+    {
+        "name": "Whether a work is a permissible category",
+        "why": "MPLADS restricts what funds may be spent on, but the portal's own category column reads 'Normal/Others' on 98.1% of works. The sector this system shows is derived from the description text, which is good enough to compare like with like and not good enough to rule a work impermissible.",
+    },
+    {
+        "name": "Whether the money bought what was claimed",
+        "why": "No progress percentage, beneficiary count, geo-tag, bill value or site photograph is published. Nothing here can speak to physical quality or existence - that is what sending someone to look is for, which is what the queue is.",
+    },
+    {
+        "name": "Whether the sanction ceiling per work was respected",
+        "why": "Ceilings vary by work type and year and are not published alongside the works. Cost is therefore judged against comparable works in the same district and sector, not against a rule.",
+    },
+]
+
+
+@app.get("/api/compliance")
+def compliance():
+    """The rule book, with how many works each rule currently catches.
+
+    A rule finding nothing means one of two very different things, and the
+    status says which: `clear` is the data satisfying the rule, `inert` is the
+    rule being unable to fire at all.
+    """
+    rows = []
+    for rule in COMPLIANCE_RULES:
+        hit = query(
+            "SELECT COUNT(*) AS n FROM project_scores WHERE flagged_reasons @> %s::jsonb",
+            [json.dumps([rule["reason"]])],
+            one=True,
+        )
+        breaches = int(hit["n"])
+        satisfiable = query(
+            f"SELECT COUNT(*) AS n FROM projects WHERE {rule['predicate']}", one=True
+        )
+        possible = int(satisfiable["n"])
+        rows.append({
+            **rule,
+            "breaches": breaches,
+            "status": "breached" if breaches else ("clear" if possible == 0 and rule["code"] != "C-01" else "inert"),
+        })
+    scored = query("SELECT COUNT(*) AS n FROM project_scores", one=True)
+    breaching = query(
+        "SELECT COUNT(*) AS n FROM project_scores WHERE compliance_risk > 0", one=True
+    )
+    return {
+        "rules": rows,
+        "blind_spots": COMPLIANCE_BLIND_SPOTS,
+        "works_scored": int(scored["n"]),
+        "works_breaching": int(breaching["n"]),
+        "weight_in_score": int(RISK_WEIGHTS_COMPLIANCE_PCT),
+    }

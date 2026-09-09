@@ -218,6 +218,27 @@ export type StateSummary = {
   avg_risk: number | null;
 };
 
+// A rule finding nothing means one of two very different things: `clear` is
+// the data satisfying it, `inert` is the rule unable to fire at all.
+export type ComplianceRule = {
+  code: string;
+  name: string;
+  weight: number;
+  predicate: string;
+  checks: string;
+  basis: string;
+  breaches: number;
+  status: "breached" | "clear" | "inert";
+};
+
+export type ComplianceBook = {
+  rules: ComplianceRule[];
+  blind_spots: Array<{ name: string; why: string }>;
+  works_scored: number;
+  works_breaching: number;
+  weight_in_score: number;
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -266,6 +287,7 @@ export const api = {
     get<AlertSummary>(`/api/alerts/summary?${new URLSearchParams(params)}`),
   states: (params: Record<string, string> = {}) =>
     get<StateSummary[]>(`/api/states?${new URLSearchParams(params)}`),
+  compliance: () => get<ComplianceBook>("/api/compliance"),
   detectors: () => get<Detector[]>("/api/detectors"),
   detectorFindings: (params: Record<string, string> = {}) =>
     get<DetectorFindingPage>(`/api/detectors/findings?${new URLSearchParams(params)}`),

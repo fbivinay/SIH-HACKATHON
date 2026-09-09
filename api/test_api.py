@@ -237,3 +237,31 @@ def test_states_paid_rate_is_expenditure_over_allocation():
     row = next(r for r in rows if r["allocated"] and r["paid_rate"] is not None)
     expected = float(row["expenditure"]) / float(row["allocated"]) * 100
     assert abs(float(row["paid_rate"]) - expected) < 0.11
+
+
+def test_compliance_rules_state_their_predicate_and_basis():
+    book = client.get("/api/compliance").json()
+    assert len(book["rules"]) == 4
+    for rule in book["rules"]:
+        # A rule you cannot read is a rule you have to take on trust.
+        assert rule["predicate"].strip()
+        assert rule["basis"].strip()
+        assert rule["status"] in ("breached", "clear", "inert")
+
+
+def test_compliance_separates_a_clear_rule_from_one_that_cannot_fire():
+    """Zero breaches means two very different things. C-01 cannot fire at all,
+    because the source publishes one figure per completed work that the loader
+    records as both sanction and expenditure."""
+    rules = {r["code"]: r for r in client.get("/api/compliance").json()["rules"]}
+    assert rules["C-01"]["status"] == "inert"
+    assert rules["C-01"]["breaches"] == 0
+    assert any(r["status"] == "breached" for r in rules.values())
+
+
+def test_compliance_states_what_it_cannot_check():
+    """A rule book listing only what passes is the more misleading half."""
+    book = client.get("/api/compliance").json()
+    assert len(book["blind_spots"]) >= 3
+    for spot in book["blind_spots"]:
+        assert spot["name"].strip() and spot["why"].strip()

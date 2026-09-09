@@ -1029,3 +1029,57 @@ select:focus-visible {
   font-size: 0.75rem;
   color: var(--ink-2);
 }
+
+/* ---- Compliance rule book ---- */
+
+.rulecard__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.rulecard__count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.rulecard__status {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* The literal condition. Shown because a rule you cannot read is a rule you
+   have to take on trust. */
+.rulecard__predicate {
+  margin-top: 0.85rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-family: var(--font-data);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.rulecard__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.4rem 1.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
