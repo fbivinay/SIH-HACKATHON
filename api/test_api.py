@@ -109,6 +109,7 @@ def test_review_round_trips_and_is_updatable(monkeypatch):
         listed = client.get("/api/alerts?status=dismissed&limit=200").json()
         assert any(a["work_key"] == key for a in listed["alerts"])
     finally:
+        execute("DELETE FROM work_review_events WHERE work_key = %s", [key])
         execute("DELETE FROM work_reviews WHERE work_key = %s", [key])
 
 
@@ -148,3 +149,45 @@ def test_detector_findings_come_back_ranked():
     body = client.get("/api/detectors/findings?limit=25").json()
     severities = [f["severity"] for f in body["findings"]]
     assert severities == sorted(severities, reverse=True)
+
+
+def test_review_history_records_every_decision_not_just_the_last(monkeypatch):
+    """Changing a verdict used to overwrite the note explaining the previous
+    one. The trail is append-only, so the earlier reason survives."""
+    from db import execute, query
+
+    monkeypatch.setenv("REVIEW_TOKEN", "test-token")
+    work = query("SELECT work_key FROM projects WHERE work_key IS NOT NULL LIMIT 1", one=True)
+    if work is None:
+        return
+    key = work["work_key"]
+    headers = {"X-Review-Token": "test-token"}
+    execute("DELETE FROM work_review_events WHERE work_key = %s", [key])
+    try:
+        client.post("/api/alerts/review", headers=headers, json={
+            "work_key": key, "status": "escalated",
+            "note": "cost looks off", "reviewer": "pytest"})
+        client.post("/api/alerts/review", headers=headers, json={
+            "work_key": key, "status": "dismissed", "reviewer": "pytest"})
+
+        resp = client.get("/api/alerts/history", params={"work_key": key})
+        assert resp.status_code == 200
+        events = resp.json()["events"]
+        assert len(events) == 2
+        # Newest first, and the escalation's reason is still there.
+        assert events[0]["status"] == "dismissed"
+        assert events[1]["status"] == "escalated"
+        assert events[1]["note"] == "cost looks off"
+
+        # The current verdict is still only the latest one.
+        current = query("SELECT status FROM work_reviews WHERE work_key = %s", [key], one=True)
+        assert current["status"] == "dismissed"
+    finally:
+        execute("DELETE FROM work_review_events WHERE work_key = %s", [key])
+        execute("DELETE FROM work_reviews WHERE work_key = %s", [key])
+
+
+def test_review_history_is_empty_for_an_untouched_work():
+    resp = client.get("/api/alerts/history", params={"work_key": "no-such-work|99|NOWHERE"})
+    assert resp.status_code == 200
+    assert resp.json()["events"] == []

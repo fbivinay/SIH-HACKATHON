@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
+import ReviewTrail from "@/components/ReviewTrail";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel, workStatusLabel } from "@/lib/format";
 
 function RiskMeter({ label, value }: { label: string; value: number | null }) {
@@ -165,6 +166,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           )}
         </div>
       </section>
+
+      <ReviewTrail workKey={p.work_key} />
 
       {p.similar_work_id && (
         <p className="mt-6 text-sm">
