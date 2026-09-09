@@ -72,11 +72,6 @@ jobs:
             } >> "$GITHUB_STEP_SUMMARY"
           else
             echo "configured=true" >> "$GITHUB_OUTPUT"
-            if [ -n "$MPLADS_DATA_URL" ]; then
-              echo "source=url" >> "$GITHUB_OUTPUT"
-            else
-              echo "source=snapshot" >> "$GITHUB_OUTPUT"
-            fi
           fi
 
       - name: Set up Python
@@ -94,23 +89,55 @@ jobs:
         if: steps.config.outputs.configured == 'true'
         env:
           MPLADS_DATA_URL: ${{ secrets.MPLADS_DATA_URL }}
-          SOURCE: ${{ steps.config.outputs.source }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           mkdir -p mplads-data
-          if [ "$SOURCE" = "url" ]; then
-            echo "Using MPLADS_DATA_URL"
+
+          # Pull from the source, which is what makes this a refresh rather
+          # than a nightly re-score of whatever was last committed. The old
+          # order had it the other way round: with no MPLADS_DATA_URL set it
+          # took the newest zip in data/snapshot/, so a run on 9 September
+          # would have reloaded the 31 August extract - dropping 4,074 works
+          # and the amount_recommended column the idle-allocation detector
+          # needs, while reporting success.
+          if [ -n "${MPLADS_DATA_URL:-}" ]; then
+            echo "Fetching from MPLADS_DATA_URL"
             curl --fail --silent --show-error --location \
-                 --max-time 600 --output snapshot.zip "$MPLADS_DATA_URL"
+                 --max-time 600 --output snapshot.zip "$MPLADS_DATA_URL" \
+              && unzip -j -o snapshot.zip '*.csv' -d mplads-data
           else
-            # No live source configured: use the snapshot committed to the repo.
-            # This re-scores the same data rather than fetching anything new, but
-            # keeps the pipeline reproducible from a clone alone.
-            echo "Using committed snapshot in data/snapshot/ (no MPLADS_DATA_URL set)"
-            cp "$(ls -1 data/snapshot/*.zip | tail -1)" snapshot.zip
+            echo "Fetching from the source API"
+            python3 scripts/fetch_mplads.py --force --out mplads-data
           fi
-          unzip -j -o snapshot.zip '*.csv' -d mplads-data
+
+          # A source that is down or has changed shape must not take the
+          # dashboard with it: fall back to the committed snapshot, which keeps
+          # the pipeline reproducible from a clone alone, and say so loudly
+          # enough that nobody mistakes stale data for fresh.
+          if [ -z "$(ls -A mplads-data 2>/dev/null)" ]; then
+            echo "::warning::Fetch produced nothing - falling back to the committed snapshot"
+            echo "FELL_BACK=1" >> "$GITHUB_ENV"
+            cp "$(ls -1 data/snapshot/*.zip | tail -1)" snapshot.zip
+            unzip -j -o snapshot.zip '*.csv' -d mplads-data
+          fi
           ls -la mplads-data
+
+      - name: Apply schema
+        if: steps.config.outputs.configured == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        # schema.sql is written to be re-runnable, and nothing was running it.
+        # Every migration made since this workflow was written reached the
+        # database only because somebody applied it by hand.
+        run: |
+          python - <<'PYEOF'
+          import os, psycopg2
+          conn = psycopg2.connect(os.environ["DATABASE_URL"])
+          with conn, conn.cursor() as cur:
+              cur.execute(open("data/schema.sql").read())
+          conn.close()
+          print("schema applied")
+          PYEOF
 
       - name: Load data
         if: steps.config.outputs.configured == 'true'
@@ -157,6 +184,12 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
+          if [ -n "${FELL_BACK:-}" ]; then
+            echo "> **Fetched nothing from the source — this run reloaded the committed"
+            echo "> snapshot, so the figures below are as old as that file.**" \
+              >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          fi
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import os, psycopg2
           conn = psycopg2.connect(os.environ["DATABASE_URL"])

@@ -127,18 +127,23 @@ def main():
     ap.add_argument("--force", action="store_true", help="overwrite existing output")
     ap.add_argument("--only", choices=sorted(DATASETS), help="fetch one dataset")
     ap.add_argument("--self-check", action="store_true", help="test merge logic offline")
+    # The nightly workflow fetches into the directory it hands the loader,
+    # rather than into the repository's own data folder.
+    ap.add_argument("--out", type=pathlib.Path, default=OUT_DIR,
+                    help=f"where to write the CSVs (default: {OUT_DIR})")
     args = ap.parse_args()
 
     if args.self_check:
         self_check()
         return
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir = args.out
+    out_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.date.today().isoformat()
     wanted = [args.only] if args.only else list(DATASETS)
 
     for endpoint in wanted:
-        out_path = OUT_DIR / f"{DATASETS[endpoint]}_{stamp}.csv"
+        out_path = out_dir / f"{DATASETS[endpoint]}_{stamp}.csv"
         if out_path.exists() and not args.force:
             print(f"{endpoint}: {out_path.name} exists, skipping (--force to redo)")
             continue
