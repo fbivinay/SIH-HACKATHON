@@ -23,6 +23,8 @@ export type Overview = {
 
 export type ProjectSummary = {
   id: number;
+  // The identifier that survives a nightly reload; `id` does not.
+  work_key: string | null;
   work_name: string;
   // 17 or 18. 0 marks a work from a snapshot taken before the column existed.
   ls_term: number | null;
@@ -116,6 +118,13 @@ export type MpStat = {
   pending_payments: number | null;
   total_projects: number;
   high_risk_works: number;
+};
+
+export type ProjectPage = {
+  total: number;
+  limit: number;
+  offset: number;
+  projects: ProjectSummary[];
 };
 
 export type ReviewStatus = "pending" | "verified" | "dismissed" | "escalated";
@@ -277,7 +286,7 @@ export const api = {
   overview: (params: Record<string, string> = {}) =>
     get<Overview>(`/api/overview?${new URLSearchParams(params)}`),
   projects: (params: Record<string, string> = {}) =>
-    get<ProjectSummary[]>(`/api/projects?${new URLSearchParams(params)}`),
+    get<ProjectPage>(`/api/projects?${new URLSearchParams(params)}`),
   project: (id: number) => get<ProjectDetail>(`/api/projects/${id}`),
   // By the identifier that survives a refresh. `id` is reassigned nightly, so
   // a bookmarked /projects/123 points at a different work tomorrow.

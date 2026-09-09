@@ -10,10 +10,12 @@ def test_overview_returns_totals():
     assert resp.json()["total_projects"] > 0
 
 
-def test_projects_list_returns_200_and_list():
+def test_projects_list_returns_200_and_a_page():
     resp = client.get("/api/projects?limit=5")
     assert resp.status_code == 200
-    assert isinstance(resp.json(), list)
+    body = resp.json()
+    assert isinstance(body["projects"], list)
+    assert body["total"] >= len(body["projects"])
 
 
 def test_project_detail_404_for_unknown_id():
@@ -287,3 +289,21 @@ def test_a_work_can_be_found_by_the_key_that_survives_a_refresh():
 def test_by_key_404s_rather_than_guessing():
     assert client.get("/api/projects/by-key",
                       params={"work_key": "no-such|99|WORK"}).status_code == 404
+
+
+def test_projects_paginate_and_report_a_total():
+    """The register showed "Showing 50 works" with no idea how many existed,
+    and no way to reach the 51st."""
+    first = client.get("/api/projects?limit=5").json()
+    assert first["total"] > len(first["projects"])
+    second = client.get("/api/projects?limit=5&offset=5").json()
+    assert {p["id"] for p in first["projects"]}.isdisjoint(
+        {p["id"] for p in second["projects"]}
+    )
+    assert second["total"] == first["total"]
+
+
+def test_projects_carry_the_durable_key():
+    """So the register can link to an address that survives the night."""
+    rows = client.get("/api/projects?limit=3").json()["projects"]
+    assert all("work_key" in p for p in rows)

@@ -112,17 +112,23 @@ def list_projects(
     where = f"WHERE {' AND '.join(filters)}" if filters else ""
     params += [limit, offset]
 
-    return query(
+    rows = query(
         f"""
-        SELECT id, work_name, ls_term, state, district, category, sector,
+        SELECT id, work_key, work_name, ls_term, state, district, category, sector,
                implementing_agency, sanctioned_amount, overall_risk_score, risk_level
         FROM projects_scored
         {where}
-        ORDER BY overall_risk_score DESC NULLS LAST
+        ORDER BY overall_risk_score DESC NULLS LAST, id
         LIMIT %s OFFSET %s
         """,
         params,
     )
+    # The register paginates like the queue does, and a page cannot show
+    # "1-50 of N" without N.
+    total = query(
+        f"SELECT COUNT(*) AS total FROM projects_scored {where}", params[:-2], one=True
+    )
+    return {"total": total["total"], "limit": limit, "offset": offset, "projects": rows}
 
 
 @app.get("/api/filters")
