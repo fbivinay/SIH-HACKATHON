@@ -33,6 +33,9 @@ export type ProjectSummary = {
 // description/mp_name/constituency are likewise nullable text columns in the schema.
 // The brief typed these as non-nullable; corrected here so callers must handle null.
 export type ProjectDetail = ProjectSummary & {
+  // '<Work ID>|<ls_term>|<IDA>' — the identity a review is pinned to. Null for
+  // rows loaded before the column existed.
+  work_key: string | null;
   description: string | null;
   mp_name: string | null;
   constituency: string | null;
@@ -107,6 +110,20 @@ export type Alert = ProjectDetail & {
   review_note: string | null;
   review_reviewer: string | null;
   review_updated_at: string | null;
+};
+
+// Append-only: one row per decision ever recorded, newest first. work_reviews
+// holds only the latest, so this is where an overwritten note survives.
+export type ReviewEvent = {
+  status: Exclude<ReviewStatus, "pending">;
+  note: string | null;
+  reviewer: string | null;
+  created_at: string;
+};
+
+export type ReviewHistory = {
+  work_key: string;
+  events: ReviewEvent[];
 };
 
 export type AlertPage = {
@@ -206,6 +223,8 @@ export const api = {
   detectors: () => get<Detector[]>("/api/detectors"),
   detectorFindings: (params: Record<string, string> = {}) =>
     get<DetectorFindingPage>(`/api/detectors/findings?${new URLSearchParams(params)}`),
+  reviewHistory: (workKey: string) =>
+    get<ReviewHistory>(`/api/alerts/history?${new URLSearchParams({ work_key: workKey })}`),
 };
 
 /** Record a reviewer's decision. Server-side only: it carries REVIEW_TOKEN,

@@ -227,3 +227,25 @@ CREATE INDEX IF NOT EXISTS idx_detector_findings_subject
     ON detector_findings(subject_type, subject, ls_term);
 CREATE INDEX IF NOT EXISTS idx_detector_findings_severity
     ON detector_findings(severity DESC);
+
+
+-- Append-only trail of every decision recorded against a work.
+--
+-- work_reviews holds only the current verdict, so changing a decision
+-- overwrote the note that explained the previous one: escalate a work with a
+-- reason, dismiss it later without one, and the reason is gone. For a queue
+-- whose whole output is "an official looked at this and concluded X", losing
+-- the earlier X is losing the audit trail.
+--
+-- Nothing here is ever updated or deleted. Keyed on work_key for the same
+-- reason work_reviews is: projects.id is reassigned on every reload.
+CREATE TABLE IF NOT EXISTS work_review_events (
+    id BIGSERIAL PRIMARY KEY,
+    work_key TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('verified', 'dismissed', 'escalated')),
+    note TEXT,
+    reviewer TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_work_review_events_work_key
+    ON work_review_events(work_key, created_at DESC);

@@ -374,20 +374,50 @@ def set_review(body: ReviewIn, x_review_token: Optional[str] = Header(default=No
     )
     if exists is None:
         raise HTTPException(status_code=404, detail="No work with that work_key.")
+    # One statement, so the trail and the current verdict cannot diverge. A
+    # second call in the same transaction would do, but this needs no new
+    # database helper and is atomic by construction.
     return execute(
         """
+        WITH recorded AS (
+            INSERT INTO work_review_events (work_key, status, note, reviewer)
+            VALUES (%s, %s, %s, %s)
+            RETURNING work_key, status, note, reviewer, created_at
+        )
         INSERT INTO work_reviews (work_key, status, note, reviewer, updated_at)
-        VALUES (%s, %s, %s, %s, now())
+        SELECT work_key, status, note, reviewer, created_at FROM recorded
         ON CONFLICT (work_key) DO UPDATE
           SET status = EXCLUDED.status,
               note = EXCLUDED.note,
               reviewer = EXCLUDED.reviewer,
-              updated_at = now()
+              updated_at = EXCLUDED.updated_at
         RETURNING work_key, status, note, reviewer, updated_at
         """,
         [body.work_key, body.status, body.note, body.reviewer],
         returning=True,
     )
+
+
+@app.get("/api/alerts/history")
+def review_history(work_key: str = Query(min_length=1, max_length=400)):
+    """Every decision ever recorded against one work, newest first.
+
+    work_key carries '|', '(' and spaces, so it travels as a query parameter
+    rather than a path segment.
+    """
+    return {
+        "work_key": work_key,
+        "events": query(
+            """
+            SELECT status, note, reviewer, created_at
+            FROM work_review_events
+            WHERE work_key = %s
+            ORDER BY created_at DESC, id DESC
+            LIMIT 200
+            """,
+            [work_key],
+        ),
+    }
 
 
 # ------------------------------------------------------------ cohort signals
