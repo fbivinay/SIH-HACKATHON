@@ -388,3 +388,100 @@ def set_review(body: ReviewIn, x_review_token: Optional[str] = Header(default=No
         [body.work_key, body.status, body.note, body.reviewer],
         returning=True,
     )
+
+
+# ------------------------------------------------------------ cohort signals
+
+# Kept beside the codes in data/detectors.py. The interface has to be able to
+# say what a detector does and, more importantly, what it does not prove -
+# a finding with no stated limit is the thing that gets a system laughed out of
+# a hearing.
+DETECTORS = {
+    "D-01": {
+        "name": "Year-end payment burst",
+        "subject": "agency",
+        "what": "Share of an agency's fiscal-year payments falling in March, the month the Indian financial year closes and unspent money can lapse.",
+        "limit": "An agency whose sanctions all arrive in the last quarter looks identical. This is a spending pattern, not a finding.",
+    },
+    "D-02": {
+        "name": "First-digit anomaly",
+        "subject": "agency",
+        "what": "Departure of an agency's payment amounts from Benford's first-digit law, measured as mean absolute deviation.",
+        "limit": "The whole population fails the textbook test — the median agency scores 6.2 where Nigrini calls 1.5 nonconformant — because MPLADS amounts are capped, rounded and repeated by design. This ranks agencies against each other, not against the law. It is the weakest signal here and is never evidence on its own.",
+    },
+    "D-03": {
+        "name": "Idle allocation",
+        "subject": "mp",
+        "what": "How much of an MP's allocation is still unspent, from the portal's own MP summary.",
+        "limit": "Not a suspicion. MPLADS funds stay spendable after a term ends, and the median MP-term has over half its allocation unspent, so only the worst quarter appears here.",
+    },
+    "D-04": {
+        "name": "Uniform sanction amount",
+        "subject": "agency",
+        "what": "Share of an agency's works sanctioned at one single identical amount.",
+        "limit": "Round figures are normal and similar works legitimately cost the same. One figure covering nearly every work is what this looks for, and it means the costing is worth seeing, not that it is wrong.",
+    },
+}
+
+
+@app.get("/api/detectors")
+def detectors_catalogue():
+    """What each detector measures and what it does not claim, with how many
+    findings it currently holds."""
+    counts = {
+        r["code"]: r
+        for r in query(
+            """
+            SELECT code, COUNT(*) AS findings, MAX(severity) AS max_severity
+            FROM detector_findings GROUP BY code
+            """
+        )
+    }
+    return [
+        {
+            "code": code,
+            **meta,
+            "findings": int(counts.get(code, {}).get("findings", 0)),
+            "max_severity": float(counts[code]["max_severity"]) if code in counts else None,
+        }
+        for code, meta in sorted(DETECTORS.items())
+    ]
+
+
+@app.get("/api/detectors/findings")
+def detector_findings(
+    code: Optional[str] = None,
+    subject_type: Optional[str] = Query(None, pattern="^(agency|mp)$"),
+    ls_term: Optional[int] = Query(None, ge=17, le=18),
+    q: Optional[str] = None,
+    limit: int = Query(50, le=200),
+    offset: int = 0,
+):
+    filters, params = [], []
+    if code:
+        filters.append("code = %s")
+        params.append(code)
+    if subject_type:
+        filters.append("subject_type = %s")
+        params.append(subject_type)
+    if ls_term:
+        filters.append("ls_term = %s")
+        params.append(ls_term)
+    if q:
+        filters.append("(subject ILIKE %s OR headline ILIKE %s)")
+        params += [f"%{q}%"] * 2
+    where = f"WHERE {' AND '.join(filters)}" if filters else ""
+
+    rows = query(
+        f"""
+        SELECT code, subject_type, subject, ls_term, period, severity, headline, evidence
+        FROM detector_findings {where}
+        ORDER BY severity DESC, code, subject
+        LIMIT %s OFFSET %s
+        """,
+        params + [limit, offset],
+    )
+    total = query(
+        f"SELECT COUNT(*) AS total FROM detector_findings {where}", params, one=True
+    )
+    return {"total": total["total"], "limit": limit, "offset": offset, "findings": rows}

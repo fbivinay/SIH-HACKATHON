@@ -127,6 +127,37 @@ export type AlertSummary = {
   pending_sanctioned_amount: number;
 };
 
+// A detector describes a population — an agency, an MP — not a work, so these
+// never appear in a work's risk score. See data/detectors.py.
+export type Detector = {
+  code: string;
+  name: string;
+  subject: "agency" | "mp";
+  what: string;
+  limit: string;
+  findings: number;
+  max_severity: number | null;
+};
+
+export type DetectorFinding = {
+  code: string;
+  subject_type: "agency" | "mp";
+  subject: string;
+  ls_term: number | null;
+  // Fiscal year for D-01, null for the rest.
+  period: string | null;
+  severity: number;
+  headline: string;
+  evidence: Record<string, unknown>;
+};
+
+export type DetectorFindingPage = {
+  total: number;
+  limit: number;
+  offset: number;
+  findings: DetectorFinding[];
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -172,6 +203,9 @@ export const api = {
     get<AlertPage>(`/api/alerts?${new URLSearchParams(params)}`),
   alertSummary: (params: Record<string, string> = {}) =>
     get<AlertSummary>(`/api/alerts/summary?${new URLSearchParams(params)}`),
+  detectors: () => get<Detector[]>("/api/detectors"),
+  detectorFindings: (params: Record<string, string> = {}) =>
+    get<DetectorFindingPage>(`/api/detectors/findings?${new URLSearchParams(params)}`),
 };
 
 /** Record a reviewer's decision. Server-side only: it carries REVIEW_TOKEN,

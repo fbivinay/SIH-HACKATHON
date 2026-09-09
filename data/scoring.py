@@ -9,6 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 
+import detectors
 import vendors
 from sectors import classify_sector
 
@@ -55,6 +56,44 @@ def fetch_expenditures(conn):
     if not df.empty:
         df["expenditure_amount"] = df["expenditure_amount"].astype(float)
     return df
+
+
+def fetch_mps(conn):
+    """MP-term aggregates, or an empty frame if the snapshot carried no MP
+    summary file - the same supported case as fetch_expenditures."""
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(
+            "SELECT mp_id, ls_term, mp_name, constituency, state, allocated_amount, "
+            "unspent_amount, utilization_pct, completed_works, recommended_works FROM mps"
+        )
+        df = pd.DataFrame(cur.fetchall())
+    for col in ("allocated_amount", "unspent_amount", "utilization_pct"):
+        if col in df.columns:
+            df[col] = df[col].astype(float)
+    return df
+
+
+def write_detector_findings(conn, findings):
+    """Replace the whole findings set. They are derived, cheap to recompute and
+    meaningless once the data under them has moved, so there is no history to
+    preserve - the same contract as agency_vendor_profile."""
+    with conn.cursor() as cur:
+        cur.execute("TRUNCATE detector_findings RESTART IDENTITY")
+        if findings:
+            execute_values(
+                cur,
+                "INSERT INTO detector_findings "
+                "(code, subject_type, subject, ls_term, period, severity, headline, evidence) "
+                "VALUES %s",
+                [
+                    (f["code"], f["subject_type"], f["subject"], f["ls_term"],
+                     f["period"], f["severity"], f["headline"], Json(f["evidence"]))
+                    for f in findings
+                ],
+                page_size=1000,
+            )
+    conn.commit()
+    return len(findings)
 
 
 def write_agency_vendor_profile(conn, profile):
@@ -476,6 +515,7 @@ if __name__ == "__main__":
     run_id = current_refresh_run_id(conn)
     df = fetch_projects(conn)
     expenditures = fetch_expenditures(conn)
+    mp_rows = fetch_mps(conn)
     conn.close()
 
     agency_profile = vendors.build_agency_vendor_profile(expenditures, as_of=date.today())
@@ -501,9 +541,21 @@ if __name__ == "__main__":
         conn.close()
         raise
 
+    # Cohort detectors run on the same frames but never touch a work's score -
+    # see data/detectors.py for why a population statistic stays at population
+    # grain. A detector failing must not lose a completed scoring pass, so this
+    # is deliberately after the scores are computed and reported separately.
+    findings = detectors.run_all(df, expenditures, mp_rows)
+
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     write_agency_vendor_profile(conn, agency_profile)
     write_scores(conn, scored)
+    written = write_detector_findings(conn, findings)
     finish_scoring_run(conn, run_id, "success", len(scored))
     conn.close()
     print(f"Scored {len(scored)} projects.")
+    by_code = {}
+    for f in findings:
+        by_code[f["code"]] = by_code.get(f["code"], 0) + 1
+    print(f"Wrote {written} detector findings: "
+          + ", ".join(f"{c} x{n}" for c, n in sorted(by_code.items())))
