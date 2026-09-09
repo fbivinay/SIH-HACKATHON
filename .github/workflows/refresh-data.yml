@@ -42,9 +42,12 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    # Scoring is 15-20 min; the default 360 is plenty, but be explicit so a hang
-    # is killed rather than burning the full 6h allowance.
-    timeout-minutes: 60
+    # Load is ~2 min and scoring ~20 on a runner, over 246,765 works and
+    # 270,934 payments. 60 was too close to that once the snapshot grew to both
+    # Lok Sabha terms - a run killed at the limit leaves the data half-refreshed
+    # and the dashboard unscored. Explicit rather than the 360 default so a
+    # genuine hang still dies instead of burning the full allowance.
+    timeout-minutes: 120
 
     steps:
       # v4/v5 target Node 20, which the runners now force onto Node 24 with a
@@ -120,8 +123,34 @@ jobs:
         if: steps.config.outputs.configured == 'true'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        # 15-20 minutes: embeds ~127k descriptions. Not hung.
+        # ~20 minutes: embeds 246,765 descriptions and then runs the cohort
+        # detectors over 270,934 payments. Not hung.
         run: python data/scoring.py
+
+      # A timeout, a cancellation or a dead runner never reaches the code that
+      # closes the audit row, so the run would sit at 'running' forever and the
+      # freshness line would keep quoting the last success as if nothing had
+      # been attempted since. Record the death here instead.
+      - name: Record a failed or cancelled run
+        if: ${{ (failure() || cancelled()) && steps.config.outputs.configured == 'true' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import os, psycopg2
+          conn = psycopg2.connect(os.environ["DATABASE_URL"])
+          with conn, conn.cursor() as cur:
+              cur.execute(
+                  """UPDATE data_refresh
+                        SET status = 'failed', finished_at = now(),
+                            notes = COALESCE(notes || ' | ', '') || %s
+                      WHERE status = 'running'""",
+                  [f"workflow did not complete: {os.environ['RUN_URL']}"],
+              )
+              print(f"Marked {cur.rowcount} run(s) failed.")
+          conn.close()
+          PY
 
       - name: Report result
         if: steps.config.outputs.configured == 'true'

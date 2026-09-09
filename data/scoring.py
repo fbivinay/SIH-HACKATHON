@@ -412,14 +412,25 @@ def score_dataframe(df, agency_profile=None):
     return df
 
 
+# A load and the scoring that follows it run minutes apart in the same job. A
+# 'running' row older than this belongs to some earlier, abandoned attempt, and
+# adopting it would stamp that attempt as this run's success.
+MAX_RUN_ADOPTION_AGE = "12 hours"
+
+
 def current_refresh_run_id(conn):
     """Find the 'running' data_refresh row load_real_data.py started, so this
     run's rows_scored/status lands on the same audit row. Best-effort: audit
-    bookkeeping must never block scoring itself."""
+    bookkeeping must never block scoring itself.
+
+    load_real_data.py already closes abandoned rows when it starts, so in the
+    normal pipeline there is exactly one candidate. The age bound covers running
+    scoring.py on its own against a database whose last load was killed."""
     try:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT id FROM data_refresh WHERE status = 'running' "
+                f"AND started_at > now() - INTERVAL '{MAX_RUN_ADOPTION_AGE}' "
                 "ORDER BY started_at DESC LIMIT 1"
             )
             row = cur.fetchone()

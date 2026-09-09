@@ -261,9 +261,28 @@ def build_rows():
 
 def start_refresh_run(conn, source):
     """Insert a 'running' data_refresh row and return its id, or None on any
-    failure. Audit bookkeeping must never block the pipeline itself."""
+    failure. Audit bookkeeping must never block the pipeline itself.
+
+    Any earlier row still marked 'running' is closed first. A refresh that is
+    killed rather than failed - a workflow timeout, a cancelled job, a runner
+    that vanishes - never reaches finish_load_run, so its row sits at 'running'
+    forever. Two things then go wrong: the freshness line keeps quoting the last
+    successful run as if nothing had been attempted since, and scoring.py adopts
+    the newest 'running' row, so the next pass stamps a stranger's abandoned
+    record as its own success. The refresh workflow holds a concurrency group of
+    one, so by the time a new load starts, any other 'running' row is abandoned
+    by definition.
+    """
     try:
         with conn.cursor() as cur:
+            cur.execute(
+                """UPDATE data_refresh SET status = 'failed', finished_at = now(),
+                       notes = COALESCE(notes || ' | ', '')
+                              || 'abandoned: never finished, closed by a later run'
+                   WHERE status = 'running'"""
+            )
+            if cur.rowcount:
+                print(f"data_refresh: closed {cur.rowcount} abandoned run(s).")
             cur.execute(
                 "INSERT INTO data_refresh (status, source) VALUES ('running', %s) RETURNING id",
                 [source],
