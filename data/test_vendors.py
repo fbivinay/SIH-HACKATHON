@@ -97,7 +97,7 @@ def test_reasons_name_the_vendor_and_the_basis():
     reason = concentration_reason(row)
     assert "74%" in reason
     assert "Aditya Construction" in reason
-    assert "Rs 12,500,000" in reason
+    assert "\u20b912,500,000" in reason
     assert "9 vendors" in reason and "140 transactions" in reason
 
 

@@ -1,20 +1,59 @@
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatINR, isAggregateScoringPending, riskLevelClass, riskLevelLabel, riskScoreToLevel } from "@/lib/format";
 
-export default async function AnalysisPage() {
-  const [agencies, mps] = await Promise.all([api.agencies(), api.mps()]);
+// The page used to render every one of the 1,539 agency-terms, which is 2.5 MB
+// of HTML and an 80,000-pixel scroll. It shows a page at a time now.
+const PAGE_SIZE = 60;
+
+export default async function AnalysisPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const term = typeof sp.ls_term === "string" ? sp.ls_term : "";
+  const offset = Math.max(0, Number.parseInt(String(sp.offset ?? "0"), 10) || 0);
+
+  const [agencies, mps] = await Promise.all([
+    api.agencies({
+      limit: String(PAGE_SIZE),
+      offset: String(offset),
+      ...(term ? { ls_term: term } : {}),
+    }),
+    api.mps(),
+  ]);
   const scoringPending = isAggregateScoringPending(agencies, "anomaly_count");
 
   return (
     <main className="shell py-8">
       <h1 className="display">Implementing agencies</h1>
       <p className="lede !mx-0 !max-w-2xl">
-        {formatCount(agencies.length)} agency-terms, ranked by average risk score. An
-        agency is reported once per Lok Sabha term — its vendor mix in one says
-        nothing about the other.
-        Vendor share is the portion of an agency&apos;s recorded spend going to its single
-        largest vendor. A high share is not wrongdoing — it is a reason to look.
+        Ranked by average risk score. An agency is reported once per Lok Sabha term —
+        its vendor mix in one says nothing about the other. Agencies with fewer than ten
+        works are left out: an average over one work is whatever that work scored, and
+        those agencies were crowding out ones with a thousand. Vendor share is the
+        portion of an agency&apos;s recorded spend going to its single largest vendor. A
+        high share is not wrongdoing — it is a reason to look.
       </p>
+
+      <nav className="mt-5 flex flex-wrap items-center gap-2" aria-label="Filter by term">
+        {[
+          { value: "", label: "Both terms" },
+          { value: "17", label: "17th Lok Sabha" },
+          { value: "18", label: "18th Lok Sabha" },
+        ].map((t) => (
+          <Link
+            key={t.value || "all"}
+            href={t.value ? `/analysis?ls_term=${t.value}` : "/analysis"}
+            className="review-btn"
+            aria-current={term === t.value ? "true" : undefined}
+            style={term === t.value ? { color: "var(--ink)", borderColor: "var(--ink)" } : undefined}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </nav>
 
       {scoringPending && (
         <div className="notice mt-5" role="status">
@@ -71,6 +110,38 @@ export default async function AnalysisPage() {
           </tbody>
         </table>
       </div>
+
+      <nav className="pager" aria-label="Agency pages">
+        {offset > 0 ? (
+          <Link
+            href={`/analysis?${new URLSearchParams({
+              ...(term ? { ls_term: term } : {}),
+              ...(offset - PAGE_SIZE > 0 ? { offset: String(offset - PAGE_SIZE) } : {}),
+            })}`}
+            className="pager__link"
+          >
+            ← Previous
+          </Link>
+        ) : (
+          <span className="pager__link is-disabled">← Previous</span>
+        )}
+        <span className="pager__link is-disabled" style={{ borderColor: "transparent" }}>
+          {formatCount(offset + 1)}–{formatCount(offset + agencies.length)}
+        </span>
+        {agencies.length === PAGE_SIZE ? (
+          <Link
+            href={`/analysis?${new URLSearchParams({
+              ...(term ? { ls_term: term } : {}),
+              offset: String(offset + PAGE_SIZE),
+            })}`}
+            className="pager__link"
+          >
+            Next →
+          </Link>
+        ) : (
+          <span className="pager__link is-disabled">Next →</span>
+        )}
+      </nav>
 
       <section className="mt-12">
         <h2 className="section-head">Allocation still unspent</h2>

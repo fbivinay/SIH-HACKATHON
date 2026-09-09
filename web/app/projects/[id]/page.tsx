@@ -53,7 +53,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const components = [
     { label: "Cost", value: p.cost_risk },
     { label: "Delay", value: p.delay_risk },
-    { label: "Duplicate", value: p.duplicate_risk },
+    { label: "Duplication", value: p.duplicate_risk },
     { label: "Agency", value: p.agency_risk },
     { label: "Compliance", value: p.compliance_risk },
   ];
@@ -64,7 +64,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   return (
     <main className="mx-auto max-w-4xl px-6 py-8">
       <Link href="/projects" className="text-xs link-quiet">
-        &larr; Back to projects
+        &larr; Back to works
       </Link>
 
       <h1 className="section-head mt-4">{p.work_name}</h1>
@@ -79,14 +79,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </>
         )}
       </p>
-      {p.description && (
+      {p.description && p.description.trim() !== p.work_name.trim() && (
         <p className="mt-3 text-sm text-[color:var(--ink)]/80 max-w-2xl">{p.description}</p>
       )}
 
       {/* Score hero */}
       <div className="stat-card stat-card--neutral mt-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="stat-card__label">Overall Risk Score</div>
+          <div className="stat-card__label">Overall risk score</div>
           <div className="stat-card__value" style={{ fontSize: "2.5rem" }}>
             {scorePending ? "—" : p.overall_risk_score!.toFixed(0)}
             <span className="text-base font-normal text-[color:var(--muted)]">/100</span>
@@ -94,7 +94,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <div className="stat-card__note">
             {scorePending
               ? "Risk scoring for this work has not run yet."
-              : "overall_risk_score, blended from the five components below."}
+              : "Blended from the five components below, each weighted as shown."}
           </div>
         </div>
         <span className={riskLevelClass(p.risk_level)} style={{ fontSize: "0.8rem", padding: "0.35rem 0.8rem" }}>
@@ -129,13 +129,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
         <div className="stat-card stat-card--medium">
-          <div className="stat-card__label">Cost Deviation</div>
+          <div className="stat-card__label">Cost deviation</div>
           <div className="stat-card__value" style={{ fontSize: "1.15rem" }}>
             {p.cost_deviation_pct === null ? "—" : `${p.cost_deviation_pct.toFixed(0)}%`}
           </div>
         </div>
         <div className="stat-card stat-card--neutral">
-          <div className="stat-card__label">Work Status</div>
+          <div className="stat-card__label">Work status</div>
           <div className="stat-card__value" style={{ fontSize: "1.15rem" }}>
             {workStatusLabel(p.work_status)}
           </div>

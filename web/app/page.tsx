@@ -75,7 +75,7 @@ export default async function OverviewPage() {
     {
       label: "High risk",
       value: scoringPending ? dash : formatCount(data.high_risk_count),
-      note: scoringPending ? "Waiting on scoring" : "Score above 70",
+      note: scoringPending ? "Waiting on scoring" : "Score 70 and above",
       tone: "high" as const,
     },
     {
@@ -87,7 +87,7 @@ export default async function OverviewPage() {
     {
       label: "Worth a look",
       value: scoringPending ? dash : formatCount(data.anomaly_count),
-      note: scoringPending ? "Waiting on scoring" : "Score above 40",
+      note: scoringPending ? "Waiting on scoring" : "Score 40 and above",
     },
   ];
 

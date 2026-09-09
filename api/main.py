@@ -23,7 +23,11 @@ def overview():
           COALESCE(SUM(expenditure), 0) AS total_expenditure,
           COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_count,
           COUNT(*) FILTER (WHERE delay_days > 60) AS delayed_count,
-          COUNT(*) FILTER (WHERE overall_risk_score > 40) AS anomaly_count
+          -- >= 40, not > 40. The alert queue's threshold is inclusive (it is
+          -- where risk_level leaves LOW), and the two screens reported
+          -- different totals for the same set: 48,359 here against 48,687
+          -- there, the 328 works sitting exactly on 40.
+          COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS anomaly_count
         FROM projects
         """,
         one=True,
@@ -112,9 +116,20 @@ def map_states():
     )
 
 
+# An average over one work is not an average. Below this an agency's mean risk
+# is whatever its single work scored, which put agencies holding one work at the
+# top of the ranking ahead of agencies holding a thousand.
+AGENCY_MIN_WORKS = 10
+
+
 @app.get("/api/agencies")
-def agencies(ls_term: Optional[int] = Query(None, ge=17, le=18)):
-    """One row per agency per Lok Sabha term.
+def agencies(
+    ls_term: Optional[int] = Query(None, ge=17, le=18),
+    min_works: int = Query(AGENCY_MIN_WORKS, ge=1),
+    limit: int = Query(100, le=500),
+    offset: int = 0,
+):
+    """One row per agency per Lok Sabha term, ranked by average risk.
 
     An agency's vendor mix in one term says nothing about its mix in the other,
     so the two are not pooled.
@@ -146,9 +161,11 @@ def agencies(ls_term: Optional[int] = Query(None, ge=17, le=18)):
         -- has no vendor data, rather than dropping off the screen.
         FROM work_stats w
         LEFT JOIN vendor_stats v USING (implementing_agency, ls_term)
-        ORDER BY w.avg_risk_score DESC
+        WHERE w.total_projects >= %s
+        ORDER BY w.avg_risk_score DESC, w.total_projects DESC
+        LIMIT %s OFFSET %s
         """,
-        params,
+        params + [min_works, limit, offset],
     )
 
 

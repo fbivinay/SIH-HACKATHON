@@ -284,7 +284,7 @@ def build_flagged_reasons(row):
     if row["cost_deviation_pct"] > 40 and has_basis:
         peers = "" if peer_count is None or pd.isna(peer_count) else f", {int(peer_count)} peer works"
         reasons.append(
-            f"Rs {float(amount):,.0f} against a Rs {float(peer_median):,.0f} median "
+            f"\u20b9{float(amount):,.0f} against a \u20b9{float(peer_median):,.0f} median "
             f"for {row.get('sector') or 'similar'} works in {row['district']} "
             f"({row['cost_deviation_pct']:.0f}% above{peers})"
         )
