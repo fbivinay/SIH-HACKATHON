@@ -307,3 +307,25 @@ def test_projects_carry_the_durable_key():
     """So the register can link to an address that survives the night."""
     rows = client.get("/api/projects?limit=3").json()["projects"]
     assert all("work_key" in p for p in rows)
+
+
+def test_provenance_traces_the_chain_to_the_designated_dataset():
+    """The problem statement names mplads.mospi.gov.in as the dataset. We load
+    from an aggregator of it, which is a claim - this endpoint is where the
+    claim gets checked rather than asserted."""
+    body = client.get("/api/provenance").json()
+    assert len(body["chain"]) == 3
+    assert any("mospi.gov.in" in c["what"] for c in body["chain"])
+    for row in body["rows"]:
+        assert row["unit"] in ("crore", "count")
+        assert row["official"] is not None
+
+
+def test_provenance_gap_stays_small():
+    """A large or positive gap means something other than lag. Ours run 0.2% to
+    3.5%, all negative, which is a snapshot taken a day earlier."""
+    body = client.get("/api/provenance").json()
+    if not body["rows"]:
+        return
+    assert body["worst_gap_pct"] is not None
+    assert body["worst_gap_pct"] < 15, "figures have drifted from the official source"

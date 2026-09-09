@@ -179,6 +179,17 @@ jobs:
           conn.close()
           PY
 
+      # Provenance is a claim until something checks it. This compares the
+      # loaded figures against the official MoSPI dashboard's own endpoints and
+      # records the result for the interface to show. Never fails the run: the
+      # portal being unreachable is not a reason to discard a good refresh.
+      - name: Reconcile against the official MoSPI dashboard
+        if: steps.config.outputs.configured == 'true'
+        continue-on-error: true
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python scripts/verify_mospi.py
+
       - name: Report result
         if: steps.config.outputs.configured == 'true'
         env:

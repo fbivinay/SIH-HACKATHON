@@ -252,6 +252,29 @@ export type ComplianceBook = {
   weight_in_score: number;
 };
 
+// How our figures compare with the official MoSPI dashboard. Recorded by
+// scripts/verify_mospi.py against the portal's own pre-login endpoints, so
+// provenance is checkable rather than asserted.
+export type Provenance = {
+  rows: Array<{
+    metric: string;
+    ours: number;
+    official: number;
+    unit: "crore" | "count";
+    gap_pct: number | null;
+    note: string | null;
+    checked_at: string;
+  }>;
+  worst_gap_pct: number | null;
+  last_refresh: {
+    finished_at?: string;
+    rows_loaded?: number;
+    rows_scored?: number;
+    source?: string;
+  };
+  chain: Array<{ step: string; what: string }>;
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -305,6 +328,7 @@ export const api = {
   states: (params: Record<string, string> = {}) =>
     get<StateSummary[]>(`/api/states?${new URLSearchParams(params)}`),
   compliance: () => get<ComplianceBook>("/api/compliance"),
+  provenance: () => get<Provenance>("/api/provenance"),
   detectors: () => get<Detector[]>("/api/detectors"),
   detectorFindings: (params: Record<string, string> = {}) =>
     get<DetectorFindingPage>(`/api/detectors/findings?${new URLSearchParams(params)}`),

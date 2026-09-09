@@ -305,3 +305,21 @@ SELECT p.id, p.work_key, p.work_name, p.description, p.ls_term, p.mp_name,
        COALESCE(s.flagged_reasons, '[]'::jsonb) AS flagged_reasons
 FROM projects p
 LEFT JOIN project_scores s ON s.project_id = p.id;
+
+
+-- How our figures compare with the official MoSPI dashboard, recorded each
+-- refresh so the interface can show provenance instead of asserting it.
+--
+-- The problem statement names mplads.mospi.gov.in as the dataset; we load from
+-- Empowered Indian, which aggregates it. That is a claim about provenance, and
+-- a claim about provenance should be checkable. Rebuilt every run, like every
+-- other derived table here.
+CREATE TABLE IF NOT EXISTS source_reconciliation (
+    metric TEXT PRIMARY KEY,
+    ours NUMERIC(18,2),
+    official NUMERIC(18,2),
+    unit TEXT NOT NULL,          -- 'crore' | 'count'
+    gap_pct NUMERIC(6,2),
+    note TEXT,
+    checked_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
