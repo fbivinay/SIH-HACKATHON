@@ -164,12 +164,24 @@ def project_detail(project_id: int):
 
 @app.get("/api/map/states")
 def map_states():
+    """Per-state figures for the choropleth.
+
+    flagged_share is what the map colours by. Average score cannot: every one
+    of the 36 states averages between 6.5 and 37.2, so all 36 fall in the LOW
+    band and a band-coloured map is a uniform green sheet that says nothing.
+    The share of a state's works above the review threshold runs 0% to 43.1% -
+    real variation, and the actionable quantity, since it is the proportion of
+    that state's works somebody has to go and look at.
+    """
     return query(
         """
         SELECT state,
                COUNT(*) AS total_projects,
                COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_count,
-               COALESCE(AVG(overall_risk_score), 0) AS avg_risk_score
+               COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS flagged_count,
+               COALESCE(AVG(overall_risk_score), 0) AS avg_risk_score,
+               ROUND(100.0 * COUNT(*) FILTER (WHERE overall_risk_score >= 40)
+                     / NULLIF(COUNT(*), 0), 1) AS flagged_share
         FROM projects_scored GROUP BY state
         """
     )

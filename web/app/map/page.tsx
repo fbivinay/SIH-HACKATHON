@@ -7,10 +7,9 @@ import {
   formatCount,
   isAggregateScoringPending,
   normalizeStateName,
-  riskLevelClass,
-  riskLevelLabel,
-  riskScoreColorHex,
-  riskScoreToLevel,
+  choroplethFill,
+  CHOROPLETH_STEPS,
+  NO_DATA_FILL,
 } from "@/lib/format";
 
 const MapContainer = dynamic(() => import("react-leaflet").then((m) => m.MapContainer), {
@@ -40,7 +39,9 @@ export default function MapPage() {
 
   const scoringPending = stats ? isAggregateScoringPending(stats, "high_risk_count") : false;
   const sorted = useMemo(
-    () => (stats ? [...stats].sort((a, b) => b.avg_risk_score - a.avg_risk_score) : []),
+    // Ordered by the quantity the map is shaded by, so the table reads as the
+    // map's index rather than a second, differently-ranked list.
+    () => (stats ? [...stats].sort((a, b) => (b.flagged_share ?? -1) - (a.flagged_share ?? -1)) : []),
     [stats]
   );
 
@@ -49,7 +50,9 @@ export default function MapPage() {
       <h1 className="display">Risk by state</h1>
       <p className="lede !mx-0 !max-w-2xl">
         {stats ? `${formatCount(stats.length)} states and union territories` : "Loading state figures…"}
-        , ranked by average risk score.
+        , shaded by the share of each state&rsquo;s works that sit above the review
+        threshold. Average score would shade nothing: all 36 states average inside the
+        low band, so the map would be one flat colour.
       </p>
 
       {scoringPending && (
@@ -75,6 +78,12 @@ export default function MapPage() {
             scrollWheelZoom={false}
             style={{ height: "100%", width: "100%" }}
           >
+            {/* OpenStreetMap's own tiles, desaturated in CSS rather than
+                swapped for a designed grey basemap: CARTO's light_all now
+                requires an API key and watermarks "API KEY REQUIRED" across
+                every tile without one. Greying the tile pane gets the same
+                result - a quiet basemap the red choropleth can sit on top of -
+                with no key, no vendor and the original attribution intact. */}
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -87,9 +96,9 @@ export default function MapPage() {
                 const known = Boolean(stat);
                 return {
                   fillColor:
-                    known && !scoringPending ? riskScoreColorHex(stat!.avg_risk_score) : "#e5e7eb",
-                  fillOpacity: known ? 0.7 : 0.4,
-                  color: "#374151",
+                    known && !scoringPending ? choroplethFill(stat!.flagged_share) : NO_DATA_FILL,
+                  fillOpacity: known ? 0.85 : 0.45,
+                  color: "#ffffff",
                   weight: 1,
                 };
               }}
@@ -99,9 +108,11 @@ export default function MapPage() {
                 const label = (feature.properties as Record<string, string>)?.ST_NM ?? "Unknown";
                 if (stat) {
                   layer.bindTooltip(
-                    `${label}: ${formatCount(stat.total_projects)} works, avg score ${
-                      scoringPending ? "—" : stat.avg_risk_score.toFixed(1)
-                    }`
+                    `${label} — ${formatCount(stat.flagged_count)} of ${formatCount(
+                      stat.total_projects
+                    )} works to verify (${
+                      stat.flagged_share === null ? "—" : `${stat.flagged_share}%`
+                    })`
                   );
                 } else {
                   layer.bindTooltip(`${label}: no matching works`);
@@ -109,6 +120,18 @@ export default function MapPage() {
               }}
             />
           </MapContainer>
+        </div>
+      )}
+
+      {geojson && stats && (
+        <div className="choro-legend" aria-hidden="true">
+          <span className="choro-legend__title">Share of works to verify</span>
+          {CHOROPLETH_STEPS.map((step) => (
+            <span key={step.label} className="choro-legend__item">
+              <span className="choro-legend__swatch" style={{ background: step.fill }} />
+              {step.label}
+            </span>
+          ))}
         </div>
       )}
 
@@ -121,16 +144,17 @@ export default function MapPage() {
           <thead>
             <tr>
               <th>State</th>
-              <th className="text-right">Works</th>
-              <th className="text-right">High Risk</th>
-              <th className="text-right">Avg Score</th>
-              <th>Level</th>
+              <th className="num">Works</th>
+              <th className="num">To verify</th>
+              <th className="num">Share</th>
+              <th className="num">High risk</th>
+              <th className="num">Avg score</th>
             </tr>
           </thead>
           <tbody>
             {stats === null && (
               <tr>
-                <td colSpan={5} className="text-center text-[color:var(--muted)] py-6">
+                <td colSpan={6} className="text-center text-[color:var(--muted)] py-6">
                   Loading…
                 </td>
               </tr>
@@ -139,13 +163,12 @@ export default function MapPage() {
               <tr key={s.state}>
                 <td>{s.state}</td>
                 <td className="num">{formatCount(s.total_projects)}</td>
+                <td className="num">{scoringPending ? "—" : formatCount(s.flagged_count)}</td>
+                <td className="num">
+                  {scoringPending || s.flagged_share === null ? "—" : `${s.flagged_share}%`}
+                </td>
                 <td className="num">{scoringPending ? "—" : formatCount(s.high_risk_count)}</td>
                 <td className="num">{scoringPending ? "—" : s.avg_risk_score.toFixed(1)}</td>
-                <td>
-                  <span className={riskLevelClass(scoringPending ? null : riskScoreToLevel(s.avg_risk_score))}>
-                    {scoringPending ? "Pending" : riskLevelLabel(riskScoreToLevel(s.avg_risk_score))}
-                  </span>
-                </td>
               </tr>
             ))}
           </tbody>

@@ -1083,3 +1083,47 @@ select:focus-visible {
   line-height: 1.45;
   color: var(--ink-3);
 }
+
+/* ---- Choropleth legend ---- */
+
+/* A sequential ramp without a key is an unlabelled gradient. */
+.choro-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.9rem;
+  margin-top: 0.7rem;
+  font-size: 0.76rem;
+  color: var(--ink-2);
+}
+
+.choro-legend__title {
+  color: var(--ink-3);
+}
+
+.choro-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.choro-legend__swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+/* The basemap is reference, not content: desaturated so the choropleth laid
+   over it is the only colour on the map. Applied to the tile pane alone, so
+   the GeoJSON overlay (a different Leaflet pane) keeps its hue. */
+.leaflet-tile-pane {
+  filter: grayscale(1) contrast(0.92) brightness(1.06);
+}
+
+/* Leaflet paints its own white container; match the page instead. */
+.leaflet-container {
+  background: var(--surface-2);
+  font-family: var(--font-ui);
+}
