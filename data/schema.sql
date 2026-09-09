@@ -201,3 +201,29 @@ CREATE TABLE IF NOT EXISTS work_reviews (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_work_reviews_status ON work_reviews(status);
+
+
+-- Cohort-level detector findings (data/detectors.py). One row per finding, and
+-- a finding describes an agency or an MP rather than a work: these are
+-- population statistics, and attributing one to whichever work happened to be
+-- in the population is the mistake that makes a risk score unusable in a
+-- hearing. Nothing here feeds overall_risk_score.
+--
+-- Rebuilt from scratch on every scoring run, like agency_vendor_profile.
+CREATE TABLE IF NOT EXISTS detector_findings (
+    id SERIAL PRIMARY KEY,
+    code TEXT NOT NULL,              -- 'D-01' .. 'D-04'
+    subject_type TEXT NOT NULL,      -- 'agency' | 'mp'
+    subject TEXT NOT NULL,           -- implementing agency name, or mp_id
+    ls_term SMALLINT,
+    period TEXT,                     -- fiscal year for D-01, else NULL
+    severity NUMERIC(5,2) NOT NULL,
+    headline TEXT NOT NULL,
+    evidence JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_detector_findings_code ON detector_findings(code);
+CREATE INDEX IF NOT EXISTS idx_detector_findings_subject
+    ON detector_findings(subject_type, subject, ls_term);
+CREATE INDEX IF NOT EXISTS idx_detector_findings_severity
+    ON detector_findings(severity DESC);

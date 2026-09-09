@@ -110,3 +110,41 @@ def test_review_round_trips_and_is_updatable(monkeypatch):
         assert any(a["work_key"] == key for a in listed["alerts"])
     finally:
         execute("DELETE FROM work_reviews WHERE work_key = %s", [key])
+
+
+def test_detector_catalogue_states_a_limit_for_every_detector():
+    resp = client.get("/api/detectors")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert {d["code"] for d in body} == {"D-01", "D-02", "D-03", "D-04"}
+    for d in body:
+        # A finding with no stated limit is what gets a system laughed out of a
+        # hearing, so the catalogue must never ship one.
+        assert d["limit"].strip()
+        assert d["what"].strip()
+        assert d["subject"] in ("agency", "mp")
+
+
+def test_detector_findings_returns_a_page():
+    resp = client.get("/api/detectors/findings?limit=5")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["total"] >= len(body["findings"])
+    for f in body["findings"]:
+        assert f["code"].startswith("D-")
+        assert 0 < f["severity"] <= 100
+
+
+def test_detector_findings_filters_by_code():
+    body = client.get("/api/detectors/findings?code=D-04&limit=10").json()
+    assert all(f["code"] == "D-04" for f in body["findings"])
+
+
+def test_detector_findings_rejects_an_unknown_subject_type():
+    assert client.get("/api/detectors/findings?subject_type=vendor").status_code == 422
+
+
+def test_detector_findings_come_back_ranked():
+    body = client.get("/api/detectors/findings?limit=25").json()
+    severities = [f["severity"] for f in body["findings"]]
+    assert severities == sorted(severities, reverse=True)
