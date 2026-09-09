@@ -140,7 +140,7 @@ def concentration_reason(row):
         return None
     return (
         f"{float(row['top_vendor_share_pct']):.0f}% of this agency's "
-        f"Rs {float(row['total_spend']):,.0f} spend went to one vendor "
+        f"\u20b9{float(row['total_spend']):,.0f} spend went to one vendor "
         f"({row['top_vendor']}), across {_plural(int(row['vendor_count']), 'vendor')} "
         f"and {_plural(int(row['transaction_count']), 'transaction')}"
     )

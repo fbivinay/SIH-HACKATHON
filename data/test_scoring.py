@@ -292,8 +292,8 @@ def test_cost_reason_states_its_comparison_basis():
     reasons = build_flagged_reasons(_priced())
     cost = [r for r in reasons if "median" in r]
     assert len(cost) == 1, reasons
-    assert "Rs 900,000" in cost[0]          # this work
-    assert "Rs 300,000" in cost[0]          # what it is compared against
+    assert "\u20b9900,000" in cost[0]          # this work
+    assert "\u20b9300,000" in cost[0]          # what it is compared against
     assert "Street Lighting" in cost[0]     # the peer group
     assert "JAUNPUR" in cost[0]
     assert "40 peer works" in cost[0]       # how many peers stand behind it

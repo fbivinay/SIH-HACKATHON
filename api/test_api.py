@@ -191,3 +191,28 @@ def test_review_history_is_empty_for_an_untouched_work():
     resp = client.get("/api/alerts/history", params={"work_key": "no-such-work|99|NOWHERE"})
     assert resp.status_code == 200
     assert resp.json()["events"] == []
+
+
+def test_overview_anomaly_count_matches_the_queue():
+    """The two screens reported different totals for the same set: overview
+    counted score > 40 and the queue counts >= 40, a 328-work gap."""
+    overview = client.get("/api/overview").json()
+    queue = client.get("/api/alerts/summary", params={"min_score": 40}).json()
+    assert overview["anomaly_count"] == queue["in_scope"]
+
+
+def test_agencies_are_bounded_and_exclude_one_work_agencies():
+    """An average over one work is whatever that work scored, and those
+    agencies were topping the ranking ahead of ones holding a thousand."""
+    rows = client.get("/api/agencies?limit=25").json()
+    assert len(rows) <= 25
+    assert all(r["total_projects"] >= 10 for r in rows)
+    scores = [r["avg_risk_score"] for r in rows]
+    assert scores == sorted(scores, reverse=True)
+
+
+def test_agencies_paginate():
+    first = client.get("/api/agencies?limit=5").json()
+    second = client.get("/api/agencies?limit=5&offset=5").json()
+    names = {(r["implementing_agency"], r["ls_term"]) for r in first}
+    assert not names & {(r["implementing_agency"], r["ls_term"]) for r in second}
