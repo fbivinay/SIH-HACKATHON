@@ -193,6 +193,31 @@ export type DetectorFindingPage = {
   findings: DetectorFinding[];
 };
 
+// Money figures are the source's own per-MP aggregates, not recomputed from
+// works, so every row can be checked against empoweredindian.in. Verified
+// 2026-09-09: all 36 states match on allocation, expenditure, amount
+// recommended, MP count and completed works.
+export type StateSummary = {
+  state: string;
+  allocated: number | null;
+  recommended: number | null;
+  expenditure: number | null;
+  mp_count: number;
+  completed_works: number | null;
+  recommended_works: number | null;
+  // Two rates, because the source publishes one number under both names.
+  // paid_rate is expenditure/allocated — the figure its state cards show.
+  // committed_rate is recommended/allocated — money attached to a work.
+  paid_rate: number | null;
+  committed_rate: number | null;
+  completion_rate: number | null;
+  works: number;
+  high_risk: number;
+  in_queue: number;
+  flagged_amount: number;
+  avg_risk: number | null;
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -239,6 +264,8 @@ export const api = {
     get<AlertPage>(`/api/alerts?${new URLSearchParams(params)}`),
   alertSummary: (params: Record<string, string> = {}) =>
     get<AlertSummary>(`/api/alerts/summary?${new URLSearchParams(params)}`),
+  states: (params: Record<string, string> = {}) =>
+    get<StateSummary[]>(`/api/states?${new URLSearchParams(params)}`),
   detectors: () => get<Detector[]>("/api/detectors"),
   detectorFindings: (params: Record<string, string> = {}) =>
     get<DetectorFindingPage>(`/api/detectors/findings?${new URLSearchParams(params)}`),

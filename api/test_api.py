@@ -216,3 +216,24 @@ def test_agencies_paginate():
     second = client.get("/api/agencies?limit=5&offset=5").json()
     names = {(r["implementing_agency"], r["ls_term"]) for r in first}
     assert not names & {(r["implementing_agency"], r["ls_term"]) for r in second}
+
+
+def test_states_cover_every_state_with_both_rates():
+    rows = client.get("/api/states?ls_term=18").json()
+    assert len(rows) >= 30
+    for r in rows:
+        assert r["state"]
+        # Two rates on purpose: the source publishes one number under both
+        # names, with utilizationDefinition "vendor_expenditure_legacy".
+        for key in ("paid_rate", "committed_rate"):
+            assert r[key] is None or 0 <= r[key] <= 200
+
+
+def test_states_paid_rate_is_expenditure_over_allocation():
+    """The figure has to be the weighted one. Averaging the 36 state
+    percentages instead gives 33.2% against the correct 34.2%, which is the
+    discrepancy between the source's own two pages."""
+    rows = client.get("/api/states?ls_term=18").json()
+    row = next(r for r in rows if r["allocated"] and r["paid_rate"] is not None)
+    expected = float(row["expenditure"]) / float(row["allocated"]) * 100
+    assert abs(float(row["paid_rate"]) - expected) < 0.11

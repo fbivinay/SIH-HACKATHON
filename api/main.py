@@ -585,3 +585,77 @@ def detector_findings(
         f"SELECT COUNT(*) AS total FROM detector_findings {where}", params, one=True
     )
     return {"total": total["total"], "limit": limit, "offset": offset, "findings": rows}
+
+
+# ------------------------------------------------------------------- states
+
+# The source's own bands, from its states page: >=80% is a high performer,
+# 50-79% average, below 50% needs improvement. Kept identical so the two
+# screens sort a state into the same bucket.
+STATE_BANDS = {"high": 80.0, "average": 50.0}
+
+
+@app.get("/api/states")
+def states(ls_term: int = Query(18, ge=17, le=18)):
+    """Per-state totals, plus what our scoring adds on top.
+
+    Every money figure comes from the source's own per-MP aggregates rather
+    than being recomputed from works, which is what lets a reader check any row
+    against empoweredindian.in. Verified 2026-09-09 against
+    api.empoweredindian.in/api/summary/states: all 36 states match on
+    allocation, expenditure, amount recommended, MP count and completed works.
+
+    Two rates, because the source publishes one number under both names. Its
+    API returns utilizationPercentage identical to expenditurePercentage, with
+    the field `utilizationDefinition: "vendor_expenditure_legacy"` marking the
+    conflation, while its overview page calls something else "Fund
+    Utilization". They are different questions and both are reported here:
+
+      - paid_rate: expenditure / allocated. Money actually out the door. This
+        is the figure the source's state cards show.
+      - committed_rate: recommended / allocated. Money attached to a work,
+        whether or not it has been paid.
+    """
+    return query(
+        """
+        WITH money AS (
+            SELECT state,
+                   SUM(allocated_amount) AS allocated,
+                   SUM(amount_recommended) AS recommended,
+                   SUM(total_expenditure) AS expenditure,
+                   COUNT(DISTINCT mp_id) AS mp_count,
+                   SUM(completed_works) AS completed_works,
+                   SUM(recommended_works) AS recommended_works
+            FROM mps WHERE ls_term = %s AND state IS NOT NULL
+            GROUP BY state
+        ),
+        risk AS (
+            SELECT state,
+                   COUNT(*) AS works,
+                   COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk,
+                   COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue,
+                   COALESCE(SUM(sanctioned_amount) FILTER (WHERE overall_risk_score >= 40), 0)
+                     AS flagged_amount,
+                   AVG(overall_risk_score) AS avg_risk
+            FROM projects WHERE ls_term = %s GROUP BY state
+        )
+        SELECT m.state, m.allocated, m.recommended, m.expenditure, m.mp_count,
+               m.completed_works, m.recommended_works,
+               CASE WHEN m.allocated > 0
+                    THEN ROUND(m.expenditure / m.allocated * 100, 1) END AS paid_rate,
+               CASE WHEN m.allocated > 0
+                    THEN ROUND(m.recommended / m.allocated * 100, 1) END AS committed_rate,
+               CASE WHEN m.recommended_works > 0
+                    THEN ROUND(m.completed_works::numeric / m.recommended_works * 100, 1)
+                    END AS completion_rate,
+               COALESCE(r.works, 0) AS works,
+               COALESCE(r.high_risk, 0) AS high_risk,
+               COALESCE(r.in_queue, 0) AS in_queue,
+               COALESCE(r.flagged_amount, 0) AS flagged_amount,
+               ROUND(r.avg_risk, 1) AS avg_risk
+        FROM money m
+        LEFT JOIN risk r USING (state)
+        ORDER BY m.expenditure / NULLIF(m.allocated, 0) DESC NULLS LAST
+        """,
+        [ls_term, ls_term],
+    )

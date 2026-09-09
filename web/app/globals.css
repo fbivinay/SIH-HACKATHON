@@ -972,3 +972,60 @@ select:focus-visible {
   color: var(--ink-2);
   max-width: 42rem;
 }
+
+/* ---- State cards ---- */
+
+.statecard {
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem 1.15rem 0.9rem;
+}
+
+/* Two figures side by side, the money the card is about. */
+.statecard__money {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.statecard__money dt {
+  font-size: 0.72rem;
+  color: var(--ink-3);
+}
+
+.statecard__money dd {
+  margin-top: 0.15rem;
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+.statebar {
+  margin-top: 0.28rem;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  overflow: hidden;
+}
+
+.statebar__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+
+.statecard__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
