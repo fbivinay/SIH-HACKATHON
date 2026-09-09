@@ -64,10 +64,11 @@ def fetch_mps(conn):
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute(
             "SELECT mp_id, ls_term, mp_name, constituency, state, allocated_amount, "
-            "unspent_amount, utilization_pct, completed_works, recommended_works FROM mps"
+            "amount_recommended, unspent_amount, utilization_pct, completed_works, "
+            "recommended_works FROM mps"
         )
         df = pd.DataFrame(cur.fetchall())
-    for col in ("allocated_amount", "unspent_amount", "utilization_pct"):
+    for col in ("allocated_amount", "amount_recommended", "unspent_amount", "utilization_pct"):
         if col in df.columns:
             df[col] = df[col].astype(float)
     return df

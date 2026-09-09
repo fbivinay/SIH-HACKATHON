@@ -109,12 +109,13 @@ IDLE_MIN_ALLOCATION = 1_00_00_000  # Rs 1 crore
 # carried over to a different quantity and would have flagged almost nobody.
 IDLE_FLOOR_PCT = 35.0
 IDLE_CEILING_PCT = 75.0
-# An MP who has recommended nothing has not started, which is a different thing
-# from money sitting idle and mostly catches members seated part-way through a
-# term. 88 of the 385 MP-terms over the floor are in that position; excluding
-# them leaves 297, and every one of those has recommended works to show for the
-# allocation it has not spent.
-IDLE_MIN_RECOMMENDED_WORKS = 1
+# An MP who has barely recommended anything has not started, which is a
+# different thing from money sitting idle. The median MP-term has recommended
+# 126 works and the 10th percentile is 17, so below that the member is in their
+# first months rather than sitting on funds - the findings this excluded were
+# Rajya Sabha members seated in 2025 and 2026 with one or two works to their
+# name, which is not a story about idle allocation.
+IDLE_MIN_RECOMMENDED_WORKS = 17
 
 # --- D-04 ------------------------------------------------------------------
 UNIFORM_MIN_WORKS = 25
@@ -304,6 +305,20 @@ def idle_allocation(mps):
     df = df[recommended >= IDLE_MIN_RECOMMENDED_WORKS]
     if df.empty:
         return []
+
+    # The source gives Rajya Sabha members a row in both Lok Sabha terms with
+    # identical figures, because their allocation belongs to neither. 231 of
+    # them do, and reporting one fund twice made 286 members produce 358
+    # findings. Where a member's rows carry the same allocation and the same
+    # amount recommended, they describe one fund: keep the later term.
+    df = (
+        df.sort_values("ls_term")
+          .drop_duplicates(subset=["mp_id", "allocated_amount", "amount_recommended"],
+                           keep="last")
+        if "amount_recommended" in df.columns else df
+    )
+    recommended = recommended.reindex(df.index)
+
     allocated = pd.to_numeric(df["allocated_amount"], errors="coerce")
     # Allocation never committed to any work. A snapshot from before the source
     # published amount_recommended cannot answer this, and the detector stays
@@ -376,11 +391,26 @@ def uniform_sanction_amount(projects):
     return out
 
 
+ALL_CODES = ("D-01", "D-02", "D-03", "D-04")
+
+
 def run_all(projects, expenditures, mps):
-    """Every detector, as one list of findings ready for detector_findings."""
+    """Every detector, as one list of findings ready for detector_findings.
+
+    A detector producing nothing is reported. D-03 shipped silent for a whole
+    scoring run because the frame it was handed did not carry
+    amount_recommended: its guard correctly refused to fall back to a column
+    meaning something else, and then nothing said so, which looks exactly like
+    a clean result.
+    """
     findings = []
     findings += year_end_burst(expenditures)
     findings += first_digit_anomaly(expenditures)
     findings += idle_allocation(mps)
     findings += uniform_sanction_amount(projects)
+
+    produced = {f["code"] for f in findings}
+    for code in ALL_CODES:
+        if code not in produced:
+            print(f"detectors: {code} produced no findings - check its input columns")
     return findings

@@ -474,3 +474,17 @@ def test_current_refresh_run_id_ignores_an_abandoned_run():
     assert scoring.MAX_RUN_ADOPTION_AGE in conn.cursor_obj.sql
 
     assert scoring.current_refresh_run_id(FakeConn(None)) is None
+
+
+def test_fetch_mps_selects_every_column_the_detectors_read():
+    """D-03 shipped silent for a whole scoring run because fetch_mps did not
+    select amount_recommended. The guard did its job; nothing checked that the
+    query supplied what the detector needs."""
+    import inspect
+
+    import scoring
+
+    sql = inspect.getsource(scoring.fetch_mps)
+    for column in ("mp_id", "ls_term", "mp_name", "allocated_amount",
+                   "amount_recommended", "completed_works", "recommended_works"):
+        assert column in sql, f"fetch_mps does not select {column}"
