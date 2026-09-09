@@ -40,12 +40,15 @@ function RiskMeter({ label, value }: { label: string; value: number | null }) {
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const projectId = Number(id);
-  if (!Number.isInteger(projectId)) notFound();
+  // The segment is either a serial id or a work_key. Both resolve here, so a
+  // link shared today still opens tomorrow: the loader reassigns every id on
+  // each nightly refresh, and work_key is what does not move.
+  const decoded = decodeURIComponent(id);
+  const isSerial = /^\d+$/.test(decoded);
 
   let p;
   try {
-    p = await api.project(projectId);
+    p = isSerial ? await api.project(Number(decoded)) : await api.projectByKey(decoded);
   } catch {
     notFound();
   }
@@ -166,6 +169,17 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           )}
         </div>
       </section>
+
+      {p.work_key && (
+        <p className="mt-6 text-[0.78rem]" style={{ color: "var(--ink-3)" }}>
+          Permanent link to this work:{" "}
+          <Link className="link-quiet" href={`/projects/${encodeURIComponent(p.work_key)}`}>
+            /projects/{p.work_key}
+          </Link>
+          <br />
+          The numeric address changes on every refresh; this one does not.
+        </p>
+      )}
 
       <ReviewTrail workKey={p.work_key} />
 

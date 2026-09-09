@@ -275,6 +275,10 @@ export const api = {
   projects: (params: Record<string, string> = {}) =>
     get<ProjectSummary[]>(`/api/projects?${new URLSearchParams(params)}`),
   project: (id: number) => get<ProjectDetail>(`/api/projects/${id}`),
+  // By the identifier that survives a refresh. `id` is reassigned nightly, so
+  // a bookmarked /projects/123 points at a different work tomorrow.
+  projectByKey: (workKey: string) =>
+    get<ProjectDetail>(`/api/projects/by-key?${new URLSearchParams({ work_key: workKey })}`),
   mapStates: () => get<StateStat[]>("/api/map/states"),
   agencies: (params: Record<string, string> = {}) =>
     get<AgencyStat[]>(`/api/agencies?${new URLSearchParams(params)}`),

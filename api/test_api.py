@@ -265,3 +265,25 @@ def test_compliance_states_what_it_cannot_check():
     assert len(book["blind_spots"]) >= 3
     for spot in book["blind_spots"]:
         assert spot["name"].strip() and spot["why"].strip()
+
+
+def test_a_work_can_be_found_by_the_key_that_survives_a_refresh():
+    """projects.id is reassigned on every nightly reload, so a link to
+    /api/projects/12524 points at a different work tomorrow. work_key does not
+    move - that is what makes a shared or bookmarked link durable."""
+    from db import query
+
+    work = query(
+        "SELECT id, work_key FROM projects WHERE work_key IS NOT NULL LIMIT 1", one=True
+    )
+    if work is None:
+        return
+    by_id = client.get(f"/api/projects/{work['id']}").json()
+    by_key = client.get("/api/projects/by-key", params={"work_key": work["work_key"]}).json()
+    assert by_id["work_key"] == by_key["work_key"] == work["work_key"]
+    assert by_id["work_name"] == by_key["work_name"]
+
+
+def test_by_key_404s_rather_than_guessing():
+    assert client.get("/api/projects/by-key",
+                      params={"work_key": "no-such|99|WORK"}).status_code == 404
