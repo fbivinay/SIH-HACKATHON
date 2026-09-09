@@ -102,3 +102,31 @@ def test_a_label_outside_the_set_is_rejected(monkeypatch):
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
+
+
+def test_a_daily_quota_stops_the_pass_instead_of_hammering_the_api():
+    """A per-minute rate limit recovers inside a run; a per-day quota does not.
+    Treating them alike made one exhaustion fire a thousand doomed requests."""
+    class Exhausted:
+        calls = 0
+
+        def classify(self, descriptions):
+            Exhausted.calls += 1
+            raise m.DailyQuotaExhausted("quotaId: GenerateRequestsPerDayPerProjectPerModel")
+
+    out = m.classify_missing([f"unplaceable {i}" for i in range(200)],
+                             client=Exhausted(), cache={}, batch_size=10,
+                             progress=lambda *_: None)
+    assert Exhausted.calls == 1, "must stop after the first refusal, not retry 20 batches"
+    assert out == {}
+    assert m.QUOTA_EXHAUSTED is True
+
+
+def test_a_transient_failure_still_only_costs_its_own_batch():
+    client = FakeClient(fail_on=[0])
+    out = m.classify_missing([f"unplaceable {i}" for i in range(4)],
+                             client=client, cache={}, batch_size=2,
+                             progress=lambda *_: None)
+    assert len(client.batches) == 2, "a transient must not stop the pass"
+    assert len(out) == 2
+    assert m.QUOTA_EXHAUSTED is False

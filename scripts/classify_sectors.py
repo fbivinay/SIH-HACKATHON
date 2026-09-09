@@ -17,6 +17,7 @@ across two days. Re-running is safe and cheap: cached descriptions are skipped.
 """
 
 import argparse
+import functools
 import os
 import pathlib
 import sys
@@ -53,6 +54,12 @@ def unclassified_descriptions(limit=None):
 
 
 def main():
+    # Redirected to a file, Python block-buffers stdout, so a long run looks
+    # dead until it exits. Every progress line here is a heartbeat; flush it.
+    global print
+    print = functools.partial(__builtins__.print if not isinstance(__builtins__, dict)
+                              else __builtins__["print"], flush=True)
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, help="only the N commonest descriptions")
     ap.add_argument("--batch-size", type=int, default=llm_sectors.BATCH_SIZE)
@@ -100,13 +107,20 @@ def main():
     remaining = [d for d in descriptions]
     while remaining:
         head, remaining = remaining[:args.batch_size], remaining[args.batch_size:]
+        # Never silence this: classify_missing reports a failed batch through
+        # `progress`, and swallowing it made a run that labelled nothing look
+        # like a run that found nothing to do.
         fresh = llm_sectors.classify_missing(head, client=client, cache=cache,
                                              batch_size=args.batch_size,
-                                             progress=lambda *_: None)
+                                             progress=print)
         flush(fresh)
         total_new += len(fresh)
         print(f"  cached {len(cache):,} descriptions "
               f"(+{len(fresh)} this batch, {len(remaining):,} to go)")
+        if llm_sectors.QUOTA_EXHAUSTED:
+            print("  daily free-tier quota reached - stopping. Re-run tomorrow; "
+                  "everything classified so far is cached.")
+            break
 
     print(f"\ndone: {total_new:,} newly labelled, {len(cache):,} cached in total")
     if total_new:
