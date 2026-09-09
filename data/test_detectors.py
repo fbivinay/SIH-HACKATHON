@@ -158,3 +158,31 @@ def test_run_all_returns_rows_shaped_for_the_table():
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
+
+
+def test_idle_allocation_reports_one_fund_once():
+    """The source gives a Rajya Sabha member a row in both Lok Sabha terms with
+    identical figures. 231 members do, and that turned 286 into 358 findings."""
+    rows = [
+        ("rs1", 17, "A Member", "Rajya Sabha", "Bihar", 5e7, 1e7, 2.0, 3, 40),
+        ("rs1", 18, "A Member", "Rajya Sabha", "Bihar", 5e7, 1e7, 2.0, 3, 40),
+    ]
+    out = d.idle_allocation(mp_rows(rows))
+    assert len(out) == 1
+    assert out[0]["ls_term"] == 18
+
+
+def test_idle_allocation_keeps_both_terms_when_the_funds_differ():
+    """A Lok Sabha member really does hold two separate allocations."""
+    rows = [
+        ("ls1", 17, "A Member", "X", "Bihar", 5e7, 1e7, 2.0, 3, 40),
+        ("ls1", 18, "A Member", "X", "Bihar", 8e7, 2e7, 2.0, 3, 40),
+    ]
+    assert len(d.idle_allocation(mp_rows(rows))) == 2
+
+
+def test_idle_allocation_ignores_a_member_who_has_barely_started():
+    """Below the 10th percentile of activity (17 works) the member is in their
+    first months, not sitting on funds."""
+    assert d.idle_allocation(mp_rows([
+        ("mp1", 18, "New Member", "X", "Bihar", 5e7, 1e6, 1.0, 0, 2)])) == []
