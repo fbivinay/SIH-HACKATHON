@@ -204,7 +204,7 @@ def main():
             break
 
     # ------------------------------------------------------------- slide 2 --
-    set_title(s[1], "MPLADS RISK MONITOR")
+    set_title(s[1], "KASAUTI")
     set_team_badge(s[1])
     restyle_pointers(s[1])
     y = TOP
@@ -225,11 +225,14 @@ def main():
 
     cw3 = (CW - 2 * 0.18) / 3
     hs = [
-        card(s[1], LEFT, y, cw3, "How it addresses the problem",
+        card(s[1], LEFT, y, cw3, "Kasauti — the touchstone",
              "Reads the published MPLADS record end to end and scores every work "
-             "against comparable works in the same district and sector. 48,542 works "
-             "clear the review threshold, carrying Rs 4,662 Cr of sanction. Officials "
-             "get them ranked, not a spreadsheet.", BLUE, min_h=3.35, tag="s2a"),
+             "A jeweller rubs gold against a kasauti and reads the streak: the stone "
+             "says which pieces are worth assaying, never which are false. This reads "
+             "the published MPLADS record and scores every work against comparable "
+             "works in the same district and sector. 48,542 clear the review "
+             "threshold, carrying Rs 4,662 Cr of sanction. Officials get them ranked, "
+             "not a spreadsheet.", BLUE, min_h=3.35, tag="s2a"),
         card(s[1], LEFT + cw3 + 0.18, y, cw3, "Innovation and uniqueness",
              "Every flag names the record that produced it. Cohort patterns are kept "
              "at cohort grain instead of being blamed on one work. Reviewer decisions "

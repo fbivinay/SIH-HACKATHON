@@ -117,6 +117,28 @@
   border-color: var(--line);
 }
 
+/* The interface renders at 133% on a desktop. Everything was legible but small
+   - a console read across a desk or projected in a hall needs more presence
+   than a dashboard read at arm's length. `zoom` scales layout and type
+   together, the way browser zoom does, rather than only inflating text and
+   leaving the containers behind.
+   
+   Scoped by width, because zoom divides the viewport: at 1.33 a 390px phone
+   has 293 CSS pixels to work with, and the queue's controls need more than
+   that - measured, it overflowed to 456px. A phone screen is already dense
+   from its device pixel ratio and needs no help. */
+@media (min-width: 1024px) {
+  :root {
+    zoom: 1.33;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1023px) {
+  :root {
+    zoom: 1.15;
+  }
+}
+
 body {
   background: var(--ground);
   color: var(--ink);
@@ -178,12 +200,28 @@ select:focus-visible {
 .wordmark {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: 1.02rem;
-  font-weight: 600;
-  letter-spacing: -0.035em;
+  gap: 0.5rem;
   color: var(--ink);
   white-space: nowrap;
+}
+
+.wordmark__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+/* The descriptor carries the meaning the name deliberately does not spell out.
+   It is the first thing a stranger reads, so it says what this is, not what it
+   is called. */
+.wordmark__sub {
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-3);
 }
 
 /* A filled square with the two initials. The one piece of iconography in the
@@ -219,16 +257,15 @@ select:focus-visible {
 /* Under ~1100px the wordmark, five links and the button cannot share a line.
    The strapline goes first, then the wordmark's text, so the nav and the
    action both survive rather than sliding off the edge. */
+/* Under ~1100px the mark, name, seven links and the action cannot share a
+   line. The wordmark drops to the mark alone - it is the piece that still
+   identifies the product at a glance. */
 @media (max-width: 1100px) {
   .masthead__inner {
     gap: 0.75rem;
   }
-  .wordmark {
-    font-size: 0;
-    gap: 0;
-  }
-  .wordmark__mark {
-    font-size: 0.62rem;
+  .wordmark__text {
+    display: none;
   }
 }
 
