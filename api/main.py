@@ -808,38 +808,42 @@ def compliance():
 # ------------------------------------------------------------------ provenance
 
 
-# Everything the designated dataset exposes without credentials, enumerated
-# from the dashboard's own JavaScript bundle (/libs/simplegrid/preLoginDashboard.js,
-# whose endpoint strings are stored reversed and unicode-escaped) and then called
-# directly. Measured 2026-09-10.
+# What the designated dataset exposes without an account, enumerated from the
+# portal's own JavaScript (endpoint strings are stored reversed and
+# unicode-escaped) and then called directly. Measured 2026-09-10.
 #
-# This is here because "we used a different source" is the first question this
-# project should expect, and it deserves an answer made of evidence rather than
-# assurance. Seven endpoints, and not one of them returns a work: no
-# description, no sanctioned amount, no start date, no implementing agency, no
-# payment. Everything else under /digigov/ answers 302 to /digigov/Login.zul.
+# "Why not the source you were given" is the first question this project should
+# expect, and it deserves an answer made of evidence. The short version: the
+# portal does publish works, but only one narrow slice at a time, behind an SMS
+# one-time password, under an explicit rate limit. There is no bulk export.
 OFFICIAL_INTERFACE = {
     "url": "https://mplads.mospi.gov.in/digigov/dashboard.html",
     "checked_on": "2026-09-10",
     "endpoints": [
         {"endpoint": "POST /rest/PreLoginDashboardData/getTilesData",
          "returns": "Six headline totals for one tenure and house - allocated, expenditure, works recommended, sanctioned, completed, calamity.",
-         "works": False},
+         "access": "open"},
         {"endpoint": "POST /rest/PreLoginDashboardData/getTenureData",
-         "returns": "The two tenures on record: 17th and 18th Lok Sabha.", "works": False},
+         "returns": "The two tenures on record: 17th and 18th Lok Sabha.", "access": "open"},
         {"endpoint": "POST /rest/PreLoginDashboardData/getStateData",
-         "returns": "36 state names and ids.", "works": False},
-        {"endpoint": "POST /rest/PreLoginDashboardData/getConstituencyData",
-         "returns": "Constituency names for a chosen state.", "works": False},
-        {"endpoint": "POST /rest/PreLoginDashboardData/getMpAndConstCombo",
-         "returns": "The dashboard's own member and constituency dropdown.", "works": False},
-        {"endpoint": "POST /rest/PreLoginDashboardData/getMpNamesData",
-         "returns": "Member names for a chosen constituency.", "works": False},
+         "returns": "36 state names and ids.", "access": "open"},
+        {"endpoint": "POST /rest/PreLoginCitizenWorkRcmdRest/getDistrictByState",
+         "returns": "Districts in a state.", "access": "open"},
+        {"endpoint": "POST /rest/PreLoginCitizenWorkRcmdRest/getMpByDistrictAndState",
+         "returns": "Members for a district and tenure.", "access": "open"},
+        {"endpoint": "POST /rest/PreLoginCitizenWorkRcmdRest/getVillageByBlock",
+         "returns": "Villages, blocks, cities and wards - the address hierarchy.", "access": "open"},
+        {"endpoint": "POST /rest/PreLoginCitizenWorkRcmdRest/generateOTPForCitizenLogin",
+         "returns": "Sends a one-time password to an Indian mobile number, behind a captcha.",
+         "access": "otp"},
+        {"endpoint": "POST /rest/PreLoginCitizenWorkRcmdRest/getAllCompletedWorkByMP",
+         "returns": "Completed works - the only work-level data published. Requires a verified mobile number and OTP in the request body, and returns one member's completed works in one ward at a time, so a citizen can rate them.",
+         "access": "otp"},
         {"endpoint": "POST /rest/PreLoginDashboardData/getRedirectUrl",
-         "returns": "An empty string pre-login; the way through to the authenticated portal.",
-         "works": False},
+         "returns": "An empty string; the way through to the authenticated portal.",
+         "access": "login"},
     ],
-    "verdict": "No work-level record is published without credentials. This system reads 250,839 works and 272,263 payments, none of which the designated URL serves. Empowered Indian republishes exactly that record as machine-readable exports, which is why it is the loader's source - and why every headline figure above is reconciled nightly against the official endpoints rather than taken on trust.",
+    "verdict": "The portal publishes works, but only completed ones, only for one member in one ward at a time, only after an SMS one-time password, and under a rate limit its own code apologises for. This system reads 250,839 works - recommended as well as completed - and 272,263 payments with vendor names, which no open endpoint serves in any quantity. Empowered Indian republishes exactly that record as machine-readable exports, which is why it is the loader's source, and why every headline figure above is reconciled nightly against the official endpoints rather than taken on trust.",
     "login_wall": "Every path under /digigov/ other than the dashboard answers 302 to /digigov/Login.zul.",
 }
 

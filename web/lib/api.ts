@@ -271,7 +271,9 @@ export type Provenance = {
   official_interface: {
     url: string;
     checked_on: string;
-    endpoints: Array<{ endpoint: string; returns: string; works: boolean }>;
+    // "open" needs nothing, "otp" needs an SMS one-time password against a
+    // real Indian mobile, "login" needs an account.
+    endpoints: Array<{ endpoint: string; returns: string; access: "open" | "otp" | "login" }>;
     verdict: string;
     login_wall: string;
   };
