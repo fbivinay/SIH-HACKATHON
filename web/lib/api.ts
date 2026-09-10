@@ -299,6 +299,41 @@ export type Trends = {
   state: string | null;
 };
 
+// One Member of Parliament: what they recommended, what got built, what is
+// still waiting, and which of it is flagged.
+export type MpDetail = {
+  terms: Array<{
+    mp_id: string;
+    ls_term: number;
+    mp_name: string;
+    constituency: string | null;
+    state: string | null;
+    house: string | null;
+    allocated_amount: number | null;
+    amount_recommended: number | null;
+    total_expenditure: number | null;
+    utilization_pct: number | null;
+    completion_rate_pct: number | null;
+    unspent_amount: number | null;
+    idle_amount: number | null;
+    completed_works: number | null;
+    recommended_works: number | null;
+    pending_payments: number | null;
+  }>;
+  works: {
+    works: number; completed: number; pending: number; high_risk: number;
+    in_queue: number; sanctioned: number; flagged_value: number;
+    districts: number; agencies: number;
+  };
+  sectors: Array<{ sector: string; works: number; sanctioned: number }>;
+  top_flagged: Array<{
+    id: number; work_key: string | null; work_name: string; district: string;
+    sanctioned_amount: number; overall_risk_score: number | null;
+    risk_level: string | null; flagged_reasons: string[];
+  }>;
+  findings: Array<{ code: string; headline: string; severity: number }>;
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -343,6 +378,7 @@ export const api = {
   agencies: (params: Record<string, string> = {}) =>
     get<AgencyStat[]>(`/api/agencies?${new URLSearchParams(params)}`),
   mps: () => get<MpStat[]>("/api/mps"),
+  mp: (mpId: string) => get<MpDetail>(`/api/mps/${encodeURIComponent(mpId)}`),
   dataFreshness: () => get<DataFreshness>("/api/data-freshness"),
   filters: () => get<FilterOptions>("/api/filters"),
   alerts: (params: Record<string, string> = {}) =>

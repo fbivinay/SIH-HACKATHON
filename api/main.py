@@ -941,3 +941,83 @@ def trends(state: Optional[str] = None):
         },
         "state": state,
     }
+
+
+# ------------------------------------------------------------------ one MP
+
+
+@app.get("/api/mps/{mp_id}")
+def mp_detail(mp_id: str, ls_term: Optional[int] = Query(None, ge=17, le=18)):
+    """Everything on record for one Member of Parliament.
+
+    The brief asks for decision-support dashboards for Members of Parliament
+    first, and an MP's question is narrower than the national one: what did I
+    recommend, what got built, what is still waiting, and which of it is being
+    flagged. Money figures are the portal's own per-MP aggregates, so an MP can
+    check this page against the Ministry's.
+    """
+    terms = query(
+        """
+        SELECT mp_id, ls_term, mp_name, constituency, state, house,
+               allocated_amount, amount_recommended, total_expenditure,
+               utilization_pct, completion_rate_pct, unspent_amount,
+               allocated_amount - amount_recommended AS idle_amount,
+               completed_works, recommended_works, pending_payments
+        FROM mps WHERE mp_id = %s
+        ORDER BY ls_term DESC
+        """,
+        [mp_id],
+    )
+    if not terms:
+        raise HTTPException(status_code=404, detail="No MP with that id")
+
+    where, params = ("AND ls_term = %s", [ls_term]) if ls_term else ("", [])
+    works = query(
+        f"""
+        SELECT COUNT(*) AS works,
+               COUNT(*) FILTER (WHERE work_status = 'completed') AS completed,
+               COUNT(*) FILTER (WHERE work_status = 'recommended') AS pending,
+               COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk,
+               COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue,
+               COALESCE(SUM(sanctioned_amount), 0) AS sanctioned,
+               COALESCE(SUM(sanctioned_amount) FILTER (WHERE overall_risk_score >= 40), 0)
+                 AS flagged_value,
+               COUNT(DISTINCT district) AS districts,
+               COUNT(DISTINCT implementing_agency) AS agencies
+        FROM projects_scored WHERE mp_id = %s {where}
+        """,
+        [mp_id] + params,
+        one=True,
+    )
+    sectors = query(
+        f"""
+        SELECT COALESCE(sector, 'Other') AS sector, COUNT(*) AS works,
+               COALESCE(SUM(sanctioned_amount), 0) AS sanctioned
+        FROM projects_scored WHERE mp_id = %s {where}
+        GROUP BY 1 ORDER BY works DESC LIMIT 8
+        """,
+        [mp_id] + params,
+    )
+    top = query(
+        f"""
+        SELECT id, work_key, work_name, district, sanctioned_amount,
+               overall_risk_score, risk_level, flagged_reasons
+        FROM projects_scored
+        WHERE mp_id = %s {where} AND overall_risk_score IS NOT NULL
+        ORDER BY overall_risk_score DESC, id
+        LIMIT 10
+        """,
+        [mp_id] + params,
+    )
+    findings = query(
+        "SELECT code, headline, severity FROM detector_findings "
+        "WHERE subject_type = 'mp' AND subject = %s ORDER BY severity DESC",
+        [mp_id],
+    )
+    return {
+        "terms": terms,
+        "works": works,
+        "sectors": sectors,
+        "top_flagged": top,
+        "findings": findings,
+    }

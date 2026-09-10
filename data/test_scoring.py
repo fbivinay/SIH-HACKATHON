@@ -422,7 +422,7 @@ def test_insert_columns_match_what_the_loader_builds():
     df = pd.DataFrame({
         "work_key": ["4021|18|PATNA(DM_IDA)"],
         "description": ["Construction of CC road"], "category": ["Normal/Others"],
-        "sector": ["Roads & Paving"], "mp_name": ["Ram Kumar"], "mp_id": ["abc123"],
+        "mp_name": ["Ram Kumar"], "mp_id": ["abc123"],
         "house": ["Lok Sabha"], "constituency": ["Somewhere"], "state": ["Bihar"],
         "district": ["PATNA"], "implementing_agency": ["PATNA(DM_IDA)"], "ls_term": [18],
         "amount": [300000.0], "expenditure": [300000.0], "work_status": ["completed"],
@@ -432,7 +432,9 @@ def test_insert_columns_match_what_the_loader_builds():
     prepared = lrd.prepare_insert_frame(df)
     assert list(prepared.columns) == lrd.INSERT_COLUMNS
     assert len(prepared.iloc[0]) == len(lrd.INSERT_COLUMNS)
-    assert prepared.iloc[0]["sector"] == "Roads & Paving"
+    # `sector` is deliberately absent: it is derived, lives in project_scores,
+    # and the loader inserting it broke every nightly refresh for two days.
+    assert "sector" not in lrd.INSERT_COLUMNS
     assert prepared.iloc[0]["work_name"] == "Construction of CC road"
     assert prepared.iloc[0]["source"] == "real"
     assert prepared.iloc[0]["work_key"] == "4021|18|PATNA(DM_IDA)"
@@ -488,3 +490,18 @@ def test_fetch_mps_selects_every_column_the_detectors_read():
     for column in ("mp_id", "ls_term", "mp_name", "allocated_amount",
                    "amount_recommended", "completed_works", "recommended_works"):
         assert column in sql, f"fetch_mps does not select {column}"
+
+
+def test_the_loader_clears_scores_when_it_replaces_works():
+    """project_scores is keyed on a serial the reload reassigns. Leaving stale
+    rows behind attaches every score to whichever work inherited its id - which
+    looks right for as long as the upstream row order never changes, and is
+    wrong the first time it does."""
+    import inspect
+
+    import load_real_data as lrd
+
+    body = inspect.getsource(lrd.load)
+    assert "TRUNCATE project_scores" in body, (
+        "replacing projects must clear the scores that describe them"
+    )
