@@ -264,8 +264,14 @@ export type Provenance = {
     gap_pct: number | null;
     note: string | null;
     checked_at: string;
+    // The aggregator's own live figure. Splits the gap into the hop we own
+    // (ours → aggregator, measurably zero) and the one we don't.
+    aggregator: number | null;
+    aggregator_gap_pct: number | null;
   }>;
   worst_gap_pct: number | null;
+  worst_our_hop_pct: number | null;
+  worst_upstream_hop_pct: number | null;
   // What the designated dataset actually serves without credentials, measured
   // from the dashboard's own JavaScript rather than assumed.
   official_interface: {

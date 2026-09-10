@@ -859,7 +859,8 @@ def provenance():
     """
     rows = query(
         """
-        SELECT metric, ours, official, unit, gap_pct, note, checked_at
+        SELECT metric, ours, official, unit, gap_pct, note, checked_at,
+               aggregator, aggregator_gap_pct
         FROM source_reconciliation ORDER BY metric
         """
     )
@@ -873,9 +874,25 @@ def provenance():
     )
     worst = max((abs(float(r["gap_pct"])) for r in rows if r["gap_pct"] is not None),
                 default=None)
+    # The chain has two hops. Ours-to-aggregator is the one this system is
+    # responsible for; aggregator-to-MoSPI is upstream lag we can measure but
+    # not fix. Reporting a single number invites reading the whole gap as ours.
+    our_hop = max(
+        (abs(float(r["ours"]) - float(r["aggregator"])) / float(r["aggregator"]) * 100
+         for r in rows
+         if r["aggregator"] not in (None, 0) and r["ours"] is not None),
+        default=None,
+    )
+    upstream_hop = max(
+        (abs(float(r["aggregator_gap_pct"])) for r in rows
+         if r["aggregator_gap_pct"] is not None),
+        default=None,
+    )
     return {
         "rows": rows,
         "worst_gap_pct": worst,
+        "worst_our_hop_pct": our_hop,
+        "worst_upstream_hop_pct": upstream_hop,
         "last_refresh": freshness or {},
         "official_interface": OFFICIAL_INTERFACE,
         "chain": [
