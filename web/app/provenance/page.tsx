@@ -106,8 +106,10 @@ export default async function ProvenancePage() {
                   <tr>
                     <th>Figure</th>
                     <th className="num">This system</th>
+                    <th className="num">Empowered Indian</th>
                     <th className="num">MoSPI dashboard</th>
-                    <th className="num">Difference</th>
+                    <th className="num">Us vs source</th>
+                    <th className="num">Source vs MoSPI</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -120,9 +122,23 @@ export default async function ProvenancePage() {
                       <tr key={r.metric}>
                         <td>{r.metric}</td>
                         <td className="num">{show(Number(r.ours))}</td>
+                        <td className="num">
+                          {r.aggregator === null ? "—" : show(Number(r.aggregator))}
+                        </td>
                         <td className="num">{show(Number(r.official))}</td>
                         <td className="num">
-                          {r.gap_pct === null ? "—" : `${Number(r.gap_pct).toFixed(2)}%`}
+                          {r.aggregator === null || Number(r.aggregator) === 0
+                            ? "—"
+                            : `${(
+                                ((Number(r.ours) - Number(r.aggregator)) /
+                                  Number(r.aggregator)) *
+                                100
+                              ).toFixed(2)}%`}
+                        </td>
+                        <td className="num">
+                          {r.aggregator_gap_pct === null
+                            ? `${Number(r.gap_pct).toFixed(2)}%`
+                            : `${Number(r.aggregator_gap_pct).toFixed(2)}%`}
                         </td>
                       </tr>
                     );
@@ -131,11 +147,35 @@ export default async function ProvenancePage() {
               </table>
             </div>
 
-            <p className="mt-4 text-[0.84rem] leading-relaxed" style={{ color: "var(--ink-2)", maxWidth: "44rem" }}>
-              Every difference is negative: this system is consistently a little behind the
-              portal, never ahead of it. That is what a snapshot taken a day earlier looks
-              like. A mangled load would miss in both directions, and the allocation figure
-              — which does not move day to day — would be the first to break.
+            <p className="mt-4 text-[0.84rem] leading-relaxed" style={{ color: "var(--ink-2)", maxWidth: "46rem" }}>
+              There are two hops here, and only one of them is ours. Between this system and
+              the export it loads the difference is{" "}
+              <b style={{ fontWeight: 600 }}>
+                {p.worst_our_hop_pct === null
+                  ? "—"
+                  : `${p.worst_our_hop_pct.toFixed(2)}% at worst`}
+              </b>{" "}
+              — and that hop is fully accounted for: it is works the loader refuses. On the
+              latest extract, 85 completed works and 52 recommended ones carry an empty
+              description, and 48 more are sanctioned below the one-thousand-rupee floor.
+              A work with no description cannot be assigned a sector or matched against a
+              duplicate, so it is rejected and written to a rejects table with its reason
+              rather than dropped quietly. Every remaining row of the export is loaded. The
+              rest{" "}
+              {p.worst_upstream_hop_pct !== null && (
+                <>
+                  (up to{" "}
+                  <b style={{ fontWeight: 600 }}>
+                    {Math.abs(p.worst_upstream_hop_pct).toFixed(2)}%
+                  </b>
+                  )
+                </>
+              )}{" "}
+              is the aggregator trailing the Ministry: it re-crawls a quarter-million-work
+              portal at one request every three seconds, so it is permanently a little
+              behind. Every difference is negative, never ahead — which is what lag looks
+              like. A mangled load would miss in both directions, and the allocation figure,
+              which does not move day to day, would be the first to break.
             </p>
 
             <div className="card mt-5" style={{ maxWidth: "44rem" }}>

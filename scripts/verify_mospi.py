@@ -79,6 +79,43 @@ def official(combo=BOTH_HOUSES):
     }
 
 
+AGGREGATOR_API = "https://api.empoweredindian.in/api/summary/states?ls_term=18"
+
+
+def aggregator():
+    """The aggregator's own live figures for the same metrics.
+
+    Without this the table shows one number - ours against MoSPI - and a reader
+    can only read it as our error. There are two hops in the chain, and they are
+    not the same size: ours against the aggregator is zero, because the loader
+    reproduces its export exactly; the aggregator against MoSPI is the whole
+    gap, because it re-crawls a 250,000-work portal at one request every three
+    seconds and is permanently a little behind.
+
+    Returns {} rather than raising: a reconciliation against MoSPI is still
+    worth recording if this call fails.
+    """
+    try:
+        request = urllib.request.Request(
+            AGGREGATOR_API, headers={"User-Agent": "kasauti-provenance-check"}
+        )
+        with urllib.request.urlopen(request, timeout=45) as response:
+            rows = json.loads(response.read().decode())
+    except Exception as err:  # noqa: BLE001
+        print(f"aggregator check skipped: {err}")
+        return {}
+    if not isinstance(rows, list):
+        rows = rows.get("data") or rows.get("states") or []
+    total = lambda key: sum((r.get(key) or 0) for r in rows)
+    return {
+        "allocated": total("totalAllocated"),
+        "expenditure": total("totalExpenditure"),
+        # Its recommendedWorksCount is the whole pipeline, matching ours().
+        "recommended_works": total("recommendedWorksCount"),
+        "completed_works": total("completedWorksCount"),
+    }
+
+
 def ours():
     import psycopg2
 
@@ -121,16 +158,21 @@ def store(rows, tenure):
     try:
         with conn, conn.cursor() as cur:
             cur.execute("TRUNCATE source_reconciliation")
-            for name, ours_v, theirs_v, unit in rows:
+            for name, ours_v, theirs_v, unit, agg_v in rows:
                 gap = (ours_v - theirs_v) / theirs_v * 100 if theirs_v else None
+                agg_gap = ((agg_v - theirs_v) / theirs_v * 100
+                           if agg_v and theirs_v else None)
                 cur.execute(
                     """INSERT INTO source_reconciliation
-                       (metric, ours, official, unit, gap_pct, note)
-                       VALUES (%s, %s, %s, %s, %s, %s)""",
+                       (metric, ours, official, unit, gap_pct, note,
+                        aggregator, aggregator_gap_pct)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
                     [name, round(ours_v, 2), round(theirs_v, 2),
                      "crore" if unit else "count",
                      None if gap is None else round(gap, 2),
-                     f"Official MoSPI dashboard, both houses, {tenure}"],
+                     f"Official MoSPI dashboard, both houses, {tenure}",
+                     None if agg_v is None else round(agg_v, 2),
+                     None if agg_gap is None else round(agg_gap, 2)],
                 )
     finally:
         conn.close()
@@ -143,22 +185,41 @@ def main():
         print(f"Could not reach the official portal: {str(err)[:120]}")
         return 2
     mine = ours()
+    agg = aggregator()
 
     print(f"Official MoSPI dashboard, both houses, {theirs['tenure']}")
-    print(f"{'figure':22}{'ours':>18}{'MoSPI':>18}{'gap':>10}")
+    print(f"{'figure':22}{'ours':>16}{'aggregator':>16}{'MoSPI':>16}"
+          f"{'us-agg':>9}{'agg-MoSPI':>11}")
+    def middle(key, unit):
+        """The aggregator's figure in the same unit as the row it sits in."""
+        raw = agg.get(key) if key else None
+        if raw is None:
+            return None
+        return raw / CRORE if unit else raw
+
     rows = [
-        ("Allocated", mine["allocated"] / CRORE, theirs["allocated"] / CRORE, "Cr"),
-        ("Expenditure", mine["expenditure"] / CRORE, theirs["expenditure"] / CRORE, "Cr"),
-        ("Works in pipeline", mine["recommended_works"], theirs["recommended_works"], ""),
-        ("Works completed", mine["completed_works"], theirs["completed_works"], ""),
-        ("Completed value", mine["completed_value"] / CRORE, theirs["completed_value"] / CRORE, "Cr"),
+        ("Allocated", mine["allocated"] / CRORE, theirs["allocated"] / CRORE, "Cr",
+         middle("allocated", "Cr")),
+        ("Expenditure", mine["expenditure"] / CRORE, theirs["expenditure"] / CRORE, "Cr",
+         middle("expenditure", "Cr")),
+        ("Works in pipeline", mine["recommended_works"], theirs["recommended_works"], "",
+         middle("recommended_works", "")),
+        ("Works completed", mine["completed_works"], theirs["completed_works"], "",
+         middle("completed_works", "")),
+        ("Completed value", mine["completed_value"] / CRORE,
+         theirs["completed_value"] / CRORE, "Cr", None),
     ]
     worst = 0.0
-    for name, a, b, unit in rows:
+    for name, a, b, unit, mid in rows:
         gap = (a - b) / b * 100 if b else float("nan")
         worst = max(worst, abs(gap))
         fmt = (lambda v: f"{v:,.1f} {unit}") if unit else (lambda v: f"{v:,.0f}")
-        print(f"{name:22}{fmt(a):>18}{fmt(b):>18}{gap:>9.1f}%")
+        # us-to-aggregator is the hop we are responsible for; aggregator-to-MoSPI
+        # is upstream lag. Printing them apart is the whole point of the row.
+        us_agg = f"{(a - mid) / mid * 100:>8.1f}%" if mid else f"{'-':>9}"
+        agg_off = f"{(mid - b) / b * 100:>10.1f}%" if mid and b else f"{'-':>11}"
+        print(f"{name:22}{fmt(a):>16}{(fmt(mid) if mid else '-'):>16}"
+              f"{fmt(b):>16}{us_agg}{agg_off}")
 
     try:
         store(rows, theirs["tenure"])

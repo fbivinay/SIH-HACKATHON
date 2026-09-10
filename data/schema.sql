@@ -323,3 +323,10 @@ CREATE TABLE IF NOT EXISTS source_reconciliation (
     note TEXT,
     checked_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- The aggregator's own live figure for the same metric, so a reader can see
+-- which link in the chain a gap comes from. Without it, "ours is 3.6% under
+-- MoSPI" reads as our error; with it, the two hops are separate numbers and
+-- ours-to-aggregator is measurably zero.
+ALTER TABLE source_reconciliation ADD COLUMN IF NOT EXISTS aggregator NUMERIC(18,2);
+ALTER TABLE source_reconciliation ADD COLUMN IF NOT EXISTS aggregator_gap_pct NUMERIC(6,2);
