@@ -11,7 +11,10 @@ python-pptx does no layout, so every box is sized from an estimated text
 height and the build asserts nothing overflows its card or the slide.
 """
 
+import json
 import math
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -87,6 +90,82 @@ def rect(slide, x, y, w, h, fill=None, line=None, line_w=0.75):
         sh.line.width = Pt(line_w)
     sh.shadow.inherit = False
     return sh
+
+
+
+# ---------------------------------------------------------------- figures --
+#
+# Every number on these slides is read from the database at build time. This
+# deck has shipped stale twice because the counts were typed in and the data
+# moved underneath them; a figure nobody can forget to update is the only fix
+# that holds. A missing figure raises rather than rendering a blank, because a
+# slide quietly claiming "0 works scored" is worse than a build that fails.
+
+
+def figures():
+    import psycopg2
+    from dotenv import load_dotenv
+
+    load_dotenv(REPO / ".env")
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    cur = conn.cursor()
+
+    def one(sql):
+        cur.execute(sql)
+        row = cur.fetchone()
+        return row[0] if row else None
+
+    f = {
+        "works": one("SELECT COUNT(*) FROM projects"),
+        "payments": one("SELECT COUNT(*) FROM expenditures"),
+        "mp_terms": one("SELECT COUNT(*) FROM mps"),
+        "states": one("SELECT COUNT(DISTINCT state) FROM projects WHERE state IS NOT NULL"),
+        "districts": one("SELECT COUNT(DISTINCT district) FROM projects WHERE district IS NOT NULL"),
+        "vendors": one("SELECT COUNT(DISTINCT vendor) FROM expenditures WHERE vendor IS NOT NULL"),
+        "agencies": one("SELECT COUNT(DISTINCT implementing_agency) FROM projects"),
+        "rejected": one("SELECT COUNT(*) FROM rejected_rows"),
+        "scored": one("SELECT COUNT(*) FROM project_scores"),
+        "queue": one("SELECT COUNT(*) FROM project_scores WHERE overall_risk_score >= 40"),
+        "high": one("SELECT COUNT(*) FROM project_scores WHERE risk_level = 'HIGH'"),
+        "queue_value": one(
+            "SELECT COALESCE(SUM(sanctioned_amount), 0) FROM projects_scored "
+            "WHERE overall_risk_score >= 40"
+        ),
+        "allocated_18": one("SELECT COALESCE(SUM(allocated_amount), 0) FROM mps WHERE ls_term = 18"),
+        "findings": one("SELECT COUNT(*) FROM detector_findings"),
+        "worst_gap": one("SELECT MAX(ABS(gap_pct)) FROM source_reconciliation"),
+    }
+    cur.execute("SELECT code, COUNT(*) FROM detector_findings GROUP BY code")
+    f["by_code"] = dict(cur.fetchall())
+    conn.close()
+
+    cache = REPO / "data/sector_cache.json"
+    f["llm_labels"] = len(json.loads(cache.read_text())) if cache.exists() else 0
+
+    # The claim "N automated tests" is checked the same way anyone else would
+    # check it, rather than being remembered.
+    out = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-q", "data", "api"],
+        cwd=REPO, capture_output=True, text=True,
+    ).stdout
+    tail = [ln for ln in out.splitlines() if "test" in ln and "collected" in ln]
+    f["tests"] = int(tail[-1].split()[0]) if tail else 0
+
+    missing = [k for k, v in f.items() if v in (None, 0) and k not in ("rejected",)]
+    if missing:
+        raise SystemExit(f"deck: no figure for {', '.join(missing)} - refusing to build")
+
+    for code in ("D-01", "D-02", "D-03", "D-04"):
+        f["by_code"].setdefault(code, 0)
+    return f
+
+
+def crore(amount) -> str:
+    return f"Rs {float(amount) / 1e7:,.0f} Cr"
+
+
+def n(value) -> str:
+    return f"{int(value):,}"
 
 
 PROBLEMS = []
@@ -171,6 +250,7 @@ def set_team_badge(slide):
 
 
 def main():
+    f = figures()
     prs = Presentation(str(TEMPLATE))
     s = list(prs.slides)
 
@@ -182,11 +262,9 @@ def main():
             lines = [
                 ("Problem Statement ID", "SIH26102"),
                 ("Problem Statement Title",
-                 "An AI-powered monitoring system that reads MPLADS project data, "
-                 "detects suspicious patterns/anomalies and inefficiencies, assigns "
-                 "a risk score, and helps authorities decide which projects need "
-                 "verification."),
-                ("Theme", "<Theme as listed on the portal>"),
+                 "Development of an AI-powered system to detect anomalies, fraud, "
+                 "and inefficiencies in MPLAD Scheme implementation regd."),
+                ("Theme", "Smart Automation"),
                 ("PS Category", "Software"),
                 ("Team ID", "<Team ID>"),
                 ("Team Name", TEAM_NAME),
@@ -209,7 +287,7 @@ def main():
     restyle_pointers(s[1])
     y = TOP
     steps = [
-        ("READ", "250,839 works, 272,263\npayments, 1,547 MP-terms"),
+        ("READ", f"{n(f['works'])} works, {n(f['payments'])}\npayments, {n(f['mp_terms'])} MP-terms"),
         ("COMPARE", "Each work against its own\ndistrict-and-sector peers"),
         ("DETECT", "5 work signals, 4 cohort\ndetectors, 4 written rules"),
         ("SCORE", "One 0-100 number, with\nthe records behind it"),
@@ -226,13 +304,12 @@ def main():
     cw3 = (CW - 2 * 0.18) / 3
     hs = [
         card(s[1], LEFT, y, cw3, "Kasauti — the touchstone",
-             "Reads the published MPLADS record end to end and scores every work "
              "A jeweller rubs gold against a kasauti and reads the streak: the stone "
              "says which pieces are worth assaying, never which are false. This reads "
-             "the published MPLADS record and scores every work against comparable "
-             "works in the same district and sector. 48,542 clear the review "
-             "threshold, carrying Rs 4,662 Cr of sanction. Officials get them ranked, "
-             "not a spreadsheet.", BLUE, min_h=3.35, tag="s2a"),
+             "the published MPLADS record end to end and scores every work against "
+             f"comparable works in the same district and sector. {n(f['queue'])} clear "
+             f"the review threshold, carrying {crore(f['queue_value'])} of sanction. "
+             "Officials get them ranked, not a spreadsheet.", BLUE, min_h=3.35, tag="s2a"),
         card(s[1], LEFT + cw3 + 0.18, y, cw3, "Innovation and uniqueness",
              "Every flag names the record that produced it. Cohort patterns are kept "
              "at cohort grain instead of being blamed on one work. Reviewer decisions "
@@ -242,8 +319,10 @@ def main():
         card(s[1], LEFT + 2 * (cw3 + 0.18), y, cw3, "What it does not claim",
              "A score is not an allegation - it means a work does not resemble its "
              "peers. No field is invented: progress %, beneficiary counts and geo-tags "
-             "are not published for MPLADS, so they are not shown. The rule book states "
-             "what cannot be checked at all. No LLM can move a score.", AMBER, min_h=3.35,
+             "are not published, so they are not shown. The rule book states what "
+             "cannot be checked at all. A language model only labels what a work is, "
+             "so it meets the right peers; it never scores or flags anything.",
+             AMBER, min_h=3.35,
              tag="s2c"),
     ]
 
@@ -253,10 +332,10 @@ def main():
     restyle_pointers(s[2])
     y = TOP
     stacks = [
-        ("AI / ML", "MiniLM sentence transformer\nIsolation Forest\nBenford + HHI statistics\npandas, scikit-learn"),
+        ("AI / ML", "MiniLM sentence transformer\nIsolation Forest\nBenford + HHI statistics\nGemini sector labelling"),
         ("BACKEND", "FastAPI, read-mostly\nPostgres on Neon\nPooled, retries dead links\nOne authenticated write"),
         ("FRONTEND", "Next.js App Router\nTypeScript, Tailwind\nServer-rendered\nLeaflet map"),
-        ("PLATFORM", "Vercel, two projects\nGitHub Actions nightly\n85 automated tests\nLive since day one"),
+        ("PLATFORM", f"Vercel, two projects\nGitHub Actions nightly\n{n(f['tests'])} automated tests\nLive since day one"),
     ]
     sw = (CW - 3 * 0.18) / 4
     for i, (name, body) in enumerate(stacks):
@@ -282,11 +361,12 @@ def main():
             [("Four cohort detectors: patterns that belong to an agency or an MP, never folded into a work's score",
               12, True, INK, UI)])
     y += 0.34
-    dets = [("D-01 Year-end burst", "311"), ("D-02 First-digit", "137"),
-            ("D-03 Idle allocation", "255"), ("D-04 Uniform amount", "209")]
+    c = f["by_code"]
+    dets = [("D-01 Year-end burst", n(c["D-01"])), ("D-02 First-digit", n(c["D-02"])),
+            ("D-03 Idle allocation", n(c["D-03"])), ("D-04 Uniform amount", n(c["D-04"]))]
     dw = (CW - 3 * 0.14) / 4
-    for i, (name, n) in enumerate(dets):
-        chip(s[2], LEFT + i * (dw + 0.14), y, dw, name, n + " findings", GREEN, h=0.74)
+    for i, (name, count) in enumerate(dets):
+        chip(s[2], LEFT + i * (dw + 0.14), y, dw, name, count + " findings", GREEN, h=0.74)
     y += 0.74 + 0.18
 
     rect(s[2], LEFT, y, CW, 0.62, fill=SURF, line=LINE)
@@ -305,9 +385,10 @@ def main():
     y = TOP
     rect(s[3], LEFT, y, CW, 0.70, fill=TINT, line=BLUE_L)
     textbox(s[3], LEFT + 0.18, y + 0.17, CW - 0.36, 0.38,
-            [("Not a proposal — already built, deployed and refreshing nightly: "
-              "250,839 works scored, all 36 states reconciled against the source, live at mplads-risk-monitor-web.vercel.app",
-              12.5, True, BLUE_D, UI)])
+            [(f"Not a proposal - already built, deployed and refreshing nightly: "
+              f"{n(f['scored'])} works scored, all {n(f['states'])} states reconciled against "
+              f"the official MoSPI dashboard to within {float(f['worst_gap']):.1f}%, live at "
+              "mplads-risk-monitor-web.vercel.app", 12.5, True, BLUE_D, UI)])
     y += 0.70 + 0.24
 
     hs = [
@@ -315,7 +396,7 @@ def main():
              "The data is already public and machine-readable: four CSVs, refreshed "
              "nightly by a scheduled job that loads in 2 minutes and scores in about "
              "20. No ministry integration, no new reporting burden on any officer, "
-             "no hardware. 85 automated tests run against the pipeline and the API.",
+             f"no hardware. {n(f['tests'])} automated tests run against the pipeline and the API.",
              GREEN, min_h=3.90, tag="s4a"),
         card(s[3], LEFT + cw3 + 0.18, y, cw3, "Challenges and risks",
              "Work IDs restart per agency, so 271 works had inherited a stranger's "
@@ -336,25 +417,28 @@ def main():
     set_team_badge(s[4])
     restyle_pointers(s[4])
     y = TOP
-    stats = [("250,839", "works scored, both terms"),
-             ("Rs 11,682 Cr", "allocated, 18th Lok Sabha"),
-             ("48,542", "works above the threshold"),
-             ("Rs 4,662 Cr", "sanction awaiting review"),
-             ("912", "cohort findings")]
+    stats = [(n(f["scored"]), "works scored, both terms"),
+             (crore(f["allocated_18"]), "allocated, 18th Lok Sabha"),
+             (n(f["queue"]), "works above the threshold"),
+             (crore(f["queue_value"]), "sanction awaiting review"),
+             (n(f["findings"]), "cohort findings")]
     sw = (CW - 4 * 0.14) / 5
     for i, (value, label) in enumerate(stats):
         chip(s[4], LEFT + i * (sw + 0.14), y, sw, label, value, BLUE_D, h=0.82)
     y += 0.82 + 0.24
 
     who = [("Member of Parliament",
-            "Sees which of their own recommendations are stalling, and how much of the allocation is still idle."),
+            "Their own page: what they recommended, what got built, how much allocation "
+            "was never committed to any work, and which of it is flagged."),
            ("District authority",
-            "Gets a ranked shortlist instead of a register, with the evidence for each flag already assembled."),
+            "A district desk led by the implementing agencies it supervises, with vendor "
+            "concentration and a ranked shortlist instead of a register."),
            ("State nodal officer",
-            "Ranks all 36 states and UTs on money committed against money paid, then drops "
-            "straight into that state's queue."),
+            f"A state desk ranking every district by the queue it has to clear, and all "
+            f"{n(f['states'])} states on money committed against money paid."),
            ("Ministry (MoSPI)",
-            "Sees national patterns and where scheme rules are breaking, without waiting for a manual audit.")]
+            "National patterns, the compliance rule book and a provenance page reconciling "
+            "every headline figure against the Ministry's own dashboard.")]
     cw4 = (CW - 3 * 0.16) / 4
     for i, (name, body) in enumerate(who):
         card(s[4], LEFT + i * (cw4 + 0.16), y, cw4, name, body, BLUE, ts=12, bs=10.5,
@@ -379,12 +463,13 @@ def main():
     cw2 = (CW - 0.20) / 2
     h_data = card(s[5], LEFT, y, cw2, "Data and scheme rules",
          "MPLADS programme data via Empowered Indian (empoweredindian.in), which "
-         "aggregates the official MoSPI portal at mplads.mospi.gov.in — 250,839 works, "
-         "272,263 payments, 1,547 MP-terms across 776 districts and 62,969 vendors.\n"
+         f"aggregates the official MoSPI portal at mplads.mospi.gov.in - {n(f['works'])} works, "
+         f"{n(f['payments'])} payments, {n(f['mp_terms'])} MP-terms across {n(f['districts'])} "
+         f"districts and {n(f['vendors'])} vendors.\n"
          "MPLADS Guidelines, Ministry of Statistics and Programme Implementation: "
          "permissible works, sanction ceilings and the annual entitlement per MP.\n"
-         "Reconciled against the source's own published totals; 4,372 rows rejected "
-         "and recorded rather than silently dropped.",
+         f"Reconciled against the source's own published totals; {n(f['rejected'])} rows "
+         "rejected and recorded rather than silently dropped.",
          BLUE, bs=11, min_h=3.85, tag="s6a")
     h_left = card(s[5], LEFT + cw2 + 0.20, y, cw2, "Methods",
          "Liu, Ting and Zhou (2008), Isolation Forest — multivariate outliers over "
