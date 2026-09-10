@@ -56,9 +56,7 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extras import Json, execute_values
 
-import sectors
 from mps import safe_mp_key
-from sectors import classify_sector
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
@@ -107,10 +105,17 @@ EXPECTED_DURATION_DAYS = 365
 # percentile Rs 2 lakh), so the floor cuts only the junk tail.
 MIN_SANCTIONED_AMOUNT = 1000
 
+# What `projects` holds: the source's own fields and nothing derived.
+#
+# `sector` is not here, and its absence broke every nightly refresh for two
+# days. It was moved to project_scores with the rest of the derived columns,
+# and the loader kept computing and inserting it - a column the table no longer
+# had. Scoring recomputes it from the description on every run, so the loader
+# does not need it at all.
 INSERT_COLUMNS = [
     "work_key", "work_name", "description", "ls_term", "mp_name", "mp_id", "house",
     "constituency", "state", "district",
-    "category", "sector", "implementing_agency", "recommended_amount",
+    "category", "implementing_agency", "recommended_amount",
     "sanctioned_amount", "expenditure", "work_status", "start_date",
     "expected_completion", "actual_completion", "source", "has_images",
 ]
@@ -243,12 +248,6 @@ def build_rows():
     df["has_images"] = [None if pd.isna(v) else bool(v) for v in df["has_images"]]
     df["district"] = df["implementing_agency"].map(parse_district)
     df["category"] = df["category"].fillna("Unknown")
-    # The source `category` is 'Normal/Others' for 98.1% of rows, so the cost
-    # baseline needs a stratifier that carries information. sectors.verify
-    # raises if the keyword rules stop matching this data, rather than letting
-    # scoring quietly compare every work against every other work again.
-    df["sector"] = df["description"].map(classify_sector)
-    sectors.verify(df["description"])
     # mp_name is not a key (see data/mps.py). safe_mp_key rather than mp_key:
     # a work whose MP name is unusable is still a work worth loading, it just
     # cannot take part in per-MP aggregates.
@@ -492,6 +491,15 @@ def load(conn, df, rejects):
             cur.execute("DELETE FROM projects WHERE source = 'real'")
         else:
             cur.execute("TRUNCATE projects RESTART IDENTITY CASCADE")
+
+        # Scores describe the rows that were just replaced, and they are keyed
+        # on a serial the reload reassigns. Today they happened to land back on
+        # the right works because the loader inserts in the same order - but a
+        # single work added or removed upstream shifts every id after it, and
+        # every score with it, silently and with no error. Derived data must
+        # not outlive the rows it describes. scoring.py repopulates this in the
+        # same pipeline run.
+        cur.execute("TRUNCATE project_scores")
         execute_values(
             cur,
             f"INSERT INTO projects ({', '.join(INSERT_COLUMNS)}) VALUES %s",

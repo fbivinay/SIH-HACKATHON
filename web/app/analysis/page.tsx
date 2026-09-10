@@ -170,7 +170,9 @@ export default async function AnalysisPage({
               {mps.map((m) => (
                 <tr key={`${m.mp_id}-${m.ls_term}`}>
                   <td className="max-w-[20rem] truncate">
-                    {m.mp_name}
+                    <Link href={`/mp/${encodeURIComponent(m.mp_id)}`} className="link-quiet">
+                      {m.mp_name}
+                    </Link>
                     <span className="ml-2 text-xs text-[color:var(--muted)]">
                       {m.house} &middot; LS{m.ls_term}
                     </span>

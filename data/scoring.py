@@ -14,6 +14,7 @@ import llm_sectors
 import vendors
 from sectors import classify_sector
 from sectors import normalize as sectors_normalize
+from sectors import verify as sectors_verify
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
@@ -138,6 +139,13 @@ def add_base_features(df):
     # than silently grouping every work in a district together.
     if "sector" not in df.columns or df["sector"].isna().any():
         df["sector"] = df["description"].map(classify_sector)
+        # Raises if the keyword rules stop matching this data. The cost
+        # baseline needs a stratifier that carries information; without this
+        # a source that changes its description style would quietly send every
+        # work into one bucket and compare it against every other work.
+        # It lives here because this is where sector is derived - `projects`
+        # holds only what the source publishes.
+        sectors_verify(df["description"])
 
     # Anything the keyword rules left in Other gets whatever label the model
     # assigned on a previous run of scripts/classify_sectors.py. Reading a cache
