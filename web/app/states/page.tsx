@@ -184,7 +184,14 @@ export default async function StatesPage({
             return (
               <article key={s.state} className="card statecard">
                 <header className="flex items-baseline justify-between gap-2">
-                  <h2 className="text-[0.98rem] font-medium leading-tight">{s.state}</h2>
+                  <h2 className="text-[0.98rem] font-medium leading-tight">
+                    <Link
+                      href={`/state/${encodeURIComponent(s.state)}?ls_term=${term}`}
+                      className="link-quiet"
+                    >
+                      {s.state}
+                    </Link>
+                  </h2>
                   <span
                     className="text-[0.72rem] tabular-nums whitespace-nowrap"
                     style={{ fontFamily: "var(--font-data)", color: "var(--ink-3)" }}

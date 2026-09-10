@@ -334,6 +334,145 @@ export type MpDetail = {
   findings: Array<{ code: string; headline: string; severity: number }>;
 };
 
+// ------------------------------------------------ state and district desks
+//
+// The brief names four audiences. The Ministry reads the national screens, an
+// MP reads /mp/[id]; these two are the middle of the chain, where MPLADS is
+// actually implemented.
+
+// Works-side totals for any scope. Every field is counted from the works, so
+// `sanctioned` is what was sanctioned per work — never confuse it with the
+// per-MP `allocated` figure, which has no district-level equivalent published.
+export type RiskRollup = {
+  works: number;
+  completed: number;
+  pending: number;
+  high_risk: number;
+  in_queue: number;
+  sanctioned: number;
+  expenditure: number;
+  flagged_amount: number;
+  districts: number;
+  agencies: number;
+  members: number;
+  avg_risk: number | null;
+};
+
+export type DeskFinding = {
+  code: string;
+  subject_type: "agency" | "mp";
+  subject: string;
+  period: string | null;
+  severity: number;
+  headline: string;
+};
+
+export type DeskSector = {
+  sector: string;
+  works: number;
+  sanctioned: number;
+  in_queue: number;
+};
+
+export type StateDesk = {
+  state: string;
+  ls_term: number;
+  // The source's own per-MP aggregates, summed. Identical to the same state's
+  // row on /api/states, so the two screens cannot disagree.
+  money: {
+    allocated: number | null;
+    recommended: number | null;
+    expenditure: number | null;
+    mp_count: number;
+    completed_works: number | null;
+    recommended_works: number | null;
+  };
+  works: RiskRollup;
+  districts: Array<{
+    district: string;
+    works: number;
+    completed: number;
+    high_risk: number;
+    in_queue: number;
+    sanctioned: number;
+    flagged_amount: number;
+    agencies: number;
+    avg_risk: number | null;
+  }>;
+  members: Array<{
+    mp_id: string;
+    mp_name: string;
+    constituency: string | null;
+    house: string | null;
+    allocated_amount: number | null;
+    total_expenditure: number | null;
+    utilization_pct: number | null;
+    completion_rate_pct: number | null;
+    idle_amount: number | null;
+    works: number;
+    in_queue: number;
+  }>;
+  sectors: DeskSector[];
+  top_flagged: Array<{
+    id: number;
+    work_key: string | null;
+    work_name: string;
+    district: string;
+    implementing_agency: string;
+    mp_name: string | null;
+    sanctioned_amount: number;
+    overall_risk_score: number | null;
+    risk_level: string | null;
+    flagged_reasons: string[];
+  }>;
+  findings: DeskFinding[];
+};
+
+export type DistrictDesk = {
+  state: string;
+  district: string;
+  ls_term: number;
+  works: RiskRollup;
+  agencies: Array<{
+    implementing_agency: string;
+    works: number;
+    completed: number;
+    high_risk: number;
+    in_queue: number;
+    sanctioned: number;
+    avg_risk: number | null;
+    vendor_count: number | null;
+    top_vendor: string | null;
+    top_vendor_share_pct: number | null;
+  }>;
+  sectors: DeskSector[];
+  members: Array<{
+    mp_id: string;
+    mp_name: string;
+    constituency: string | null;
+    works: number;
+    in_queue: number;
+    sanctioned: number;
+  }>;
+  top_flagged: Array<{
+    id: number;
+    work_key: string | null;
+    work_name: string;
+    implementing_agency: string;
+    mp_name: string | null;
+    sector: string | null;
+    work_status: string | null;
+    sanctioned_amount: number;
+    expenditure: number | null;
+    delay_days: number | null;
+    cost_deviation_pct: number | null;
+    overall_risk_score: number | null;
+    risk_level: string | null;
+    flagged_reasons: string[];
+  }>;
+  findings: DeskFinding[];
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -387,6 +526,15 @@ export const api = {
     get<AlertSummary>(`/api/alerts/summary?${new URLSearchParams(params)}`),
   states: (params: Record<string, string> = {}) =>
     get<StateSummary[]>(`/api/states?${new URLSearchParams(params)}`),
+  stateDesk: (state: string, params: Record<string, string> = {}) =>
+    get<StateDesk>(
+      `/api/states/${encodeURIComponent(state)}?${new URLSearchParams(params)}`
+    ),
+  districtDesk: (state: string, district: string, params: Record<string, string> = {}) =>
+    get<DistrictDesk>(
+      `/api/districts/${encodeURIComponent(state)}/${encodeURIComponent(district)}` +
+        `?${new URLSearchParams(params)}`
+    ),
   compliance: () => get<ComplianceBook>("/api/compliance"),
   provenance: () => get<Provenance>("/api/provenance"),
   trends: (params: Record<string, string> = {}) =>
