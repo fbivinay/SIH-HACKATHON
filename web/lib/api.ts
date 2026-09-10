@@ -275,6 +275,30 @@ export type Provenance = {
   chain: Array<{ step: string; what: string }>;
 };
 
+export type Trends = {
+  monthly: Array<{ month: string; payments: number; amount: number }>;
+  fiscal_years: Array<{
+    fy: number;
+    payments: number;
+    amount: number;
+    march_share: number | null;
+    first_payment: string;
+    last_payment: string;
+  }>;
+  // Agencies holding open works that have not paid anyone in months. The only
+  // forward-looking signal the published record honestly supports.
+  quiet_agencies: Array<{
+    implementing_agency: string;
+    last_paid: string;
+    payments: number;
+    open_works: number;
+    open_value: number;
+    days_silent: number;
+  }>;
+  quiet_rule: { days: number; min_open_works: number };
+  state: string | null;
+};
+
 export type FilterOptions = {
   states: Array<{ state: string; count: number }>;
   risk_levels: string[];
@@ -329,6 +353,8 @@ export const api = {
     get<StateSummary[]>(`/api/states?${new URLSearchParams(params)}`),
   compliance: () => get<ComplianceBook>("/api/compliance"),
   provenance: () => get<Provenance>("/api/provenance"),
+  trends: (params: Record<string, string> = {}) =>
+    get<Trends>(`/api/trends?${new URLSearchParams(params)}`),
   detectors: () => get<Detector[]>("/api/detectors"),
   detectorFindings: (params: Record<string, string> = {}) =>
     get<DetectorFindingPage>(`/api/detectors/findings?${new URLSearchParams(params)}`),

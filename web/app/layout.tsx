@@ -34,6 +34,7 @@ export const navLinks = [
   { href: "/signals", label: "Signals" },
   { href: "/compliance", label: "Rules" },
   { href: "/projects", label: "Works" },
+  { href: "/trends", label: "Trends" },
   { href: "/states", label: "States" },
   { href: "/map", label: "Map" },
   { href: "/analysis", label: "Agencies" },

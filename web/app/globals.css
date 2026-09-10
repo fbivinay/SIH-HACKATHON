@@ -1164,3 +1164,30 @@ select:focus-visible {
   background: var(--surface-2);
   font-family: var(--font-ui);
 }
+
+/* ---- Charts ---- */
+
+.chart {
+  margin: 0;
+}
+
+.chart__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.chart__tick {
+  font-family: var(--font-data);
+  font-size: 11px;
+  fill: var(--ink-3);
+}
+
+.chart__caption {
+  margin-top: 0.7rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink-3);
+  max-width: 46rem;
+}
