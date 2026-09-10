@@ -32,9 +32,17 @@ import llm_sectors  # noqa: E402
 load_dotenv(pathlib.Path(__file__).resolve().parent.parent / ".env")
 
 
-def unclassified_descriptions(limit=None):
+def unclassified_descriptions(limit=None, cache=None):
     """Distinct descriptions currently sitting in Other, commonest first, so a
-    partial run buys the most works per request."""
+    partial run buys the most works per request.
+
+    A description the model has already answered "Other" for is indistinguishable
+    in the database from one it has never seen - both sit in the Other bucket.
+    So the cache is subtracted here, before `limit` is applied. Applying LIMIT in
+    SQL instead meant a partial run kept re-picking the same commonest rows,
+    every one of them already answered, and reported "0 newly labelled" while
+    22,030 descriptions waited behind them.
+    """
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     try:
         with conn.cursor() as cur:
@@ -45,12 +53,19 @@ def unclassified_descriptions(limit=None):
                 WHERE s.sector = %s AND p.description IS NOT NULL
                 GROUP BY p.description
                 ORDER BY works DESC
-                """ + ("LIMIT %s" if limit else ""),
-                [llm_sectors.OTHER] + ([limit] if limit else []),
+                """,
+                [llm_sectors.OTHER],
             )
-            return cur.fetchall()
+            rows = cur.fetchall()
     finally:
         conn.close()
+
+    if cache is None:
+        return rows[:limit] if limit else rows
+    from sectors import normalize
+    fresh = [(d, n) for d, n in rows
+             if (key := normalize(d)) and key not in cache]
+    return fresh[:limit] if limit else fresh
 
 
 def main():
@@ -68,11 +83,11 @@ def main():
                     help="report what would be sent, call nothing")
     args = ap.parse_args()
 
-    rows = unclassified_descriptions(args.limit)
+    cache = llm_sectors.load_cache()
+    rows = unclassified_descriptions(args.limit, cache)
     descriptions = [d for d, _ in rows]
     works = sum(n for _, n in rows)
-    cache = llm_sectors.load_cache()
-    print(f"{len(descriptions):,} distinct descriptions covering {works:,} works; "
+    print(f"{len(descriptions):,} unanswered descriptions covering {works:,} works; "
           f"{len(cache):,} already cached")
 
     if args.dry_run:
