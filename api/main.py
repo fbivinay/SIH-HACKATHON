@@ -852,3 +852,92 @@ def provenance():
             },
         ],
     }
+
+
+# ---------------------------------------------------------------------- trends
+
+# An agency with a handful of open works and no recent payment is ordinary. One
+# holding twenty or more, silent for half a year, is worth a phone call.
+QUIET_MIN_OPEN_WORKS = 20
+QUIET_DAYS = 180
+
+
+@app.get("/api/trends")
+def trends(state: Optional[str] = None):
+    """Payments over time, by month and by fiscal year, plus what has gone quiet.
+
+    The brief asks for trend analysis and early warning. Both are read from
+    expenditure_date across 272,263 payments spanning 39 months - the only
+    genuinely temporal thing the published record contains.
+    """
+    where, params = ("WHERE state = %s", [state]) if state else ("", [])
+
+    monthly = query(
+        f"""
+        SELECT to_char(date_trunc('month', expenditure_date), 'YYYY-MM') AS month,
+               COUNT(*) AS payments,
+               COALESCE(SUM(expenditure_amount), 0) AS amount
+        FROM expenditures
+        {where or "WHERE TRUE"} AND expenditure_date IS NOT NULL
+        GROUP BY 1 ORDER BY 1
+        """,
+        params,
+    )
+
+    # India's fiscal year runs April to March, which is the whole point: the
+    # year-end share is the number that says whether money is being spent as
+    # work happens or shovelled out before it lapses.
+    fiscal = query(
+        f"""
+        SELECT CASE WHEN EXTRACT(MONTH FROM expenditure_date) >= 4
+                    THEN EXTRACT(YEAR FROM expenditure_date)
+                    ELSE EXTRACT(YEAR FROM expenditure_date) - 1 END::int AS fy,
+               COUNT(*) AS payments,
+               COALESCE(SUM(expenditure_amount), 0) AS amount,
+               ROUND(100.0 * COUNT(*) FILTER (WHERE EXTRACT(MONTH FROM expenditure_date) = 3)
+                     / NULLIF(COUNT(*), 0), 1) AS march_share,
+               MIN(expenditure_date) AS first_payment,
+               MAX(expenditure_date) AS last_payment
+        FROM expenditures
+        {where or "WHERE TRUE"} AND expenditure_date IS NOT NULL
+        GROUP BY 1 ORDER BY 1
+        """,
+        params,
+    )
+
+    quiet = query(
+        f"""
+        WITH last_pay AS (
+            SELECT implementing_agency, MAX(expenditure_date) AS last_paid,
+                   COUNT(*) AS payments
+            FROM expenditures {where} GROUP BY implementing_agency
+        ),
+        open_work AS (
+            SELECT implementing_agency,
+                   COUNT(*) FILTER (WHERE work_status = 'recommended') AS open_works,
+                   COALESCE(SUM(sanctioned_amount) FILTER (WHERE work_status = 'recommended'), 0)
+                     AS open_value
+            FROM projects {where} GROUP BY implementing_agency
+        )
+        SELECT l.implementing_agency, l.last_paid, l.payments,
+               o.open_works, o.open_value,
+               (CURRENT_DATE - l.last_paid) AS days_silent
+        FROM last_pay l JOIN open_work o USING (implementing_agency)
+        WHERE l.last_paid < CURRENT_DATE - INTERVAL '%s days'
+          AND o.open_works >= %s
+        ORDER BY o.open_value DESC
+        LIMIT 50
+        """ % (QUIET_DAYS, QUIET_MIN_OPEN_WORKS),
+        params + params,
+    )
+
+    return {
+        "monthly": monthly,
+        "fiscal_years": fiscal,
+        "quiet_agencies": quiet,
+        "quiet_rule": {
+            "days": QUIET_DAYS,
+            "min_open_works": QUIET_MIN_OPEN_WORKS,
+        },
+        "state": state,
+    }

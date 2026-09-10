@@ -329,3 +329,22 @@ def test_provenance_gap_stays_small():
         return
     assert body["worst_gap_pct"] is not None
     assert body["worst_gap_pct"] < 15, "figures have drifted from the official source"
+
+
+def test_trends_cover_every_month_and_fiscal_year():
+    t = client.get("/api/trends").json()
+    assert len(t["monthly"]) >= 12
+    months = [m["month"] for m in t["monthly"]]
+    assert months == sorted(months), "months must arrive in order"
+    for f in t["fiscal_years"]:
+        assert f["march_share"] is None or 0 <= float(f["march_share"]) <= 100
+
+
+def test_quiet_agencies_hold_open_works_and_have_stopped_paying():
+    """The early-warning rule is deliberately narrow: an agency with a couple of
+    open works and no recent payment is ordinary."""
+    t = client.get("/api/trends").json()
+    rule = t["quiet_rule"]
+    for q in t["quiet_agencies"]:
+        assert q["open_works"] >= rule["min_open_works"]
+        assert q["days_silent"] >= rule["days"]
