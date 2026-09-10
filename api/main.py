@@ -754,7 +754,7 @@ COMPLIANCE_BLIND_SPOTS = [
     },
     {
         "name": "Whether a work is a permissible category",
-        "why": "MPLADS restricts what funds may be spent on, but the portal's own category column reads 'Normal/Others' on 98.1% of works. The sector this system shows is derived from the description text, which is good enough to compare like with like and not good enough to rule a work impermissible.",
+        "why": "MPLADS restricts what funds may be spent on, but the portal's own category column reads 'Normal/Others' on 98.1% of works. The sector this system shows is derived from the description text, which is good enough to compare like with like and not good enough to rule a work impermissible. The twelve sectors are also not exhaustive: roughly 1,750 works are electrical - substations, transformers, 11kV lines - and have no sector of their own, so they sit wherever their description reads closest.",
     },
     {
         "name": "Whether the money bought what was claimed",
