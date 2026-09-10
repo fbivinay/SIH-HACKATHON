@@ -37,6 +37,45 @@ export default async function ProvenancePage() {
           ))}
         </div>
 
+        <div className="mt-10">
+          <h2 className="section-head">Why not the link in the problem statement?</h2>
+          <p className="lede !mx-0 !max-w-3xl">
+            Because it does not publish the data this system reads. The designated
+            dashboard&rsquo;s entire public interface is the seven calls below, enumerated
+            from its own JavaScript bundle and then made directly on{" "}
+            {p.official_interface.checked_on}. Not one of them returns a work: no
+            description, no sanctioned amount, no start date, no implementing agency, no
+            payment. {p.official_interface.login_wall}
+          </p>
+          <div className="data-table-wrap mt-4">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Endpoint</th>
+                  <th>What it returns</th>
+                  <th className="num">Work-level?</th>
+                </tr>
+              </thead>
+              <tbody>
+                {p.official_interface.endpoints.map((e) => (
+                  <tr key={e.endpoint}>
+                    <td style={{ fontFamily: "var(--font-data)", fontSize: "0.78rem" }}>
+                      {e.endpoint}
+                    </td>
+                    <td>
+                      <span className="cell-sub">{e.returns}</span>
+                    </td>
+                    <td className="num">{e.works ? "yes" : "no"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-[0.85rem] leading-relaxed" style={{ color: "var(--ink-2)" }}>
+            {p.official_interface.verdict}
+          </p>
+        </div>
+
         {p.rows.length === 0 ? (
           <div className="notice mt-6" role="status">
             <span aria-hidden="true">&#9679;</span>
