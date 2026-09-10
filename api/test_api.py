@@ -370,3 +370,57 @@ def test_mp_dashboard_scopes_everything_to_one_member():
 
 def test_unknown_mp_404s():
     assert client.get("/api/mps/not-a-real-mp-id").status_code == 404
+
+
+# --------------------------------------------------- state / district desks
+
+
+def _a_state() -> str:
+    """A state that actually has works, taken from the data rather than named."""
+    rows = client.get("/api/map/states").json()
+    assert rows, "no states loaded"
+    return max(rows, key=lambda r: r["total_projects"])["state"]
+
+
+def test_state_desk_totals_agree_with_its_own_district_table():
+    """The scope guard. The rollup and the per-district rows are separate
+    queries; if either ever stops meaning 'this state, this term', these two
+    numbers part company and the page starts lying quietly."""
+    state = _a_state()
+    body = client.get(f"/api/states/{state}?ls_term=18").json()
+    districts = body["districts"]
+    assert districts, f"{state} has no districts"
+    assert sum(d["works"] for d in districts) == body["works"]["works"]
+    assert sum(d["in_queue"] for d in districts) == body["works"]["in_queue"]
+
+
+def test_state_desk_money_matches_the_state_list():
+    """The state desk and /api/states must never disagree about one state."""
+    state = _a_state()
+    desk = client.get(f"/api/states/{state}?ls_term=18").json()["money"]
+    row = next(
+        r for r in client.get("/api/states?ls_term=18").json() if r["state"] == state
+    )
+    assert float(desk["allocated"]) == float(row["allocated"])
+    assert float(desk["expenditure"]) == float(row["expenditure"])
+    assert desk["mp_count"] == row["mp_count"]
+
+
+def test_state_desk_404_for_an_unknown_state():
+    assert client.get("/api/states/Narnia").status_code == 404
+
+
+def test_district_desk_agrees_with_its_parent_state_row():
+    state = _a_state()
+    parent = client.get(f"/api/states/{state}?ls_term=18").json()
+    top = parent["districts"][0]
+    body = client.get(f"/api/districts/{state}/{top['district']}?ls_term=18").json()
+    assert body["works"]["works"] == top["works"]
+    assert body["works"]["in_queue"] == top["in_queue"]
+    # An agency table that does not account for every work in the district
+    # would send a district officer after the wrong people.
+    assert sum(a["works"] for a in body["agencies"]) == body["works"]["works"]
+
+
+def test_district_desk_404_for_an_unknown_district():
+    assert client.get(f"/api/districts/{_a_state()}/NOWHERE").status_code == 404

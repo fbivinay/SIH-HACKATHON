@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from db import execute, query
 
-app = FastAPI(title="MPLADS Risk Monitor API")
+app = FastAPI(title="Kasauti API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -1018,6 +1018,254 @@ def mp_detail(mp_id: str, ls_term: Optional[int] = Query(None, ge=17, le=18)):
         "terms": terms,
         "works": works,
         "sectors": sectors,
+        "top_flagged": top,
+        "findings": findings,
+    }
+
+
+# ------------------------------------------------- state and district desks
+#
+# The brief asks for decision-support dashboards for four audiences: Members of
+# Parliament, State Nodal Authorities, District Authorities, and the Ministry.
+# The Ministry's question is the national one every other screen answers, and
+# an MP's is /api/mps/{mp_id}. These two are the middle of that chain, and the
+# middle is where MPLADS actually gets implemented: a State Nodal Authority
+# releases funds to districts and answers for the state's utilisation, a
+# District Authority is the implementing agency's supervisor and answers for
+# individual works.
+#
+# Both deliberately return one payload rather than making the page fan out to
+# six endpoints: a district officer on a bad connection should pay one round
+# trip, and a single query set cannot disagree with itself the way six can.
+
+
+def _risk_rollup(where: str, params: list) -> dict:
+    """Works-side totals for any scope. One query so scopes cannot drift."""
+    return query(
+        f"""
+        SELECT COUNT(*) AS works,
+               COUNT(*) FILTER (WHERE work_status = 'completed') AS completed,
+               COUNT(*) FILTER (WHERE work_status = 'recommended') AS pending,
+               COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk,
+               COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue,
+               COALESCE(SUM(sanctioned_amount), 0) AS sanctioned,
+               COALESCE(SUM(expenditure), 0) AS expenditure,
+               COALESCE(SUM(sanctioned_amount) FILTER (WHERE overall_risk_score >= 40), 0)
+                 AS flagged_amount,
+               COUNT(DISTINCT district) AS districts,
+               COUNT(DISTINCT implementing_agency) AS agencies,
+               COUNT(DISTINCT mp_id) AS members,
+               ROUND(AVG(overall_risk_score), 1) AS avg_risk
+        FROM projects_scored {where}
+        """,
+        params,
+        one=True,
+    )
+
+
+@app.get("/api/states/{state}")
+def state_detail(state: str, ls_term: int = Query(18, ge=17, le=18)):
+    """One state's desk: the State Nodal Authority's view.
+
+    Money comes from the source's per-MP aggregates (same figures as
+    /api/states, so this page and the state list can never disagree); the
+    district table and everything below it comes from the works.
+    """
+    money = query(
+        """
+        SELECT SUM(allocated_amount) AS allocated,
+               SUM(amount_recommended) AS recommended,
+               SUM(total_expenditure) AS expenditure,
+               COUNT(DISTINCT mp_id) AS mp_count,
+               SUM(completed_works) AS completed_works,
+               SUM(recommended_works) AS recommended_works
+        FROM mps WHERE ls_term = %s AND state = %s
+        """,
+        [ls_term, state],
+        one=True,
+    )
+    works = _risk_rollup("WHERE ls_term = %s AND state = %s", [ls_term, state])
+    if not money["mp_count"] and not works["works"]:
+        raise HTTPException(status_code=404, detail="No state by that name in this term")
+
+    districts = query(
+        """
+        SELECT district,
+               COUNT(*) AS works,
+               COUNT(*) FILTER (WHERE work_status = 'completed') AS completed,
+               COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk,
+               COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue,
+               COALESCE(SUM(sanctioned_amount), 0) AS sanctioned,
+               COALESCE(SUM(sanctioned_amount) FILTER (WHERE overall_risk_score >= 40), 0)
+                 AS flagged_amount,
+               COUNT(DISTINCT implementing_agency) AS agencies,
+               ROUND(AVG(overall_risk_score), 1) AS avg_risk
+        FROM projects_scored
+        WHERE ls_term = %s AND state = %s AND district IS NOT NULL
+        GROUP BY district
+        ORDER BY in_queue DESC, works DESC
+        """,
+        [ls_term, state],
+    )
+    members = query(
+        """
+        WITH w AS (
+            SELECT mp_id, COUNT(*) AS works,
+                   COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue
+            FROM projects_scored WHERE ls_term = %s AND state = %s GROUP BY mp_id
+        )
+        SELECT m.mp_id, m.mp_name, m.constituency, m.house,
+               m.allocated_amount, m.total_expenditure, m.utilization_pct,
+               m.completion_rate_pct,
+               m.allocated_amount - m.amount_recommended AS idle_amount,
+               COALESCE(w.works, 0) AS works, COALESCE(w.in_queue, 0) AS in_queue
+        FROM mps m LEFT JOIN w USING (mp_id)
+        WHERE m.ls_term = %s AND m.state = %s
+        ORDER BY m.utilization_pct ASC NULLS FIRST
+        """,
+        [ls_term, state, ls_term, state],
+    )
+    sectors = query(
+        """
+        SELECT COALESCE(sector, 'Other') AS sector, COUNT(*) AS works,
+               COALESCE(SUM(sanctioned_amount), 0) AS sanctioned,
+               COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue
+        FROM projects_scored WHERE ls_term = %s AND state = %s
+        GROUP BY 1 ORDER BY works DESC LIMIT 10
+        """,
+        [ls_term, state],
+    )
+    top = query(
+        """
+        SELECT id, work_key, work_name, district, implementing_agency, mp_name,
+               sanctioned_amount, overall_risk_score, risk_level, flagged_reasons
+        FROM projects_scored
+        WHERE ls_term = %s AND state = %s AND overall_risk_score IS NOT NULL
+        ORDER BY overall_risk_score DESC, id
+        LIMIT 10
+        """,
+        [ls_term, state],
+    )
+    findings = query(
+        """
+        WITH agencies AS (
+            SELECT DISTINCT implementing_agency AS name
+            FROM projects WHERE state = %s AND ls_term = %s
+        ),
+        members AS (SELECT mp_id FROM mps WHERE state = %s AND ls_term = %s)
+        SELECT code, subject_type, subject, period, severity, headline
+        FROM detector_findings f
+        WHERE f.ls_term = %s
+          AND ((f.subject_type = 'agency' AND f.subject IN (SELECT name FROM agencies))
+            OR (f.subject_type = 'mp' AND f.subject IN (SELECT mp_id FROM members)))
+        ORDER BY severity DESC, code
+        LIMIT 25
+        """,
+        [state, ls_term, state, ls_term, ls_term],
+    )
+    return {
+        "state": state,
+        "ls_term": ls_term,
+        "money": money,
+        "works": works,
+        "districts": districts,
+        "members": members,
+        "sectors": sectors,
+        "top_flagged": top,
+        "findings": findings,
+    }
+
+
+@app.get("/api/districts/{state}/{district}")
+def district_detail(state: str, district: str, ls_term: int = Query(18, ge=17, le=18)):
+    """One district's desk: the District Authority's view.
+
+    A district officer supervises implementing agencies, so the agency table is
+    the centre of this page rather than a footnote. There is no per-district
+    money aggregate published anywhere - allocation is per MP, not per district
+    - so every figure here is summed from the works themselves and labelled as
+    sanctioned rather than allocated.
+    """
+    scope = "WHERE ls_term = %s AND state = %s AND district = %s"
+    args = [ls_term, state, district]
+    works = _risk_rollup(scope, args)
+    if not works["works"]:
+        raise HTTPException(status_code=404, detail="No works for that district in this term")
+
+    agencies = query(
+        """
+        SELECT p.implementing_agency,
+               COUNT(*) AS works,
+               COUNT(*) FILTER (WHERE p.work_status = 'completed') AS completed,
+               COUNT(*) FILTER (WHERE p.risk_level = 'HIGH') AS high_risk,
+               COUNT(*) FILTER (WHERE p.overall_risk_score >= 40) AS in_queue,
+               COALESCE(SUM(p.sanctioned_amount), 0) AS sanctioned,
+               ROUND(AVG(p.overall_risk_score), 1) AS avg_risk,
+               v.vendor_count, v.top_vendor, v.top_vendor_share_pct
+        FROM projects_scored p
+        LEFT JOIN agency_vendor_profile v
+          ON v.implementing_agency = p.implementing_agency AND v.ls_term = p.ls_term
+        WHERE p.ls_term = %s AND p.state = %s AND p.district = %s
+        GROUP BY p.implementing_agency, v.vendor_count, v.top_vendor, v.top_vendor_share_pct
+        ORDER BY in_queue DESC, works DESC
+        """,
+        args,
+    )
+    sectors = query(
+        f"""
+        SELECT COALESCE(sector, 'Other') AS sector, COUNT(*) AS works,
+               COALESCE(SUM(sanctioned_amount), 0) AS sanctioned,
+               COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue
+        FROM projects_scored {scope}
+        GROUP BY 1 ORDER BY works DESC LIMIT 10
+        """,
+        args,
+    )
+    members = query(
+        f"""
+        SELECT mp_id, MAX(mp_name) AS mp_name, MAX(constituency) AS constituency,
+               COUNT(*) AS works,
+               COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue,
+               COALESCE(SUM(sanctioned_amount), 0) AS sanctioned
+        FROM projects_scored {scope} AND mp_id IS NOT NULL
+        GROUP BY mp_id ORDER BY works DESC LIMIT 12
+        """,
+        args,
+    )
+    top = query(
+        f"""
+        SELECT id, work_key, work_name, implementing_agency, mp_name, sector,
+               work_status, sanctioned_amount, expenditure, delay_days,
+               cost_deviation_pct, overall_risk_score, risk_level, flagged_reasons
+        FROM projects_scored {scope} AND overall_risk_score IS NOT NULL
+        ORDER BY overall_risk_score DESC, id
+        LIMIT 15
+        """,
+        args,
+    )
+    findings = query(
+        """
+        WITH agencies AS (
+            SELECT DISTINCT implementing_agency AS name FROM projects
+            WHERE state = %s AND district = %s AND ls_term = %s
+        )
+        SELECT code, subject_type, subject, period, severity, headline
+        FROM detector_findings
+        WHERE ls_term = %s AND subject_type = 'agency'
+          AND subject IN (SELECT name FROM agencies)
+        ORDER BY severity DESC, code
+        LIMIT 20
+        """,
+        [state, district, ls_term, ls_term],
+    )
+    return {
+        "state": state,
+        "district": district,
+        "ls_term": ls_term,
+        "works": works,
+        "agencies": agencies,
+        "sectors": sectors,
+        "members": members,
         "top_flagged": top,
         "findings": findings,
     }
