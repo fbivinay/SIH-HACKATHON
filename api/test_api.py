@@ -348,3 +348,25 @@ def test_quiet_agencies_hold_open_works_and_have_stopped_paying():
     for q in t["quiet_agencies"]:
         assert q["open_works"] >= rule["min_open_works"]
         assert q["days_silent"] >= rule["days"]
+
+
+def test_mp_dashboard_scopes_everything_to_one_member():
+    """The brief asks for decision-support dashboards for Members of Parliament
+    first. An MP's question is narrower than the national one."""
+    from db import query
+
+    row = query(
+        "SELECT mp_id FROM projects WHERE mp_id IS NOT NULL LIMIT 1", one=True
+    )
+    if row is None:
+        return
+    d = client.get(f"/api/mps/{row['mp_id']}").json()
+    assert d["terms"], "an MP must have at least one term"
+    assert d["works"]["works"] >= 0
+    assert d["works"]["completed"] + d["works"]["pending"] == d["works"]["works"]
+    for t in d["top_flagged"]:
+        assert t["overall_risk_score"] is not None
+
+
+def test_unknown_mp_404s():
+    assert client.get("/api/mps/not-a-real-mp-id").status_code == 404

@@ -24,7 +24,20 @@ export default async function MpPage({ params }: { params: Promise<{ id: string 
 
       <h1 className="display mt-4">{current.mp_name}</h1>
       <p className="mt-2 text-[0.9rem]" style={{ color: "var(--ink-2)" }}>
-        {[current.constituency, current.state, current.house].filter(Boolean).join(" · ")}
+        {/* Rajya Sabha members carry "Sitting Rajya Sabha" as their
+            constituency, which repeats the house verbatim. Dedupe rather than
+            print the same words twice. */}
+        {Array.from(
+          new Set(
+            [current.constituency, current.state, current.house].filter(
+              (x): x is string => Boolean(x)
+            )
+          )
+        )
+          .filter((part, _, all) =>
+            all.every((other) => other === part || !other.includes(part))
+          )
+          .join(" · ")}
         {mp.terms.length > 1 && ` · ${mp.terms.length} terms on record`}
       </p>
 
