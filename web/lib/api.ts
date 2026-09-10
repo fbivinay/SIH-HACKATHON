@@ -266,6 +266,15 @@ export type Provenance = {
     checked_at: string;
   }>;
   worst_gap_pct: number | null;
+  // What the designated dataset actually serves without credentials, measured
+  // from the dashboard's own JavaScript rather than assumed.
+  official_interface: {
+    url: string;
+    checked_on: string;
+    endpoints: Array<{ endpoint: string; returns: string; works: boolean }>;
+    verdict: string;
+    login_wall: string;
+  };
   last_refresh: {
     finished_at?: string;
     rows_loaded?: number;

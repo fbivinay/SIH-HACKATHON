@@ -808,6 +808,42 @@ def compliance():
 # ------------------------------------------------------------------ provenance
 
 
+# Everything the designated dataset exposes without credentials, enumerated
+# from the dashboard's own JavaScript bundle (/libs/simplegrid/preLoginDashboard.js,
+# whose endpoint strings are stored reversed and unicode-escaped) and then called
+# directly. Measured 2026-09-10.
+#
+# This is here because "we used a different source" is the first question this
+# project should expect, and it deserves an answer made of evidence rather than
+# assurance. Seven endpoints, and not one of them returns a work: no
+# description, no sanctioned amount, no start date, no implementing agency, no
+# payment. Everything else under /digigov/ answers 302 to /digigov/Login.zul.
+OFFICIAL_INTERFACE = {
+    "url": "https://mplads.mospi.gov.in/digigov/dashboard.html",
+    "checked_on": "2026-09-10",
+    "endpoints": [
+        {"endpoint": "POST /rest/PreLoginDashboardData/getTilesData",
+         "returns": "Six headline totals for one tenure and house - allocated, expenditure, works recommended, sanctioned, completed, calamity.",
+         "works": False},
+        {"endpoint": "POST /rest/PreLoginDashboardData/getTenureData",
+         "returns": "The two tenures on record: 17th and 18th Lok Sabha.", "works": False},
+        {"endpoint": "POST /rest/PreLoginDashboardData/getStateData",
+         "returns": "36 state names and ids.", "works": False},
+        {"endpoint": "POST /rest/PreLoginDashboardData/getConstituencyData",
+         "returns": "Constituency names for a chosen state.", "works": False},
+        {"endpoint": "POST /rest/PreLoginDashboardData/getMpAndConstCombo",
+         "returns": "The dashboard's own member and constituency dropdown.", "works": False},
+        {"endpoint": "POST /rest/PreLoginDashboardData/getMpNamesData",
+         "returns": "Member names for a chosen constituency.", "works": False},
+        {"endpoint": "POST /rest/PreLoginDashboardData/getRedirectUrl",
+         "returns": "An empty string pre-login; the way through to the authenticated portal.",
+         "works": False},
+    ],
+    "verdict": "No work-level record is published without credentials. This system reads 250,839 works and 272,263 payments, none of which the designated URL serves. Empowered Indian republishes exactly that record as machine-readable exports, which is why it is the loader's source - and why every headline figure above is reconciled nightly against the official endpoints rather than taken on trust.",
+    "login_wall": "Every path under /digigov/ other than the dashboard answers 302 to /digigov/Login.zul.",
+}
+
+
 @app.get("/api/provenance")
 def provenance():
     """How our figures compare with the official MoSPI dashboard.
@@ -837,6 +873,7 @@ def provenance():
         "rows": rows,
         "worst_gap_pct": worst,
         "last_refresh": freshness or {},
+        "official_interface": OFFICIAL_INTERFACE,
         "chain": [
             {
                 "step": "Ministry of Statistics and Programme Implementation",
