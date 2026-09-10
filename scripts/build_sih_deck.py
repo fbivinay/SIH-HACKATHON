@@ -461,16 +461,24 @@ def main():
     restyle_pointers(s[5])
     y = TOP
     cw2 = (CW - 0.20) / 2
-    h_data = card(s[5], LEFT, y, cw2, "Data and scheme rules",
-         "MPLADS programme data via Empowered Indian (empoweredindian.in), which "
-         f"aggregates the official MoSPI portal at mplads.mospi.gov.in - {n(f['works'])} works, "
-         f"{n(f['payments'])} payments, {n(f['mp_terms'])} MP-terms across {n(f['districts'])} "
-         f"districts and {n(f['vendors'])} vendors.\n"
-         "MPLADS Guidelines, Ministry of Statistics and Programme Implementation: "
-         "permissible works, sanction ceilings and the annual entitlement per MP.\n"
-         f"Reconciled against the source's own published totals; {n(f['rejected'])} rows "
-         "rejected and recorded rather than silently dropped.",
-         BLUE, bs=11, min_h=3.85, tag="s6a")
+    h_data = card(s[5], LEFT, y, cw2, "The designated dataset, and what it serves",
+         "The problem statement names mplads.mospi.gov.in. Its public interface, "
+         "enumerated from its own JavaScript and called directly: totals, "
+         "states, districts and member names are open to anyone. Works are not. Completed "
+         "works come only through a citizen rating form that needs an SMS one-time password "
+         "on an Indian mobile, returns one member's works in one ward per call, and is rate "
+         "limited. Recommended works, payments and vendors are not served at all; every "
+         "other path answers 302 to the login page.\n"
+         "Empowered Indian republishes that record as machine-readable exports. Its own "
+         "uploader reads the State Bank disbursement portal that MPLADS money is paid "
+         "through, with a signed-in session cookie at one request every three seconds.\n"
+         f"So this system loads those exports - {n(f['works'])} works, {n(f['payments'])} "
+         f"payments, {n(f['mp_terms'])} MP-terms, {n(f['districts'])} districts, "
+         f"{n(f['vendors'])} vendors - and reconciles against the official endpoints on "
+         f"every refresh: five figures within {float(f['worst_gap']):.1f}%, every gap "
+         "negative because our snapshot trails a portal that gains works overnight. "
+         f"{n(f['rejected'])} rows rejected and recorded, not silently dropped.",
+         BLUE, bs=10, min_h=3.85, tag="s6a")
     h_left = card(s[5], LEFT + cw2 + 0.20, y, cw2, "Methods",
          "Liu, Ting and Zhou (2008), Isolation Forest — multivariate outliers over "
          "amount, delay and spend.\n"
@@ -478,7 +486,8 @@ def main():
          "cosine 0.94 within a district and sector, for duplicate sanctions.\n"
          "Newcomb-Benford first-digit law, with Nigrini's MAD — used peer-relative, "
          "because the population itself does not conform.\n"
-         "Herfindahl-Hirschman Index — vendor concentration per implementing agency.",
+         "Herfindahl-Hirschman Index - vendor concentration per implementing agency.\n"
+         "MPLADS Guidelines, MoSPI - permissible works, sanction ceilings, entitlement per MP.",
          GREEN, bs=11, min_h=3.85, tag="s6b")
     y += max(h_data, h_left) + 0.24
 
