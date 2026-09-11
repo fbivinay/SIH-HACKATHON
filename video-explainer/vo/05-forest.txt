@@ -1,0 +1,1 @@
+Three models do what no rule could. An isolation forest learns what a normal sanction looks like for a sector and district, and finds the works sitting outside it.

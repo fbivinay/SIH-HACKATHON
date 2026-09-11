@@ -1,0 +1,1 @@
+Sentence BERT embeds every description and compares them inside the same district, at ninety four percent similarity. That threshold was measured on this data, not borrowed.

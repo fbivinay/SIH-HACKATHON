@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Kasauti — how it works</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      /* GENERATED FILE - edit video-explainer/build.py, not this.
+         Scene timings come from the measured narration in vo/durations.json. */
+      @font-face {
+        font-family: "Geist";
+        src: url("assets/fonts/geist.woff2") format("woff2");
+        font-weight: 100 900; font-style: normal; font-display: block;
+      }
+      @font-face {
+        font-family: "Geist Mono";
+        src: url("assets/fonts/geist-mono.woff2") format("woff2");
+        font-weight: 400; font-style: normal; font-display: block;
+      }
+
+      /* The product's tokens. Colour only ever means risk - the one exception
+         is the two words "AI powered", exactly as on the site. */
+      :root {
+        --slab: #0b0b0c; --slab-2: #17171a;
+        --ground: #f1f1f2; --surface: #ffffff;
+        --on-slab: #fafafa; --on-slab-2: #b6b6bf; --on-slab-3: #8e8e99;
+        --ink: #0b0b0c; --ink-2: #4a4a52; --ink-3: #6b6b74;
+        --risk-high: #a82e22; --risk-medium: #96600a; --risk-low: #16704a;
+        --risk-high-dark: #f2695c;
+        --ai-red: #7a1a12; --ai-red-dark: #e0685c;
+        --line: #e3e3e6; --line-strong: #d2d2d7;
+        --ui: "Geist", ui-sans-serif, system-ui, sans-serif;
+        --mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+      }
+      body { margin: 0; background: #000; font-family: var(--ui);
+             -webkit-font-smoothing: antialiased; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      .clip { position: absolute; inset: 0; display: grid; place-items: center; }
+      .dark { background: var(--slab); color: var(--on-slab); }
+      .light { background: var(--ground); color: var(--ink); }
+      .stack { display: flex; flex-direction: column; align-items: center; }
+      .wrap { width: 1500px; }
+
+      .eyebrow { font-family: var(--mono); font-size: 21px; font-weight: 500;
+                  letter-spacing: 0.24em; text-transform: uppercase; }
+      .dark .eyebrow { color: var(--on-slab-3); }
+      .light .eyebrow { color: var(--ink-3); }
+      .figure { font-family: var(--mono); font-variant-numeric: tabular-nums;
+                 font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+      .display { font-weight: 650; letter-spacing: -0.035em; line-height: 1.06; margin: 0; }
+      .say { font-size: 40px; font-weight: 450; letter-spacing: -0.02em; }
+      .dark .say { color: var(--on-slab-2); }
+      .light .say { color: var(--ink-2); }
+
+      /* 1 problem */
+      #pb-count { font-size: 220px; }
+      #pb-money { margin-top: 30px; font-size: 58px; color: var(--on-slab-2); }
+      #pb-line { margin-top: 56px; font-size: 50px; font-weight: 500;
+                  letter-spacing: -0.02em; color: var(--on-slab); }
+
+      /* 2 what */
+      #wh-head { margin-top: 36px; font-size: 88px; max-width: 1400px; text-align: center; }
+      #wh-sub { margin-top: 34px; font-size: 38px; color: var(--ink-2); }
+      .ai-eyebrow { display: flex; align-items: center; gap: 0.55em;
+                     font-family: var(--mono); font-size: 20px; font-weight: 600;
+                     letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }
+      .ai-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--risk-low); }
+      .ai-word { color: var(--ai-red); }
+      .dark .ai-word { color: var(--ai-red-dark); }
+
+      /* 3 provenance */
+      #pv-chain { display: flex; align-items: stretch; gap: 0; margin-top: 56px; }
+      .node { width: 400px; padding: 34px 30px; border-radius: 20px;
+               background: var(--slab-2); border: 1px solid rgba(255,255,255,0.11); }
+      .node-k { font-family: var(--mono); font-size: 18px; letter-spacing: 0.18em;
+                 text-transform: uppercase; color: var(--on-slab-3); }
+      .node-n { margin-top: 14px; font-size: 34px; font-weight: 550;
+                 letter-spacing: -0.02em; color: var(--on-slab); }
+      .node-d { margin-top: 12px; font-size: 22px; color: var(--on-slab-2); line-height: 1.4; }
+      .arrow { width: 100px; display: grid; place-items: center;
+                font-family: var(--mono); font-size: 30px; color: var(--on-slab-3); }
+      #pv-note { margin-top: 46px; font-size: 30px; color: var(--on-slab-2); }
+
+      /* 4 score */
+      .row { display: grid; grid-template-columns: 1fr auto; align-items: baseline;
+              row-gap: 12px; margin-bottom: 22px; }
+      .row-name { font-size: 36px; font-weight: 500; letter-spacing: -0.02em; }
+      .row-weight { font-family: var(--mono); font-variant-numeric: tabular-nums;
+                     font-size: 27px; color: var(--ink-3); }
+      .bar-track { grid-column: 1 / -1; height: 6px; border-radius: 999px;
+                    background: var(--line-strong); overflow: hidden; }
+      .bar-fill { height: 100%; border-radius: 999px; background: var(--ink-2);
+                   transform-origin: left center; }
+      #sc-bands { display: flex; gap: 18px; margin-top: 44px; }
+      .band { flex: 1; padding: 20px 24px; border-radius: 14px; background: var(--surface);
+               border: 1px solid var(--line); }
+      .band-n { font-family: var(--mono); font-size: 19px; letter-spacing: 0.16em;
+                 text-transform: uppercase; }
+      .band-r { margin-top: 8px; font-family: var(--mono); font-size: 30px;
+                 font-variant-numeric: tabular-nums; color: var(--ink); }
+
+      /* 5 forest */
+      #fo-plot { position: relative; width: 900px; height: 560px; margin-top: 40px;
+                  border: 1px solid rgba(255,255,255,0.14); border-radius: 18px;
+                  background: var(--slab-2); }
+      .pt { position: absolute; width: 9px; height: 9px; border-radius: 50%;
+             background: var(--on-slab-3); margin: -4.5px 0 0 -4.5px; }
+      .pt.is-out { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px;
+                    background: var(--risk-high); }
+      #fo-side { width: 470px; }
+
+      /* 6 bert */
+      .desc { width: 620px; padding: 30px 32px; border-radius: 18px; background: var(--slab-2);
+               border: 1px solid rgba(255,255,255,0.11); font-size: 28px; line-height: 1.45;
+               color: var(--on-slab); }
+      #bt-mid { width: 220px; display: grid; place-items: center; }
+      /* The dark-mode risk red. The light-ground #a82e22 measures 2.88:1 on
+         the slab, under the 3:1 large-text floor. */
+      #bt-score { font-family: var(--mono); font-size: 66px; color: var(--risk-high-dark);
+                   font-variant-numeric: tabular-nums; }
+
+      /* 7 gemini */
+      .lab { display: grid; grid-template-columns: 1fr 120px 380px; align-items: center;
+              gap: 24px; padding: 22px 0; border-bottom: 1px solid rgba(255,255,255,0.10); }
+      .lab-src { font-size: 30px; color: var(--on-slab); }
+      .lab-ar { font-family: var(--mono); font-size: 24px; color: var(--on-slab-3);
+                 text-align: center; }
+      .lab-out { font-family: var(--mono); font-size: 24px; letter-spacing: 0.06em;
+                  text-transform: uppercase; color: var(--on-slab-2);
+                  border: 1px solid rgba(255,255,255,0.16); border-radius: 999px;
+                  padding: 8px 18px; text-align: center; }
+      .lab-out.is-abstain { color: var(--on-slab-3); }
+
+      /* 8 detectors */
+      #dt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px;
+                  margin-top: 46px; }
+      .dcard { padding: 30px 32px; border-radius: 18px; background: var(--surface);
+                border: 1px solid var(--line); }
+      .dcode { font-family: var(--mono); font-size: 20px; letter-spacing: 0.16em;
+                color: var(--ink-3); }
+      .dname { margin-top: 12px; font-size: 32px; font-weight: 550; letter-spacing: -0.02em; }
+      .ddesc { margin-top: 10px; font-size: 23px; color: var(--ink-2); line-height: 1.4; }
+
+      /* 9 queue */
+      #qu-wrap { display: flex; margin-top: 64px; }
+      .fcol { width: 500px; display: flex; flex-direction: column; align-items: center; }
+      .ffig { font-size: 104px; }
+      .ffig.is-risk { color: var(--risk-high); }
+      .flab { margin-top: 22px; font-family: var(--mono); font-size: 20px;
+               letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
+
+      /* 10 why */
+      #wy-badge { display: inline-flex; align-items: center; gap: 0.5em;
+                   padding: 0.4em 1em; border: 1px solid rgba(255,255,255,0.14);
+                   border-radius: 999px; background: rgba(255,255,255,0.05);
+                   font-family: var(--mono); font-size: 21px; font-weight: 550;
+                   letter-spacing: 0.08em; text-transform: uppercase; color: var(--on-slab-2); }
+      #wy-head { margin-top: 30px; font-size: 62px; }
+      .reason { padding: 20px 0 20px 32px; border-left: 2px solid rgba(255,255,255,0.16);
+                 margin-bottom: 22px; }
+      .reason-text { font-size: 34px; font-weight: 450; letter-spacing: -0.015em; }
+      .reason-method { margin-top: 10px; font-family: var(--mono); font-size: 19px;
+                        letter-spacing: 0.14em; text-transform: uppercase;
+                        color: var(--on-slab-3); }
+
+      /* 11 refresh */
+      #rf-steps { display: flex; gap: 20px; margin-top: 50px; }
+      .step { flex: 1; padding: 30px 26px; border-radius: 18px; background: var(--surface);
+               border: 1px solid var(--line); }
+      .step-n { font-family: var(--mono); font-size: 20px; color: var(--ink-3); }
+      .step-name { margin-top: 14px; font-size: 34px; font-weight: 600;
+                    letter-spacing: -0.025em; }
+      .step-sub { margin-top: 8px; font-family: var(--mono); font-size: 20px;
+                   color: var(--ink-3); }
+      #rf-note { margin-top: 44px; font-size: 30px; color: var(--ink-2); }
+
+      /* 12 limits */
+      .np { display: flex; align-items: center; gap: 24px; font-size: 38px;
+             color: var(--on-slab); padding: 18px 0; }
+      .np-x { font-family: var(--mono); font-size: 18px; letter-spacing: 0.16em;
+               text-transform: uppercase; color: var(--on-slab-3);
+               border: 1px solid rgba(255,255,255,0.18); border-radius: 999px;
+               padding: 7px 16px; }
+      #lm-l1 { margin-top: 60px; font-size: 52px; font-weight: 500;
+                letter-spacing: -0.025em; color: var(--on-slab-2); }
+      #lm-l2 { margin-top: 20px; font-size: 66px; font-weight: 650;
+                letter-spacing: -0.03em; color: var(--on-slab); }
+      #lm-mark { margin-top: 70px; display: flex; align-items: center; gap: 24px; }
+      #lm-logo { width: 74px; height: 74px; border-radius: 20px; background: var(--on-slab);
+                  position: relative; overflow: hidden; }
+      .slash { position: absolute; width: 12px; height: 98px; background: var(--slab);
+                top: -12px; transform: rotate(26deg); }
+      .slash.a { left: 20px; } .slash.b { left: 43px; }
+      #lm-name { font-size: 66px; font-weight: 650; letter-spacing: -0.035em; }
+      #lm-sub { margin-top: 26px; font-family: var(--mono); font-size: 20px;
+                 letter-spacing: 0.2em; color: var(--on-slab-3); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0"
+         data-width="1920" data-height="1080" data-duration="136.982" data-fps="30">
+
+      <!-- 1 -->
+      <section id="s-problem" class="clip dark" data-start="0.0" data-duration="11.927">
+        <div class="stack">
+          <div class="eyebrow">MPLADS works published</div>
+          <div id="pb-count" class="figure" style="margin-top:36px">0</div>
+          <div id="pb-money" class="figure">&#8377;19,804 Cr allocated</div>
+          <div id="pb-line">Nobody has read them all.</div>
+        </div>
+      </section>
+
+      <!-- 2 -->
+      <section id="s-what" class="clip light" data-start="11.927" data-duration="8.749">
+        <div class="stack">
+          <div id="wh-eyebrow" class="ai-eyebrow">
+            <span class="ai-dot"></span><span class="ai-word">AI powered</span>
+            <span>&middot; Gemini Flash Lite &middot; Isolation Forest &middot; Sentence-BERT</span>
+          </div>
+          <h1 id="wh-head" class="display">Every MPLADS work, checked against its peers.</h1>
+          <div id="wh-sub">A touchstone, not a verdict.</div>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section id="s-provenance" class="clip dark" data-start="20.676" data-duration="18.647">
+        <div class="wrap">
+          <div id="pv-title" class="eyebrow">Where the data comes from</div>
+          <div id="pv-chain">
+            <div class="node" id="pv-n1">
+              <div class="node-k">Designated source</div>
+              <div class="node-n">MoSPI portal</div>
+              <div class="node-d">Totals and members open. Individual works only behind an OTP-gated form.</div>
+            </div>
+            <div class="arrow" id="pv-a1">&rarr;</div>
+            <div class="node" id="pv-n2">
+              <div class="node-k">Bulk export</div>
+              <div class="node-n">Empowered Indian</div>
+              <div class="node-d">The same record, published as CSV the official site does not offer.</div>
+            </div>
+            <div class="arrow" id="pv-a2">&rarr;</div>
+            <div class="node" id="pv-n3">
+              <div class="node-k">This system</div>
+              <div class="node-n">Kasauti</div>
+              <div class="node-d">Reconciled against MoSPI's own endpoints on every refresh.</div>
+            </div>
+          </div>
+          <div id="pv-note">Both hops are shown on the site &mdash; ours, and upstream lag.</div>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section id="s-score" class="clip light" data-start="39.323" data-duration="12.695">
+        <div class="wrap">
+          <div id="sc-title" class="eyebrow">What the score is made of</div>
+          <div style="margin-top:44px">
+            <div class="row" id="sc-r1">
+              <div class="row-name">Cost</div>
+              <div class="row-weight">25%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="1.0"></div></div>
+            </div>
+            <div class="row" id="sc-r2">
+              <div class="row-name">Delay</div>
+              <div class="row-weight">25%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="1.0"></div></div>
+            </div>
+            <div class="row" id="sc-r3">
+              <div class="row-name">Duplication</div>
+              <div class="row-weight">20%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="0.8"></div></div>
+            </div>
+            <div class="row" id="sc-r4">
+              <div class="row-name">Agency</div>
+              <div class="row-weight">15%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="0.6"></div></div>
+            </div>
+            <div class="row" id="sc-r5">
+              <div class="row-name">Compliance</div>
+              <div class="row-weight">15%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="0.6"></div></div>
+            </div>
+          </div>
+          <div id="sc-bands">
+            <div class="band" id="bd-1"><div class="band-n" style="color:var(--risk-low)">Low</div><div class="band-r">0 &ndash; 39</div></div>
+            <div class="band" id="bd-2"><div class="band-n" style="color:var(--risk-medium)">Medium</div><div class="band-r">40 &ndash; 69</div></div>
+            <div class="band" id="bd-3"><div class="band-n" style="color:var(--risk-high)">High</div><div class="band-r">70 &ndash; 100</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="s-forest" class="clip dark" data-start="52.018" data-duration="10.925">
+        <div style="display:flex;align-items:center;gap:80px">
+          <div id="fo-plot" data-layout-allow-overflow="true">
+            <span class="pt" style="left:42.7%;top:71.88%"></span>
+            <span class="pt" style="left:46.85%;top:42.1%"></span>
+            <span class="pt" style="left:95.45%;top:82.79%"></span>
+            <span class="pt" style="left:104.46%;top:40.11%"></span>
+            <span class="pt" style="left:47.4%;top:54.34%"></span>
+            <span class="pt" style="left:51.4%;top:41.18%"></span>
+            <span class="pt" style="left:61.96%;top:4.91%"></span>
+            <span class="pt" style="left:50.09%;top:50.01%"></span>
+            <span class="pt" style="left:47.56%;top:36.91%"></span>
+            <span class="pt" style="left:53.23%;top:71.93%"></span>
+            <span class="pt" style="left:49.99%;top:49.99%"></span>
+            <span class="pt" style="left:52.0%;top:48.7%"></span>
+            <span class="pt" style="left:30.26%;top:56.64%"></span>
+            <span class="pt" style="left:-0.75%;top:31.56%"></span>
+            <span class="pt" style="left:11.1%;top:59.28%"></span>
+            <span class="pt" style="left:39.37%;top:58.01%"></span>
+            <span class="pt" style="left:76.7%;top:79.79%"></span>
+            <span class="pt" style="left:45.88%;top:9.6%"></span>
+            <span class="pt" style="left:70.97%;top:65.53%"></span>
+            <span class="pt" style="left:56.56%;top:46.16%"></span>
+            <span class="pt" style="left:28.48%;top:62.2%"></span>
+            <span class="pt" style="left:50.08%;top:49.93%"></span>
+            <span class="pt" style="left:47.78%;top:50.27%"></span>
+            <span class="pt" style="left:52.61%;top:61.82%"></span>
+            <span class="pt" style="left:52.15%;top:51.62%"></span>
+            <span class="pt" style="left:52.55%;top:44.4%"></span>
+            <span class="pt" style="left:45.75%;top:47.49%"></span>
+            <span class="pt" style="left:67.49%;top:33.63%"></span>
+            <span class="pt" style="left:36.68%;top:73.0%"></span>
+            <span class="pt" style="left:49.97%;top:50.0%"></span>
+            <span class="pt" style="left:56.16%;top:48.96%"></span>
+            <span class="pt" style="left:39.9%;top:36.65%"></span>
+            <span class="pt" style="left:26.39%;top:54.42%"></span>
+            <span class="pt" style="left:33.8%;top:61.33%"></span>
+            <span class="pt" style="left:74.79%;top:72.93%"></span>
+            <span class="pt" style="left:49.13%;top:44.47%"></span>
+            <span class="pt" style="left:87.06%;top:50.36%"></span>
+            <span class="pt" style="left:29.25%;top:47.69%"></span>
+            <span class="pt" style="left:49.98%;top:44.26%"></span>
+            <span class="pt" style="left:78.85%;top:11.09%"></span>
+            <span class="pt" style="left:51.47%;top:57.83%"></span>
+            <span class="pt" style="left:49.43%;top:49.5%"></span>
+            <span class="pt" style="left:102.45%;top:30.35%"></span>
+            <span class="pt" style="left:32.55%;top:92.74%"></span>
+            <span class="pt" style="left:55.12%;top:40.8%"></span>
+            <span class="pt" style="left:83.39%;top:64.59%"></span>
+            <span class="pt" style="left:53.49%;top:57.66%"></span>
+            <span class="pt" style="left:50.08%;top:49.84%"></span>
+            <span class="pt" style="left:6.51%;top:85.6%"></span>
+            <span class="pt" style="left:40.75%;top:32.45%"></span>
+            <span class="pt" style="left:49.73%;top:51.72%"></span>
+            <span class="pt" style="left:43.75%;top:97.98%"></span>
+            <span class="pt" style="left:42.31%;top:35.18%"></span>
+            <span class="pt" style="left:30.91%;top:71.22%"></span>
+            <span class="pt" style="left:52.19%;top:51.23%"></span>
+            <span class="pt" style="left:38.25%;top:74.64%"></span>
+            <span class="pt" style="left:51.32%;top:49.02%"></span>
+            <span class="pt" style="left:49.73%;top:47.81%"></span>
+            <span class="pt" style="left:58.77%;top:104.51%"></span>
+            <span class="pt" style="left:93.61%;top:27.35%"></span>
+            <span class="pt" style="left:50.12%;top:47.04%"></span>
+            <span class="pt" style="left:30.6%;top:51.14%"></span>
+            <span class="pt" style="left:42.76%;top:46.82%"></span>
+            <span class="pt" style="left:43.97%;top:36.5%"></span>
+            <span class="pt" style="left:37.7%;top:53.67%"></span>
+            <span class="pt" style="left:50.05%;top:49.61%"></span>
+            <span class="pt" style="left:40.31%;top:37.61%"></span>
+            <span class="pt" style="left:90.2%;top:86.75%"></span>
+            <span class="pt" style="left:2.95%;top:52.15%"></span>
+            <span class="pt" style="left:48.53%;top:54.42%"></span>
+            <span class="pt" style="left:71.53%;top:41.8%"></span>
+            <span class="pt" style="left:50.5%;top:41.61%"></span>
+            <span class="pt" style="left:47.85%;top:51.12%"></span>
+            <span class="pt" style="left:16.47%;top:55.48%"></span>
+            <span class="pt" style="left:94.54%;top:53.95%"></span>
+            <span class="pt" style="left:51.14%;top:51.49%"></span>
+            <span class="pt" style="left:14.67%;top:73.82%"></span>
+            <span class="pt" style="left:44.58%;top:78.78%"></span>
+            <span class="pt" style="left:39.19%;top:45.65%"></span>
+            <span class="pt" style="left:45.43%;top:15.24%"></span>
+            <span class="pt" style="left:41.36%;top:28.33%"></span>
+            <span class="pt" style="left:57.93%;top:55.92%"></span>
+            <span class="pt" style="left:48.02%;top:55.87%"></span>
+            <span class="pt" style="left:22.61%;top:36.14%"></span>
+            <span class="pt" style="left:62.83%;top:47.68%"></span>
+            <span class="pt" style="left:47.26%;top:51.22%"></span>
+            <span class="pt" style="left:49.86%;top:48.16%"></span>
+            <span class="pt" style="left:54.74%;top:50.64%"></span>
+            <span class="pt" style="left:41.8%;top:46.79%"></span>
+            <span class="pt" style="left:48.03%;top:51.82%"></span>
+            <span class="pt" style="left:50.0%;top:50.0%"></span>
+            <span class="pt" style="left:65.33%;top:70.05%"></span>
+            <span class="pt" style="left:32.42%;top:47.64%"></span>
+            <span class="pt" style="left:70.54%;top:76.18%"></span>
+            <span class="pt" style="left:29.51%;top:39.67%"></span>
+            <span class="pt" style="left:60.25%;top:67.09%"></span>
+            <span class="pt" style="left:28.39%;top:33.95%"></span>
+            <span class="pt" style="left:29.56%;top:86.18%"></span>
+            <span class="pt" style="left:48.45%;top:95.21%"></span>
+            <span class="pt" style="left:20.57%;top:9.44%"></span>
+            <span class="pt" style="left:87.53%;top:76.27%"></span>
+            <span class="pt" style="left:67.28%;top:59.49%"></span>
+            <span class="pt" style="left:53.81%;top:46.31%"></span>
+            <span class="pt" style="left:47.61%;top:45.3%"></span>
+            <span class="pt" style="left:2.87%;top:35.1%"></span>
+            <span class="pt is-out" style="left:8%;top:16%"></span>
+            <span class="pt is-out" style="left:91%;top:22%"></span>
+            <span class="pt is-out" style="left:13%;top:84%"></span>
+            <span class="pt is-out" style="left:88%;top:79%"></span>
+            <span class="pt is-out" style="left:50%;top:6%"></span>
+            <span class="pt is-out" style="left:95%;top:50%"></span>
+            <span class="pt is-out" style="left:6%;top:55%"></span>
+          </div>
+          <div id="fo-side">
+            <div class="eyebrow">Model 1 &middot; scikit-learn</div>
+            <div id="fo-name" class="display" style="margin-top:22px;font-size:58px">Isolation Forest</div>
+            <div id="fo-desc" class="say" style="margin-top:26px;font-size:32px">Learns what a normal sanction looks like for a sector and district, and isolates the works that sit outside it.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section id="s-bert" class="clip dark" data-start="62.943" data-duration="12.098">
+        <div class="stack">
+          <div id="bt-title" class="eyebrow">Model 2 &middot; sentence-transformers</div>
+          <div id="bt-name" class="display" style="margin-top:20px;font-size:58px">Sentence-BERT</div>
+          <div style="display:flex;align-items:center;margin-top:46px">
+            <div class="desc" id="bt-a">Construction of CC road from main road to school in ward 4</div>
+            <div id="bt-mid">
+              <div>
+                <div id="bt-score" class="figure">0.94</div>
+                <div class="eyebrow" style="text-align:center;margin-top:10px">cosine</div>
+              </div>
+            </div>
+            <div class="desc" id="bt-b">Construction of C.C. road from main road to school, ward no. 4</div>
+          </div>
+          <div id="bt-note" class="say" style="margin-top:40px;font-size:30px">Threshold measured on this data &mdash; the foot of the genuine near-duplicate tail.</div>
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section id="s-gemini" class="clip dark" data-start="75.041" data-duration="11.287">
+        <div class="wrap">
+          <div id="gm-title" class="eyebrow">Model 3 &middot; <span class="ai-word">AI powered</span> &middot; gemini-flash-lite</div>
+          <div id="gm-name" class="display" style="margin-top:20px;font-size:56px">It labels. It never judges.</div>
+          <div style="margin-top:40px">
+            <div class="lab" id="gl-1">
+              <div class="lab-src">Muktidham Nirman</div>
+              <div class="lab-ar">&rarr;</div>
+              <div class="lab-out">Religious &amp; Cultural</div>
+            </div>
+            <div class="lab" id="gl-2">
+              <div class="lab-src">Nala nirman ward 12</div>
+              <div class="lab-ar">&rarr;</div>
+              <div class="lab-out">Drainage</div>
+            </div>
+            <div class="lab" id="gl-3">
+              <div class="lab-src">Vividh karya</div>
+              <div class="lab-ar">&rarr;</div>
+              <div class="lab-out is-abstain">Other</div>
+            </div>
+          </div>
+          <div id="gm-note" class="say" style="margin-top:34px;font-size:29px">Chosen because it can abstain. No model output ever becomes a risk number.</div>
+        </div>
+      </section>
+
+      <!-- 8 -->
+      <section id="s-detectors" class="clip light" data-start="86.328" data-duration="11.309">
+        <div class="wrap">
+          <div id="dt-title" class="eyebrow">Cohort detectors &mdash; about agencies and members, never a single work</div>
+          <div id="dt-grid">
+            <div class="dcard" id="dc-1">
+              <div class="dcode">D-01</div>
+              <div class="dname">Year-end payment burst</div>
+              <div class="ddesc">An agency paying most of its invoices in March</div>
+            </div>
+            <div class="dcard" id="dc-2">
+              <div class="dcode">D-02</div>
+              <div class="dname">First-digit anomaly</div>
+              <div class="ddesc">Leading digits that diverge from the agency's peers</div>
+            </div>
+            <div class="dcard" id="dc-3">
+              <div class="dcode">D-03</div>
+              <div class="dname">Idle allocation</div>
+              <div class="ddesc">A member's funds never committed to any work</div>
+            </div>
+            <div class="dcard" id="dc-4">
+              <div class="dcode">D-04</div>
+              <div class="dname">Uniform sanction amount</div>
+              <div class="ddesc">The same round figure, again and again</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section id="s-queue" class="clip light" data-start="97.637" data-duration="8.898">
+        <div class="stack">
+          <div id="qu-title" class="eyebrow">What reaches a desk</div>
+          <div id="qu-wrap">
+            <div class="fcol" id="qc-1"><div class="ffig figure">2,50,839</div><div class="flab">Works scored</div></div>
+            <div class="fcol" id="qc-2"><div class="ffig figure">48,296</div><div class="flab">Worth a look</div></div>
+            <div class="fcol" id="qc-3"><div class="ffig figure is-risk">2,316</div><div class="flab">High risk</div></div>
+          </div>
+          <div id="qu-note" class="say" style="margin-top:56px">A morning&rsquo;s work, instead of a year&rsquo;s.</div>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section id="s-why" class="clip dark" data-start="106.535" data-duration="8.877">
+        <div style="width:1280px">
+          <div><span id="wy-badge"><span class="ai-dot"></span><span class="ai-word">AI powered</span><span>&middot; gemini-flash-lite</span></span></div>
+          <h2 id="wy-head" class="display">Why was this flagged?</h2>
+          <div style="margin-top:44px">
+            <div class="reason" id="wr-1">
+              <div class="reason-text">298% above the median for this sector and district</div>
+              <div class="reason-method">Peer comparison</div>
+            </div>
+            <div class="reason" id="wr-2">
+              <div class="reason-text">100% similarity with another nearby work</div>
+              <div class="reason-method">AI &middot; Sentence-BERT embeddings</div>
+            </div>
+            <div class="reason" id="wr-3">
+              <div class="reason-text">191 days beyond expected completion</div>
+              <div class="reason-method">Published dates</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section id="s-refresh" class="clip light" data-start="115.412" data-duration="4.823">
+        <div class="wrap">
+          <div id="rf-title" class="eyebrow">Every night, 01:00 IST</div>
+          <div id="rf-steps">
+            <div class="step" id="st-1">
+              <div class="step-n">1</div>
+              <div class="step-name">Load</div>
+              <div class="step-sub">250,839 works</div>
+            </div>
+            <div class="step" id="st-2">
+              <div class="step-n">2</div>
+              <div class="step-name">Label</div>
+              <div class="step-sub">new sectors</div>
+            </div>
+            <div class="step" id="st-3">
+              <div class="step-n">3</div>
+              <div class="step-name">Score</div>
+              <div class="step-sub">five components</div>
+            </div>
+            <div class="step" id="st-4">
+              <div class="step-n">4</div>
+              <div class="step-name">Reconcile</div>
+              <div class="step-sub">against MoSPI</div>
+            </div>
+          </div>
+          <div id="rf-note">Scores are swapped in one transaction, so a reader never sees a half-empty table.</div>
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section id="s-limits" class="clip dark" data-start="120.235" data-duration="16.747">
+        <div class="stack">
+          <div id="lm-title" class="eyebrow">What it will not tell you</div>
+          <div style="margin-top:34px">
+            <div class="np" id="np-1"><span class="np-x">not published</span>Progress percentage</div>
+            <div class="np" id="np-2"><span class="np-x">not published</span>Beneficiary count</div>
+            <div class="np" id="np-3"><span class="np-x">not published</span>Geo-tag</div>
+            <div class="np" id="np-4"><span class="np-x">not published</span>Bill value</div>
+          </div>
+          <div id="lm-l1">A kasauti says which pieces are worth assaying.</div>
+          <div id="lm-l2">Never which are false.</div>
+          <div id="lm-mark">
+            <div id="lm-logo" data-layout-allow-overflow="true">
+              <span class="slash a"></span><span class="slash b"></span>
+            </div>
+            <div id="lm-name">Kasauti</div>
+          </div>
+          <div id="lm-sub">SIH26102 &middot; MoSPI</div>
+        </div>
+      </section>
+
+      <!-- narration, one file per scene -->
+      <audio id="vo-problem" src="assets/vo/01-problem.mp3" data-start="0.0" data-duration="11.477" data-volume="1"></audio>
+      <audio id="vo-what" src="assets/vo/02-what.mp3" data-start="11.927" data-duration="8.299" data-volume="1"></audio>
+      <audio id="vo-provenance" src="assets/vo/03-provenance.mp3" data-start="20.676" data-duration="18.197" data-volume="1"></audio>
+      <audio id="vo-score" src="assets/vo/04-score.mp3" data-start="39.323" data-duration="12.245" data-volume="1"></audio>
+      <audio id="vo-forest" src="assets/vo/05-forest.mp3" data-start="52.018" data-duration="10.475" data-volume="1"></audio>
+      <audio id="vo-bert" src="assets/vo/06-bert.mp3" data-start="62.943" data-duration="11.648" data-volume="1"></audio>
+      <audio id="vo-gemini" src="assets/vo/07-gemini.mp3" data-start="75.041" data-duration="10.837" data-volume="1"></audio>
+      <audio id="vo-detectors" src="assets/vo/08-detectors.mp3" data-start="86.328" data-duration="10.859" data-volume="1"></audio>
+      <audio id="vo-queue" src="assets/vo/09-queue.mp3" data-start="97.637" data-duration="8.448" data-volume="1"></audio>
+      <audio id="vo-why" src="assets/vo/10-why.mp3" data-start="106.535" data-duration="8.427" data-volume="1"></audio>
+      <audio id="vo-refresh" src="assets/vo/11-refresh.mp3" data-start="115.412" data-duration="4.373" data-volume="1"></audio>
+      <audio id="vo-limits" src="assets/vo/12-limits.mp3" data-start="120.235" data-duration="15.147" data-volume="1"></audio>
+      <audio id="bed" src="assets/music/bed.mp3" data-start="0" data-duration="136.982" data-volume="0.1"></audio>
+    </div>
+
+    <script>
+      function formatIN(n) {
+        const s = Math.round(n).toString();
+        if (s.length <= 3) return s;
+        const last3 = s.slice(-3), rest = s.slice(0, -3);
+        return rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + last3;
+      }
+
+      function build() {
+        const tl = gsap.timeline({ paused: true });
+        // Entrances are always `from`, never a CSS transform plus a tween on
+        // the same property - that pairing is a lint error and the two start
+        // values fight.
+        const rise = (t, at, o) => tl.from(t, Object.assign(
+          { y: 30, opacity: 0, duration: 0.55, ease: "power3.out" }, o || {}), at);
+        const seq = (sel, at, step, o) =>
+          gsap.utils.toArray(sel).forEach((el, i) => rise(el, at + i * step, o));
+
+        // 1 problem
+        rise("#s-problem .eyebrow", 0.1, { y: 16 });
+        const c = { v: 0 }, cEl = document.getElementById("pb-count");
+        tl.to(c, { v: 250839, duration: 2.1, ease: "power2.out",
+          onUpdate: () => { cEl.textContent = formatIN(c.v); } }, 0.35);
+        tl.from("#pb-count", { opacity: 0, duration: 0.4 }, 0.35);
+        rise("#pb-money", 3.1, { y: 20 });
+        rise("#pb-line", 5.6, { y: 22, duration: 0.7 });
+
+        // 2 what
+        rise("#wh-eyebrow", 12.127, { y: 16 });
+        rise("#wh-head", 12.627, { y: 38, duration: 0.75 });
+        rise("#wh-sub", 15.327, { y: 20 });
+
+        // 3 provenance
+        rise("#pv-title", 20.826, { y: 14 });
+        rise("#pv-n1", 21.476, { y: 26 });
+        rise("#pv-a1", 26.076, { y: 0, duration: 0.4 });
+        rise("#pv-n2", 26.576, { y: 26 });
+        rise("#pv-a2", 31.476, { y: 0, duration: 0.4 });
+        rise("#pv-n3", 31.976, { y: 26 });
+        rise("#pv-note", 35.276, { y: 18 });
+
+        // 4 score - one row per named component, as the line names them
+        rise("#sc-title", 39.473, { y: 14 });
+        [0, 1, 2, 3, 4].forEach((i) => {
+          const row = "#sc-r" + (i + 1), t = 40.823 + i * 1.25;
+          rise(row, t, { y: 22, duration: 0.45 });
+          tl.fromTo(row + " .bar-fill", { scaleX: 0 },
+            { scaleX: Number(document.querySelector(row + " .bar-fill").dataset.w),
+               duration: 0.55, ease: "power2.out" }, t + 0.1);
+        });
+        seq("#sc-bands .band", 47.923, 0.3, { y: 18, duration: 0.5 });
+
+        // 5 forest - the population settles first, then what it isolates
+        rise("#fo-plot", 52.168, { y: 24, duration: 0.6 });
+        rise("#fo-side .eyebrow", 52.418, { y: 14 });
+        rise("#fo-name", 52.818, { y: 24 });
+        rise("#fo-desc", 53.418, { y: 20 });
+        tl.from("#fo-plot .pt:not(.is-out)", { opacity: 0, duration: 0.5,
+          stagger: { each: 0.012, from: "random" }, ease: "power1.out" }, 53.018);
+        tl.from("#fo-plot .pt.is-out", { opacity: 0, scale: 0.3, duration: 0.5,
+          stagger: 0.12, ease: "power3.out" }, 58.218);
+
+        // 6 bert
+        rise("#bt-title", 63.093, { y: 14 });
+        rise("#bt-name", 63.443, { y: 22 });
+        rise("#bt-a", 64.543, { y: 24 });
+        rise("#bt-b", 65.243, { y: 24 });
+        rise("#bt-mid", 67.543, { y: 0, scale: 0.9, duration: 0.6 });
+        rise("#bt-note", 70.343, { y: 18 });
+
+        // 7 gemini
+        rise("#gm-title", 75.191, { y: 14 });
+        rise("#gm-name", 75.541, { y: 24 });
+        seq(".lab", 76.641, 1.1, { y: 22, duration: 0.5 });
+        rise("#gm-note", 81.441, { y: 18 });
+
+        // 8 detectors - one card per line of the list
+        rise("#dt-title", 86.478, { y: 14 });
+        seq(".dcard", 88.928, 1.35, { y: 26, duration: 0.5 });
+
+        // 9 queue
+        rise("#qu-title", 97.787, { y: 14 });
+        rise("#qc-1", 98.237, { y: 26 });
+        rise("#qc-2", 98.937, { y: 26 });
+        rise("#qc-3", 100.737, { y: 26, duration: 0.6 });
+        rise("#qu-note", 102.837, { y: 18 });
+
+        // 10 why
+        rise("#wy-badge", 106.685, { y: 14 });
+        rise("#wy-head", 107.135, { y: 26 });
+        seq(".reason", 108.535, 1.5, { y: 22, duration: 0.5 });
+
+        // 11 refresh
+        rise("#rf-title", 115.512, { y: 14 });
+        seq(".step", 116.112, 0.62, { y: 22, duration: 0.5 });
+        rise("#rf-note", 118.712, { y: 16 });
+
+        // 12 limits
+        rise("#lm-title", 120.385, { y: 14 });
+        seq(".np", 121.635, 0.85, { y: 18, duration: 0.45 });
+        rise("#lm-l1", 128.635, { y: 22, duration: 0.6 });
+        rise("#lm-l2", 130.135, { y: 24, duration: 0.6 });
+        rise("#lm-mark", 132.635, { y: 24, duration: 0.6 });
+        rise("#lm-sub", 133.335, { y: 14, duration: 0.5 });
+
+        // Music sits far under the narration - it is a floor, not a bed.
+        const bed = document.getElementById("bed");
+        tl.fromTo(bed, { volume: 0 }, { volume: 0.1, duration: 1.2 }, 0);
+        tl.to(bed, { volume: 0.16, duration: 2 }, 128.235);
+        tl.to(bed, { volume: 0, duration: 2.2 }, 134.58);
+
+        window.__timelines["main"] = tl;
+      }
+
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+      else build();
+    </script>
+  </body>
+</html>

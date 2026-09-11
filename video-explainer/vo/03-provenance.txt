@@ -1,0 +1,1 @@
+The problem statement names the MoSPI portal. It publishes totals openly, but individual works only behind an O T P gated form. So we load the same record from Empowered Indian, and reconcile against MoSPI's own endpoints every night.
