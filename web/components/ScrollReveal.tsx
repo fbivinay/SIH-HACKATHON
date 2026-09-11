@@ -38,6 +38,22 @@ export default function ScrollReveal() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!CSS.supports("animation-timeline: view()")) return;
 
+    // Where a block sits in the layout, ignoring transforms. Not
+    // getBoundingClientRect: that reports the box as drawn, and every one of
+    // these blocks is drawn 104px low and scaled down while its first-paint
+    // animation waits behind the loading cover (`both` fill applies the from
+    // state through the delay). Measured that way, a row sitting at 599px was
+    // read as 765px, marked as below the fold, and then sat at 61% opacity in
+    // the first viewport for as long as nobody scrolled. offsetTop is a layout
+    // value; the zoom factor puts it in the same units as innerHeight.
+    const layoutTop = (el: HTMLElement) => {
+      let y = 0;
+      for (let n: Element | null = el; n instanceof HTMLElement; n = n.offsetParent) {
+        y += n.offsetTop;
+      }
+      return y * (el.currentCSSZoom ?? 1) - window.scrollY;
+    };
+
     const mark = () => {
       const fold = window.innerHeight;
       document.querySelectorAll<HTMLElement>(REVEALABLE).forEach((el) => {
@@ -52,14 +68,14 @@ export default function ScrollReveal() {
         // Add only, never remove. Running this more than once is the point
         // (see below), and un-marking a block the reader has since scrolled
         // past would make it re-animate under them.
-        if (el.getBoundingClientRect().top > fold * 0.92) {
+        if (layoutTop(el) > fold * 0.92) {
           el.setAttribute("data-reveal", "");
         }
       });
     };
 
     // Marked more than once, because one measurement is not enough to trust.
-    // Hydration now happens behind a two-second cover and before the webfont
+    // Hydration now happens behind a three-second cover and before the webfont
     // has swapped, and both move the layout - a block measured above the fold
     // at hydration can be well below it by the time anyone sees the page, and
     // would then sit there never having animated. Measuring again when the
@@ -67,7 +83,7 @@ export default function ScrollReveal() {
     // a few dozen elements and removes the whole class of mistake.
     const frame = requestAnimationFrame(mark);
     document.fonts?.ready.then(mark);
-    const afterSplash = window.setTimeout(mark, 2400);
+    const afterSplash = window.setTimeout(mark, 3600);
 
     return () => {
       cancelAnimationFrame(frame);

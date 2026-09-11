@@ -82,7 +82,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Logo size={37} />
               <span className="wordmark__text">
                 Kasauti
-                <span className="wordmark__sub">MPLADS verification</span>
+                <span className="wordmark__sub">AI-powered MPLADS verification</span>
               </span>
             </Link>
             <NavLinks links={navLinks} />
