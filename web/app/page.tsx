@@ -135,37 +135,16 @@ export default async function OverviewPage({
     <main>
       <section className="shell page-head">
         <h1 className="display display--hero">
-          Every MPLADS work,
-          <br />
-          checked against its peers.
+          Every MPLADS work, checked against its peers.
         </h1>
+        {/* Shorter than it was: the long version pushed the figures this page
+            exists for below the fold, and the detail it carried is on /provenance
+            and the work pages where a reader can act on it. */}
         <p className="lede">
           {formatCount(data.total_projects)} works across every district in India, scored on
-          cost, delay, duplication, the implementing agency and the scheme&rsquo;s own rules.
-          The ones that do not fit come out ranked, with the record that flagged them.
+          cost, delay, duplication, the agency and the scheme&rsquo;s own rules.
         </p>
 
-        <nav className="mt-6 flex flex-wrap justify-center gap-2" aria-label="Lok Sabha term">
-          {TERMS.map((t) => (
-            <Link
-              key={t.value || "all"}
-              href={t.value ? `/?ls_term=${t.value}` : "/?ls_term="}
-              className="review-btn"
-              aria-current={term === t.value ? "true" : undefined}
-              style={term === t.value ? { color: "var(--ink)", borderColor: "var(--ink)" } : undefined}
-            >
-              {t.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="mt-8 flex flex-wrap justify-center gap-2.5">
-          <Link href="/alerts" className="btn btn--solid">
-            Open the verification queue
-          </Link>
-          <Link href="/projects" className="btn btn--quiet">
-            Browse every work
-          </Link>
-        </div>
       </section>
 
       <section className="shell">
@@ -178,11 +157,31 @@ export default async function OverviewPage({
             </span>
           </div>
         )}
-        <p className="mb-3 text-[0.8rem]" style={{ color: "var(--ink-3)" }}>
-          {scope.label}
-          {scope.note ? ` (${scope.note})` : ""} — figures below cover this scope only, so
-          they line up with the same view on the source&rsquo;s own dashboard.
-        </p>
+        {/* The term switcher sits with the figures it filters rather than in the
+            hero, where it cost 66px of the fold and explained nothing. */}
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          {/* flex-1 min-w-0 so the sentence wraps inside its own column instead of
+              pushing the term buttons onto a second row, which cost a whole
+              card-row of the fold at 1280. */}
+          <p className="flex-1 min-w-0 text-[0.8rem]" style={{ color: "var(--ink-3)" }}>
+            {scope.label}
+            {scope.note ? ` (${scope.note})` : ""} — figures cover this scope only, matching
+            the same view on the source&rsquo;s dashboard.
+          </p>
+          <nav className="flex flex-none flex-wrap gap-2" aria-label="Lok Sabha term">
+            {TERMS.map((t) => (
+              <Link
+                key={t.value || "all"}
+                href={t.value ? `/?ls_term=${t.value}` : "/?ls_term="}
+                className="review-btn"
+                aria-current={term === t.value ? "true" : undefined}
+                style={term === t.value ? { color: "var(--ink)", borderColor: "var(--ink)" } : undefined}
+              >
+                {t.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {stats.map((s) => (
             <div key={s.label} className={`stat-card${s.tone ? ` stat-card--${s.tone}` : ""}`}>

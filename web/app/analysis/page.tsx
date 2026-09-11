@@ -70,12 +70,12 @@ export default async function AnalysisPage({
           <thead>
             <tr>
               <th>Agency</th>
-              <th className="text-right">Works</th>
-              <th className="text-right">Delayed</th>
-              <th className="text-right">Anomalies</th>
-              <th className="text-right">Vendors</th>
-              <th className="text-right">Top vendor share</th>
-              <th className="text-right">Avg Risk</th>
+              <th className="num">Works</th>
+              <th className="num">Delayed</th>
+              <th className="num">Anomalies</th>
+              <th className="num">Vendors</th>
+              <th className="num">Top vendor share</th>
+              <th className="num">Avg Risk</th>
               <th>Level</th>
             </tr>
           </thead>
@@ -163,7 +163,7 @@ export default async function AnalysisPage({
                 <th className="num">Never committed</th>
                 <th className="num">Awaiting payment</th>
                 <th className="num">Utilisation</th>
-                <th className="text-right">Works</th>
+                <th className="num">Works</th>
               </tr>
             </thead>
             <tbody>

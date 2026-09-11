@@ -17,8 +17,11 @@ number destroys that, and nobody downstream can tell which number it was.
 
 - **Never invent a field the source does not publish.** MPLADS publishes no
   progress percentage, beneficiary count, geo-tag, or bill value. If a screen
-  seems to want one, the answer is to say it is not published — `/compliance`
-  has a blind-spots section for exactly this.
+  seems to want one, the answer is to say it is not published. The blind-spot
+  list lives in `COMPLIANCE_BLIND_SPOTS` in `api/main.py` and is still served by
+  `/api/compliance`; the page that rendered it was removed from the interface,
+  so add new limits there and give them a home on `/provenance` if they need to
+  be seen.
 - **Never invent a guideline clause number.** The MPLADS guidelines are not in
   this repository. `basis` on each compliance rule says what the rule rests on
   in words; "clause 3.12.1" would look authoritative and be fiction.

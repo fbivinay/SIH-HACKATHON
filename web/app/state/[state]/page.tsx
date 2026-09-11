@@ -323,14 +323,7 @@ export default async function StateDeskPage({
                   </li>
                 ))}
               </ul>
-              {/* /api/detectors/findings has no state parameter - a finding
-                  belongs to an agency or a member, not a place - so a state
-                  query string here promised a scope the page could not honour
-                  and silently showed every state's signals. Link unscoped and
-                  say so. */}
-              <Link href="/signals" className="link-quiet">
-                All signals, nationally →
-              </Link>
+
             </>
           ) : null}
         </div>

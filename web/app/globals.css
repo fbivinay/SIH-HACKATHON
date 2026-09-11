@@ -48,6 +48,23 @@
   --risk-pending: #6b6b74;
   --risk-pending-bg: #eeeef0;
 
+  /* Glass. A translucent pane only reads as glass if there is something behind
+     it to refract, so `body` carries a faint two-point wash (below) and these
+     surfaces let it through. Kept to two levels: the pane most cards sit on,
+     and a slightly denser one for bars that overlap scrolling content. */
+  --glass: rgba(255, 255, 255, 0.62);
+  --glass-strong: rgba(255, 255, 255, 0.78);
+  --glass-line: rgba(255, 255, 255, 0.75);
+  --glass-blur: 14px;
+  --glass-shadow: 0 1px 2px rgba(11, 11, 12, 0.04), 0 8px 24px -12px rgba(11, 11, 12, 0.10);
+  --glass-shadow-lift: 0 2px 4px rgba(11, 11, 12, 0.05), 0 16px 36px -14px rgba(11, 11, 12, 0.16);
+
+  /* One easing and two durations for the whole interface, so nothing moves at
+     a speed nothing else moves at. */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-fast: 130ms;
+  --t-base: 240ms;
+
   --radius-slab: 28px;
   --radius-card: 18px;
   --radius-control: 10px;
@@ -63,6 +80,11 @@
 }
 
 @media (prefers-color-scheme: dark) {
+  body {
+    background-image:
+      radial-gradient(ellipse 78rem 40rem at 12% -8%, rgba(242, 105, 92, 0.06), transparent 62%),
+      radial-gradient(ellipse 64rem 36rem at 92% 4%, rgba(76, 195, 138, 0.05), transparent 60%);
+  }
   :root {
     color-scheme: dark;
 
@@ -92,6 +114,16 @@
     --risk-high-bg: rgba(242, 105, 92, 0.13);
     --risk-pending: #8a8a93;
     --risk-pending-bg: rgba(138, 138, 147, 0.13);
+
+    /* Glass on a dark ground is a lightened pane, not a darkened one: the same
+       white at 62% would wash the page out, so these are near-surface values
+       with just enough lift to separate. The shadow goes deeper because a soft
+       grey shadow is invisible against near-black. */
+    --glass: rgba(30, 30, 34, 0.62);
+    --glass-strong: rgba(26, 26, 30, 0.80);
+    --glass-line: rgba(255, 255, 255, 0.07);
+    --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.32), 0 8px 24px -12px rgba(0, 0, 0, 0.55);
+    --glass-shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 36px -14px rgba(0, 0, 0, 0.7);
   }
 }
 
@@ -141,6 +173,13 @@
 
 body {
   background: var(--ground);
+  /* Two very faint radial washes. At 3-4% they are invisible as colour and
+     only show up as depth under a translucent pane - which is the point.
+     Fixed, so they do not slide around as the page scrolls. */
+  background-image:
+    radial-gradient(ellipse 78rem 40rem at 12% -8%, rgba(168, 46, 34, 0.045), transparent 62%),
+    radial-gradient(ellipse 64rem 36rem at 92% 4%, rgba(22, 112, 74, 0.035), transparent 60%);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
@@ -377,7 +416,7 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 /* ---------------------------------------------------------- page headings - */
 
 .page-head {
-  padding-block: 3.5rem 2rem;
+  padding-block: 1.6rem 1.1rem;
   text-align: center;
 }
 
@@ -389,8 +428,13 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   text-wrap: balance;
 }
 
+/* Was clamp(2.9rem, 7.4vw, 5rem), which pushed every figure below the fold on
+   a laptop - the headline filled the screen and the numbers the page exists for
+   needed a scroll. Sized so the headline, the lede and the first row of figures
+   all land above the fold at 1440x900 with the 1.33 zoom applied. */
 .display--hero {
-  font-size: clamp(2.9rem, 7.4vw, 5rem);
+  font-size: clamp(1.95rem, 3.8vw, 2.7rem);
+  letter-spacing: -0.032em;
 }
 
 .section-head {
@@ -404,7 +448,7 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 /* Sentence case, no tracking, no uppercase: this is a sentence that explains
    the heading above it, not a label stamped on top of it. */
 .lede {
-  margin-top: 0.9rem;
+  margin-top: 0.7rem;
   margin-inline: auto;
   max-width: 44rem;
   font-size: 0.95rem;
@@ -446,21 +490,41 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 /* ------------------------------------------------------------------ card -- */
 
 .card {
-  background: var(--surface);
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(1.5) blur(var(--glass-blur));
+  backdrop-filter: saturate(1.5) blur(var(--glass-blur));
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   padding: 1.25rem 1.35rem;
+  box-shadow: var(--glass-shadow);
+  transition: box-shadow var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease),
+              border-color var(--t-base) var(--ease);
 }
 
 /* ------------------------------------------------------------- stat card -- */
 
 .stat-card {
   container-type: inline-size;
-  background: var(--surface);
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(1.5) blur(var(--glass-blur));
+  backdrop-filter: saturate(1.5) blur(var(--glass-blur));
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  padding: 1.1rem 1.25rem 1.2rem;
+  padding: 0.85rem 1.05rem 0.9rem;
   min-width: 0;
+  box-shadow: var(--glass-shadow);
+  transition: box-shadow var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease),
+              border-color var(--t-base) var(--ease);
+}
+/* A figure lifts slightly when pointed at - enough to feel responsive, not
+   enough to shift the layout. Cards that are not links stay put. */
+a.stat-card:hover,
+a.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-lift);
+  border-color: var(--line-strong);
 }
 
 .slab .stat-card {
@@ -478,14 +542,14 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 }
 
 .stat-card__value {
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
   /* The UI face, not the mono one. Geist Mono gives every glyph the same
      advance, so at this size a grouped Indian figure reads as "48 , 687" -
      the comma sits in its own column. tabular-nums keeps the digits aligned
      without paying for that. */
   font-family: var(--font-ui);
   font-variant-numeric: tabular-nums;
-  font-size: 1.9rem;
+  font-size: 1.6rem;
   line-height: 1.1;
   letter-spacing: -0.02em;
   font-weight: 600;
@@ -505,9 +569,9 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 }
 
 .stat-card__note {
-  margin-top: 0.4rem;
-  font-size: 0.78rem;
-  line-height: 1.45;
+  margin-top: 0.28rem;
+  font-size: 0.74rem;
+  line-height: 1.4;
   color: var(--ink-3);
 }
 
@@ -577,9 +641,12 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 /* ----------------------------------------------------------------- table -- */
 
 .data-table-wrap {
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(1.5) blur(var(--glass-blur));
+  backdrop-filter: saturate(1.5) blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  background: var(--surface);
   overflow: auto;
 }
 
@@ -591,16 +658,20 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 
 .data-table thead th {
   position: sticky;
-  /* Clears the bar rather than sticking at 0, where it would pin underneath it.
-     Note this is inert today: .data-table-wrap sets overflow-x, which makes it
-     the scroll container, so the header sticks within a box that never scrolls
-     vertically instead of to the viewport. Keeping the honest value means the
-     header lands in the right place if that structure is ever changed, rather
-     than appearing halfway up the page. */
-  top: var(--topbar-h);
+  /* Deliberately 0, not the topbar height.
+     .data-table-wrap sets overflow, which makes IT the scrolling ancestor, so
+     this offset is measured from the top of the wrap and not from the viewport.
+     Setting it to the bar's height pushed the header 114px down into the table
+     and parked it across the first row. Sticky headers cannot reach the
+     viewport while the wrap owns the scroll, and the wrap has to own it so wide
+     tables scroll inside themselves rather than dragging the page sideways. So
+     this stays 0, where it is simply the header in its natural place. */
+  top: 0;
   z-index: 1;
   text-align: left;
-  background: var(--surface-2);
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: saturate(1.6) blur(10px);
+  backdrop-filter: saturate(1.6) blur(10px);
   font-size: 0.76rem;
   font-weight: 500;
   color: var(--ink-2);
@@ -637,13 +708,23 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 
 /* The row's position in the queue. Meaningful here — the queue is ranked, so
    the number is the rank, not decoration. */
-.data-table td.rank {
+/* The header has to be selected as specifically as `.data-table thead th`, or
+   it loses on specificity and silently falls back to left - which is exactly
+   how eight numeric columns ended up with left-aligned headers sitting over
+   right-aligned figures. */
+.data-table td.rank,
+.data-table thead th.rank {
   font-family: var(--font-data);
   font-variant-numeric: tabular-nums;
-  color: var(--ink-3);
-  font-size: 0.78rem;
   text-align: right;
   width: 3rem;
+}
+.data-table td.rank {
+  color: var(--ink-3);
+  font-size: 0.78rem;
+}
+.data-table thead th.rank {
+  font-family: var(--font-ui);
 }
 
 .cell-sub {
@@ -1383,4 +1464,83 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 @media (max-width: 640px) {
   .ticker__label, .ticker__all { display: none; }
   .ticker__name { max-width: 18ch; }
+}
+
+/* ------------------------------------------------------------- motion -- */
+/*
+ * One easing, two durations, applied to the things a pointer or a keyboard
+ * actually touches. Deliberately not a blanket `* { transition: all }`: that
+ * animates layout properties too, which is how interfaces end up feeling
+ * rubbery rather than smooth.
+ */
+a,
+button,
+.btn,
+.review-btn,
+.nav__link,
+.link-quiet,
+.filter-input,
+.filter-select,
+.pager__link,
+.risk-pill {
+  transition:
+    color var(--t-fast) var(--ease),
+    background-color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    opacity var(--t-fast) var(--ease),
+    box-shadow var(--t-base) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+
+.data-table tbody tr {
+  transition: background-color var(--t-fast) var(--ease);
+}
+
+/* Focus is the one ring that must never animate in from nothing - a keyboard
+   user needs it the instant it lands. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  transition: none;
+}
+
+/*
+ * Content arrives rather than appearing. One keyframe, staggered down the page
+ * by section, so a load reads as settling instead of flashing.
+ *
+ * `both` holds the opening frame before the animation starts, so nothing is
+ * briefly visible at full opacity first.
+ */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+main > section,
+main > .shell {
+  animation: rise-in 420ms var(--ease) both;
+}
+main > section:nth-of-type(2) { animation-delay: 60ms; }
+main > section:nth-of-type(3) { animation-delay: 110ms; }
+main > section:nth-of-type(4) { animation-delay: 150ms; }
+main > section:nth-of-type(n + 5) { animation-delay: 180ms; }
+
+/* The bar itself never animates in: it is the frame, and a frame that slides
+   about on every navigation is noise. */
+
+/*
+ * Everything above is a courtesy, and a courtesy that cannot be declined is an
+ * imposition. Under reduced motion the interface still changes colour on hover
+ * - that is feedback, not decoration - but nothing moves or fades.
+ */
+@media (prefers-reduced-motion: reduce) {
+  main > section,
+  main > .shell {
+    animation: none;
+  }
+  a, button, .btn, .review-btn, .nav__link, .link-quiet, .risk-pill,
+  .card, .stat-card, .data-table tbody tr {
+    transition-duration: 1ms;
+  }
+  a.stat-card:hover, a.card:hover { transform: none; }
 }
