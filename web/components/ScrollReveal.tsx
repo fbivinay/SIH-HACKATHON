@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 /**
  * Decides which blocks arrive on scroll, and which are simply already there.
@@ -34,19 +34,33 @@ const REVEALABLE = [
 export default function ScrollReveal() {
   const pathname = usePathname();
 
-  // Once, after the loading cover has gone: from here on, every page entrance
-  // is a client navigation with nothing covering it, and globals.css reads
-  // this attribute to drop the entrance delay and shorten the travel. Separate
-  // from the effect below because that one re-runs and cleans up on every
-  // navigation, and a click inside the first few seconds would have cancelled
-  // this before it fired.
+  // Once, after the first-load entrance has finished: from here on, every
+  // page entrance is a client navigation with nothing covering it, and
+  // globals.css reads this attribute to drop the entrance delay and shorten
+  // the travel.
+  //
+  // After it has FINISHED, not after the cover has gone. Setting the attribute
+  // changes --enter-at, which is the animation-delay of every entrance still
+  // running, and a running CSS animation whose delay drops by three seconds
+  // is retimed on the spot: measured, every card snapped from 47px to 0 in
+  // one frame at the moment this landed. The last entrance ends at 3000ms +
+  // 390ms stagger + 960ms, so this waits past that. A navigation before then
+  // sets it early (below) - the old page's elements are gone by the time the
+  // new ones animate, so nothing is retimed under the reader.
   useEffect(() => {
     const t = window.setTimeout(
       () => document.documentElement.setAttribute("data-entered", ""),
-      3400
+      4500
     );
     return () => window.clearTimeout(t);
   }, []);
+
+  const firstPath = useRef(pathname);
+  useEffect(() => {
+    if (pathname !== firstPath.current) {
+      document.documentElement.setAttribute("data-entered", "");
+    }
+  }, [pathname]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

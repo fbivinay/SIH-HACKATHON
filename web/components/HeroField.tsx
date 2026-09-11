@@ -101,7 +101,7 @@ export default function HeroField() {
         const ey = (y / h - 0.45) / 0.6;
         const edge = 1 - Math.min(1, ex * ex + ey * ey);
         if (edge <= 0) continue;
-        ctx.globalAlpha = (0.07 + z * 0.15) * edge;
+        ctx.globalAlpha = Math.min(1, (0.07 + z * 0.15) * edge * inkBoost);
         // A filled square, not an arc: at one to three pixels the eye cannot
         // tell, and a path per point was the whole cost of the frame.
         const r = 1.2 + z * 2;
@@ -110,8 +110,16 @@ export default function HeroField() {
       ctx.globalAlpha = 1;
     };
 
+    // Dark ink on a light ground needs nearly twice the alpha to read as
+    // strongly as light ink on a dark one, so the theme sets a multiplier.
+    // Decided from the colour itself rather than a media query, because the
+    // site also has an explicit theme switch.
+    let inkBoost = 1;
     const readInk = () => {
       ink = getComputedStyle(canvas).color || ink;
+      const m = ink.match(/\d+/g);
+      const lum = m ? (+m[0] * 0.2126 + +m[1] * 0.7152 + +m[2] * 0.0722) / 255 : 0;
+      inkBoost = lum < 0.5 ? 1.9 : 1;
     };
 
     const tick = (now: number) => {
