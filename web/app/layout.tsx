@@ -7,9 +7,8 @@ import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import Logo from "@/components/Logo";
 import NavLinks from "@/components/NavLinks";
-import PointerGlow from "@/components/PointerGlow";
 import RiskTicker from "@/components/RiskTicker";
-import ScrollReveal from "@/components/ScrollReveal";
+import Splash from "@/components/Splash";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const mono = Geist_Mono({
@@ -71,15 +70,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body className="flex min-h-screen flex-col">
-        {/* One delegated pointer listener for the whole document. */}
-        <PointerGlow />
-        {/* Marks the blocks that were below the fold, so only those animate on scroll. */}
-        <ScrollReveal />
+        {/* Client-only: with no JavaScript the page is simply there. */}
+        <Splash />
         <div className="topbar">
         <header className="masthead">
           <div className="shell masthead__inner">
             <Link href="/" className="wordmark">
-              <Logo />
+              <Logo size={37} />
               <span className="wordmark__text">
                 Kasauti
                 <span className="wordmark__sub">MPLADS verification</span>

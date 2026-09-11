@@ -27,15 +27,15 @@
 
   /* Ink */
   --ink: #0b0b0c;
-  --ink-2: #63636b;
-  --ink-3: #9a9aa3;
+  --ink-2: #4a4a52;
+  --ink-3: #6b6b74;
 
   /* The inset dark slab, and what sits on it */
   --slab: #0b0b0c;
   --slab-2: #17171a;
   --slab-line: rgba(255, 255, 255, 0.11);
   --on-slab: #fafafa;
-  --on-slab-2: #9d9da6;
+  --on-slab-2: #b6b6bf;
 
   /* Risk. The only hues in the system. Each has a light-ground and a
      dark-slab variant because a single value cannot hold contrast on both. */
@@ -98,6 +98,9 @@
 
 @media (prefers-color-scheme: dark) {
   body {
+    background: none;
+  }
+  body::before {
     background-image:
       radial-gradient(ellipse 70rem 38rem at 8% -6%, rgba(242, 105, 92, 0.13), transparent 58%),
       radial-gradient(ellipse 58rem 34rem at 96% 2%, rgba(76, 195, 138, 0.10), transparent 56%),
@@ -113,8 +116,8 @@
     --line-strong: #3a3a40;
 
     --ink: #f5f5f6;
-    --ink-2: #9d9da6;
-    --ink-3: #6e6e77;
+    --ink-2: #b8b8c0;
+    --ink-3: #92929c;
 
     /* On a dark page the contrast panel has to go lighter, not darker — the
        slab is defined by standing apart from the ground, not by being black. */
@@ -122,7 +125,7 @@
     --slab-2: #202024;
     --slab-line: rgba(255, 255, 255, 0.09);
     --on-slab: #f5f5f6;
-    --on-slab-2: #9d9da6;
+    --on-slab-2: #b6b6bf;
 
     --risk-low: #4cc38a;
     --risk-low-bg: rgba(76, 195, 138, 0.12);
@@ -202,14 +205,10 @@
 
 body {
   background: var(--ground);
-  /* Two very faint radial washes. At 3-4% they are invisible as colour and
-     only show up as depth under a translucent pane - which is the point.
-     Fixed, so they do not slide around as the page scrolls. */
-  background-image:
-    radial-gradient(ellipse 70rem 38rem at 8% -6%, rgba(168, 46, 34, 0.10), transparent 58%),
-    radial-gradient(ellipse 58rem 34rem at 96% 2%, rgba(22, 112, 74, 0.075), transparent 56%),
-    radial-gradient(ellipse 52rem 40rem at 62% 108%, rgba(150, 96, 10, 0.05), transparent 58%);
-  background-attachment: fixed;
+  /* The wash is on a fixed pseudo-element below, not on this background.
+     `background-attachment: fixed` makes the browser repaint the page
+     background on every scroll frame, and there were three layers of it -
+     the single biggest reason scrolling felt heavy. */
   color: var(--ink);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
@@ -300,13 +299,15 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding-block: 0.9rem;
+  /* Tight, because the wordmark grew to fill the bar rather than to make a
+     taller one. The header was 67px before this and has to stay there. */
+  padding-block: 0.26rem;
 }
 
 .wordmark {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.7rem;
   color: var(--ink);
   white-space: nowrap;
 }
@@ -314,20 +315,20 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 .wordmark__text {
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
-  font-size: 1.02rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  line-height: 1.12;
+  font-size: 1.18rem;
+  font-weight: 650;
+  letter-spacing: -0.035em;
 }
 
 /* The descriptor carries the meaning the name deliberately does not spell out.
    It is the first thing a stranger reads, so it says what this is, not what it
    is called. */
 .wordmark__sub {
-  font-size: 0.68rem;
-  font-weight: 400;
-  letter-spacing: 0;
-  color: var(--ink-3);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.002em;
+  color: var(--ink-2);
 }
 
 /* A filled square with the two initials. The one piece of iconography in the
@@ -363,26 +364,16 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   padding: 0.28rem;
   border-radius: var(--radius-pill);
   background: var(--glass);
-  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
-  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-edge), var(--glass-shadow);
   /* A slow rise and fall, so the island reads as floating rather than as a
      panel that happens to have a shadow. Six seconds and four pixels: long
      enough and small enough that it is felt at the edge of vision and never
      competes with anything being read. */
-  animation: nav-float 6s ease-in-out infinite;
 }
 
-@keyframes nav-float {
-  0%, 100% { transform: translateY(0); box-shadow: var(--glass-edge), var(--glass-shadow); }
-  50%      { transform: translateY(-4px); box-shadow: var(--glass-edge), var(--glass-shadow-lift); }
-}
 
 /* The island lifts under the pointer, and each link grows toward it. */
-.nav:hover {
-  animation-play-state: paused;
-}
 
 .nav::-webkit-scrollbar {
   display: none;
@@ -559,8 +550,6 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 
 .card {
   background: var(--glass);
-  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
-  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-card);
   padding: 1.25rem 1.35rem;
@@ -575,8 +564,6 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 .stat-card {
   container-type: inline-size;
   background: var(--glass);
-  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
-  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-card);
   padding: 0.85rem 1.05rem 0.9rem;
@@ -701,12 +688,24 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   color: var(--ink-2);
 }
 
+/* The ambient wash: one fixed layer the browser composites once and never
+   repaints, rather than a background the scroll drags along with it. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 70rem 38rem at 8% -6%, rgba(168, 46, 34, 0.10), transparent 58%),
+    radial-gradient(ellipse 58rem 34rem at 96% 2%, rgba(22, 112, 74, 0.075), transparent 56%),
+    radial-gradient(ellipse 52rem 40rem at 62% 108%, rgba(150, 96, 10, 0.05), transparent 58%);
+}
+
 /* ----------------------------------------------------------------- table -- */
 
 .data-table-wrap {
   background: var(--glass);
-  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
-  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
   box-shadow: var(--glass-edge), var(--glass-shadow);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-card);
@@ -732,9 +731,7 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   top: 0;
   z-index: 1;
   text-align: left;
-  background: var(--glass-strong);
-  -webkit-backdrop-filter: saturate(1.6) blur(10px);
-  backdrop-filter: saturate(1.6) blur(10px);
+  background: var(--surface-2);
   font-size: 0.76rem;
   font-weight: 500;
   color: var(--ink-2);
@@ -1391,7 +1388,9 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   display: flex;
   align-items: stretch;
   gap: 0;
-  border-bottom: 1px solid var(--line);
+  /* A definite edge, not a hairline: this strip scrolls under the page and
+     needs to read as a separate band rather than as part of the content. */
+  border-bottom: 2px solid color-mix(in srgb, var(--ink) 55%, transparent);
   background: var(--glass-strong);
   -webkit-backdrop-filter: saturate(1.9) blur(26px);
   backdrop-filter: saturate(1.9) blur(26px);
@@ -1410,23 +1409,21 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   padding: 0.32rem 0.9rem;
   border-radius: var(--radius-pill);
   background: var(--glass);
-  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
-  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-edge);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--ink);
   white-space: nowrap;
 }
 .ticker__count {
-  font-weight: 400;
+  font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--ink-3);
-  font-size: 0.66rem;
+  color: var(--ink-2);
+  font-size: 0.68rem;
 }
 
 .ticker__viewport {
@@ -1498,13 +1495,15 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 }
 .ticker__name {
   color: var(--ink);
+  font-weight: 500;
   max-width: 26ch;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .ticker__meta {
-  color: var(--ink-3);
+  color: var(--ink-2);
   font-size: 0.72rem;
+  font-weight: 500;
 }
 
 .ticker__all {
@@ -1515,12 +1514,11 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   padding: 0.32rem 0.9rem;
   border-radius: var(--radius-pill);
   background: var(--glass);
-  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
-  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-edge);
-  color: var(--ink-2);
-  font-size: 0.72rem;
+  color: var(--ink);
+  font-size: 0.74rem;
+  font-weight: 650;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -1550,16 +1548,18 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 
 /* ------------------------------------------------------------- motion -- */
 /*
- * Two systems, and they do different jobs.
+ * What moves, and what deliberately does not.
  *
- *   1. Interaction. Colour and elevation changes on the things a pointer or a
- *      keyboard touches. Fast, because feedback that lags feels broken.
- *   2. Arrival. Sections rise into place as they enter the viewport, driven by
- *      scroll position rather than a timer - so it happens wherever the reader
- *      is on the page, not once on load and never again.
+ * Everything that used to animate on arrival - sections rising, cards
+ * staggering in, rows settling, the navigation bobbing - is gone. It was
+ * costing more than it gave: scroll-driven animations keep the compositor
+ * working on every frame of every scroll, and on top of seventeen backdrop
+ * blurs and three fixed background layers the result was a page that felt
+ * heavy to move through. A dashboard someone reads all day should be still.
  *
- * Deliberately not `* { transition: all }`, which animates layout properties
- * too and is how interfaces end up feeling rubbery instead of smooth.
+ * What is left is feedback: the things a pointer or a keyboard touches
+ * respond, and nothing else moves on its own. Each of these is a colour or a
+ * composited transform on one element at a time, which costs nothing.
  */
 
 a,
@@ -1593,283 +1593,24 @@ button,
   transition: none;
 }
 
-@keyframes rise-in {
-  from { opacity: 0; transform: translateY(74px) scale(0.95); }
-  to   { opacity: 1; transform: none; }
-}
-
-/*
- * Cards arrive from below and from behind the screen.
- *
- * The travel is 72px and the scale starts at 0.9, which is a long way further
- * than this began: the first version moved 34px at 0.97 and read as barely
- * moving at all once it was spread across the seconds a reader takes to scroll
- * a card into view. Motion tuned by looking at a single frame is always too
- * subtle - what matters is how much has visibly changed over the distance the
- * eye tracks it.
- *
- * Still no rotation and no overshoot. These are audited public-spending
- * figures; the movement should read as confident, not playful.
- */
-@keyframes card-in {
-  from { opacity: 0; transform: translateY(104px) scale(0.86); }
-  to   { opacity: 1; transform: none; }
-}
-
-/*
- * The figure fades in slightly behind its card.
- *
- * Only for the no-JavaScript case: with the counter running, CountUp drives
- * this element's opacity itself and this animation has long finished.
- */
+/* The figure fades in once on load, behind CountUp, so the counter's reset to
+   zero is not visible before it starts counting. */
 @keyframes value-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 .stat-card__value {
-  animation: value-in 460ms var(--ease-out) 120ms both;
+  animation: value-in 380ms var(--ease-out) 60ms both;
 }
 
-/*
- * FIRST PAINT. Everything above the fold settles in one staggered pass, on a
- * timer, because there is no scroll to drive it yet.
- */
-main > section,
-main > .shell {
-  animation: rise-in 520ms var(--ease-out) both;
-}
-main > section:nth-of-type(2) { animation-delay: 70ms; }
-main > section:nth-of-type(3) { animation-delay: 130ms; }
-main > section:nth-of-type(4) { animation-delay: 180ms; }
-main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
-
-.stat-card,
-.grid > .card,
-.slab-card,
-.model-card {
-  animation: card-in 560ms var(--ease-out) both;
-}
-.grid > :nth-child(2), .slab-card:nth-child(2) { animation-delay: 60ms; }
-.grid > :nth-child(3), .slab-card:nth-child(3) { animation-delay: 120ms; }
-.grid > :nth-child(4), .slab-card:nth-child(4) { animation-delay: 180ms; }
-.grid > :nth-child(5), .slab-card:nth-child(5) { animation-delay: 240ms; }
-.grid > :nth-child(6), .slab-card:nth-child(6) { animation-delay: 300ms; }
-.grid > :nth-child(n + 7), .slab-card:nth-child(n + 7) { animation-delay: 340ms; }
-
-.data-table tbody tr:nth-child(-n + 12) {
-  animation: rise-in 440ms var(--ease-out) both;
-}
-.data-table tbody tr:nth-child(2) { animation-delay: 30ms; }
-.data-table tbody tr:nth-child(3) { animation-delay: 60ms; }
-.data-table tbody tr:nth-child(4) { animation-delay: 90ms; }
-.data-table tbody tr:nth-child(5) { animation-delay: 120ms; }
-.data-table tbody tr:nth-child(6) { animation-delay: 150ms; }
-.data-table tbody tr:nth-child(n + 7) { animation-delay: 180ms; }
-
-/*
- * SCROLL. This is what makes the page feel alive rather than pre-played.
- *
- * The reveal is attached to each CARD, not to the section around it. Driving
- * it from the section looked right on a short block and was wrong everywhere
- * else: view() measures the section's own top edge entering the viewport, so
- * in a tall section every card was revealed the moment the heading appeared,
- * and by the time the reader scrolled down to the cards they had finished
- * animating minutes of scrolling earlier. That is precisely the "these boxes
- * are stagnant" complaint - the movement had already happened off-screen.
- *
- * Each card now carries its own timeline and arrives as it personally reaches
- * the viewport, at the reader's pace, and again on the way back up.
- *
- * `entry 0% / entry 38%` starts as the top edge appears and finishes well
- * before the middle of the screen, so nothing is still moving while it is
- * being read. The stagger is expressed as a later start per column rather than
- * a delay, because on a scroll timeline a delay is a scroll distance and would
- * leave the last card of a row unfinished at the top of the screen.
- */
-@supports (animation-timeline: view()) {
-  /*
-   * Only blocks ScrollReveal has marked, which are the ones that were below
-   * the fold when the page loaded. Everything already on screen keeps the
-   * first-paint animation above and is solid the moment it is painted.
-   *
-   * That split is what lets the range be long. It used to apply to every
-   * block, which forced it down to 260px so above-fold content would resolve -
-   * and 260px is one flick of a wheel, so the arrival was over before it could
-   * be seen. At 720px a block travels its full distance across roughly a
-   * screen of scrolling, at the reader's pace.
-   */
-  [data-reveal] {
-    animation: card-in linear both;
-    animation-timeline: view();
-    /*
-     * 340px, and the number comes from measuring rather than from the spec.
-     *
-     * A declared range does NOT equal the screen distance the block travels
-     * while animating: measured on this layout, 470px of declared range played
-     * out over 644px of the element rising up the screen, a factor of about
-     * 1.37. Reasoning about it as if the two were the same is what put the
-     * settle point at top=256px - a third of the way up, well past where a
-     * reader is already reading.
-     *
-     * At 340 the block settles as its top nears the middle of the screen,
-     * having animated across roughly 465px of scrolling on the way there.
-     * That is still far more visible motion than the 260px this started at,
-     * because the perceived length is the screen travel, not the declaration.
-     */
-    animation-range: cover 0px cover 340px;
-    animation-delay: 0s;
-  }
-
-  /* A row arrives as a wave: the stagger moves the start, every column shares
-     the finish, so the row settles as one object and no column is still
-     arriving once the row is in reading position. */
-  /* Scoped to grid children. Unscoped, `[data-reveal]:nth-child(2)` matched any
-     revealed block that happened to be its parent's second child - a lede under
-     a heading, for instance - and handed it a stagger meant for a column in a
-     row, so body text started late and was still arriving in the reading zone
-     while everything around it was solid. A stagger is about position in a row,
-     not position in the DOM. */
-  .grid > [data-reveal]:nth-child(2) { animation-range: cover 32px cover 340px; }
-  .grid > [data-reveal]:nth-child(3) { animation-range: cover 64px cover 340px; }
-  .grid > [data-reveal]:nth-child(4) { animation-range: cover 96px cover 340px; }
-  .grid > [data-reveal]:nth-child(n + 5) { animation-range: cover 128px cover 340px; }
-
-  /* The table is the page's main object and can be ten thousand pixels tall.
-     A block that size travelling a hundred pixels reads as the page shifting
-     under the reader, so it fades and lifts a little instead. */
-  .data-table-wrap[data-reveal],
-  .leaflet-container[data-reveal] {
-    animation-name: rise-in;
-    animation-range: cover 0px cover 280px;
-  }
-
-  /* Text blocks use the gentler keyframe. A heading that travels as far as a
-     card reads as unstable: the eye reads type from a fixed baseline and
-     notices a moving one. */
-  .section-head[data-reveal],
-  .display[data-reveal],
-  .lede[data-reveal],
-  .eyebrow[data-reveal],
-  .reason-list[data-reveal],
-  .pager[data-reveal] {
-    animation-name: rise-in;
-  }
-
-  /* Rows never take a timeline: a table is one object and its wrap already
-     animates. The selector has to be repeated at the same specificity as the
-     first-paint rule below, or `:nth-child(-n + 12)` (0,2,2) outranks a bare
-     `tr` (0,1,2) and every visible row keeps animating inside its own wrap. */
-  .data-table tbody tr,
-  .data-table tbody tr:nth-child(-n + 12) {
-    animation: none;
-  }
-}
-
-/*
- * All of the above is a courtesy, and a courtesy that cannot be declined is an
- * imposition. Under reduced motion the interface still changes colour on hover
- * - that is feedback, not decoration - but nothing moves, fades or reveals.
- */
 @media (prefers-reduced-motion: reduce) {
-  .nav { animation: none; }
+  .stat-card__value { animation: none; opacity: 1; }
   .nav__link:hover, .nav__link:active { scale: 1; }
   .ticker__item:hover { scale: 1; }
-
-  main > section,
-  main > .shell,
-  .stat-card,
-  .stat-card__value,
-  .card,
-  .grid > .card,
-  .slab-card,
-  .model-card,
-  .statecard,
-  .rulecard,
-  .data-table-wrap,
-  .section-head,
-  .display,
-  .lede,
-  .eyebrow,
-  .notice,
-  .reason-list,
-  .trail,
-  .chart,
-  .choro-legend,
-  .filter-bar,
-  .pager,
-  .leaflet-container,
-  .data-table tbody tr {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
   a, button, .btn, .review-btn, .nav__link, .link-quiet, .risk-pill,
   .card, .stat-card, .data-table tbody tr, .ticker__item {
     transition-duration: 1ms;
   }
-  a.stat-card:hover, a.card:hover { transform: none; }
-}
-
-/* --------------------------------------------------------- model card -- */
-/* The three models, stated plainly. Same glass pane as everything else - this
-   is evidence, not a feature advertisement, so it gets no special colour. */
-.model-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.model-card__name {
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-}
-.model-card__kind {
-  font-family: var(--font-data);
-  font-size: 0.7rem;
-  line-height: 1.4;
-  color: var(--ink-3);
-  margin-top: -0.35rem;
-}
-.model-card__does {
-  font-size: 0.85rem;
-  line-height: 1.55;
-  color: var(--ink-2);
-}
-.model-card__decides {
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--ink);
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--line);
-}
-/* The label reads as a caption, not as part of the sentence. */
-.model-card__decides span {
-  display: block;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  margin-bottom: 0.2rem;
-}
-.model-card__where {
-  margin-top: auto;
-  padding-top: 0.5rem;
-  font-family: var(--font-data);
-  font-size: 0.68rem;
-  color: var(--ink-3);
-}
-
-/* What a detector explicitly does not claim, shown under its headline. Quieter
-   than the finding and set off by a rule, so it reads as the caveat it is
-   rather than as more evidence. */
-.finding-limit {
-  margin-top: 0.3rem;
-  padding-left: 0.6rem;
-  border-left: 2px solid var(--line);
-  font-size: 0.74rem;
-  line-height: 1.5;
-  color: var(--ink-3);
 }
 
 /* ------------------------------------------------------- pointer feel -- */
@@ -1891,36 +1632,9 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
 .statecard,
 .rulecard,
 .data-table-wrap {
-  --mx: 50%;
-  --my: 50%;
-  --tilt-x: 0deg;
-  --tilt-y: 0deg;
   position: relative;
-  transform-style: preserve-3d;
 }
 
-/* The sheen. A soft light centred on the cursor, invisible until hovered, and
-   drawn on a pseudo-element so it can never affect the content's contrast. */
-.stat-card::after,
-.card::after,
-.slab-card::after,
-.model-card::after,
-.statecard::after,
-.rulecard::after,
-.data-table-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity var(--t-base) var(--ease);
-  background: radial-gradient(
-    22rem circle at var(--mx) var(--my),
-    color-mix(in srgb, var(--ink) 7%, transparent),
-    transparent 62%
-  );
-}
 
 /*
  * Hover: the surface comes toward the reader and leans away from the cursor.
@@ -1948,21 +1662,11 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
      * transform-origin is the cursor, so the zoom grows FROM the point being
      * pointed at rather than from the middle of the card.
      */
-    transform-origin: var(--mx) var(--my);
     scale: 1.03;
     translate: 0 -4px;
     rotate: 0deg;
     box-shadow: var(--glass-edge), var(--glass-shadow-lift);
     z-index: 1;
-  }
-  .stat-card:hover::after,
-  .card:hover::after,
-  .slab-card:hover::after,
-  .model-card:hover::after,
-  .statecard:hover::after,
-  .rulecard:hover::after,
-  .data-table-wrap:hover::after {
-    opacity: 1;
   }
 }
 
@@ -1977,8 +1681,7 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
 .model-card:active,
 .statecard:active,
 .rulecard:active {
-  transform-origin: var(--mx) var(--my);
-  scale: 1.055;
+  scale: 1.05;
   translate: 0 -6px;
   transition-duration: var(--t-fast);
 }
@@ -2026,4 +1729,75 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   font-weight: 500;
   color: var(--ink-2);
   margin-right: 0.3rem;
+}
+
+/* ------------------------------------------------------------- splash -- */
+/*
+ * The loading cover. Opaque, so nothing behind it shows through mid-assembly,
+ * and it fades rather than cuts so the page is revealed instead of swapped.
+ */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: var(--ground);
+  opacity: 1;
+  transition: opacity 400ms var(--ease);
+}
+.splash--leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+.splash__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  transform: translateY(-6%);
+}
+.splash__mark { border-radius: 12px; }
+.splash__name {
+  margin-top: 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+.splash__sub {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.splash__track {
+  margin-top: 1.2rem;
+  width: 220px;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+  overflow: hidden;
+}
+/* Width rather than transform: the bar is 220px and repainting a strip that
+   size once a frame is nothing, while a scaled transform would blur the
+   rounded cap. */
+.splash__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ink);
+  /* Also animated in CSS so the bar is moving from the first painted frame,
+     before any script has run. The inline width JS sets takes over seamlessly
+     because both describe the same journey. */
+  animation: splash-fill 1100ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+@keyframes splash-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+.splash__pct {
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
 }
