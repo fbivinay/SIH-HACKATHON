@@ -2,6 +2,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatINR } from "@/lib/format";
 import CountUp from "@/components/CountUp";
+import HeroField from "@/components/HeroField";
 
 // Same weights and thresholds as data/scoring.py. Stated on the page because a
 // score nobody can take apart is a score nobody should act on.
@@ -174,6 +175,7 @@ export default async function OverviewPage({
   return (
     <main>
       <section className="shell page-head">
+        <HeroField />
         <div className="eyebrow-ai">AI powered · Gemini Flash Lite · Isolation Forest · Sentence-BERT</div>
         <h1 className="display display--hero">
           Every MPLADS work, checked against its peers.

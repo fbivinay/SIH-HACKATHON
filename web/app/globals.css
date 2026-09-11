@@ -490,7 +490,33 @@ html { overflow-anchor: none; }
 .page-head {
   padding-block: 1.6rem 1.1rem;
   text-align: center;
+  /* For the field behind the overview headline: `isolation` gives it a
+     stacking context of its own, so the canvas at z-index -1 sits behind the
+     text but in front of the page. */
+  position: relative;
+  isolation: isolate;
 }
+
+/* The drifting points behind the overview headline (components/HeroField).
+   Kept inside the shell rather than bleeding to the viewport edge: a canvas
+   wider than the page is a horizontal scrollbar. It starts at the section's
+   top, not above it - a canvas that reaches under the bar makes the bar's
+   backdrop blur recompute every frame. No CSS mask either: the edge fade is
+   done per point inside the canvas, because a mask-image over a canvas that
+   changes every frame cost the whole frame budget (measured: 33ms with,
+   16.7ms without). */
+.herofield {
+  position: absolute;
+  inset: 0 0 -2.5rem;
+  z-index: -1;
+  width: 100%;
+  height: calc(100% + 2.5rem);
+  pointer-events: none;
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity 1400ms var(--ease);
+}
+.herofield.is-on { opacity: 1; }
 
 .display {
   font-size: clamp(2.4rem, 5.6vw, 3.9rem);
