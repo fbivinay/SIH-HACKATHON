@@ -176,7 +176,7 @@ export default async function OverviewPage({
     <main>
       <section className="shell page-head">
         <HeroField />
-        <div className="eyebrow-ai">AI powered · Gemini Flash Lite · Isolation Forest · Sentence-BERT</div>
+        <div className="eyebrow-ai"><b className="ai-word">AI powered</b> · Gemini Flash Lite · Isolation Forest · Sentence-BERT</div>
         <h1 className="display display--hero">
           Every MPLADS work, checked against its peers.
         </h1>
@@ -246,7 +246,7 @@ export default async function OverviewPage({
         <div className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div>
             <h2 className="section-head flex items-center gap-3 flex-wrap">
-              <span className="ai-badge">AI powered</span>
+              <span className="ai-badge"><b className="ai-word">AI powered</b></span>
               Where the AI is
             </h2>
             <p className="lede !mx-0 !max-w-2xl !mt-1">

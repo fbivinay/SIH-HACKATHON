@@ -28,7 +28,7 @@ export default function Splash() {
         <Logo size={58} />
         <div className="splash__name">Kasauti</div>
         <div className="splash__sub">MPLADS verification</div>
-        <div className="splash__ai">AI powered · Gemini Flash Lite · Isolation Forest · Sentence-BERT</div>
+        <div className="splash__ai"><b className="ai-word">AI powered</b> · Gemini Flash Lite · Isolation Forest · Sentence-BERT</div>
         <div className="splash__track">
           <span className="splash__fill" />
         </div>

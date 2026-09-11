@@ -6,6 +6,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import Logo from "@/components/Logo";
+import Cursor from "@/components/Cursor";
 import NavLinks from "@/components/NavLinks";
 import RiskTicker from "@/components/RiskTicker";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -75,6 +76,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Splash />
         {/* Marks below-fold blocks so only those animate on scroll. */}
         <ScrollReveal />
+        {/* The dot-and-ring pointer; renders nothing on touch devices. */}
+        <Cursor />
         <div className="topbar">
         <header className="masthead">
           <div className="shell masthead__inner">
@@ -82,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Logo size={37} />
               <span className="wordmark__text">
                 Kasauti
-                <span className="wordmark__sub">AI-powered MPLADS verification</span>
+                <span className="wordmark__sub"><b className="ai-word">AI-powered</b> MPLADS verification</span>
               </span>
             </Link>
             <NavLinks links={navLinks} />
