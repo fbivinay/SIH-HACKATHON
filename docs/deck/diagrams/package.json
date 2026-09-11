@@ -1,0 +1,9 @@
+{
+  "name": "kasauti-deck-diagrams",
+  "private": true,
+  "type": "module",
+  "description": "Renders the deck's diagram boards to PNG. Run via scripts/build_sih_deck.py.",
+  "dependencies": {
+    "playwright-core": "^1.56.0"
+  }
+}

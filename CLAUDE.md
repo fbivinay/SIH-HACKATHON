@@ -190,6 +190,25 @@ The deck (`scripts/build_sih_deck.py`) reads every figure from the database at
 build time and refuses to build on a null or zero. It shipped stale twice when
 the numbers were typed in. Do not retype them.
 
+Its content is **images**, because the template's own instruction slide says to
+use "points / diagrams / Infographics / pictures" rather than paragraphs. Six
+diagram boards live in `docs/deck/diagrams/boards.template.html`, authored with
+the product's tokens and fonts and rendered to PNG by `render.mjs`; six
+screenshots of the running system sit beside them. The figures inside those
+images are `{{tokens}}` the build fills from the database, so the no-retyping
+rule survives the move to pictures. Exactly three links, everywhere: demo
+video, prototype, GitHub.
+
+Two things that bite here. `new URL(import.meta.url).pathname` keeps this
+repository's space percent-encoded, so node wrote every PNG into a parallel
+`SIH%20HACKATHON` tree and the deck silently kept using stale images - use
+`fileURLToPath`. And there is no LibreOffice on this machine, so
+`scripts/preview_deck.py` redraws the built `.pptx` as HTML and screenshots it;
+it is exact for image and shape geometry and only approximate for text
+wrapping. Look at the preview before believing a layout - it has caught an
+image running a full inch off the slide, a title printing over the team badge,
+and clipped captions that `verify()` could not see.
+
 ## 11. Motion, measured
 
 Every rule here was found by measuring in a headless browser (playwright-core

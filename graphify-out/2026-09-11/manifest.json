@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789155108.956208,
-    "seen": 1789156880.4904308,
-    "ast_hash": "a737c4cc04e932ad3ad46a8bdf551b9c",
+    "mtime": 1789161939.998323,
+    "seen": 1789162252.5286393,
+    "ast_hash": "1df9bb9d846705c2efbb342d6685226a",
     "semantic_hash": ""
   },
   "web/app/map/page.tsx": {
@@ -204,15 +204,15 @@
     "semantic_hash": ""
   },
   "web/app/page.tsx": {
-    "mtime": 1789160634.5003693,
-    "seen": 1789161061.4037452,
-    "ast_hash": "b5847115255ab607a6a99ea5525613e8",
+    "mtime": 1789161939.9989095,
+    "seen": 1789162252.5287404,
+    "ast_hash": "66e8fa191b55a1c025df84bb290b4432",
     "semantic_hash": ""
   },
   "web/app/projects/[id]/page.tsx": {
-    "mtime": 1789155097.3838515,
-    "seen": 1789156880.4904382,
-    "ast_hash": "f8cd8698d2c99b63bd4df9e01aea4f3e",
+    "mtime": 1789161939.999527,
+    "seen": 1789162252.5287423,
+    "ast_hash": "7cf0cc2cece8830796d78812e701a651",
     "semantic_hash": ""
   },
   "web/app/projects/page.tsx": {
@@ -354,9 +354,9 @@
     "semantic_hash": ""
   },
   "web/components/Splash.tsx": {
-    "mtime": 1789155097.3834217,
-    "seen": 1789156880.4907794,
-    "ast_hash": "39fac1421c45cf9f80356be7e49ad7c8",
+    "mtime": 1789161939.9999003,
+    "seen": 1789162252.529265,
+    "ast_hash": "3522a743f8dc95bf163d3990e4338726",
     "semantic_hash": ""
   },
   ".claude/CLAUDE.md": {
@@ -531,6 +531,12 @@
     "mtime": 1789161510.8221664,
     "seen": 1789161608.596693,
     "ast_hash": "a6038c6fe3da415136a83c5c191424af",
+    "semantic_hash": ""
+  },
+  "web/components/Cursor.tsx": {
+    "mtime": 1789162167.2836742,
+    "seen": 1789162252.5289063,
+    "ast_hash": "92d424c2125d8d0ffd8a3a9f0fa0f3c8",
     "semantic_hash": ""
   }
 }

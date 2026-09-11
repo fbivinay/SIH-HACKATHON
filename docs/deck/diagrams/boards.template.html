@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Kasauti — deck diagrams</title>
+    <style>
+      /* Every board here is rendered to PNG and placed on a slide. They use the
+         product's own tokens so the deck and the thing it describes look like
+         one object. Colour only ever means risk. */
+      @font-face {
+        font-family: "Geist"; src: url("fonts/geist.woff2") format("woff2");
+        font-weight: 100 900; font-display: block;
+      }
+      @font-face {
+        font-family: "Geist Mono"; src: url("fonts/geist-mono.woff2") format("woff2");
+        font-weight: 400; font-display: block;
+      }
+      :root {
+        --ground: #f1f1f2; --surface: #ffffff; --slab: #0b0b0c; --slab-2: #17171a;
+        --ink: #0b0b0c; --ink-2: #4a4a52; --ink-3: #6b6b74;
+        --on-slab: #fafafa; --on-slab-2: #b6b6bf; --on-slab-3: #8e8e99;
+        --line: #e3e3e6; --line-strong: #d2d2d7;
+        --risk-high: #a82e22; --risk-medium: #96600a; --risk-low: #16704a;
+        --ai-red: #7a1a12;
+        --ui: "Geist", system-ui, sans-serif; --mono: "Geist Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #888; font-family: var(--ui); }
+      .board {
+        background: var(--ground); position: relative; overflow: hidden;
+        margin: 20px; padding: 26px 30px; color: var(--ink);
+      }
+      .eyebrow {
+        font-family: var(--mono); font-size: 13px; font-weight: 600;
+        letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3);
+      }
+      .ai-word { color: var(--ai-red); font-weight: 700; }
+      .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+      /* generic pieces -------------------------------------------------- */
+      .card {
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: 14px; padding: 14px 16px;
+      }
+      .card.dark { background: var(--slab); border-color: rgba(255,255,255,.14); color: var(--on-slab); }
+      .k { font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+           text-transform: uppercase; color: var(--ink-3); }
+      .dark .k { color: var(--on-slab-3); }
+      .t { font-size: 19px; font-weight: 600; letter-spacing: -.02em; margin-top: 5px; }
+      .d { font-size: 14px; color: var(--ink-2); margin-top: 6px; line-height: 1.38; }
+      .dark .d { color: var(--on-slab-2); }
+      .arrow { display: grid; place-items: center; font-family: var(--mono);
+               font-size: 22px; color: var(--ink-3); }
+
+      /* ============================================ 1. architecture ==== */
+      #arch { width: 1400px; }
+      #arch .col-h { font-family: var(--mono); font-size: 12px; letter-spacing: .16em;
+                     text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+      .lane { display: grid; grid-template-columns: 250px 40px 1fr 40px 250px; gap: 0;
+              align-items: stretch; }
+      .stackv { display: flex; flex-direction: column; gap: 10px; }
+      .model { background: var(--slab); color: var(--on-slab); border-radius: 12px;
+               padding: 11px 14px; border: 1px solid rgba(255,255,255,.14); }
+      .model .mn { font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+      .model .md { font-size: 12.5px; color: var(--on-slab-2); margin-top: 3px; line-height: 1.35; }
+      .model .mk { font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+                   text-transform: uppercase; color: var(--on-slab-3); }
+      .scorebox { background: var(--surface); border: 2px solid var(--ink);
+                  border-radius: 16px; padding: 14px 16px; }
+      .wrow { display: flex; justify-content: space-between; font-size: 13.5px;
+              padding: 3px 0; }
+      .wrow b { font-family: var(--mono); font-weight: 500; }
+      .bands { display: flex; gap: 7px; margin-top: 10px; }
+      .bd { flex: 1; text-align: center; border-radius: 8px; padding: 6px 2px;
+            font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); }
+      .role { background: var(--surface); border: 1px solid var(--line);
+              border-radius: 11px; padding: 9px 12px; font-size: 14px; font-weight: 550; }
+      .role span { display: block; font-family: var(--mono); font-size: 10.5px;
+                   color: var(--ink-3); font-weight: 400; margin-top: 2px;
+                   letter-spacing: .1em; text-transform: uppercase; }
+      .never { margin-top: 14px; border-left: 3px solid var(--risk-high);
+               background: #fbe9e7; border-radius: 0 10px 10px 0; padding: 10px 14px; }
+      .never b { color: var(--risk-high); }
+
+      /* ============================================ 2. pipeline ======== */
+      #pipeline { width: 1600px; }
+      .pipe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0;
+              align-items: center; margin-top: 14px; }
+      .pstep { position: relative; padding: 0 18px 0 0; }
+      .pstep .pn { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+      .pstep .pt { font-size: 19px; font-weight: 650; letter-spacing: -.025em; margin-top: 3px; }
+      .pstep .pd { font-size: 13px; color: var(--ink-2); margin-top: 4px; line-height: 1.35; }
+      .pstep::after { content: ""; position: absolute; right: 6px; top: 20px;
+                      width: 10px; height: 10px; border-top: 2px solid var(--line-strong);
+                      border-right: 2px solid var(--line-strong); transform: rotate(45deg); }
+      .pstep:last-child::after { display: none; }
+      .railline { height: 2px; background: var(--line-strong); margin-top: 16px; }
+
+      /* ============================================ 3. stack =========== */
+      #stack { width: 900px; }
+      .srow { display: grid; grid-template-columns: 132px 1fr; gap: 14px;
+              align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); }
+      .srow:last-child { border-bottom: 0; }
+      .slabel { font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em;
+                text-transform: uppercase; color: var(--ink-3); }
+      .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+      .chip { background: var(--surface); border: 1px solid var(--line-strong);
+              border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 500; }
+      .chip.ai { border-color: var(--ai-red); color: var(--ai-red); font-weight: 650; }
+
+      /* ============================================ 4. feasibility ===== */
+      #feas { width: 1600px; }
+      .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+               margin-top: 16px; }
+      .fh { font-size: 22px; font-weight: 650; letter-spacing: -.025em; margin-bottom: 10px; }
+      .item { display: grid; grid-template-columns: 22px 1fr; gap: 10px; margin-bottom: 11px; }
+      .item .ic { font-family: var(--mono); font-size: 13px; color: var(--ink-3); }
+      .item .ib { font-size: 14px; line-height: 1.4; }
+      .item .ib b { font-weight: 650; }
+      .proof { margin-top: 10px; background: var(--surface); border: 1px solid var(--line);
+               border-radius: 12px; padding: 10px 13px; }
+      .proof .pv { font-family: var(--mono); font-size: 25px; font-weight: 500; }
+      .proof .pl { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+
+      /* ============================================ 5. impact ========== */
+      #impact { width: 1600px; }
+      .funnel { display: flex; align-items: center; gap: 0; margin: 6px 0 18px; }
+      .fstep { text-align: center; padding: 0 28px; }
+      .fstep .fv { font-family: var(--mono); font-size: 46px; font-variant-numeric: tabular-nums; }
+      .fstep .fl { font-family: var(--mono); font-size: 11px; letter-spacing: .16em;
+                   text-transform: uppercase; color: var(--ink-3); margin-top: 5px; }
+      .fjoin { flex: 1; height: 2px; background: var(--line-strong); }
+      .who { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+      .whobox { background: var(--surface); border: 1px solid var(--line);
+                border-radius: 13px; padding: 13px 15px; }
+      .whobox .wn { font-size: 16px; font-weight: 650; letter-spacing: -.02em; }
+      .whobox .wd { font-size: 13px; color: var(--ink-2); margin-top: 5px; line-height: 1.38; }
+      .ba { display: grid; grid-template-columns: 1fr 34px 1fr; gap: 10px;
+            align-items: center; margin-top: 14px; }
+      .before { background: #fbe9e7; border-radius: 11px; padding: 11px 14px;
+                font-size: 14px; color: var(--risk-high); font-weight: 550; }
+      .after { background: #e6f2ec; border-radius: 11px; padding: 11px 14px;
+               font-size: 14px; color: var(--risk-low); font-weight: 550; }
+
+      /* ============================================ 6. references ====== */
+      #refs { width: 1600px; }
+      .hexrow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
+                margin-top: 16px; }
+      .hex { background: var(--surface); border: 1px solid var(--line-strong);
+             border-radius: 14px; padding: 14px; text-align: center;
+             display: flex; flex-direction: column; justify-content: space-between;
+             min-height: 210px; }
+      .hex .hk { font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+                 color: var(--ink-3); text-transform: uppercase; }
+      .hex .hn { font-size: 15px; font-weight: 650; letter-spacing: -.02em;
+                 margin-top: 8px; line-height: 1.25; }
+      .hex .hd { font-size: 12px; color: var(--ink-2); margin-top: 6px; line-height: 1.35; }
+      .hex .hl { font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+                 color: var(--ink-3); margin-top: 10px; letter-spacing: .02em;
+                 border-top: 1px solid var(--line); padding-top: 8px;
+                 word-break: break-all; }
+    </style>
+  </head>
+  <body>
+
+    <!-- ============================================ 1. ARCHITECTURE -->
+    <div class="board" id="arch">
+      <div class="eyebrow">System architecture &mdash; published record to a ranked queue</div>
+
+      <div class="lane" style="margin-top:16px">
+        <!-- sources -->
+        <div>
+          <div class="col-h">Source</div>
+          <div class="stackv">
+            <div class="card">
+              <div class="k">Designated</div>
+              <div class="t">MoSPI portal</div>
+              <div class="d">Totals and members open. Works only behind an OTP-gated form &mdash; no bulk export.</div>
+            </div>
+            <div class="card">
+              <div class="k">Bulk export</div>
+              <div class="t">Empowered Indian</div>
+              <div class="d">The same record as CSV. {{works}} works, {{payments}} payments, both LS terms.</div>
+            </div>
+            <div class="card" style="border-color:var(--risk-low)">
+              <div class="k" style="color:var(--risk-low)">Every night</div>
+              <div class="t" style="font-size:16px">Reconciled to MoSPI</div>
+              <div class="d">{{states}} / {{states}} states match exactly. Both hops shown separately.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow">&rarr;</div>
+
+        <!-- engine -->
+        <div>
+          <div class="col-h">Scoring engine &mdash; offline, deterministic, no key required</div>
+          <div class="stackv">
+            <div class="model">
+              <div class="mk">Model 1 &middot; scikit-learn</div>
+              <div class="mn">Isolation Forest</div>
+              <div class="md">Learns the normal sanction for a sector and district; isolates what sits outside. Blended into cost risk.</div>
+            </div>
+            <div class="model">
+              <div class="mk">Model 2 &middot; sentence-transformers</div>
+              <div class="mn">Sentence-BERT &middot; all-MiniLM-L6-v2</div>
+              <div class="md">Embeds every description, compares within district and sector at 0.94 cosine &mdash; measured, not borrowed.</div>
+            </div>
+            <div class="model">
+              <div class="mk">Model 3 &middot; <span style="color:#e0685c">AI powered</span></div>
+              <div class="mn">Gemini Flash Lite</div>
+              <div class="md">Labels the sectors keyword rules cannot read. Can abstain. {{labels}} labels cached and committed.</div>
+            </div>
+            <div class="card" style="padding:10px 14px">
+              <div class="k">Rules &amp; statistics</div>
+              <div class="d" style="margin-top:3px">Published dates &middot; compliance rules &middot; Herfindahl-Hirschman over vendor spend</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow">&rarr;</div>
+
+        <!-- score and out -->
+        <div>
+          <div class="col-h">Score &amp; route</div>
+          <div class="scorebox">
+            <div class="k">Overall risk score &middot; 0&ndash;100</div>
+            <div style="margin-top:8px">
+              <div class="wrow"><span>Cost</span><b>25%</b></div>
+              <div class="wrow"><span>Delay</span><b>25%</b></div>
+              <div class="wrow"><span>Duplication</span><b>20%</b></div>
+              <div class="wrow"><span>Agency</span><b>15%</b></div>
+              <div class="wrow"><span>Compliance</span><b>15%</b></div>
+            </div>
+            <div class="bands">
+              <div class="bd" style="color:var(--risk-low)">LOW &lt;40</div>
+              <div class="bd" style="color:var(--risk-medium)">MED 40&ndash;70</div>
+              <div class="bd" style="color:var(--risk-high)">HIGH &ge;70</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+            <div class="role">MPs<span>own works</span></div>
+            <div class="role">District<span>verify on site</span></div>
+            <div class="role">State nodal<span>oversight</span></div>
+            <div class="role">Ministry<span>programme view</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="never">
+        <b>What never happens:</b> no model output becomes a risk number, and no
+        cohort statistic is folded into a single work&rsquo;s score. A score says a work
+        does not resemble its peers &mdash; it is a reason to look, never an allegation.
+      </div>
+    </div>
+
+    <!-- ============================================ 2. PIPELINE -->
+    <div class="board" id="pipeline">
+      <div class="eyebrow">Nightly refresh &mdash; GitHub Actions, 19:30 UTC / 01:00 IST, one run at a time</div>
+      <div class="railline"></div>
+      <div class="pipe">
+        <div class="pstep"><div class="pn">01</div><div class="pt">Fetch</div><div class="pd">Both LS terms from the source; falls back to the committed snapshot, loudly.</div></div>
+        <div class="pstep"><div class="pn">02</div><div class="pt">Load</div><div class="pd">Every frame parsed before anything is written. Rejects recorded, not dropped.</div></div>
+        <div class="pstep"><div class="pn">03</div><div class="pt">Label</div><div class="pd">Gemini labels new sectors; the cache is committed back to the repo.</div></div>
+        <div class="pstep"><div class="pn">04</div><div class="pt">Score</div><div class="pd">3 models + rules over {{works}} works, ~20 min on a runner.</div></div>
+        <div class="pstep"><div class="pn">05</div><div class="pt">Swap</div><div class="pd">TRUNCATE + INSERT in one transaction &mdash; readers never see a half-empty table.</div></div>
+        <div class="pstep"><div class="pn">06</div><div class="pt">Reconcile</div><div class="pd">Against MoSPI's own endpoints; the gap is published on the site.</div></div>
+      </div>
+    </div>
+
+    <!-- ============================================ 3. STACK -->
+    <div class="board" id="stack">
+      <div class="eyebrow">Technologies used</div>
+      <div style="margin-top:10px">
+        <div class="srow"><div class="slabel">AI / ML</div><div class="chips">
+          <span class="chip ai">Gemini Flash Lite</span><span class="chip ai">Isolation Forest</span>
+          <span class="chip ai">Sentence-BERT</span><span class="chip">scikit-learn</span>
+          <span class="chip">sentence-transformers</span></div></div>
+        <div class="srow"><div class="slabel">Statistics</div><div class="chips">
+          <span class="chip">Benford / MAD</span><span class="chip">Herfindahl-Hirschman</span>
+          <span class="chip">peer medians</span><span class="chip">pandas &middot; numpy</span></div></div>
+        <div class="srow"><div class="slabel">Backend</div><div class="chips">
+          <span class="chip">FastAPI</span><span class="chip">psycopg2</span>
+          <span class="chip">Postgres (Neon)</span><span class="chip">24 REST endpoints</span></div></div>
+        <div class="srow"><div class="slabel">Frontend</div><div class="chips">
+          <span class="chip">Next.js 16</span><span class="chip">React 19</span>
+          <span class="chip">TypeScript</span><span class="chip">Tailwind v4</span>
+          <span class="chip">Leaflet</span></div></div>
+        <div class="srow"><div class="slabel">Ops</div><div class="chips">
+          <span class="chip">Vercel</span><span class="chip">GitHub Actions</span>
+          <span class="chip">139 tests</span><span class="chip">nightly reconciliation</span></div></div>
+      </div>
+    </div>
+
+    <!-- ============================================ 4. FEASIBILITY -->
+    <div class="board" id="feas">
+      <div class="eyebrow">Feasibility &mdash; challenges &mdash; how each is already handled</div>
+      <div class="three">
+        <div>
+          <div class="fh">Feasible today</div>
+          <div class="item"><div class="ic">01</div><div class="ib"><b>It is already built and running.</b> Live site, live API, nightly refresh unattended.</div></div>
+          <div class="item"><div class="ic">02</div><div class="ib"><b>Public data only.</b> No new collection, no ministry integration needed to start.</div></div>
+          <div class="item"><div class="ic">03</div><div class="ib"><b>Free to run.</b> Scoring is offline and deterministic; labels are cached and committed, so a clone needs no API key.</div></div>
+          <div class="item"><div class="ic">04</div><div class="ib"><b>Commodity infrastructure.</b> One Postgres, one serverless API, one static front end.</div></div>
+          <div class="proof">
+            <div class="pv">{{tests}}</div><div class="pl">tests against the live database</div>
+          </div>
+        </div>
+        <div>
+          <div class="fh">Real challenges</div>
+          <div class="item"><div class="ic">01</div><div class="ib"><b>No bulk export from MoSPI.</b> Works sit behind an OTP-gated citizen form, one member at a time.</div></div>
+          <div class="item"><div class="ic">02</div><div class="ib"><b>A score can be mistaken for an accusation</b> by a reader, a reporter, or an MP.</div></div>
+          <div class="item"><div class="ic">03</div><div class="ib"><b>The record is thin.</b> No progress %, beneficiaries, geo-tag or bill value is published.</div></div>
+          <div class="item"><div class="ic">04</div><div class="ib"><b>Peer groups were meaningless</b> while 98.1% of works carried one category.</div></div>
+          <div class="item"><div class="ic">05</div><div class="ib"><b>Free-tier limits.</b> 512 MB database; a 300&rarr;457 MB blowup happened once.</div></div>
+        </div>
+        <div>
+          <div class="fh">How each is handled</div>
+          <div class="item"><div class="ic">&rarr;</div><div class="ib">Load the aggregator's export, then <b>reconcile to MoSPI's own endpoints nightly</b> and publish both hops separately.</div></div>
+          <div class="item"><div class="ic">&rarr;</div><div class="ib">Every flag carries <b>the method that produced it</b>; a whole page states what the system refuses to claim.</div></div>
+          <div class="item"><div class="ic">&rarr;</div><div class="ib">Blind spots are <b>listed on the site</b> rather than filled with invented fields.</div></div>
+          <div class="item"><div class="ic">&rarr;</div><div class="ib">A language model that <b>can abstain</b> labels the sectors; "Other" fell from 74,676 works to 7,464.</div></div>
+          <div class="item"><div class="ic">&rarr;</div><div class="ib">Derived tables are rebuilt, never row-updated, and swapped in <b>one transaction</b>.</div></div>
+          <div class="proof">
+            <div class="pv">{{states}} / {{states}}</div><div class="pl">states match the source exactly</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ 5. IMPACT -->
+    <div class="board" id="impact">
+      <div class="eyebrow">Impact &mdash; a quarter-million records reduced to a morning of verification</div>
+      <div class="funnel">
+        <div class="fstep"><div class="fv">{{works}}</div><div class="fl">works scored</div></div>
+        <div class="fjoin"></div>
+        <div class="fstep"><div class="fv">{{queue}}</div><div class="fl">worth a look &ge; 40</div></div>
+        <div class="fjoin"></div>
+        <div class="fstep"><div class="fv" style="color:var(--risk-high)">{{high}}</div><div class="fl">high risk &ge; 70</div></div>
+        <div class="fjoin"></div>
+        <div class="fstep"><div class="fv">18</div><div class="fl">top of the queue</div></div>
+      </div>
+
+      <div class="who">
+        <div class="whobox"><div class="wn">Members of Parliament</div><div class="wd">See their own works before somebody else does, with the reason attached.</div></div>
+        <div class="whobox"><div class="wn">District authorities</div><div class="wd">A ranked list of what to inspect this week, not a spreadsheet of everything.</div></div>
+        <div class="whobox"><div class="wn">State nodal authorities</div><div class="wd">Agencies that have gone quiet, and members whose funds sit idle.</div></div>
+        <div class="whobox"><div class="wn">The Ministry</div><div class="wd">Programme-wide patterns, reconciled against its own published figures.</div></div>
+      </div>
+
+      <div class="ba">
+        <div class="before">Today: {{works}} works, {{allocated}}, and no human path through the record.</div>
+        <div class="arrow">&rarr;</div>
+        <div class="after">With Kasauti: a ranked queue, every flag arguable, refreshed nightly and checked against the source.</div>
+      </div>
+    </div>
+
+    <!-- ============================================ 6. REFERENCES -->
+    <div class="board" id="refs">
+      <div class="eyebrow">Research, sources and the running system &mdash; every claim in this deck is checkable</div>
+      <div class="hexrow">
+        <div class="hex">
+          <div><div class="hk">Designated source</div>
+          <div class="hn">MoSPI MPLADS</div>
+          <div class="hd">The portal the problem statement names. Totals open, works OTP-gated.</div></div>
+          <div class="hl">mplads.mospi.gov.in</div>
+        </div>
+        <div class="hex">
+          <div><div class="hk">Data used</div>
+          <div class="hn">Empowered Indian</div>
+          <div class="hd">Bulk CSV export of the same record. Reconciled nightly.</div></div>
+          <div class="hl">empoweredindian.in</div>
+        </div>
+        <div class="hex">
+          <div><div class="hk">Method</div>
+          <div class="hn">Isolation Forest</div>
+          <div class="hd">Liu, Ting &amp; Zhou, 2008. Anomaly detection by isolation.</div></div>
+          <div class="hl">Liu, Ting &amp; Zhou &middot; ICDM 2008</div>
+        </div>
+        <div class="hex">
+          <div><div class="hk">Method</div>
+          <div class="hn">Sentence-BERT</div>
+          <div class="hd">Reimers &amp; Gurevych, 2019. Sentence embeddings for similarity.</div></div>
+          <div class="hl">arxiv.org/abs/1908.10084</div>
+        </div>
+        <div class="hex">
+          <div><div class="hk">Live system</div>
+          <div class="hn">Working prototype</div>
+          <div class="hd">The site itself &mdash; every figure in this deck is on it.</div></div>
+          <div class="hl">2,50,839 works scored nightly</div>
+        </div>
+        <div class="hex">
+          <div><div class="hk">Source code</div>
+          <div class="hn">GitHub &amp; video</div>
+          <div class="hd">Loader, scorer, detectors, API, tests, and the 2-min explainer.</div></div>
+          <div class="hl">loader &middot; scorer &middot; API &middot; tests</div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

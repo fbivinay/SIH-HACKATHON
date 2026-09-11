@@ -126,9 +126,9 @@
     "semantic_hash": "a7295a74f693f0977221c66cd9e7a3eb"
   },
   "scripts/build_sih_deck.py": {
-    "mtime": 1789121981.729633,
-    "seen": 1789156880.4902062,
-    "ast_hash": "536590be4b08829a0264aa321712966f",
+    "mtime": 1789168940.6483324,
+    "seen": 1789169013.0291061,
+    "ast_hash": "2382cf3ce93d9003c54fd4225408becb",
     "semantic_hash": ""
   },
   "scripts/classify_sectors.py": {
@@ -426,15 +426,15 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789134532.1158838,
-    "seen": 1789156880.491069,
-    "ast_hash": "e1aa36a7d6c1858f89e29ad201d5c4f7",
+    "mtime": 1789168982.7319489,
+    "seen": 1789169013.0320761,
+    "ast_hash": "ba40bdbebb44577537b5a99202598b0d",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1788980707.8208857,
-    "seen": 1789156880.4910705,
-    "ast_hash": "87d6a9a5456ddcf563e7f6f9fad11b4f",
+    "mtime": 1789162703.1117349,
+    "seen": 1789169013.03208,
+    "ast_hash": "3a6fe9bda4c0d33e6a803e8ae22a0ce6",
     "semantic_hash": ""
   },
   "api/requirements.txt": {
@@ -537,6 +537,276 @@
     "mtime": 1789162167.2836742,
     "seen": 1789162252.5289063,
     "ast_hash": "92d424c2125d8d0ffd8a3a9f0fa0f3c8",
+    "semantic_hash": ""
+  },
+  ".impeccable/config.json": {
+    "mtime": 1789164523.398261,
+    "seen": 1789169013.0276206,
+    "ast_hash": "ccc43fd63a40fd4092a8d54ec622219b",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/package.json": {
+    "mtime": 1789168293.3460987,
+    "seen": 1789169013.0290976,
+    "ast_hash": "279c2a61308bf8bf97b7e7bce152a1da",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/png/sizes.json": {
+    "mtime": 1789168964.6635082,
+    "seen": 1789169013.029101,
+    "ast_hash": "4346bcfeb9cdf341f23f93174f473035",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/render.mjs": {
+    "mtime": 1789168597.1873348,
+    "seen": 1789169013.0291033,
+    "ast_hash": "53502e31b72c18a1b467e7a65ed838ff",
+    "semantic_hash": ""
+  },
+  "scripts/preview_deck.py": {
+    "mtime": 1789168676.2786152,
+    "seen": 1789169013.0292606,
+    "ast_hash": "14051823a731a72e2963035b76603f11",
+    "semantic_hash": ""
+  },
+  "skills-lock.json": {
+    "mtime": 1789163078.2648365,
+    "seen": 1789169013.0294585,
+    "ast_hash": "af80e0786273b5118bacbefbef9a00cf",
+    "semantic_hash": ""
+  },
+  "video-explainer/build.py": {
+    "mtime": 1789166510.834814,
+    "seen": 1789169013.0294623,
+    "ast_hash": "a9aa96e92bc3071e4f8bd11a4ed3bde4",
+    "semantic_hash": ""
+  },
+  "brag-output/brag-plan.md": {
+    "mtime": 1789163917.49033,
+    "seen": 1789169013.0321262,
+    "ast_hash": "98f71a0b27fc139f4f66a2307c9bbda5",
+    "semantic_hash": ""
+  },
+  "brag-output/composition-brief.md": {
+    "mtime": 1789163960.7037873,
+    "seen": 1789169013.0321288,
+    "ast_hash": "cc3e3029479ef9b91fa030550ed60b5e",
+    "semantic_hash": ""
+  },
+  "brag-output/composition/assets/README.md": {
+    "mtime": 1789164475.3102658,
+    "seen": 1789169013.0321314,
+    "ast_hash": "988841f5d029e1dad78c747e1a8cbbec",
+    "semantic_hash": ""
+  },
+  "brag-output/composition/index.html": {
+    "mtime": 1789164277.7262878,
+    "seen": 1789169013.032133,
+    "ast_hash": "69a7084dad68085dc04b21c95572094c",
+    "semantic_hash": ""
+  },
+  "brag-output/share-copy.txt": {
+    "mtime": 1789164436.0782683,
+    "seen": 1789169013.032135,
+    "ast_hash": "0ff580ede97a3aeb0f9c34ed85f04fc2",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/boards.template.html": {
+    "mtime": 1789168319.607772,
+    "seen": 1789169013.032232,
+    "ast_hash": "fcb0d29f058756e535e0d8c842d7d70a",
+    "semantic_hash": ""
+  },
+  "video-explainer/README.md": {
+    "mtime": 1789166112.489254,
+    "seen": 1789169013.0323415,
+    "ast_hash": "90e23302386424aa1f12567afeb425cb",
+    "semantic_hash": ""
+  },
+  "video-explainer/composition/assets/README.md": {
+    "mtime": 1789166112.4921756,
+    "seen": 1789169013.0323434,
+    "ast_hash": "988841f5d029e1dad78c747e1a8cbbec",
+    "semantic_hash": ""
+  },
+  "video-explainer/composition/index.html": {
+    "mtime": 1789166511.1193826,
+    "seen": 1789169013.0323455,
+    "ast_hash": "f0172e6de0d8b8ff390453423699f073",
+    "semantic_hash": ""
+  },
+  "video-explainer/narration.txt": {
+    "mtime": 1789165430.9757118,
+    "seen": 1789169013.0323474,
+    "ast_hash": "1a3383c6bb5c61ac3e0d2e82af6b744c",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/01-problem.txt": {
+    "mtime": 1789165278.838515,
+    "seen": 1789169013.0323496,
+    "ast_hash": "140436b470051c25308fd7db70f1b391",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/02-what.txt": {
+    "mtime": 1789165278.838619,
+    "seen": 1789169013.0323513,
+    "ast_hash": "d8b6c0d2d0ceb94ed1422737ea5564f4",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/03-provenance.txt": {
+    "mtime": 1789165431.0003982,
+    "seen": 1789169013.0323527,
+    "ast_hash": "040d2a56caee9e9c1337ef53a5158460",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/04-score.txt": {
+    "mtime": 1789165278.8387096,
+    "seen": 1789169013.0323548,
+    "ast_hash": "61722c503b9ea22fa99249f425b299e5",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/05-forest.txt": {
+    "mtime": 1789165278.8387449,
+    "seen": 1789169013.032357,
+    "ast_hash": "0d3f5de125ac3f766a07e112a713699e",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/06-bert.txt": {
+    "mtime": 1789165278.8387792,
+    "seen": 1789169013.032359,
+    "ast_hash": "7f39370701f52079f83e7fb014280741",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/07-gemini.txt": {
+    "mtime": 1789165278.838834,
+    "seen": 1789169013.032361,
+    "ast_hash": "3f63bb5a5985aa4b0461ecb47458f07d",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/08-detectors.txt": {
+    "mtime": 1789165278.838908,
+    "seen": 1789169013.032363,
+    "ast_hash": "d9b1a162c5161a1f6be55d80632de73b",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/09-queue.txt": {
+    "mtime": 1789165278.8389494,
+    "seen": 1789169013.0323648,
+    "ast_hash": "162e95897d08e44b4732c698ffc224c3",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/10-why.txt": {
+    "mtime": 1789165278.8389974,
+    "seen": 1789169013.0323665,
+    "ast_hash": "2021f3abab4478edd4df4e4ce42ce0fe",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/11-refresh.txt": {
+    "mtime": 1789165278.839041,
+    "seen": 1789169013.0323684,
+    "ast_hash": "66821bcaf9c3b379fe90b14668a68102",
+    "semantic_hash": ""
+  },
+  "video-explainer/vo/12-limits.txt": {
+    "mtime": 1789165445.8877707,
+    "seen": 1789169013.03237,
+    "ast_hash": "b9f5f467c2ed441a80b4f2b4f01a6fac",
+    "semantic_hash": ""
+  },
+  "brag-output/brag.jpg": {
+    "mtime": 1789164389.6976826,
+    "seen": 1789169013.0324953,
+    "ast_hash": "9bf59482b64f5f5879ce8c3eade84dde",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/png/arch.png": {
+    "mtime": 1789168963.9279041,
+    "seen": 1789169013.0324976,
+    "ast_hash": "8e3ad944ecb74fab0839d366cecd56a6",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/png/feas.png": {
+    "mtime": 1789168964.358681,
+    "seen": 1789169013.0324993,
+    "ast_hash": "fead9cceb5e9ecc6d24b9e26f0154e70",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/png/impact.png": {
+    "mtime": 1789168964.5160625,
+    "seen": 1789169013.032501,
+    "ast_hash": "f27afc2014fe0194ffd77437054cc8d1",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/png/pipeline.png": {
+    "mtime": 1789168964.036578,
+    "seen": 1789169013.0325024,
+    "ast_hash": "34540699f1308cc6a04fe0ec651fadb0",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/png/refs.png": {
+    "mtime": 1789168964.6608698,
+    "seen": 1789169013.032504,
+    "ast_hash": "7af004a196372828dcd05b0f3a06a678",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/png/stack.png": {
+    "mtime": 1789168964.1428678,
+    "seen": 1789169013.0325062,
+    "ast_hash": "73e18eae93d7af44f5754f8af4c70592",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/shots/agencies.png": {
+    "mtime": 1789168086.3287349,
+    "seen": 1789169013.0325086,
+    "ast_hash": "9870a39d2210e77b119fe733f5913dca",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/shots/alerts.png": {
+    "mtime": 1789168085.3501108,
+    "seen": 1789169013.0325108,
+    "ast_hash": "5e6a4c96deaee33e9d73e8d5fcac0c29",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/shots/map.png": {
+    "mtime": 1789168086.0250442,
+    "seen": 1789169013.0325122,
+    "ast_hash": "b39682d564d308bbb51485af262d4aa3",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/shots/overview.png": {
+    "mtime": 1789168085.1161268,
+    "seen": 1789169013.032514,
+    "ast_hash": "fda33e4f67de87b1619193430c029cf1",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/shots/provenance.png": {
+    "mtime": 1789168086.6240695,
+    "seen": 1789169013.032516,
+    "ast_hash": "b7399429d6b5ebd08c4c92ad5cba8170",
+    "semantic_hash": ""
+  },
+  "docs/deck/diagrams/shots/work.png": {
+    "mtime": 1789168085.6159997,
+    "seen": 1789169013.0325184,
+    "ast_hash": "0ebef73963439dfac4dad4abed91de28",
+    "semantic_hash": ""
+  },
+  "video-explainer/poster.jpg": {
+    "mtime": 1789166778.456259,
+    "seen": 1789169013.0325203,
+    "ast_hash": "124f8d38b3e6acbd2998bee7d8e47398",
+    "semantic_hash": ""
+  },
+  "brag-output/brag.mp4": {
+    "mtime": 1789164411.705135,
+    "seen": 1789169013.0328653,
+    "ast_hash": "69517c54721e7417c61e4330416d270e",
+    "semantic_hash": ""
+  },
+  "video-explainer/kasauti-explainer.mp4": {
+    "mtime": 1789166813.620214,
+    "seen": 1789169013.0328681,
+    "ast_hash": "f5af7b81339243c0c9de14f030ae2607",
     "semantic_hash": ""
   }
 }
