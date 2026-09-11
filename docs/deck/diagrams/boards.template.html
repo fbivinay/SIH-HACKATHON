@@ -78,8 +78,13 @@
       .role span { display: block; font-family: var(--mono); font-size: 10.5px;
                    color: var(--ink-3); font-weight: 400; margin-top: 2px;
                    letter-spacing: .1em; text-transform: uppercase; }
-      .never { margin-top: 14px; border-left: 3px solid var(--risk-high);
-               background: #fbe9e7; border-radius: 0 10px 10px 0; padding: 10px 14px; }
+      /* A full hairline border and the risk tint, the way the product's own
+         .notice is built - no accent stripe down one side. The product never
+         does that: every border-left in globals.css is a neutral 1-2px line,
+         and the bold red lead-in already carries the emphasis. */
+      .never { margin-top: 14px; background: #fbe9e7; padding: 11px 15px;
+               border: 1px solid color-mix(in srgb, var(--risk-high) 26%, transparent);
+               border-radius: 12px; }
       .never b { color: var(--risk-high); }
 
       /* ============================================ 2. pipeline ======== */
