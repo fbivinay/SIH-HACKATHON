@@ -1599,7 +1599,7 @@ button,
 }
 
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(74px) scale(0.95); }
+  from { opacity: 0; transform: translateY(var(--rise-y)) scale(var(--rise-s)); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1607,7 +1607,7 @@ button,
    overshoot: these are audited public-spending figures, and the movement
    should read as confident rather than playful. */
 @keyframes card-in {
-  from { opacity: 0; transform: translateY(104px) scale(0.86); }
+  from { opacity: 0; transform: translateY(var(--card-y)) scale(var(--card-s)); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1652,7 +1652,25 @@ button,
  * Both are CSS animations timed from first paint, so they stay in step without
  * anything having to coordinate them.
  */
-:root { --enter-at: 3000ms; }
+:root {
+  --enter-at: 3000ms;
+  --rise-y: 74px;  --rise-s: 0.95;
+  --card-y: 104px; --card-s: 0.86;
+}
+
+/*
+ * After the cover has gone (ScrollReveal sets this at 3.4s), an entrance is a
+ * page arriving after a nav click. That gets no delay - with the delay in
+ * place every page after the first sat blank for three seconds, which was
+ * most of what "changing sections is laggy" was - and a lighter travel, so
+ * the page reads as arriving in place rather than climbing up from below.
+ * The scroll reveals are untouched; they keep the full travel.
+ */
+:root[data-entered] {
+  --enter-at: 0ms;
+  --rise-y: 22px;  --rise-s: 0.99;
+  --card-y: 34px;  --card-s: 0.96;
+}
 
 main > section,
 main > .shell {
@@ -1979,6 +1997,54 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   height: 6px;
   border-radius: 50%;
   background: var(--ink);
+}
+
+/* ----------------------------------------------------------- pageload -- */
+/*
+ * The between-pages loader (app/loading.tsx). A running bar and the ghost of
+ * the page-head and first row of cards, pulsing on opacity - composited, so it
+ * costs nothing while the real page streams in behind it.
+ */
+.pageload { padding-block: 1.6rem 3rem; }
+.pageload__bar {
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  overflow: hidden;
+  margin-bottom: 1.6rem;
+}
+.pageload__run {
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ink);
+  animation: pageload-run 1.1s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+@keyframes pageload-run {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(265%); }
+}
+.pageload__title,
+.pageload__lede,
+.pageload__card {
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  animation: pageload-pulse 1.4s ease-in-out infinite;
+}
+.pageload__title { height: 2.4rem; width: 58%; margin-bottom: 0.9rem; }
+.pageload__lede  { height: 1.1rem; width: 42%; margin-bottom: 1.8rem; animation-delay: 120ms; }
+.pageload__card  { height: 7.2rem; }
+.pageload__card:nth-child(2) { animation-delay: 90ms; }
+.pageload__card:nth-child(3) { animation-delay: 180ms; }
+.pageload__card:nth-child(4) { animation-delay: 270ms; }
+@keyframes pageload-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pageload__run { animation: none; width: 100%; }
+  .pageload__title, .pageload__lede, .pageload__card { animation: none; }
 }
 
 /* ------------------------------------------------------------- splash -- */

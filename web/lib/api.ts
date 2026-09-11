@@ -541,9 +541,18 @@ export type DataFreshness = {
 // to the SSO login page. No-op once the API is public.
 const API_BYPASS = process.env.API_PROTECTION_BYPASS;
 
+// Every read is cached for five minutes. The record changes once a night, so
+// a page rendered from five-minute-old data is not wrong, and it is the
+// difference between a nav click that waits one to nine seconds on Neon (measured)
+// and one that is served from cache. The one thing that changes between
+// refreshes is a review, and submitting one expires the whole tag (see
+// app/alerts/actions.ts), so a reviewer always reads their own write.
+const CACHE_TAG = "api";
+const CACHE_SECONDS = 300;
+
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
-    cache: "no-store",
+    next: { revalidate: CACHE_SECONDS, tags: [CACHE_TAG] },
     headers: API_BYPASS ? { "x-vercel-protection-bypass": API_BYPASS } : undefined,
   });
   if (!res.ok) throw new Error(`API error ${res.status} on ${path}`);
