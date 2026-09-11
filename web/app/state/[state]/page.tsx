@@ -212,8 +212,11 @@ export default async function StateDeskPage({
         <div className="mb-4">
           <h2 className="section-head">Members</h2>
           <p className="lede !mx-0 !max-w-2xl">
-            Ordered by the share of allocation actually paid out, lowest first — the
-            members whose funds are moving slowest are the ones a nodal authority chases.
+            Ordered by the share of allocation actually paid to vendors, lowest first —
+            the members whose funds are moving slowest are the ones a nodal authority
+            chases. &ldquo;Committed&rdquo; is money attached to a work but not yet paid;
+            the portal publishes that figure under the name &ldquo;utilisation&rdquo;,
+            which is why the two columns differ.
           </p>
         </div>
         <div className="data-table-wrap">
@@ -223,6 +226,7 @@ export default async function StateDeskPage({
                 <th>Member</th>
                 <th className="num">Allocated</th>
                 <th className="num">Paid out</th>
+                <th className="num">Committed</th>
                 <th className="num">Never committed</th>
                 <th className="num">To verify</th>
               </tr>
@@ -241,6 +245,9 @@ export default async function StateDeskPage({
                   </td>
                   <td className="num">{formatINR(m.allocated_amount)}</td>
                   <td className="num">
+                    {m.paid_pct === null ? "—" : `${Number(m.paid_pct).toFixed(1)}%`}
+                  </td>
+                  <td className="num" style={{ color: "var(--ink-2)" }}>
                     {m.utilization_pct === null ? "—" : `${m.utilization_pct.toFixed(1)}%`}
                   </td>
                   <td className="num">{formatINR(m.idle_amount)}</td>

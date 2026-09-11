@@ -167,3 +167,16 @@ export const DUPLICATE_SIMILARITY_THRESHOLD = 0.94;
 export function isNearDuplicate(score: number | null | undefined): boolean {
   return score !== null && score !== undefined && score >= DUPLICATE_SIMILARITY_THRESHOLD;
 }
+
+/**
+ * Same value as MIN_PEERS in data/scoring.py: below this, cost_risk_score
+ * returns 0 and leaves cost_deviation_pct at 0 rather than comparing against a
+ * handful of works. 10,334 of 250,839 works are in that position, and every one
+ * of them carries exactly 0 - so a bare "0%" would read as "precisely at the
+ * peer median" when it means "not compared".
+ */
+export const MIN_PEERS_FOR_COST = 8;
+
+export function hasPeers(peerCount: number | null | undefined): boolean {
+  return peerCount !== null && peerCount !== undefined && peerCount >= MIN_PEERS_FOR_COST;
+}

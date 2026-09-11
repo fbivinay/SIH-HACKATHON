@@ -5,7 +5,9 @@ import ReviewTrail from "@/components/ReviewTrail";
 import {
   formatCount,
   formatINR,
+  hasPeers,
   isNearDuplicate,
+  MIN_PEERS_FOR_COST,
   riskLevelClass,
   riskLevelLabel,
   workStatusLabel,
@@ -141,8 +143,19 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         <div className="stat-card stat-card--medium">
           <div className="stat-card__label">Cost deviation</div>
           <div className="stat-card__value" style={{ fontSize: "1.15rem" }}>
-            {p.cost_deviation_pct === null ? "—" : `${p.cost_deviation_pct.toFixed(0)}%`}
+            {/* The scorer writes 0 when it refuses to compare - all 10,334 works
+                with fewer than MIN_PEERS peers carry exactly 0. Printing that as
+                "0%" claims the work sits precisely at its peer median, which is
+                the opposite of "we could not say". */}
+            {p.cost_deviation_pct === null || !hasPeers(p.peer_count)
+              ? "—"
+              : `${p.cost_deviation_pct.toFixed(0)}%`}
           </div>
+          {!hasPeers(p.peer_count) && (
+            <div className="stat-card__note">
+              Fewer than {MIN_PEERS_FOR_COST} comparable works in this district and sector
+            </div>
+          )}
         </div>
         <div className="stat-card stat-card--neutral">
           <div className="stat-card__label">Work status</div>

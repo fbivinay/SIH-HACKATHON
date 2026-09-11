@@ -137,7 +137,7 @@ export default async function ProvenancePage() {
                         </td>
                         <td className="num">
                           {r.aggregator_gap_pct === null
-                            ? `${Number(r.gap_pct).toFixed(2)}%`
+                            ? "—"
                             : `${Number(r.aggregator_gap_pct).toFixed(2)}%`}
                         </td>
                       </tr>
@@ -156,9 +156,19 @@ export default async function ProvenancePage() {
                   : `${p.worst_our_hop_pct.toFixed(2)}% at worst`}
               </b>{" "}
               — and that hop is fully accounted for: it is works the loader refuses. On the
-              latest extract, 85 completed works and 52 recommended ones carry an empty
-              description, and 48 more are sanctioned below the one-thousand-rupee floor.
-              A work with no description cannot be assigned a sector or matched against a
+              latest extract it refused{" "}
+              {p.rejects.length ? (
+                p.rejects.map((r, i) => (
+                  <span key={r.reason}>
+                    {i > 0 ? ", " : ""}
+                    <b style={{ fontWeight: 600 }}>{formatCount(r.rows)}</b> for{" "}
+                    {r.reason.toLowerCase()}
+                  </span>
+                ))
+              ) : (
+                <b style={{ fontWeight: 600 }}>nothing</b>
+              )}
+              . A work with no description cannot be assigned a sector or matched against a
               duplicate, so it is rejected and written to a rejects table with its reason
               rather than dropped quietly. Every remaining row of the export is loaded. The
               rest{" "}

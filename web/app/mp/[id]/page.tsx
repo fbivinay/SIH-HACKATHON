@@ -7,7 +7,14 @@ export default async function MpPage({ params }: { params: Promise<{ id: string 
   const { id } = await params;
   let mp;
   try {
+    // Without ls_term the works block spans BOTH terms (see mp_detail), while
+    // the money block below reads terms[0] - the most recent one. A member with
+    // works in the 17th and 18th Lok Sabha then got one term's allocation shown
+    // against two terms' works.
     mp = await api.mp(decodeURIComponent(id));
+    if (mp.terms.length > 1) {
+      mp = await api.mp(decodeURIComponent(id), { ls_term: String(mp.terms[0].ls_term) });
+    }
   } catch {
     notFound();
   }
@@ -46,7 +53,7 @@ export default async function MpPage({ params }: { params: Promise<{ id: string 
           {
             label: "Allocated",
             value: formatINR(Number(current.allocated_amount)),
-            note: `${pct(current.utilization_pct)} utilised`,
+            note: `${pct(current.utilization_pct)} committed to works`,
           },
           {
             label: "Never committed",

@@ -37,7 +37,7 @@ const COMPONENTS = [
     name: "Compliance",
     weight: "15%",
     method:
-      "Checks against the MPLADS guidelines: permissible work categories, sanction ceilings, and spend exceeding sanction.",
+      "Four stated rules: spend beyond the sanction, a recommended work with no schedule, a completed work with no completion date, and a completed work with no photograph.",
     guard: "Each breach names the rule it breaks.",
   },
 ];
