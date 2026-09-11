@@ -2,7 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import ReviewTrail from "@/components/ReviewTrail";
-import { formatCount, formatINR, riskLevelClass, riskLevelLabel, workStatusLabel } from "@/lib/format";
+import {
+  formatCount,
+  formatINR,
+  isNearDuplicate,
+  riskLevelClass,
+  riskLevelLabel,
+  workStatusLabel,
+} from "@/lib/format";
 
 function RiskMeter({ label, value }: { label: string; value: number | null }) {
   const pct = value === null ? 0 : Math.max(0, Math.min(100, value));
@@ -183,12 +190,17 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
       <ReviewTrail workKey={p.work_key} />
 
-      {p.similar_work_id && (
+      {p.similar_work_id && isNearDuplicate(p.max_similarity_score) && (
         <p className="mt-6 text-sm">
-          Similar to{" "}
+          Reads as a near-duplicate of{" "}
           <Link className="link-quiet" href={`/projects/${p.similar_work_id}`}>
             work #{p.similar_work_id}
-          </Link>
+          </Link>{" "}
+          <span style={{ color: "var(--ink-3)" }}>
+            (description similarity {Number(p.max_similarity_score).toFixed(2)}; two works
+            can legitimately share a description, so this is a prompt to check, not a
+            finding)
+          </span>
         </p>
       )}
     </main>
