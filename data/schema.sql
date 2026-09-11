@@ -262,8 +262,28 @@ CREATE INDEX IF NOT EXISTS idx_work_review_events_work_key
 -- statement, so this table is always the size of its contents and `projects`
 -- is never rewritten after the load. Same contract as agency_vendor_profile
 -- and detector_findings: derived, rebuilt every run, no history to keep.
+--
+-- Keyed on work_key, not projects.id. The id is a serial the nightly reload
+-- reassigns, so a score row could only survive a reload by luck - which is why
+-- the loader used to truncate this table outright. That left the site showing
+-- no scores at all for the ~25 minutes between the load finishing and scoring
+-- catching up. work_key survives a reload by construction, so yesterday's
+-- scores stay attached to the right works while today's are computed, and the
+-- swap happens in write_scores' single transaction. Readers never see empty.
+--
+-- One-time migration: rebuild the table if it is still keyed on project_id.
+-- Runs once, then the IF becomes false and this is a no-op every night after.
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns
+               WHERE table_name = 'project_scores' AND column_name = 'project_id') THEN
+        DROP VIEW IF EXISTS projects_scored;
+        DROP TABLE project_scores;
+    END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS project_scores (
-    project_id INTEGER PRIMARY KEY,
+    work_key TEXT PRIMARY KEY,
     delay_days INTEGER,
     cost_deviation_pct NUMERIC(12,2),
     expenditure_ratio NUMERIC(6,2),
@@ -272,7 +292,7 @@ CREATE TABLE IF NOT EXISTS project_scores (
     peer_count INTEGER,
     agency_delay_rate NUMERIC(5,2),
     max_similarity_score NUMERIC(5,4),
-    similar_work_id INTEGER,
+    similar_work_key TEXT,
     cost_risk NUMERIC(5,2),
     delay_risk NUMERIC(5,2),
     duplicate_risk NUMERIC(5,2),
@@ -299,12 +319,16 @@ SELECT p.id, p.work_key, p.work_name, p.description, p.ls_term, p.mp_name,
        p.actual_completion, p.source, p.has_images, p.created_at,
        s.delay_days, s.cost_deviation_pct, s.expenditure_ratio, s.sector,
        s.peer_median_cost, s.peer_count, s.agency_delay_rate,
-       s.max_similarity_score, s.similar_work_id, s.cost_risk, s.delay_risk,
+       s.max_similarity_score, sim.id AS similar_work_id,
+       s.cost_risk, s.delay_risk,
        s.duplicate_risk, s.agency_risk, s.compliance_risk,
        s.overall_risk_score, s.risk_level,
        COALESCE(s.flagged_reasons, '[]'::jsonb) AS flagged_reasons
 FROM projects p
-LEFT JOIN project_scores s ON s.project_id = p.id;
+LEFT JOIN project_scores s ON s.work_key = p.work_key
+-- Resolved here so callers keep getting an id they can link to, while what is
+-- stored stays reload-proof.
+LEFT JOIN projects sim ON sim.work_key = s.similar_work_key;
 
 
 -- How our figures compare with the official MoSPI dashboard, recorded each

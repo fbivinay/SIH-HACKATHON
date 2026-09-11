@@ -492,14 +492,13 @@ def load(conn, df, rejects):
         else:
             cur.execute("TRUNCATE projects RESTART IDENTITY CASCADE")
 
-        # Scores describe the rows that were just replaced, and they are keyed
-        # on a serial the reload reassigns. Today they happened to land back on
-        # the right works because the loader inserts in the same order - but a
-        # single work added or removed upstream shifts every id after it, and
-        # every score with it, silently and with no error. Derived data must
-        # not outlive the rows it describes. scoring.py repopulates this in the
-        # same pipeline run.
-        cur.execute("TRUNCATE project_scores")
+        # project_scores is deliberately NOT cleared here. It used to be, because
+        # it was keyed on a serial this reload reassigns, so a surviving score
+        # would silently describe a different work. It is keyed on work_key now,
+        # which survives by construction - so last night's scores stay attached
+        # to the right works while tonight's are computed, and write_scores
+        # swaps them in one transaction. Truncating here instead left the whole
+        # site showing no scores for the ~25 minutes in between.
         execute_values(
             cur,
             f"INSERT INTO projects ({', '.join(INSERT_COLUMNS)}) VALUES %s",
@@ -513,7 +512,17 @@ def load(conn, df, rejects):
                 rejects,
                 page_size=1000,
             )
+        # A work the source has withdrawn leaves its score behind with nothing
+        # to join to. Harmless to readers - the view is a LEFT JOIN from
+        # projects - but it would accumulate forever on a 512 MB database.
+        cur.execute(
+            """DELETE FROM project_scores s
+               WHERE NOT EXISTS (SELECT 1 FROM projects p WHERE p.work_key = s.work_key)"""
+        )
+        orphaned = cur.rowcount
     conn.commit()
+    if orphaned:
+        print(f"Dropped {orphaned:,} score(s) for works no longer in the source.")
     return len(rows), len(rejects)
 
 
