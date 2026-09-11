@@ -333,9 +333,13 @@ def build_flagged_reasons(row):
     elif row.get("iso_anomaly", 0) > 40:
         # The multivariate signal is real and is driving this work's score, so
         # narrate it honestly rather than silently dropping the explanation.
+        # Name the model. This is the one flag a reviewer cannot reproduce by
+        # eye - no single column is out of range, which is exactly the point -
+        # so the reason has to say what found it.
         reasons.append(
             "Unusual combination of sanctioned amount, delay and spending "
-            "pattern compared with all works"
+            "pattern — flagged by an isolation forest fitted over every work, "
+            "not by any single figure being out of range"
         )
     if row["delay_risk"] > 40:
         reasons.append(f"{row['delay_days']:.0f} days beyond expected completion")

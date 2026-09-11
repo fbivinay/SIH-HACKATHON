@@ -227,9 +227,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             work #{p.similar_work_id}
           </Link>{" "}
           <span style={{ color: "var(--ink-3)" }}>
-            (description similarity {Number(p.max_similarity_score).toFixed(2)}; two works
-            can legitimately share a description, so this is a prompt to check, not a
-            finding)
+            (sentence-embedding similarity {Number(p.max_similarity_score).toFixed(2)},
+            measured by all-MiniLM-L6-v2 on meaning rather than shared words; two works can
+            legitimately share a description, so this is a prompt to check, not a finding)
           </span>
         </p>
       )}

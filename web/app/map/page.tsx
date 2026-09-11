@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { api, StateStat } from "@/lib/api";
@@ -161,7 +162,13 @@ export default function MapPage() {
             )}
             {sorted.map((s) => (
               <tr key={s.state}>
-                <td>{s.state}</td>
+                <td>
+                  {/* The Map is the page a state officer opens first to find
+                      their state, and every state on it was dead text. */}
+                  <Link href={`/state/${encodeURIComponent(s.state)}`} className="link-quiet">
+                    {s.state}
+                  </Link>
+                </td>
                 <td className="num">{formatCount(s.total_projects)}</td>
                 <td className="num">{scoringPending ? "—" : formatCount(s.flagged_count)}</td>
                 <td className="num">

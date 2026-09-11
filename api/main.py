@@ -1,7 +1,9 @@
+import csv
+import io
 import json
 import os
 from typing import Optional
-from fastapi import FastAPI, Header, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from db import execute, query
@@ -347,7 +349,8 @@ _ALERT_COLUMNS = """
 """
 
 
-def _alert_filters(q, state, district, sector, risk_level, ls_term, status, min_score):
+def _alert_filters(q, state, district, sector, risk_level, ls_term, status, min_score,
+                   mp_id=None):
     """Shared WHERE builder so the list and its total count can never drift."""
     filters, params = [], []
     if q:
@@ -362,6 +365,10 @@ def _alert_filters(q, state, district, sector, risk_level, ls_term, status, min_
         ("p.sector", sector),
         ("p.risk_level", risk_level),
         ("p.ls_term", ls_term),
+        # So a member's page can hand them their own works. The two desks each
+        # end on "open this place in the queue"; the MP page ended on a
+        # ten-row table and no route into acting on it.
+        ("p.mp_id", mp_id),
     ):
         if value is not None:
             filters.append(f"{column} = %s")
@@ -389,13 +396,14 @@ def alerts(
     ls_term: Optional[int] = Query(None, ge=17, le=18),
     status: Optional[str] = Query(None, pattern="^(pending|verified|dismissed|escalated)$"),
     min_score: Optional[float] = Query(None, ge=0, le=100),
+    mp_id: Optional[str] = None,
     limit: int = Query(50, le=200),
     offset: int = 0,
 ):
     """The triage queue: works ranked by risk, carrying their evidence and
     whatever a reviewer has already concluded about them."""
     where, params = _alert_filters(
-        q, state, district, sector, risk_level, ls_term, status, min_score
+        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id
     )
     rows = query(
         f"""
@@ -421,6 +429,90 @@ def alerts(
     return {"total": total["total"], "limit": limit, "offset": offset, "alerts": rows}
 
 
+@app.get("/api/alerts/export")
+def alerts_export(
+    q: Optional[str] = None,
+    state: Optional[str] = None,
+    district: Optional[str] = None,
+    sector: Optional[str] = None,
+    risk_level: Optional[str] = None,
+    ls_term: Optional[int] = Query(None, ge=17, le=18),
+    status: Optional[str] = None,
+    min_score: float = Query(40, ge=0, le=100),
+    mp_id: Optional[str] = None,
+    limit: int = Query(5000, le=20000),
+):
+    """The current queue as CSV, under the same filters the page is showing.
+
+    The brief asks the platform to "reduce manual monitoring efforts". A
+    district officer who narrows the queue to their district and finds 261
+    works to inspect could read them on screen and then had no way to hand the
+    list to the people who would do the inspecting. This is that list.
+
+    Same _alert_filters as the table and the tiles, so a download can never
+    disagree with what was on screen when it was requested.
+    """
+    where, params = _alert_filters(
+        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id
+    )
+    rows = query(
+        f"""
+        SELECT p.work_key, p.work_name, p.state, p.district, p.sector,
+               p.implementing_agency, p.mp_name, p.work_status,
+               p.sanctioned_amount, p.expenditure, p.delay_days,
+               p.cost_deviation_pct, p.overall_risk_score, p.risk_level,
+               COALESCE(r.status, 'pending') AS review_status,
+               p.flagged_reasons
+        FROM projects_scored p
+        LEFT JOIN work_reviews r ON r.work_key = p.work_key
+        {where}
+        ORDER BY p.overall_risk_score DESC NULLS LAST, p.id
+        LIMIT {int(limit)}
+        """,
+        params,
+    )
+
+    def flat(value):
+        """One record per line.
+
+        Work names in this data contain literal newlines and tabs. Quoting them
+        is valid CSV and Excel reads it, but the file then has more lines than
+        works, and every rougher consumer - awk, a naive split, a pasted column
+        - silently mangles it. A queue that is going to be mailed around should
+        not carry that trap.
+        """
+        if not isinstance(value, str):
+            return value
+        return " ".join(value.split())
+
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\n")
+    header = [
+        "work_key", "work_name", "state", "district", "sector",
+        "implementing_agency", "mp_name", "work_status", "sanctioned_amount",
+        "expenditure", "delay_days", "cost_deviation_pct", "risk_score",
+        "risk_band", "review_status", "why_flagged",
+    ]
+    writer.writerow(header)
+    for row in rows:
+        reasons = row.get("flagged_reasons") or []
+        writer.writerow([
+            flat(row["work_key"]), flat(row["work_name"]), flat(row["state"]),
+            flat(row["district"]), flat(row["sector"]),
+            flat(row["implementing_agency"]), flat(row["mp_name"]),
+            row["work_status"], row["sanctioned_amount"], row["expenditure"],
+            row["delay_days"], row["cost_deviation_pct"],
+            row["overall_risk_score"], row["risk_level"], row["review_status"],
+            flat(" | ".join(reasons)) if isinstance(reasons, list) else "",
+        ])
+
+    return Response(
+        content=buf.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="kasauti-queue.csv"'},
+    )
+
+
 @app.get("/api/alerts/summary")
 def alerts_summary(
     q: Optional[str] = None,
@@ -431,6 +523,7 @@ def alerts_summary(
     ls_term: Optional[int] = Query(None, ge=17, le=18),
     status: Optional[str] = None,
     min_score: float = Query(40, ge=0, le=100),
+    mp_id: Optional[str] = None,
 ):
     """Counts for the queue header. min_score defaults to 40 because that is
     where risk_level leaves LOW (see RISK_LEVEL_THRESHOLDS in data/scoring.py) -
@@ -443,7 +536,7 @@ def alerts_summary(
     Kozhikode".
     """
     where, params = _alert_filters(
-        q, state, district, sector, risk_level, ls_term, status, min_score
+        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id
     )
     return query(
         f"""
@@ -959,8 +1052,12 @@ def provenance():
                 "what": "Aggregates that portal and publishes machine-readable exports of the works, payments and per-MP figures the official site shows only as a dashboard.",
             },
             {
+                "step": "A language model, once per description",
+                "what": "MPLADS publishes no usable category - the portal's own column reads 'Normal/Others' on 98.1% of works - so a work's sector is derived from its description. Keyword rules handle most of it; Gemini labelled the 41,691 they could not read, answering 'unclear' 5,167 times rather than guess. The labels are cached and committed, so a clone reproduces them with no API key and scoring stays offline and deterministic.",
+            },
+            {
                 "step": "This system",
-                "what": "Loads those exports nightly, scores every work against its peers, and records the comparison above so the chain can be audited rather than trusted.",
+                "what": "Loads those exports nightly, scores every work against its peers - the peer group being the district and sector above - and records the comparison above so the chain can be audited rather than trusted.",
             },
         ],
     }
