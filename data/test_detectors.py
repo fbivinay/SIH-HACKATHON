@@ -186,3 +186,52 @@ def test_idle_allocation_ignores_a_member_who_has_barely_started():
     first months, not sitting on funds."""
     assert d.idle_allocation(mp_rows([
         ("mp1", 18, "New Member", "X", "Bihar", 5e7, 1e6, 1.0, 0, 2)])) == []
+
+
+def test_every_detector_survives_an_empty_frame():
+    """fetch_expenditures returns pd.DataFrame(cur.fetchall()), which on zero
+    rows is 0x0 - no columns at all - so dropna(subset=["x"]) raises KeyError on
+    a name that is simply absent.
+
+    A snapshot with no expenditure file is documented as supported (the
+    2026-08-30 one had none). D-01, D-03 and D-04 all had the emptiness guard
+    AFTER the subset access, so run_all died on the first of them and the whole
+    scoring pass with it. D-04 stayed hidden until D-01 was fixed, because
+    run_all never reached it.
+    """
+    import pandas as pd
+
+    import detectors
+
+    empty = pd.DataFrame([])
+    for name, fn in (
+        ("D-01", detectors.year_end_burst),
+        ("D-02", detectors.first_digit_anomaly),
+        ("D-03", detectors.idle_allocation),
+        ("D-04", detectors.uniform_sanction_amount),
+    ):
+        assert fn(empty) == [], f"{name} should find nothing in an empty frame"
+    assert detectors.run_all(empty, empty, empty) == []
+
+
+def test_scores_are_written_before_the_detectors_run():
+    """A detector failure must not discard a finished scoring pass.
+
+    The comment in scoring.py claimed this was already true. It was not: the
+    detectors ran after the scores were COMPUTED but before they were WRITTEN,
+    and outside the try/except, so any exception threw away fifty minutes of
+    work held in memory.
+    """
+    import inspect
+
+    import scoring
+
+    body = inspect.getsource(scoring)
+    main = body[body.index('if __name__ == "__main__":'):]
+    assert main.index("write_scores(conn, scored)") < main.index("detectors.run_all"), (
+        "scores must be committed before the detectors are given a chance to fail"
+    )
+    after = main[main.index("detectors.run_all"):]
+    assert "except Exception" in after, (
+        "a detector failure must be caught and reported, not raised"
+    )

@@ -52,12 +52,12 @@ export default async function MpPage({ params }: { params: Promise<{ id: string 
         {[
           {
             label: "Allocated",
-            value: formatINR(Number(current.allocated_amount)),
+            value: formatINR(current.allocated_amount),
             note: `${pct(current.utilization_pct)} committed to works`,
           },
           {
             label: "Never committed",
-            value: formatINR(Number(current.idle_amount)),
+            value: formatINR(current.idle_amount),
             note: "Allocation not attached to any work",
             tone: "medium" as const,
           },
@@ -69,7 +69,7 @@ export default async function MpPage({ params }: { params: Promise<{ id: string 
           {
             label: "To verify",
             value: formatCount(w.in_queue),
-            note: `${formatINR(Number(w.flagged_value))} sanctioned`,
+            note: `${formatINR(w.flagged_value)} sanctioned`,
             tone: "high" as const,
           },
         ].map((c) => (

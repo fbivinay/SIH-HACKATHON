@@ -212,6 +212,13 @@ def _finding(code, subject_type, subject, ls_term, period, severity, headline, e
 
 def year_end_burst(expenditures):
     """D-01. Share of an agency's fiscal-year payments falling in March."""
+    # Guard BEFORE the subset access, not after. fetch_expenditures returns
+    # pd.DataFrame(cur.fetchall()), which on zero rows is 0x0 - no columns at
+    # all - so dropna(subset=[...]) raises KeyError on a name that is simply
+    # absent. A snapshot with no expenditure file is documented as supported
+    # (the 2026-08-30 one had none), so this must not fail the run.
+    if expenditures.empty or "expenditure_date" not in expenditures.columns:
+        return []
     df = expenditures.dropna(subset=["expenditure_date"]).copy()
     if df.empty:
         return []
@@ -292,6 +299,10 @@ def first_digit_anomaly(expenditures):
 
 def idle_allocation(mps):
     """D-03. How much of an MP-term's allocation is still unspent."""
+    # Same inversion as D-01 had: a 0x0 frame has no allocated_amount column
+    # for dropna to name.
+    if mps.empty or "allocated_amount" not in mps.columns:
+        return []
     df = mps.dropna(subset=["allocated_amount"]).copy()
     df = df[df["allocated_amount"] >= IDLE_MIN_ALLOCATION]
     # df.get on a missing column returns None, and pd.to_numeric(None) is a
@@ -362,6 +373,10 @@ def idle_allocation(mps):
 
 def uniform_sanction_amount(projects):
     """D-04. Share of an agency's works carrying its single commonest amount."""
+    # Third instance of the same inversion. It stayed hidden because run_all
+    # dies at D-01 first, so fixing that one is what exposed this.
+    if projects.empty or "sanctioned_amount" not in projects.columns:
+        return []
     df = projects.dropna(subset=["sanctioned_amount"]).copy()
     if df.empty:
         return []

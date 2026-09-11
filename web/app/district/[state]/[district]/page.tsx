@@ -295,7 +295,10 @@ export default async function DistrictDeskPage({
               {desk.top_flagged.map((w) => (
                 <tr key={w.id}>
                   <td>
-                    <Link href={`/projects/${w.id}`} className="link-quiet">
+                    <Link
+                      href={`/projects/${encodeURIComponent(w.work_key ?? String(w.id))}`}
+                      className="link-quiet"
+                    >
                       {w.work_name}
                     </Link>
                     {w.flagged_reasons?.length ? (

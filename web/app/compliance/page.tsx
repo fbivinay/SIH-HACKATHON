@@ -44,7 +44,9 @@ export default async function CompliancePage() {
             {
               label: "Works breaching",
               value: formatCount(book.works_breaching),
-              note: `${((book.works_breaching / book.works_scored) * 100).toFixed(1)}% of those checked`,
+              note: `${book.works_scored > 0
+            ? `${((book.works_breaching / book.works_scored) * 100).toFixed(1)}% of those checked`
+            : "Scoring has not run yet"}`,
               tone: "high" as const,
             },
             {

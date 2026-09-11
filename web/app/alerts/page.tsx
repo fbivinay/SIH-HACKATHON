@@ -54,8 +54,14 @@ export default async function AlertsPage({
   const [page, filterOptions, summary] = await Promise.all([
     api.alerts(filters),
     api.filters().catch(() => ({ states: [], risk_levels: [] })),
+    // The same filters the table uses, minus paging - the tiles describe the
+    // queue below them, not the whole country.
     api
-      .alertSummary({ min_score: filters.min_score })
+      .alertSummary(
+        Object.fromEntries(
+          Object.entries(filters).filter(([k]) => k !== "limit" && k !== "offset")
+        )
+      )
       .catch(() => null),
   ]);
 
@@ -190,7 +196,10 @@ export default async function AlertsPage({
                 <tr key={a.id} className={a.review_status !== "pending" ? "is-reviewed" : undefined}>
                   <td className="rank">{formatCount(offset + i + 1)}</td>
                   <td className="max-w-[30rem]">
-                    <Link href={`/projects/${a.id}`} className="link-quiet">
+                    <Link
+                      href={`/projects/${encodeURIComponent(a.work_key ?? String(a.id))}`}
+                      className="link-quiet"
+                    >
                       {a.work_name}
                     </Link>
                     <div className="cell-sub">
