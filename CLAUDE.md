@@ -143,10 +143,16 @@ deterministic and free; keep it that way.
 - **Report silent producers.** A detector that writes nothing, a classifier
   batch that labels nothing — say so. Two separate bugs here looked like clean
   runs because failure was indistinguishable from "nothing to do".
-- **Secrets live only in `.env`** (gitignored via `.env*`): `DATABASE_URL`,
-  `REVIEW_TOKEN`, `GEMINI_API_KEY`. Never commit or print them. **Quote the
-  values** — `DATABASE_URL` contains `&`, and unquoted, `. .env` backgrounds the
-  line and silently leaves the variable unset.
+- **Secrets live only in `.env`** (gitignored via `.env*`): `DATABASE_URL` and
+  `REVIEW_TOKEN`. Never commit or print them. **Quote the values** —
+  `DATABASE_URL` contains `&`, and unquoted, `. .env` backgrounds the line and
+  silently leaves the variable unset.
+- **No Gemini key is needed to run anything.** All 41,691 sector labels are
+  cached in `data/sector_cache.json`, which is committed. Scoring, the API and
+  the nightly Action never read one; only `scripts/classify_sectors.py` does,
+  and it exits cleanly saying so when the variable is absent. Set one only to
+  label descriptions a future extract introduces, and remove it afterwards —
+  a key that does not exist cannot leak.
 - **Run the tests before committing:** `python3 -m pytest data api -q`. They hit
   the live database and take ~2.5 minutes.
 
