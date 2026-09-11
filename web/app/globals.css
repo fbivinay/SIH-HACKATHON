@@ -1698,8 +1698,51 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
        cover spans the viewport as well as the element, so the movement plays
        while the card travels up into view and settles around the middle of the
        screen, where the reader is actually looking. */
-    animation-range: cover 0% cover 42%;
+    /*
+     * A FIXED DISTANCE, not a percentage.
+     *
+     * This is the bug that made the queue look broken. A percentage of the
+     * `cover` range is a percentage of (element height + viewport), so the
+     * taller the element the longer it stays half-faded. The alerts table is
+     * 10,162px tall: 42% of its cover range is 4,646px of scrolling, so its
+     * first rows sat at 4% opacity, reached 28% a thousand pixels later, and
+     * only went solid near the bottom of the page. The reader saw pale rows
+     * that slowly darkened - and the whole table sat 104px lower than it
+     * belonged for the same reason.
+     *
+     * In pixels, every block animates over the same 420px of scrolling
+     * whatever its size, which is also what makes a short card and a long
+     * table feel like parts of one interface.
+     */
+    /*
+     * 260px, and every stagger below finishes inside it. This bound is not a
+     * taste decision - it is what content already on screen at load requires.
+     *
+     * A scroll timeline has no progress until the reader scrolls. An element
+     * sitting in the first viewport is partway through its range by geometry
+     * alone: the distance it has "travelled" is (viewport bottom - its top).
+     * A card 600px down a 900px screen has only 300px of that, so with a 420px
+     * range it rendered at 71% opacity and stayed there until the reader
+     * scrolled - and because the stagger pushed each column's range further
+     * out, a row of four came out at 0.87, 0.74, 0.62, 0.51. A gradient across
+     * a row that should be uniform, on the first screen, before any
+     * interaction. That is the "first ones light, later ones dark" fault.
+     *
+     * At 260px everything above roughly two thirds of the fold is fully
+     * resolved at load, and anything lower is genuinely at the edge of the
+     * screen, where being mid-arrival is correct.
+     */
+    animation-range: cover 0px cover 260px;
     animation-delay: 0s;
+  }
+
+  /* The table is the page's main object and can be ten thousand pixels tall.
+     It fades and lifts a little rather than travelling like a card: a block
+     that size moving 104px reads as the page shifting under the reader. */
+  .data-table-wrap,
+  .leaflet-container {
+    animation-name: rise-in;
+    animation-range: cover 0px cover 240px;
   }
 
   /* Text blocks use the gentler keyframe. A heading that travels as far as a
@@ -1717,10 +1760,10 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   /* Cards sharing a row enter together, so the stagger is a slightly later
      finish per column - a wave across the row rather than five boxes moving
      as one plate. */
-  .grid > :nth-child(2), .slab-card:nth-child(2) { animation-range: cover 3% cover 46%; }
-  .grid > :nth-child(3), .slab-card:nth-child(3) { animation-range: cover 6% cover 50%; }
-  .grid > :nth-child(4), .slab-card:nth-child(4) { animation-range: cover 9% cover 54%; }
-  .grid > :nth-child(n + 5), .slab-card:nth-child(n + 5) { animation-range: cover 12% cover 58%; }
+  .grid > :nth-child(2), .slab-card:nth-child(2) { animation-range: cover 26px cover 260px; }
+  .grid > :nth-child(3), .slab-card:nth-child(3) { animation-range: cover 52px cover 260px; }
+  .grid > :nth-child(4), .slab-card:nth-child(4) { animation-range: cover 78px cover 260px; }
+  .grid > :nth-child(n + 5), .slab-card:nth-child(n + 5) { animation-range: cover 104px cover 260px; }
 
   /*
    * Nothing animates inside something that is already animating. Two nested
