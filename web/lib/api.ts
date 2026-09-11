@@ -48,6 +48,9 @@ export type ProjectSummary = {
 // description/mp_name/constituency are likewise nullable text columns in the schema.
 // The brief typed these as non-nullable; corrected here so callers must handle null.
 export type ProjectDetail = ProjectSummary & {
+  // Returned by SELECT * over projects_scored all along, just never declared -
+  // so the work page could not link to the member whose fund paid for it.
+  mp_id: string | null;
   // '<Work ID>|<ls_term>|<IDA>' — the identity a review is pinned to. Null for
   // rows loaded before the column existed.
   work_key: string | null;
@@ -389,6 +392,12 @@ export type DeskFinding = {
   period: string | null;
   severity: number;
   headline: string;
+  // What the detector is called, and what it explicitly does not claim. Both
+  // travel with the finding: a Benford headline against a named agency is a
+  // statistical accusation without the caveat that the whole population fails
+  // the textbook test.
+  detector_name: string | null;
+  limit: string | null;
 };
 
 export type DeskSector = {
@@ -556,6 +565,15 @@ export const api = {
     get<AlertSummary>(`/api/alerts/summary?${new URLSearchParams(params)}`),
   states: (params: Record<string, string> = {}) =>
     get<StateSummary[]>(`/api/states?${new URLSearchParams(params)}`),
+  // Restored after the pages that consumed them were removed from the
+  // interface. The capabilities they describe - the cohort detectors, the
+  // compliance rule book, trend analysis, the early-warning signal - are each
+  // named in the problem statement, so they moved to /provenance and /analysis
+  // rather than leaving with the navigation entries.
+  compliance: () => get<ComplianceBook>("/api/compliance"),
+  detectors: () => get<Detector[]>("/api/detectors"),
+  trends: (params: Record<string, string> = {}) =>
+    get<Trends>(`/api/trends?${new URLSearchParams(params)}`),
   stateDesk: (state: string, params: Record<string, string> = {}) =>
     get<StateDesk>(
       `/api/states/${encodeURIComponent(state)}?${new URLSearchParams(params)}`

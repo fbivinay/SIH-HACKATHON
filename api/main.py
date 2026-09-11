@@ -580,6 +580,25 @@ DETECTORS = {
 }
 
 
+def _with_limits(findings):
+    """Attach each detector's stated limit to its findings.
+
+    D-02 is the reason this exists. Its headline reads "Leading digits across
+    250 payments depart from the expected distribution (MAD 16.56)" - which,
+    against a named implementing agency and with no caveat, is a statistical
+    accusation. The caveat that makes it honest (the whole MPLADS population
+    fails the textbook test; this ranks agencies against each other, not
+    against the law) lived only on the detector catalogue page, and that page
+    was removed from the interface. A finding must carry its own limits
+    wherever it is shown.
+    """
+    for f in findings:
+        meta = DETECTORS.get(f["code"], {})
+        f["detector_name"] = meta.get("name")
+        f["limit"] = meta.get("limit")
+    return findings
+
+
 @app.get("/api/detectors")
 def detectors_catalogue():
     """What each detector measures and what it does not claim, with how many
@@ -1118,7 +1137,7 @@ def mp_detail(mp_id: str, ls_term: Optional[int] = Query(None, ge=17, le=18)):
         "works": works,
         "sectors": sectors,
         "top_flagged": top,
-        "findings": findings,
+        "findings": _with_limits(findings),
     }
 
 
@@ -1280,7 +1299,7 @@ def state_detail(state: str, ls_term: int = Query(18, ge=17, le=18)):
         "members": members,
         "sectors": sectors,
         "top_flagged": top,
-        "findings": findings,
+        "findings": _with_limits(findings),
     }
 
 
@@ -1375,5 +1394,5 @@ def district_detail(state: str, district: str, ls_term: int = Query(18, ge=17, l
         "sectors": sectors,
         "members": members,
         "top_flagged": top,
-        "findings": findings,
+        "findings": _with_limits(findings),
     }

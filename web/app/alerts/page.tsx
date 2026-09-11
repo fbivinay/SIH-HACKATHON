@@ -215,8 +215,19 @@ export default async function AlertsPage({
                     )}
                   </td>
                   <td className="whitespace-nowrap">
-                    {a.district}
-                    <div className="cell-sub">{a.state}</div>
+                    <Link
+                      href={`/district/${encodeURIComponent(a.state)}/${encodeURIComponent(
+                        a.district
+                      )}`}
+                      className="link-quiet"
+                    >
+                      {a.district}
+                    </Link>
+                    <div className="cell-sub">
+                      <Link href={`/state/${encodeURIComponent(a.state)}`} className="link-quiet">
+                        {a.state}
+                      </Link>
+                    </div>
                   </td>
                   <td className="num">{formatINR(a.sanctioned_amount)}</td>
                   <td className="min-w-[11rem]">

@@ -82,11 +82,28 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       <h1 className="section-head mt-4">{p.work_name}</h1>
       <div className="eyebrow mt-2">{p.sector ?? p.category}</div>
       <p className="mt-1.5 text-sm text-[color:var(--muted)]">
-        {p.state} / {p.district} — {p.implementing_agency}
+        <Link href={`/state/${encodeURIComponent(p.state)}`} className="link-quiet">
+          {p.state}
+        </Link>{" "}
+        /{" "}
+        <Link
+          href={`/district/${encodeURIComponent(p.state)}/${encodeURIComponent(p.district)}`}
+          className="link-quiet"
+        >
+          {p.district}
+        </Link>{" "}
+        — {p.implementing_agency}
         {p.mp_name && (
           <>
             {" "}
-            &middot; {p.mp_name}
+            &middot;{" "}
+            {p.mp_id ? (
+              <Link href={`/mp/${encodeURIComponent(p.mp_id)}`} className="link-quiet">
+                {p.mp_name}
+              </Link>
+            ) : (
+              p.mp_name
+            )}
             {p.constituency ? ` (${p.constituency})` : ""}
           </>
         )}
