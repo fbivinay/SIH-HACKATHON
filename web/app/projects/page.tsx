@@ -69,7 +69,7 @@ export default async function ProjectsPage({
               <th>State</th>
               <th>District</th>
               <th>Agency</th>
-              <th className="text-right">Sanctioned</th>
+              <th className="num">Sanctioned</th>
               <th>Risk</th>
             </tr>
           </thead>

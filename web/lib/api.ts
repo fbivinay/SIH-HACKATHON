@@ -565,13 +565,7 @@ export const api = {
       `/api/districts/${encodeURIComponent(state)}/${encodeURIComponent(district)}` +
         `?${new URLSearchParams(params)}`
     ),
-  compliance: () => get<ComplianceBook>("/api/compliance"),
   provenance: () => get<Provenance>("/api/provenance"),
-  trends: (params: Record<string, string> = {}) =>
-    get<Trends>(`/api/trends?${new URLSearchParams(params)}`),
-  detectors: () => get<Detector[]>("/api/detectors"),
-  detectorFindings: (params: Record<string, string> = {}) =>
-    get<DetectorFindingPage>(`/api/detectors/findings?${new URLSearchParams(params)}`),
   reviewHistory: (workKey: string) =>
     get<ReviewHistory>(`/api/alerts/history?${new URLSearchParams({ work_key: workKey })}`),
 };
