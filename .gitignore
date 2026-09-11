@@ -9,3 +9,9 @@ web/.next/
 .venv/
 mplads-data/
 docs/deck/references/
+
+# graphify: the graph and its report are worth sharing, the AST cache is not -
+# it is rebuilt from source and is per-version.
+graphify-out/cache/
+# Per-developer permission grants, not a project decision.
+.claude/settings.local.json
