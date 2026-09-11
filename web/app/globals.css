@@ -367,6 +367,21 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   backdrop-filter: saturate(1.8) blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-edge), var(--glass-shadow);
+  /* A slow rise and fall, so the island reads as floating rather than as a
+     panel that happens to have a shadow. Six seconds and four pixels: long
+     enough and small enough that it is felt at the edge of vision and never
+     competes with anything being read. */
+  animation: nav-float 6s ease-in-out infinite;
+}
+
+@keyframes nav-float {
+  0%, 100% { transform: translateY(0); box-shadow: var(--glass-edge), var(--glass-shadow); }
+  50%      { transform: translateY(-4px); box-shadow: var(--glass-edge), var(--glass-shadow-lift); }
+}
+
+/* The island lifts under the pointer, and each link grows toward it. */
+.nav:hover {
+  animation-play-state: paused;
 }
 
 .nav::-webkit-scrollbar {
@@ -413,8 +428,10 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 
 .nav__link:hover {
   color: var(--ink);
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  scale: 1.07;
 }
+.nav__link:active { scale: 1.02; }
 
 /* The current section is the one solid thing in a bar of glass, so it reads
    as where you are rather than as another option. */
@@ -1374,7 +1391,7 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   display: flex;
   align-items: stretch;
   gap: 0;
-  border-block: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   background: var(--glass-strong);
   -webkit-backdrop-filter: saturate(1.9) blur(26px);
   backdrop-filter: saturate(1.9) blur(26px);
@@ -1389,9 +1406,14 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   flex-direction: column;
   justify-content: center;
   flex: none;
-  padding: 0.4rem 0.85rem;
-  border-right: 1px solid var(--line);
-  background: var(--surface);
+  margin: 0.28rem 0.4rem 0.28rem 0;
+  padding: 0.32rem 0.9rem;
+  border-radius: var(--radius-pill);
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
+  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-edge);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -1440,21 +1462,29 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   animation-play-state: paused;
 }
 
+/* Each work is its own rounded card rather than a cell divided off by a rule.
+   Vertical dividers turned the strip into a row of rectangles, which is the
+   one shape this interface does not use anywhere else. */
 .ticker__item {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
   flex: none;
-  padding: 0.45rem 1rem;
-  border-right: 1px solid var(--line);
+  margin: 0.28rem 0.22rem;
+  padding: 0.36rem 0.85rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
   color: inherit;
   text-decoration: none;
   white-space: nowrap;
 }
-.ticker__item:hover .ticker__name {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.ticker__item:hover {
+  background: var(--glass);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+  scale: 1.04;
 }
+.ticker__item:hover .ticker__name { color: var(--ink); }
 
 .ticker__score {
   font-family: var(--font-data);
@@ -1481,9 +1511,14 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   display: flex;
   align-items: center;
   flex: none;
-  padding: 0.4rem 0.85rem;
-  border-left: 1px solid var(--line);
-  background: var(--surface);
+  margin: 0.28rem 0 0.28rem 0.4rem;
+  padding: 0.32rem 0.9rem;
+  border-radius: var(--radius-pill);
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
+  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-edge);
   color: var(--ink-2);
   font-size: 0.72rem;
   text-decoration: none;
@@ -1652,148 +1687,80 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
  * leave the last card of a row unfinished at the top of the screen.
  */
 @supports (animation-timeline: view()) {
-  main > section,
-  main > .shell {
-    animation: none;
-  }
-
   /*
-   * Every content block on the site, not only the cards.
+   * Only blocks ScrollReveal has marked, which are the ones that were below
+   * the fold when the page loaded. Everything already on screen keeps the
+   * first-paint animation above and is solid the moment it is painted.
    *
-   * Deliberately leaf blocks rather than their containers: .shell, section and
-   * .slab are all skipped, because animating a container AND its children
-   * multiplies their opacities and the inner ones then fade twice as slowly as
-   * everything else. Each rule below names something that holds text or a
-   * figure and nothing that holds another animated block.
+   * That split is what lets the range be long. It used to apply to every
+   * block, which forced it down to 260px so above-fold content would resolve -
+   * and 260px is one flick of a wheel, so the arrival was over before it could
+   * be seen. At 720px a block travels its full distance across roughly a
+   * screen of scrolling, at the reader's pace.
    */
-  .stat-card,
-  .grid > .card,
-  .card,
-  .slab-card,
-  .model-card,
-  .statecard,
-  .rulecard,
-  .data-table-wrap,
-  .section-head,
-  .display,
-  .lede,
-  .eyebrow,
-  .notice,
-  .reason-list,
-  .trail,
-  .chart,
-  .choro-legend,
-  .filter-bar,
-  .pager,
-  .leaflet-container {
+  [data-reveal] {
     animation: card-in linear both;
     animation-timeline: view();
-    /* `cover`, not `entry`.
-       entry is measured against the ELEMENT's own height, so a tall card
-       finished its animation while its top edge was still near the bottom of
-       the screen - a 549px card was fully opaque at y=648 of a 900px viewport
-       and then sat motionless for the 400px of scrolling it took to reach
-       reading position. That is why these boxes read as stagnant despite
-       measurably animating.
-       cover spans the viewport as well as the element, so the movement plays
-       while the card travels up into view and settles around the middle of the
-       screen, where the reader is actually looking. */
     /*
-     * A FIXED DISTANCE, not a percentage.
+     * 340px, and the number comes from measuring rather than from the spec.
      *
-     * This is the bug that made the queue look broken. A percentage of the
-     * `cover` range is a percentage of (element height + viewport), so the
-     * taller the element the longer it stays half-faded. The alerts table is
-     * 10,162px tall: 42% of its cover range is 4,646px of scrolling, so its
-     * first rows sat at 4% opacity, reached 28% a thousand pixels later, and
-     * only went solid near the bottom of the page. The reader saw pale rows
-     * that slowly darkened - and the whole table sat 104px lower than it
-     * belonged for the same reason.
+     * A declared range does NOT equal the screen distance the block travels
+     * while animating: measured on this layout, 470px of declared range played
+     * out over 644px of the element rising up the screen, a factor of about
+     * 1.37. Reasoning about it as if the two were the same is what put the
+     * settle point at top=256px - a third of the way up, well past where a
+     * reader is already reading.
      *
-     * In pixels, every block animates over the same 420px of scrolling
-     * whatever its size, which is also what makes a short card and a long
-     * table feel like parts of one interface.
+     * At 340 the block settles as its top nears the middle of the screen,
+     * having animated across roughly 465px of scrolling on the way there.
+     * That is still far more visible motion than the 260px this started at,
+     * because the perceived length is the screen travel, not the declaration.
      */
-    /*
-     * 260px, and every stagger below finishes inside it. This bound is not a
-     * taste decision - it is what content already on screen at load requires.
-     *
-     * A scroll timeline has no progress until the reader scrolls. An element
-     * sitting in the first viewport is partway through its range by geometry
-     * alone: the distance it has "travelled" is (viewport bottom - its top).
-     * A card 600px down a 900px screen has only 300px of that, so with a 420px
-     * range it rendered at 71% opacity and stayed there until the reader
-     * scrolled - and because the stagger pushed each column's range further
-     * out, a row of four came out at 0.87, 0.74, 0.62, 0.51. A gradient across
-     * a row that should be uniform, on the first screen, before any
-     * interaction. That is the "first ones light, later ones dark" fault.
-     *
-     * At 260px everything above roughly two thirds of the fold is fully
-     * resolved at load, and anything lower is genuinely at the edge of the
-     * screen, where being mid-arrival is correct.
-     */
-    animation-range: cover 0px cover 260px;
+    animation-range: cover 0px cover 340px;
     animation-delay: 0s;
   }
 
+  /* A row arrives as a wave: the stagger moves the start, every column shares
+     the finish, so the row settles as one object and no column is still
+     arriving once the row is in reading position. */
+  /* Scoped to grid children. Unscoped, `[data-reveal]:nth-child(2)` matched any
+     revealed block that happened to be its parent's second child - a lede under
+     a heading, for instance - and handed it a stagger meant for a column in a
+     row, so body text started late and was still arriving in the reading zone
+     while everything around it was solid. A stagger is about position in a row,
+     not position in the DOM. */
+  .grid > [data-reveal]:nth-child(2) { animation-range: cover 32px cover 340px; }
+  .grid > [data-reveal]:nth-child(3) { animation-range: cover 64px cover 340px; }
+  .grid > [data-reveal]:nth-child(4) { animation-range: cover 96px cover 340px; }
+  .grid > [data-reveal]:nth-child(n + 5) { animation-range: cover 128px cover 340px; }
+
   /* The table is the page's main object and can be ten thousand pixels tall.
-     It fades and lifts a little rather than travelling like a card: a block
-     that size moving 104px reads as the page shifting under the reader. */
-  .data-table-wrap,
-  .leaflet-container {
+     A block that size travelling a hundred pixels reads as the page shifting
+     under the reader, so it fades and lifts a little instead. */
+  .data-table-wrap[data-reveal],
+  .leaflet-container[data-reveal] {
     animation-name: rise-in;
-    animation-range: cover 0px cover 240px;
+    animation-range: cover 0px cover 280px;
   }
 
   /* Text blocks use the gentler keyframe. A heading that travels as far as a
      card reads as unstable: the eye reads type from a fixed baseline and
      notices a moving one. */
-  .section-head,
-  .display,
-  .lede,
-  .eyebrow,
-  .reason-list,
-  .pager {
+  .section-head[data-reveal],
+  .display[data-reveal],
+  .lede[data-reveal],
+  .eyebrow[data-reveal],
+  .reason-list[data-reveal],
+  .pager[data-reveal] {
     animation-name: rise-in;
   }
 
-  /* Cards sharing a row enter together, so the stagger is a slightly later
-     finish per column - a wave across the row rather than five boxes moving
-     as one plate. */
-  .grid > :nth-child(2), .slab-card:nth-child(2) { animation-range: cover 26px cover 260px; }
-  .grid > :nth-child(3), .slab-card:nth-child(3) { animation-range: cover 52px cover 260px; }
-  .grid > :nth-child(4), .slab-card:nth-child(4) { animation-range: cover 78px cover 260px; }
-  .grid > :nth-child(n + 5), .slab-card:nth-child(n + 5) { animation-range: cover 104px cover 260px; }
-
-  /*
-   * Nothing animates inside something that is already animating. Two nested
-   * fades multiply, so the inner block ends up arriving at a quarter of the
-   * opacity of everything beside it and reads as broken rather than layered.
-   *
-   * The row rule has to repeat the :nth-child selector. Without it,
-   * `.data-table tbody tr` (0,1,2) loses to the first-paint rule
-   * `.data-table tbody tr:nth-child(-n + 12)` (0,2,2) and every visible row
-   * kept animating inside its own wrap.
-   */
+  /* Rows never take a timeline: a table is one object and its wrap already
+     animates. The selector has to be repeated at the same specificity as the
+     first-paint rule below, or `:nth-child(-n + 12)` (0,2,2) outranks a bare
+     `tr` (0,1,2) and every visible row keeps animating inside its own wrap. */
   .data-table tbody tr,
   .data-table tbody tr:nth-child(-n + 12) {
-    animation: none;
-  }
-
-  /* The wrap animates as one object, so nothing inside it animates again -
-     the evidence lists rendered inside queue rows are the case that reached
-     production. */
-  .data-table-wrap .reason-list,
-  .data-table-wrap .card,
-  .data-table-wrap .chart,
-  .card .reason-list,
-  .card .section-head,
-  .card .lede,
-  .card .chart,
-  .card .trail,
-  .slab-card .lede,
-  .stat-card .lede,
-  .model-card .section-head {
     animation: none;
   }
 }
@@ -1804,6 +1771,10 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
  * - that is feedback, not decoration - but nothing moves, fades or reveals.
  */
 @media (prefers-reduced-motion: reduce) {
+  .nav { animation: none; }
+  .nav__link:hover, .nav__link:active { scale: 1; }
+  .ticker__item:hover { scale: 1; }
+
   main > section,
   main > .shell,
   .stat-card,
@@ -2037,4 +2008,22 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
     scale: 1;
     translate: none;
   }
+}
+
+/* The range between the pager's two buttons. Quieter than they are - it is
+   orientation, not an action - but the figures themselves carry weight. */
+.pager__range {
+  display: flex;
+  align-items: center;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.pager__range b {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-right: 0.3rem;
 }

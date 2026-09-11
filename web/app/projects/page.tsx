@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import ProjectFilters from "@/components/ProjectFilters";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
 import CountUp from "@/components/CountUp";
+import Pager from "@/components/Pager";
 
 const PAGE_SIZE = 50;
 
@@ -127,22 +128,14 @@ export default async function ProjectsPage({
       </div>
 
       {page.total > PAGE_SIZE && (
-        <nav className="pager" aria-label="Register pages">
-          {offset > 0 ? (
-            <Link href={pageHref(Math.max(0, offset - PAGE_SIZE))} className="pager__link">
-              ← Previous
-            </Link>
-          ) : (
-            <span className="pager__link is-disabled">← Previous</span>
-          )}
-          {offset + PAGE_SIZE < page.total ? (
-            <Link href={pageHref(offset + PAGE_SIZE)} className="pager__link">
-              Next →
-            </Link>
-          ) : (
-            <span className="pager__link is-disabled">Next →</span>
-          )}
-        </nav>
+        <Pager
+          offset={offset}
+          pageSize={PAGE_SIZE}
+          shown={page.projects.length}
+          total={page.total}
+          hrefFor={pageHref}
+          label="Register pages"
+        />
       )}
     </main>
   );
