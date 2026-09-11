@@ -9,6 +9,7 @@ import Logo from "@/components/Logo";
 import NavLinks from "@/components/NavLinks";
 import PointerGlow from "@/components/PointerGlow";
 import RiskTicker from "@/components/RiskTicker";
+import ScrollReveal from "@/components/ScrollReveal";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const mono = Geist_Mono({
@@ -72,6 +73,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="flex min-h-screen flex-col">
         {/* One delegated pointer listener for the whole document. */}
         <PointerGlow />
+        {/* Marks the blocks that were below the fold, so only those animate on scroll. */}
+        <ScrollReveal />
         <div className="topbar">
         <header className="masthead">
           <div className="shell masthead__inner">

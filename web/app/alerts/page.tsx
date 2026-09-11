@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { api, alertsExportUrl } from "@/lib/api";
 import type { Alert } from "@/lib/api";
+import Pager from "@/components/Pager";
 import ProjectFilters from "@/components/ProjectFilters";
 import ReviewActions from "@/components/ReviewActions";
 import ReviewerName from "@/components/ReviewerName";
@@ -292,22 +293,15 @@ export default async function AlertsPage({
       </div>
 
       {page.total > PAGE_SIZE && (
-        <nav className="pager" aria-label="Queue pages">
-          {offset > 0 ? (
-            <Link href={pageHref(prevOffset)} className="pager__link">
-              ← Previous
-            </Link>
-          ) : (
-            <span className="pager__link is-disabled">← Previous</span>
-          )}
-          {nextOffset < page.total ? (
-            <Link href={pageHref(nextOffset)} className="pager__link">
-              Next →
-            </Link>
-          ) : (
-            <span className="pager__link is-disabled">Next →</span>
-          )}
-        </nav>
+        <Pager
+          offset={offset}
+          pageSize={PAGE_SIZE}
+          shown={page.alerts.length}
+          total={page.total}
+          hrefFor={pageHref}
+          label="Queue pages"
+          noun="flagged works"
+        />
       )}
       </section>
     </main>

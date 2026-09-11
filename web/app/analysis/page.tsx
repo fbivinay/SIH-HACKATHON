@@ -2,6 +2,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatINR, isAggregateScoringPending, riskLevelClass, riskLevelLabel, riskScoreToLevel } from "@/lib/format";
 import CountUp from "@/components/CountUp";
+import Pager from "@/components/Pager";
 
 // The page used to render every one of the 1,539 agency-terms, which is 2.5 MB
 // of HTML and an 80,000-pixel scroll. It shows a page at a time now.
@@ -219,37 +220,22 @@ export default async function AnalysisPage({
         </table>
       </div>
 
-      <nav className="pager" aria-label="Agency pages">
-        {offset > 0 ? (
-          <Link
-            href={`/analysis?${new URLSearchParams({
-              ...(term ? { ls_term: term } : {}),
-              ...(offset - PAGE_SIZE > 0 ? { offset: String(offset - PAGE_SIZE) } : {}),
-            })}`}
-            className="pager__link"
-          >
-            ← Previous
-          </Link>
-        ) : (
-          <span className="pager__link is-disabled">← Previous</span>
-        )}
-        <span className="pager__link is-disabled" style={{ borderColor: "transparent" }}>
-          {formatCount(offset + 1)}–{formatCount(offset + agencies.length)}
-        </span>
-        {agencies.length === PAGE_SIZE ? (
-          <Link
-            href={`/analysis?${new URLSearchParams({
-              ...(term ? { ls_term: term } : {}),
-              offset: String(offset + PAGE_SIZE),
-            })}`}
-            className="pager__link"
-          >
-            Next →
-          </Link>
-        ) : (
-          <span className="pager__link is-disabled">Next →</span>
-        )}
-      </nav>
+      {/* The agencies endpoint returns a page, not a count, so the total is
+          genuinely unknown here - the pager says so rather than inventing one. */}
+      <Pager
+        offset={offset}
+        pageSize={PAGE_SIZE}
+        shown={agencies.length}
+        total={null}
+        hrefFor={(o) =>
+          `/analysis?${new URLSearchParams({
+            ...(term ? { ls_term: term } : {}),
+            ...(o > 0 ? { offset: String(o) } : {}),
+          })}`
+        }
+        label="Agency pages"
+        noun="agencies"
+      />
 
       <section className="mt-12">
         <h2 className="section-head">Allocation never committed</h2>
