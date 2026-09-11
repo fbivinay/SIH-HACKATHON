@@ -1,0 +1,41 @@
+# Kasauti — 2-minute explainer narration
+# One segment per scene. Numbers are spelled out so Kokoro says them
+# correctly; the screen shows the digits. Trimmed from a 401-word first pass
+# that measured 2:45 — the real rate is ~145 wpm, not the 142 a single short
+# line suggested.
+
+[01 problem]
+India publishes every rupee of M P LADS spending. Two lakh fifty thousand works. Nineteen thousand eight hundred crore rupees. Nobody has read them all.
+
+[02 what]
+Kasauti reads all of them, scores every work against comparable works, and hands officials a ranked list of what to verify.
+
+[03 provenance]
+The problem statement names the MoSPI portal. It publishes totals openly, but individual works only behind an O T P gated form. So we load the same record from Empowered Indian, and reconcile against MoSPI's own endpoints every night.
+
+[04 score]
+Each work scores zero to one hundred, from five components. Cost, twenty five percent. Delay, twenty five. Duplication, twenty. Agency, fifteen. Compliance, fifteen.
+
+[05 forest]
+Three models do what no rule could. An isolation forest learns what a normal sanction looks like for a sector and district, and finds the works sitting outside it.
+
+[06 bert]
+Sentence BERT embeds every description and compares them inside the same district, at ninety four percent similarity. That threshold was measured on this data, not borrowed.
+
+[07 gemini]
+Gemini Flash Lite labels the sectors keyword rules cannot read. It was chosen because it can abstain. It labels. It never scores, ranks, or flags.
+
+[08 detectors]
+Four more detectors describe agencies and members, not works. Year end payment bursts. First digit anomalies. Idle allocation. Uniform sanctions.
+
+[09 queue]
+Forty eight thousand works come out worth a second look. Two thousand three hundred are high risk. A morning's work, instead of a year's.
+
+[10 why]
+Open one, and it tells you why. Every reason carries the method behind it, so a flag can be argued with rather than obeyed.
+
+[11 refresh]
+It refreshes itself nightly. Load, label, score, reconcile.
+
+[12 limits]
+And it says what it cannot tell you. M P LADS publishes no progress percentage, no beneficiary count, no geo tag, so we never invent them. A kasauti says which pieces are worth assaying. Never which are false.
