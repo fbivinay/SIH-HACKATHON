@@ -1548,18 +1548,23 @@ body::before {
 
 /* ------------------------------------------------------------- motion -- */
 /*
- * What moves, and what deliberately does not.
+ * The interface moves again, at the intensity it had before - 104px of travel
+ * from a 0.86 scale - but the page it moves on is a much cheaper one.
  *
- * Everything that used to animate on arrival - sections rising, cards
- * staggering in, rows settling, the navigation bobbing - is gone. It was
- * costing more than it gave: scroll-driven animations keep the compositor
- * working on every frame of every scroll, and on top of seventeen backdrop
- * blurs and three fixed background layers the result was a page that felt
- * heavy to move through. A dashboard someone reads all day should be still.
+ * The lag was never these animations. It was 17 backdrop blurs and three fixed
+ * background layers, each repainting on every scroll frame; the animations
+ * were simply the most visible thing happening while the browser was already
+ * saturated. With those gone the same movement runs on the compositor.
  *
- * What is left is feedback: the things a pointer or a keyboard touches
- * respond, and nothing else moves on its own. Each of these is a colour or a
- * composited transform on one element at a time, which costs nothing.
+ * What keeps it cheap:
+ *   - Only `opacity` and `transform` are animated. Both are composited, so a
+ *     frame costs no layout and no paint. Animating height, top or filter here
+ *     would put every frame back on the main thread.
+ *   - Only blocks that were below the fold get a timeline (ScrollReveal), so a
+ *     long page animates a handful at a time rather than all of them.
+ *   - Blocks, not every text node. An earlier version animated ledes, eyebrows
+ *     and reason lists too, which tripled the count for movement nobody could
+ *     pick out.
  */
 
 a,
@@ -1593,18 +1598,136 @@ button,
   transition: none;
 }
 
-/* The figure fades in once on load, behind CountUp, so the counter's reset to
-   zero is not visible before it starts counting. */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(74px) scale(0.95); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Cards come from below and from behind the screen. No rotation and no
+   overshoot: these are audited public-spending figures, and the movement
+   should read as confident rather than playful. */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(104px) scale(0.86); }
+  to   { opacity: 1; transform: none; }
+}
+
 @keyframes value-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 .stat-card__value {
-  animation: value-in 380ms var(--ease-out) 60ms both;
+  animation: value-in 420ms var(--ease-out) 80ms both;
 }
 
+/*
+ * FIRST PAINT. Everything on the opening screen settles in one staggered pass,
+ * on a timer, because there is no scroll yet to drive anything.
+ */
+main > section,
+main > .shell {
+  animation: rise-in 560ms var(--ease-out) both;
+}
+main > section:nth-of-type(2) { animation-delay: 70ms; }
+main > section:nth-of-type(3) { animation-delay: 130ms; }
+main > section:nth-of-type(4) { animation-delay: 180ms; }
+main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
+
+.stat-card,
+.grid > .card,
+.slab-card,
+.model-card,
+.statecard,
+.rulecard {
+  animation: card-in 600ms var(--ease-out) both;
+}
+.grid > :nth-child(2), .slab-card:nth-child(2) { animation-delay: 60ms; }
+.grid > :nth-child(3), .slab-card:nth-child(3) { animation-delay: 120ms; }
+.grid > :nth-child(4), .slab-card:nth-child(4) { animation-delay: 180ms; }
+.grid > :nth-child(5), .slab-card:nth-child(5) { animation-delay: 240ms; }
+.grid > :nth-child(n + 6), .slab-card:nth-child(n + 6) { animation-delay: 290ms; }
+
+.data-table tbody tr:nth-child(-n + 12) {
+  animation: rise-in 460ms var(--ease-out) both;
+}
+.data-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.data-table tbody tr:nth-child(3) { animation-delay: 70ms; }
+.data-table tbody tr:nth-child(4) { animation-delay: 105ms; }
+.data-table tbody tr:nth-child(5) { animation-delay: 140ms; }
+.data-table tbody tr:nth-child(n + 6) { animation-delay: 175ms; }
+
+/*
+ * SCROLL. Blocks below the fold arrive as the reader reaches them.
+ *
+ * The range is a fixed pixel distance, never a percentage: a percentage of the
+ * `cover` range is a percentage of (element height + viewport), so an
+ * 11,000px table once faded in over 5,000px of scrolling while a small card
+ * took 500. In pixels every block animates over the same scroll.
+ *
+ * 340 is measured rather than chosen. A declared range is not the distance the
+ * block travels up the screen while animating - on this layout 470px of range
+ * played out over 644px of travel, a factor of about 1.37 - so at 340 a block
+ * settles as its top nears the middle of the screen, having moved across
+ * roughly 465px of scrolling to get there.
+ */
+@supports (animation-timeline: view()) {
+  [data-reveal] {
+    animation: card-in linear both;
+    animation-timeline: view();
+    animation-range: cover 0px cover 340px;
+    animation-delay: 0s;
+  }
+
+  /* A row arrives as a wave: the stagger moves the start, every column shares
+     the finish, so the row settles as one object. Scoped to grid children -
+     unscoped, `:nth-child(2)` also caught body text that happened to be its
+     parent's second child and made it arrive late. */
+  .grid > [data-reveal]:nth-child(2) { animation-range: cover 32px cover 340px; }
+  .grid > [data-reveal]:nth-child(3) { animation-range: cover 64px cover 340px; }
+  .grid > [data-reveal]:nth-child(4) { animation-range: cover 96px cover 340px; }
+  .grid > [data-reveal]:nth-child(n + 5) { animation-range: cover 128px cover 340px; }
+
+  /* The table is the page's main object and can be ten thousand pixels tall. A
+     block that size travelling a hundred pixels reads as the page shifting
+     under the reader, so it fades and lifts a little instead. */
+  .data-table-wrap[data-reveal],
+  .leaflet-container[data-reveal],
+  .section-head[data-reveal] {
+    animation-name: rise-in;
+    animation-range: cover 0px cover 280px;
+  }
+
+  /* Rows never take a timeline: a table is one object and its wrap animates.
+     The selector repeats at the first-paint rule's specificity, or
+     `:nth-child(-n + 12)` (0,2,2) outranks a bare `tr` (0,1,2). */
+  .data-table tbody tr,
+  .data-table tbody tr:nth-child(-n + 12) {
+    animation: none;
+  }
+}
+
+/*
+ * All of this is a courtesy, and a courtesy that cannot be declined is an
+ * imposition. Under reduced motion the interface still changes colour on hover
+ * - that is feedback, not decoration - but nothing moves, fades or reveals.
+ */
 @media (prefers-reduced-motion: reduce) {
-  .stat-card__value { animation: none; opacity: 1; }
+  main > section,
+  main > .shell,
+  .stat-card,
+  .stat-card__value,
+  .card,
+  .grid > .card,
+  .slab-card,
+  .model-card,
+  .statecard,
+  .rulecard,
+  .data-table-wrap,
+  .section-head,
+  .data-table tbody tr {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
   .nav__link:hover, .nav__link:active { scale: 1; }
   .ticker__item:hover { scale: 1; }
   a, button, .btn, .review-btn, .nav__link, .link-quiet, .risk-pill,
@@ -1733,9 +1856,26 @@ button,
 
 /* ------------------------------------------------------------- splash -- */
 /*
- * The loading cover. Opaque, so nothing behind it shows through mid-assembly,
- * and it fades rather than cuts so the page is revealed instead of swapped.
+ * The loading cover, driven entirely from here.
+ *
+ * Every part of it - the bar, the counting number, the hold, the fade and the
+ * final removal - is a CSS animation that starts at first paint. Nothing waits
+ * on React, which is what the first version got wrong: it hid itself from a
+ * useEffect timer, so on a slow hydration it sat at 0% and would not leave.
+ *
+ * Timings: the bar fills over 1.6s, everything holds until 2s, then the cover
+ * fades over 0.45s and is taken out of the page with `visibility: hidden`.
  */
+
+/* A registered property can be interpolated, which is what lets a counter
+   animate. Without the @property registration this is just a string swap and
+   the number would jump from 0 to 100. */
+@property --splash-pct {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
 .splash {
   position: fixed;
   inset: 0;
@@ -1743,61 +1883,83 @@ button,
   display: grid;
   place-items: center;
   background: var(--ground);
-  opacity: 1;
-  transition: opacity 400ms var(--ease);
+  animation: splash-out 450ms var(--ease) 2000ms forwards;
 }
-.splash--leaving {
-  opacity: 0;
-  pointer-events: none;
+
+@keyframes splash-out {
+  /* pointer-events goes at the first frame of the fade, not the last: without
+     it the cover kept swallowing clicks for the whole 450ms it spent
+     disappearing, which is exactly when a reader starts reaching for the page.
+     During the 2s hold before this animation begins the element has its normal
+     style, so it still blocks interaction while it is genuinely covering. */
+  from { opacity: 1; pointer-events: none; }
+  99%  { opacity: 0; visibility: visible; }
+  to   { opacity: 0; visibility: hidden; }
 }
+
 .splash__inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.55rem;
   transform: translateY(-6%);
+  animation: splash-in 620ms var(--ease-out) both;
 }
-.splash__mark { border-radius: 12px; }
+@keyframes splash-in {
+  from { opacity: 0; transform: translateY(-2%) scale(0.96); }
+  to   { opacity: 1; transform: translateY(-6%) scale(1); }
+}
+
 .splash__name {
-  margin-top: 0.5rem;
-  font-size: 1.6rem;
+  margin-top: 0.7rem;
+  font-size: 1.7rem;
   font-weight: 650;
   letter-spacing: -0.035em;
   color: var(--ink);
 }
 .splash__sub {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 500;
   color: var(--ink-2);
 }
+
 .splash__track {
-  margin-top: 1.2rem;
-  width: 220px;
+  margin-top: 1.3rem;
+  width: 240px;
   height: 3px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--ink) 12%, transparent);
   overflow: hidden;
 }
-/* Width rather than transform: the bar is 220px and repainting a strip that
-   size once a frame is nothing, while a scaled transform would blur the
-   rounded cap. */
+/* Width rather than a scaled transform: the bar is 240px, repainting a strip
+   that size costs nothing, and scaling would smear the rounded cap. */
 .splash__fill {
   display: block;
   height: 100%;
   border-radius: 999px;
   background: var(--ink);
-  /* Also animated in CSS so the bar is moving from the first painted frame,
-     before any script has run. The inline width JS sets takes over seamlessly
-     because both describe the same journey. */
-  animation: splash-fill 1100ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation: splash-fill 1600ms cubic-bezier(0.25, 0.8, 0.35, 1) both;
 }
 @keyframes splash-fill {
   from { width: 0%; }
   to   { width: 100%; }
 }
+
 .splash__pct {
   font-family: var(--font-data);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-variant-numeric: tabular-nums;
   color: var(--ink-2);
+  counter-reset: splash-pct var(--splash-pct);
+  animation: splash-count 1600ms cubic-bezier(0.25, 0.8, 0.35, 1) both;
+}
+.splash__pct::after { content: counter(splash-pct) "%"; }
+@keyframes splash-count {
+  from { --splash-pct: 0; }
+  to   { --splash-pct: 100; }
+}
+
+/* A cover nobody asked for is motion like any other. */
+@media (prefers-reduced-motion: reduce) {
+  .splash { display: none; }
 }
