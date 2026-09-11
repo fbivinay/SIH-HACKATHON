@@ -147,12 +147,19 @@ deterministic and free; keep it that way.
   `REVIEW_TOKEN`. Never commit or print them. **Quote the values** —
   `DATABASE_URL` contains `&`, and unquoted, `. .env` backgrounds the line and
   silently leaves the variable unset.
-- **No Gemini key is needed to run anything.** All 41,691 sector labels are
-  cached in `data/sector_cache.json`, which is committed. Scoring, the API and
-  the nightly Action never read one; only `scripts/classify_sectors.py` does,
-  and it exits cleanly saying so when the variable is absent. Set one only to
-  label descriptions a future extract introduces, and remove it afterwards —
-  a key that does not exist cannot leak.
+- **No Gemini key is needed to run anything that already works.** All 41,691
+  sector labels are cached in `data/sector_cache.json`, which is committed, so
+  a clone scores correctly with no key at all. Scoring and the API never read
+  one.
+- **A key belongs in the `GEMINI_API_KEY` GitHub secret, nowhere else.** The
+  nightly Action labels descriptions a new extract introduces, between load and
+  score, and commits the cache so the repository stays self-sufficient. Without
+  the secret that step prints why and skips; the refresh still succeeds and new
+  works land in "Other", which is a real peer group rather than a failure. Never
+  put a key in `.env` on a shared machine and never paste one into a chat: at
+  roughly 22% of new descriptions needing a label and a few hundred new works a
+  day, this costs about 3-9 requests a day, which one account's free tier covers
+  many times over.
 - **Run the tests before committing:** `python3 -m pytest data api -q`. They hit
   the live database and take ~2.5 minutes.
 
