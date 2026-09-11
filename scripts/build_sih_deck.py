@@ -123,7 +123,17 @@ def figures():
         "districts": one("SELECT COUNT(DISTINCT district) FROM projects WHERE district IS NOT NULL"),
         "vendors": one("SELECT COUNT(DISTINCT vendor) FROM expenditures WHERE vendor IS NOT NULL"),
         "agencies": one("SELECT COUNT(DISTINCT implementing_agency) FROM projects"),
-        "rejected": one("SELECT COUNT(*) FROM rejected_rows"),
+        # The latest extract's rejections, not every run ever recorded. The
+        # slide sets this beside the loaded counts, so a cumulative total there
+        # reads as "this load threw away 1,488 rows" when it threw away 417.
+        "rejected": one(
+            """WITH dated AS (
+                   SELECT SUBSTRING(source_file FROM '\\d{4}-\\d{2}-\\d{2}') AS d
+                   FROM rejected_rows
+               )
+               SELECT COUNT(*) FROM dated
+               WHERE d = (SELECT MAX(d) FROM dated)"""
+        ),
         "scored": one("SELECT COUNT(*) FROM project_scores"),
         "queue": one("SELECT COUNT(*) FROM project_scores WHERE overall_risk_score >= 40"),
         "high": one("SELECT COUNT(*) FROM project_scores WHERE risk_level = 'HIGH'"),
