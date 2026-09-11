@@ -8,6 +8,7 @@ import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import Logo from "@/components/Logo";
 import NavLinks from "@/components/NavLinks";
 import RiskTicker from "@/components/RiskTicker";
+import ScrollReveal from "@/components/ScrollReveal";
 import Splash from "@/components/Splash";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -72,6 +73,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="flex min-h-screen flex-col">
         {/* Client-only: with no JavaScript the page is simply there. */}
         <Splash />
+        {/* Marks below-fold blocks so only those animate on scroll. */}
+        <ScrollReveal />
         <div className="topbar">
         <header className="masthead">
           <div className="shell masthead__inner">

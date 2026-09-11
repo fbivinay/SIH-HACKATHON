@@ -47,6 +47,30 @@ function RiskMeter({ label, value }: { label: string; value: number | null }) {
   );
 }
 
+/**
+ * Which method produced a given flag.
+ *
+ * Matched on the reason text because that is where the information already is
+ * - data/scoring.py writes these strings and each one is unmistakably the
+ * output of one component. Carrying a method field through the database, the
+ * API and the type just to re-derive what the sentence already says would be a
+ * schema change for a label.
+ *
+ * The names are the real ones. The classifier is gemini-flash-lite-latest, so
+ * that is what it is called here; inventing a version number to sound more
+ * impressive is the same failure as inventing a figure.
+ */
+function methodFor(reason: string): string {
+  const r = reason.toLowerCase();
+  if (r.includes("isolation forest")) return "AI · Isolation Forest (scikit-learn)";
+  if (r.includes("similarity")) return "AI · Sentence-BERT embeddings (all-MiniLM-L6-v2)";
+  if (r.includes("median")) return "Peer comparison · sector labelled by Gemini Flash Lite";
+  if (r.includes("one vendor") || r.includes("vendor")) return "Statistics · Herfindahl-Hirschman index";
+  if (r.includes("beyond expected completion")) return "Published dates";
+  if (r.includes("payments still in progress")) return "Payment records";
+  return "Stated compliance rule";
+}
+
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   // The segment is either a serial id or a work_key. Both resolve here, so a
@@ -194,9 +218,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               scoring pass.
             </p>
           ) : hasReasons ? (
-            <ul className="list-disc pl-5 space-y-1.5 text-sm text-[color:var(--ink)]">
+            <ul className="reason-method-list">
               {p.flagged_reasons.map((r, i) => (
-                <li key={i}>{r}</li>
+                <li key={i}>
+                  <span className="reason-method-list__text">{r}</span>
+                  <span className="reason-method">{methodFor(r)}</span>
+                </li>
               ))}
             </ul>
           ) : (
@@ -206,17 +233,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           )}
         </div>
       </section>
-
-      {p.work_key && (
-        <p className="mt-6 text-[0.78rem]" style={{ color: "var(--ink-3)" }}>
-          Permanent link to this work:{" "}
-          <Link className="link-quiet" href={`/projects/${encodeURIComponent(p.work_key)}`}>
-            /projects/{p.work_key}
-          </Link>
-          <br />
-          The numeric address changes on every refresh; this one does not.
-        </p>
-      )}
 
       <ReviewTrail workKey={p.work_key} />
 
