@@ -1543,7 +1543,7 @@ button,
 }
 
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(52px) scale(0.97); }
+  from { opacity: 0; transform: translateY(62px) scale(0.96); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1561,7 +1561,7 @@ button,
  * figures; the movement should read as confident, not playful.
  */
 @keyframes card-in {
-  from { opacity: 0; transform: translateY(72px) scale(0.9); }
+  from { opacity: 0; transform: translateY(88px) scale(0.88); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1641,12 +1641,35 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
     animation: none;
   }
 
+  /*
+   * Every content block on the site, not only the cards.
+   *
+   * Deliberately leaf blocks rather than their containers: .shell, section and
+   * .slab are all skipped, because animating a container AND its children
+   * multiplies their opacities and the inner ones then fade twice as slowly as
+   * everything else. Each rule below names something that holds text or a
+   * figure and nothing that holds another animated block.
+   */
   .stat-card,
   .grid > .card,
+  .card,
   .slab-card,
   .model-card,
+  .statecard,
+  .rulecard,
   .data-table-wrap,
-  .section-head {
+  .section-head,
+  .display,
+  .lede,
+  .eyebrow,
+  .notice,
+  .reason-list,
+  .trail,
+  .chart,
+  .choro-legend,
+  .filter-bar,
+  .pager,
+  .leaflet-container {
     animation: card-in linear both;
     animation-timeline: view();
     /* `cover`, not `entry`.
@@ -1663,6 +1686,18 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
     animation-delay: 0s;
   }
 
+  /* Text blocks use the gentler keyframe. A heading that travels as far as a
+     card reads as unstable: the eye reads type from a fixed baseline and
+     notices a moving one. */
+  .section-head,
+  .display,
+  .lede,
+  .eyebrow,
+  .reason-list,
+  .pager {
+    animation-name: rise-in;
+  }
+
   /* Cards sharing a row enter together, so the stagger is a slightly later
      finish per column - a wave across the row rather than five boxes moving
      as one plate. */
@@ -1671,9 +1706,37 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   .grid > :nth-child(4), .slab-card:nth-child(4) { animation-range: cover 9% cover 54%; }
   .grid > :nth-child(n + 5), .slab-card:nth-child(n + 5) { animation-range: cover 12% cover 58%; }
 
-  /* Rows keep their first-paint stagger and take no scroll timeline: a table
-     is one object, and its wrap already animates. */
-  .data-table tbody tr { animation: none; }
+  /*
+   * Nothing animates inside something that is already animating. Two nested
+   * fades multiply, so the inner block ends up arriving at a quarter of the
+   * opacity of everything beside it and reads as broken rather than layered.
+   *
+   * The row rule has to repeat the :nth-child selector. Without it,
+   * `.data-table tbody tr` (0,1,2) loses to the first-paint rule
+   * `.data-table tbody tr:nth-child(-n + 12)` (0,2,2) and every visible row
+   * kept animating inside its own wrap.
+   */
+  .data-table tbody tr,
+  .data-table tbody tr:nth-child(-n + 12) {
+    animation: none;
+  }
+
+  /* The wrap animates as one object, so nothing inside it animates again -
+     the evidence lists rendered inside queue rows are the case that reached
+     production. */
+  .data-table-wrap .reason-list,
+  .data-table-wrap .card,
+  .data-table-wrap .chart,
+  .card .reason-list,
+  .card .section-head,
+  .card .lede,
+  .card .chart,
+  .card .trail,
+  .slab-card .lede,
+  .stat-card .lede,
+  .model-card .section-head {
+    animation: none;
+  }
 }
 
 /*
@@ -1686,11 +1749,25 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   main > .shell,
   .stat-card,
   .stat-card__value,
+  .card,
   .grid > .card,
   .slab-card,
   .model-card,
+  .statecard,
+  .rulecard,
   .data-table-wrap,
   .section-head,
+  .display,
+  .lede,
+  .eyebrow,
+  .notice,
+  .reason-list,
+  .trail,
+  .chart,
+  .choro-legend,
+  .filter-bar,
+  .pager,
+  .leaflet-container,
   .data-table tbody tr {
     animation: none;
     opacity: 1;
