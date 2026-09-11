@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import Logo from "@/components/Logo";
 import NavLinks from "@/components/NavLinks";
+import PointerGlow from "@/components/PointerGlow";
 import RiskTicker from "@/components/RiskTicker";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -69,6 +70,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body className="flex min-h-screen flex-col">
+        {/* One delegated pointer listener for the whole document. */}
+        <PointerGlow />
         <div className="topbar">
         <header className="masthead">
           <div className="shell masthead__inner">

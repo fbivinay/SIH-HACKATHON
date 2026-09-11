@@ -346,6 +346,12 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   letter-spacing: 0;
 }
 
+/*
+ * A floating island rather than links sitting flat on the bar: its own glass
+ * pane, its own rim highlight, lifted off the masthead by a shadow. On a page
+ * where every other surface is glass, navigation that is merely text was the
+ * one element that read as unfinished.
+ */
 .nav {
   display: flex;
   align-items: center;
@@ -354,6 +360,13 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
+  padding: 0.28rem;
+  border-radius: var(--radius-pill);
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(1.8) blur(var(--glass-blur));
+  backdrop-filter: saturate(1.8) blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
 }
 
 .nav::-webkit-scrollbar {
@@ -403,9 +416,16 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
   background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
+/* The current section is the one solid thing in a bar of glass, so it reads
+   as where you are rather than as another option. */
 .nav__link[aria-current="page"] {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--surface);
+  background: var(--ink);
+  box-shadow: 0 1px 2px rgba(11, 11, 12, 0.18);
+}
+.nav__link[aria-current="page"]:hover {
+  color: var(--surface);
+  background: var(--ink);
 }
 
 /* ---------------------------------------------------------------- buttons - */
@@ -549,13 +569,9 @@ html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
               transform var(--t-base) var(--ease),
               border-color var(--t-base) var(--ease);
 }
-/* A figure lifts slightly when pointed at - enough to feel responsive, not
-   enough to shift the layout. Cards that are not links stay put. */
-a.stat-card:hover,
-a.card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--glass-edge), var(--glass-shadow-lift);
-}
+/* Hover and press live in the pointer-feel block at the end of this file,
+   which supersedes the lift that used to be here: it applied only to cards
+   that were links, so most of the interface did not respond at all. */
 
 .slab .stat-card {
   background: var(--slab-2);
@@ -1543,7 +1559,7 @@ button,
 }
 
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(62px) scale(0.96); }
+  from { opacity: 0; transform: translateY(74px) scale(0.95); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1561,7 +1577,7 @@ button,
  * figures; the movement should read as confident, not playful.
  */
 @keyframes card-in {
-  from { opacity: 0; transform: translateY(88px) scale(0.88); }
+  from { opacity: 0; transform: translateY(104px) scale(0.86); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1840,4 +1856,142 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   font-size: 0.74rem;
   line-height: 1.5;
   color: var(--ink-3);
+}
+
+/* ------------------------------------------------------- pointer feel -- */
+/*
+ * Every surface responds to the pointer over it: it lifts toward the reader,
+ * leans very slightly away from the cursor, and carries a sheen that tracks
+ * where the cursor is. PointerGlow supplies --mx/--my and --tilt-x/y; all the
+ * defaults below are what applies when it never runs, so a page without
+ * JavaScript still lifts and still responds to a press.
+ *
+ * `will-change: transform` is deliberately absent. Promoting sixty cards to
+ * their own compositor layers costs more memory than the animation saves, and
+ * the transform is cheap enough without it.
+ */
+.stat-card,
+.card,
+.slab-card,
+.model-card,
+.statecard,
+.rulecard,
+.data-table-wrap {
+  --mx: 50%;
+  --my: 50%;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+/* The sheen. A soft light centred on the cursor, invisible until hovered, and
+   drawn on a pseudo-element so it can never affect the content's contrast. */
+.stat-card::after,
+.card::after,
+.slab-card::after,
+.model-card::after,
+.statecard::after,
+.rulecard::after,
+.data-table-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-base) var(--ease);
+  background: radial-gradient(
+    22rem circle at var(--mx) var(--my),
+    color-mix(in srgb, var(--ink) 7%, transparent),
+    transparent 62%
+  );
+}
+
+/*
+ * Hover: the surface comes toward the reader and leans away from the cursor.
+ * :where() keeps the specificity at zero so a card's own risk colouring, and
+ * the arrival animation's transform, are never fought over.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .stat-card:hover,
+  .card:hover,
+  .slab-card:hover,
+  .model-card:hover,
+  .statecard:hover,
+  .rulecard:hover {
+    /*
+     * `scale` and `translate`, NOT `transform`.
+     *
+     * These cards carry the arrival animation, and a CSS animation holding its
+     * fill state wins the cascade against a plain declaration - so a
+     * `transform` here silently never applied: the sheen tracked the cursor
+     * and the card itself did not move at all. scale/translate/rotate are
+     * independent properties that compose with transform instead of replacing
+     * it, so the hover and the arrival can both be true at once without
+     * !important and without a wrapper element.
+     *
+     * transform-origin is the cursor, so the zoom grows FROM the point being
+     * pointed at rather than from the middle of the card.
+     */
+    transform-origin: var(--mx) var(--my);
+    scale: 1.03;
+    translate: 0 -4px;
+    rotate: 0deg;
+    box-shadow: var(--glass-edge), var(--glass-shadow-lift);
+    z-index: 1;
+  }
+  .stat-card:hover::after,
+  .card:hover::after,
+  .slab-card:hover::after,
+  .model-card:hover::after,
+  .statecard:hover::after,
+  .rulecard:hover::after,
+  .data-table-wrap:hover::after {
+    opacity: 1;
+  }
+}
+
+/*
+ * Press. The zoom continues rather than reversing - a surface that shrinks
+ * under the finger reads as a button, and these are panels being opened, not
+ * buttons being clicked. Faster than the hover so the response feels immediate.
+ */
+.stat-card:active,
+.card:active,
+.slab-card:active,
+.model-card:active,
+.statecard:active,
+.rulecard:active {
+  transform-origin: var(--mx) var(--my);
+  scale: 1.055;
+  translate: 0 -6px;
+  transition-duration: var(--t-fast);
+}
+
+/* The transition has to name transform explicitly, or the hover lift snaps
+   while the box-shadow eases and the two arrive at different times. */
+.stat-card,
+.card,
+.slab-card,
+.model-card,
+.statecard,
+.rulecard {
+  transition:
+    scale var(--t-base) var(--ease),
+    translate var(--t-base) var(--ease),
+    box-shadow var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease);
+}
+
+/* Nothing moves under the pointer when motion is declined. The sheen stays,
+   because a highlight that does not move is not motion. */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card:hover, .card:hover, .slab-card:hover, .model-card:hover,
+  .statecard:hover, .rulecard:hover,
+  .stat-card:active, .card:active, .slab-card:active, .model-card:active,
+  .statecard:active, .rulecard:active {
+    scale: 1;
+    translate: none;
+  }
 }
