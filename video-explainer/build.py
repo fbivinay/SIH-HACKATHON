@@ -226,7 +226,25 @@ HTML = f"""<!doctype html>
       #pb-line {{ margin-top: 56px; font-size: 50px; font-weight: 500;
                   letter-spacing: -0.02em; color: var(--on-slab); }}
 
+      /* The wordmark. Tone-aware because it appears on both grounds: a filled
+         square with two slashes cut out of it, so the square takes the
+         foreground colour and the slashes take the background. */
+      .mark {{ display: flex; align-items: center; gap: 22px; }}
+      .mk-logo {{ position: relative; overflow: hidden; }}
+      .mk-slash {{ position: absolute; top: -12px; transform: rotate(26deg); }}
+      .light .mk-logo {{ background: var(--ink); }}
+      .light .mk-slash {{ background: var(--ground); }}
+      .dark .mk-logo {{ background: var(--on-slab); }}
+      .dark .mk-slash {{ background: var(--slab); }}
+      .mk-name {{ font-weight: 650; letter-spacing: -0.035em; }}
+
       /* 2 what */
+      #wh-mark {{ margin-bottom: 46px; }}
+      #wh-mark .mk-logo {{ width: 64px; height: 64px; border-radius: 17px; }}
+      #wh-mark .mk-slash {{ width: 10px; height: 86px; }}
+      #wh-mark .mk-slash.a {{ left: 17px; }}
+      #wh-mark .mk-slash.b {{ left: 37px; }}
+      #wh-mark .mk-name {{ font-size: 56px; }}
       #wh-head {{ margin-top: 36px; font-size: 88px; max-width: 1400px; text-align: center; }}
       #wh-sub {{ margin-top: 34px; font-size: 38px; color: var(--ink-2); }}
       .ai-eyebrow {{ display: flex; align-items: center; gap: 0.55em;
@@ -353,13 +371,12 @@ HTML = f"""<!doctype html>
                 letter-spacing: -0.025em; color: var(--on-slab-2); }}
       #lm-l2 {{ margin-top: 20px; font-size: 66px; font-weight: 650;
                 letter-spacing: -0.03em; color: var(--on-slab); }}
-      #lm-mark {{ margin-top: 70px; display: flex; align-items: center; gap: 24px; }}
-      #lm-logo {{ width: 74px; height: 74px; border-radius: 20px; background: var(--on-slab);
-                  position: relative; overflow: hidden; }}
-      .slash {{ position: absolute; width: 12px; height: 98px; background: var(--slab);
-                top: -12px; transform: rotate(26deg); }}
-      .slash.a {{ left: 20px; }} .slash.b {{ left: 43px; }}
-      #lm-name {{ font-size: 66px; font-weight: 650; letter-spacing: -0.035em; }}
+      #lm-mark {{ margin-top: 70px; gap: 24px; }}
+      #lm-mark .mk-logo {{ width: 74px; height: 74px; border-radius: 20px; }}
+      #lm-mark .mk-slash {{ width: 12px; height: 98px; }}
+      #lm-mark .mk-slash.a {{ left: 20px; }}
+      #lm-mark .mk-slash.b {{ left: 43px; }}
+      #lm-mark .mk-name {{ font-size: 66px; }}
       #lm-sub {{ margin-top: 26px; font-family: var(--mono); font-size: 20px;
                  letter-spacing: 0.2em; color: var(--on-slab-3); }}
     </style>
@@ -381,6 +398,12 @@ HTML = f"""<!doctype html>
       <!-- 2 -->
       {scene_open['what'].format(tone='light')}
         <div class="stack">
+          <div id="wh-mark" class="mark">
+            <div class="mk-logo" data-layout-allow-overflow="true">
+              <span class="mk-slash a"></span><span class="mk-slash b"></span>
+            </div>
+            <div class="mk-name">Kasauti</div>
+          </div>
           <div id="wh-eyebrow" class="ai-eyebrow">
             <span class="ai-dot"></span><span class="ai-word">AI powered</span>
             <span>&middot; Gemini Flash Lite &middot; Isolation Forest &middot; Sentence-BERT</span>
@@ -557,11 +580,11 @@ HTML = f"""<!doctype html>
           </div>
           <div id="lm-l1">A kasauti says which pieces are worth assaying.</div>
           <div id="lm-l2">Never which are false.</div>
-          <div id="lm-mark">
-            <div id="lm-logo" data-layout-allow-overflow="true">
-              <span class="slash a"></span><span class="slash b"></span>
+          <div id="lm-mark" class="mark">
+            <div class="mk-logo" data-layout-allow-overflow="true">
+              <span class="mk-slash a"></span><span class="mk-slash b"></span>
             </div>
-            <div id="lm-name">Kasauti</div>
+            <div class="mk-name">Kasauti</div>
           </div>
           <div id="lm-sub">SIH26102 &middot; MoSPI</div>
         </div>
@@ -599,10 +622,11 @@ HTML = f"""<!doctype html>
         rise("#pb-money", {at('problem', 3.1)}, {{ y: 20 }});
         rise("#pb-line", {at('problem', 5.6)}, {{ y: 22, duration: 0.7 }});
 
-        // 2 what
-        rise("#wh-eyebrow", {at('what', 0.2)}, {{ y: 16 }});
-        rise("#wh-head", {at('what', 0.7)}, {{ y: 38, duration: 0.75 }});
-        rise("#wh-sub", {at('what', 3.4)}, {{ y: 20 }});
+        // 2 what - the mark arrives on the word "Kasauti", which opens the line
+        rise("#wh-mark", {at('what', 0.1)}, {{ y: 22, duration: 0.6 }});
+        rise("#wh-eyebrow", {at('what', 0.75)}, {{ y: 16 }});
+        rise("#wh-head", {at('what', 1.25)}, {{ y: 38, duration: 0.75 }});
+        rise("#wh-sub", {at('what', 4.2)}, {{ y: 20 }});
 
         // 3 provenance
         rise("#pv-title", {at('provenance', 0.15)}, {{ y: 14 }});
