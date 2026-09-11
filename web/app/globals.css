@@ -273,6 +273,19 @@ select:focus-visible {
 /* An in-page anchor would otherwise land its target underneath the bar. */
 html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
 
+/*
+ * No scroll anchoring on the page. On a reload from the top, Chrome picked the
+ * first section as its anchor while that section was still 74px low in its
+ * entrance animation, then "kept it in place" by scrolling the page down by
+ * exactly that much - 77px unzoomed, 103px at the desktop zoom - so every
+ * refresh landed with the heading tucked under the bar. Measured by removing
+ * one thing at a time: only this, or removing the entrance animations, put
+ * the reload back at 0. Anchoring guards against content loading in above
+ * the reader; nothing here does that - every page is rendered in full on the
+ * server - so there is nothing to lose.
+ */
+html { overflow-anchor: none; }
+
 /* The masthead and the risk ticker stick together as one unit. The ticker used
    to carry its own `top` offset, which meant hard-coding the masthead's height -
    and the zoom block below changes that height at two breakpoints, so a fixed
