@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 export default async function MpPage({
   params,
@@ -112,7 +113,9 @@ export default async function MpPage({
         ].map((c) => (
           <div key={c.label} className={`stat-card${c.tone ? ` stat-card--${c.tone}` : ""}`}>
             <div className="stat-card__label">{c.label}</div>
-            <div className="stat-card__value">{c.value}</div>
+            <div className="stat-card__value">
+                <CountUp text={String(c.value)} />
+              </div>
             <div className="stat-card__note">{c.note}</div>
           </div>
         ))}

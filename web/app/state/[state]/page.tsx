@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { api } from "@/lib/api";
 import type { StateDesk } from "@/lib/api";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 type Params = { state: string };
 type Search = Record<string, string | string[] | undefined>;
@@ -138,7 +139,9 @@ export default async function StateDeskPage({
           ].map((c) => (
             <div key={c.label} className={c.tone ? "stat-card stat-card--medium" : "stat-card"}>
               <div className="stat-card__label">{c.label}</div>
-              <div className="stat-card__value">{c.value}</div>
+              <div className="stat-card__value">
+                <CountUp text={String(c.value)} />
+              </div>
               <div className="stat-card__note">{c.note}</div>
             </div>
           ))}

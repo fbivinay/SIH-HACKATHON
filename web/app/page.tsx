@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatINR } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 // Same weights and thresholds as data/scoring.py. Stated on the page because a
 // score nobody can take apart is a score nobody should act on.
@@ -225,7 +226,9 @@ export default async function OverviewPage({
           {stats.map((s) => (
             <div key={s.label} className={`stat-card${s.tone ? ` stat-card--${s.tone}` : ""}`}>
               <div className="stat-card__label">{s.label}</div>
-              <div className="stat-card__value">{s.value}</div>
+              <div className="stat-card__value">
+                <CountUp text={String(s.value)} />
+              </div>
               <div className="stat-card__note">{s.note}</div>
             </div>
           ))}

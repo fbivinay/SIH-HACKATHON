@@ -2,6 +2,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import type { StateSummary } from "@/lib/api";
 import { formatCount, formatINR } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 // The source's own bands, so a state falls in the same bucket on both sites.
 const HIGH = 80;
@@ -126,7 +127,9 @@ export default async function StatesPage({
           ].map((c) => (
             <div key={c.label} className="stat-card">
               <div className="stat-card__label">{c.label}</div>
-              <div className="stat-card__value">{c.value}</div>
+              <div className="stat-card__value">
+                <CountUp text={String(c.value)} />
+              </div>
               <div className="stat-card__note">{c.note}</div>
             </div>
           ))}

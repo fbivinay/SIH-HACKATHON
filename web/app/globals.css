@@ -1543,7 +1543,15 @@ button,
 }
 
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(26px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Cards come from below and slightly behind, so a grid resolves into place
+   rather than blinking on. The scale is tiny on purpose: at 0.985 it reads as
+   depth, and anything more reads as a slideshow. */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(22px) scale(0.975); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1587,8 +1595,59 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   }
 }
 
-/* Cards inside a section arrive with it rather than each on their own clock:
-   eight boxes animating independently is confetti, not composure. */
+/*
+ * The figure itself fades in slightly behind its card.
+ *
+ * Not decoration: the server paints the real number, and the counter can only
+ * reset it to zero once hydration lands - a few hundred milliseconds later on
+ * a cold load. Without this the reader saw the true figure, then a snap back to
+ * zero, then the count. Fading the value across that window hides the reset and
+ * leaves the count reading as the number arriving. With JavaScript off the
+ * figure simply fades in and stays correct, which is the same thing minus the
+ * count.
+ */
+@keyframes value-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* Only for the no-JavaScript case: with the counter running, CountUp drives
+   this element's opacity itself and this animation has long finished. */
+.stat-card__value {
+  animation: value-in 460ms var(--ease-out) 120ms both;
+}
+
+/*
+ * Cards arrive one after another rather than all at once. The delay is small -
+ * 45ms a card - because the point is a sense of order, not a queue the reader
+ * has to wait through: eight cards are fully settled 315ms after the first.
+ *
+ * Capped at eight. Beyond that the stagger stops growing, so a long grid never
+ * leaves its last card waiting a second and a half to appear.
+ */
+.stat-card,
+.grid > .card {
+  animation: card-in 560ms var(--ease-out) both;
+}
+.grid > :nth-child(1) { animation-delay: 0ms; }
+.grid > :nth-child(2) { animation-delay: 45ms; }
+.grid > :nth-child(3) { animation-delay: 90ms; }
+.grid > :nth-child(4) { animation-delay: 135ms; }
+.grid > :nth-child(5) { animation-delay: 180ms; }
+.grid > :nth-child(6) { animation-delay: 225ms; }
+.grid > :nth-child(7) { animation-delay: 270ms; }
+.grid > :nth-child(n + 8) { animation-delay: 315ms; }
+
+/* Table rows settle in too, but only the first screenful: staggering four
+   hundred rows would animate for half a minute. */
+.data-table tbody tr:nth-child(-n + 12) {
+  animation: rise-in 440ms var(--ease-out) both;
+}
+.data-table tbody tr:nth-child(2) { animation-delay: 30ms; }
+.data-table tbody tr:nth-child(3) { animation-delay: 60ms; }
+.data-table tbody tr:nth-child(4) { animation-delay: 90ms; }
+.data-table tbody tr:nth-child(5) { animation-delay: 120ms; }
+.data-table tbody tr:nth-child(6) { animation-delay: 150ms; }
+.data-table tbody tr:nth-child(n + 7) { animation-delay: 180ms; }
 
 /*
  * All of the above is a courtesy, and a courtesy that cannot be declined is an
@@ -1597,7 +1656,11 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
  */
 @media (prefers-reduced-motion: reduce) {
   main > section,
-  main > .shell {
+  main > .shell,
+  .stat-card,
+  .stat-card__value,
+  .grid > .card,
+  .data-table tbody tr {
     animation: none;
     opacity: 1;
     transform: none;

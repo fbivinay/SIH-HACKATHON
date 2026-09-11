@@ -10,6 +10,7 @@ import {
   riskLevelLabel,
   workStatusLabel,
 } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 type Params = { state: string; district: string };
 type Search = Record<string, string | string[] | undefined>;
@@ -111,7 +112,9 @@ export default async function DistrictDeskPage({
           ].map((c) => (
             <div key={c.label} className={c.tone ?? "stat-card"}>
               <div className="stat-card__label">{c.label}</div>
-              <div className="stat-card__value">{c.value}</div>
+              <div className="stat-card__value">
+                <CountUp text={String(c.value)} />
+              </div>
               <div className="stat-card__note">{c.note}</div>
             </div>
           ))}

@@ -6,6 +6,7 @@ import ReviewActions from "@/components/ReviewActions";
 import ReviewerName from "@/components/ReviewerName";
 import RiskBar from "@/components/RiskBar";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 // Each row carries its full evidence, which is the point of the page and also
 // about 280px. Fifty of them was a 14,000px scroll.
@@ -158,7 +159,9 @@ export default async function AlertsPage({
           {tiles.map((t) => (
             <div key={t.label} className={`stat-card stat-card--${t.tone}`}>
               <div className="stat-card__label">{t.label}</div>
-              <div className="stat-card__value">{t.value}</div>
+              <div className="stat-card__value">
+                <CountUp text={String(t.value)} />
+              </div>
               <div className="stat-card__note">{t.note}</div>
             </div>
           ))}
