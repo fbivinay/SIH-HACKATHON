@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "createdAt": "2026-09-11T22:08:43.341Z",
+        "reason": "Project design system: CLAUDE.md section 10 fixes the interface typefaces as 'Geist and Geist Mono'. This is the launch video for that product and reuses its exact woff2 files from web/.next, so the face is brand consistency, not a default."
+      },
+      {
+        "rule": "overused-font",
+        "value": "geist mono",
+        "createdAt": "2026-09-11T22:08:43.402Z",
+        "reason": "Same project design system rule (CLAUDE.md section 10). Geist Mono carries every figure in the product with tabular numerals, which the video's count-up depends on."
+      }
+    ]
+  }
+}
