@@ -42,7 +42,20 @@ def fetch_projects(conn):
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         # The base table, not the view: this is the input scoring is about to
         # replace, and reading its own previous output would be circular.
-        cur.execute("SELECT * FROM projects")
+        #
+        # work_key IS NOT NULL because project_scores is keyed on it, so a row
+        # without one cannot be scored at all. It used to be keyed on
+        # projects.id, which is never null, so nothing needed saying. The rows
+        # this excludes are the synthetic demo rows generate_synthetic.py
+        # writes without a work_key - which load() deliberately preserves -
+        # and scoring them would abort the whole pass on a not-null violation
+        # after ~50 minutes of computation, at the very last statement.
+        cur.execute("SELECT COUNT(*) FROM projects WHERE work_key IS NULL")
+        unkeyed = cur.fetchone()["count"]
+        if unkeyed:
+            print(f"Skipping {unkeyed:,} project(s) with no work_key - they cannot "
+                  "be scored, because a score is keyed on work_key.")
+        cur.execute("SELECT * FROM projects WHERE work_key IS NOT NULL")
         return pd.DataFrame(cur.fetchall())
 
 

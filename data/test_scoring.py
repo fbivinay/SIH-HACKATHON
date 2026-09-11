@@ -529,3 +529,97 @@ def test_scores_are_keyed_on_something_a_reload_cannot_move():
     assert write_body.count("conn.commit()") == 1, (
         "the clear and the refill must commit together or readers see empty"
     )
+
+
+class _RecordingCursor:
+    """Captures the SQL fetch_projects actually runs, and answers it minimally."""
+
+    def __init__(self, rows):
+        self.rows = rows
+        self.executed = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, params=None):
+        self.executed.append(" ".join(sql.split()))
+
+    def fetchone(self):
+        return {"count": sum(1 for r in self.rows if r["work_key"] is None)}
+
+    def fetchall(self):
+        last = self.executed[-1]
+        # Stand in for the database: honour the filter if the query asks for it.
+        if "work_key IS NOT NULL" in last:
+            return [r for r in self.rows if r["work_key"] is not None]
+        return list(self.rows)
+
+
+class _RecordingConn:
+    def __init__(self, rows):
+        self.cur = _RecordingCursor(rows)
+
+    def cursor(self, **kwargs):
+        return self.cur
+
+
+def test_scoring_skips_rows_that_cannot_carry_a_score():
+    """A project with no work_key cannot be scored, because project_scores is
+    keyed on work_key.
+
+    Harmless while scores were keyed on projects.id, which is never null.
+    Rekeying made it fatal: generate_synthetic.py writes demo rows with no
+    work_key, load() deliberately preserves them (it deletes only
+    source = 'real'), and fetch_projects read every row unfiltered - so the
+    pass died on a not-null violation at the very last statement, after about
+    fifty minutes of computation.
+
+    Asserted against the SQL actually executed. An earlier version of this test
+    used inspect.getsource and passed on the explanatory comment above the
+    query, which is no test at all.
+    """
+    import scoring
+
+    conn = _RecordingConn([
+        {"id": 1, "work_key": "101|18|AGENCY_IDA", "description": "a road"},
+        {"id": 2, "work_key": None, "description": "a synthetic demo row"},
+    ])
+    df = scoring.fetch_projects(conn)
+
+    assert list(df["work_key"]) == ["101|18|AGENCY_IDA"], (
+        "a row with no work_key reached scoring; write_scores would abort the "
+        "whole pass on the not-null constraint"
+    )
+    row_query = [q for q in conn.cur.executed if q.startswith("SELECT * FROM projects")]
+    assert row_query and "work_key IS NOT NULL" in row_query[0], (
+        f"the row query must exclude unkeyable rows, got: {row_query}"
+    )
+
+
+def test_the_loader_only_removes_scores_whose_work_is_gone():
+    """The loader is allowed to touch project_scores in exactly one way.
+
+    Asserting only that it never says TRUNCATE leaves the obvious mistake
+    uncovered: an unconditional DELETE FROM project_scores, or the orphan
+    cleanup moved up beside the projects delete - where it reads like tidying
+    and would empty the table, because projects is momentarily empty there.
+    """
+    import inspect
+
+    import load_real_data as lrd
+
+    body = inspect.getsource(lrd.load)
+    clears = [
+        line.strip()
+        for line in body.splitlines()
+        if "project_scores" in line and ("DELETE" in line or "TRUNCATE" in line)
+    ]
+    assert len(clears) == 1, f"expected one guarded delete, found: {clears}"
+    delete_stmt = body[body.index("DELETE FROM project_scores"):]
+    assert "NOT EXISTS" in delete_stmt[:400], (
+        "scores may only be deleted for works that have left the source; an "
+        "unguarded delete empties the table the site is reading"
+    )

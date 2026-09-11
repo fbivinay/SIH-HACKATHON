@@ -49,7 +49,7 @@ def unclassified_descriptions(limit=None, cache=None):
             cur.execute(
                 """
                 SELECT p.description, COUNT(*) AS works
-                FROM project_scores s JOIN projects p ON p.id = s.project_id
+                FROM project_scores s JOIN projects p ON p.work_key = s.work_key
                 WHERE s.sector = %s AND p.description IS NOT NULL
                 GROUP BY p.description
                 ORDER BY works DESC
