@@ -18,10 +18,9 @@ number destroys that, and nobody downstream can tell which number it was.
 - **Never invent a field the source does not publish.** MPLADS publishes no
   progress percentage, beneficiary count, geo-tag, or bill value. If a screen
   seems to want one, the answer is to say it is not published. The blind-spot
-  list lives in `COMPLIANCE_BLIND_SPOTS` in `api/main.py` and is still served by
-  `/api/compliance`; the page that rendered it was removed from the interface,
-  so add new limits there and give them a home on `/provenance` if they need to
-  be seen.
+  list lives in `COMPLIANCE_BLIND_SPOTS` in `api/main.py`, is served by
+  `/api/compliance`, and is rendered on `/provenance` (the Compliance page that
+  used to hold it was deleted). Add new limits there.
 - **Never invent a guideline clause number.** The MPLADS guidelines are not in
   this repository. `basis` on each compliance rule says what the rule rests on
   in words; "clause 3.12.1" would look authoritative and be fiction.
@@ -168,17 +167,123 @@ deterministic and free; keep it that way.
 
 ## 10. Interface
 
-Monochrome. **Colour only ever means risk** — `--risk-low/medium/high`, and
-nothing else earns a hue. Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15`
-at 700–1023px, none below, because 456px of content does not fit a 390px phone.
+Monochrome. **Colour only ever means risk** — `--risk-low/medium/high`. One
+deliberate exception, on the owner's call: the two words "AI powered" are
+`--ai-red` wherever they appear (eyebrow, badges, masthead, loading cover) and
+the dot beside them is `--risk-low` green; the pointer is `--risk-high`. Nothing
+else earns a hue. Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at
+700–1023px, none below, because 456px of content does not fit a 390px phone.
 
 Tables scroll inside their own container; the page body never scrolls
-sideways. Money is `formatINR` (₹ Cr / L), counts are `formatCount`, and
-timestamps render in IST with the label written literally.
+sideways — so nothing may be wider than the shell, including the hero canvas.
+Money is `formatINR` (₹ Cr / L), counts are `formatCount`, and timestamps
+render in IST with the label written literally.
+
+Seven nav pages in this order: Overview `/`, Alerts `/alerts`, States
+`/states`, Map `/map`, Works `/projects`, Agencies `/analysis`, Sources
+`/provenance`. Signals, Rules and Trends were deleted; what they carried lives
+on the overview and `/provenance`. "AI powered" must be visible on every page
+(masthead) and in front of "Why was this flagged?" on the work page — the
+brief asks for an AI-powered system and a visitor could not previously tell.
 
 The deck (`scripts/build_sih_deck.py`) reads every figure from the database at
 build time and refuses to build on a null or zero. It shipped stale twice when
 the numbers were typed in. Do not retype them.
+
+## 11. Motion, measured
+
+Every rule here was found by measuring in a headless browser (playwright-core
+against a local `next start`), not by looking. Keep doing that: sample
+opacity and transform at every scroll position, frame intervals over 120
+frames, scrollY through a reload. "Looks fine" was wrong six times.
+
+**Two kinds of entrance, and never retime a running one.**
+- First load: everything on the opening screen animates on a timer after the
+  loading cover, starting at `--enter-at` (3000ms) — before that the cover is
+  opaque and the entrance plays for nobody.
+- Client navigation: `<html data-entered>` sets `--enter-at: 0` and shorter
+  travel (`--rise-y`, `--card-y`), because the new page has no cover and sat
+  blank for three seconds otherwise.
+- `data-entered` is set at 4500ms, **after the last first-load entrance has
+  ended**, or immediately on a navigation. Setting it while entrances run
+  changes their `animation-delay`, and a running CSS animation whose delay
+  drops by 3s is retimed on the spot — measured, every card snapped 47px → 0
+  in one frame. Never change `animation-delay`, `animation-name` or keyframe
+  custom properties on an element mid-animation.
+
+**Scroll reveals** (`[data-reveal]`, `@supports (animation-timeline: view())`):
+- Two animations on one timeline: opacity over `cover 0px → 300px`, movement
+  over `cover 0px → 680px` with `--ease`. One range could not serve both —
+  short and the arrival was invisible, long and text sat translucent while
+  read.
+- **Pixel ranges, never percentages.** A percentage of `cover` on an
+  11,225px table was 5,093px of scrolling before solid.
+- **Longhands, with `animation-duration: auto` written out.** Lightning CSS
+  (under Tailwind v4) expands the `animation` shorthand and fills the
+  duration as `0s`, which for a scroll timeline is a zero-length effect —
+  blocks snapped 0 → 1 the instant their range began. Check the compiled
+  chunk in `.next/static/chunks/*.css` when a scroll animation does nothing.
+- The selector is `[data-reveal], .grid > [data-reveal]`: `.grid > .card`
+  (0,2,0) outranks a bare attribute (0,1,0), and the first card of every
+  grid on the overview never took a timeline until this was added.
+- `ScrollReveal` marks only blocks below the fold at load, **by layout
+  position (`offsetTop` chain × `currentCSSZoom`), never
+  `getBoundingClientRect`** — the rect includes the pending 104px entrance
+  transform, and a row at 599px was read as 765px, marked, and stuck at 61%
+  opacity in the first viewport. It marks three times (rAF, `fonts.ready`,
+  after the cover), add-only. Nothing nested inside another revealable block
+  is marked: two nested fades multiply.
+- Table rows never take a timeline; the wrap animates as one object.
+
+**Scroll position.** `html { overflow-anchor: none }`. Chrome picked the first
+section as scroll anchor while it was 74px low in its entrance and "kept it
+in place" by scrolling every reload 103px down. Nothing here loads in above
+the reader, so anchoring guards against nothing.
+
+**The loading cover** (`components/Splash.tsx`) is CSS-only — no state, no
+effect, no `"use client"`. The first version hid itself from a `useEffect`
+timer and sat at 0% for three seconds on a slow hydration with no way to
+leave. It runs 3.3s: fill 2.5s on a symmetric curve, fade 2.7 → 3.3s,
+`pointer-events: none` from the first fade frame, `visibility: hidden` at the
+end. `ScrollReveal`'s last pass and `data-entered` are timed off it.
+
+**Performance budget, measured on `/alerts`:** 2 backdrop-filters on the
+whole page (masthead, ticker), 0 `background-attachment: fixed`, 0 gradient
+pseudo-elements, 60fps. What broke it before: 17 backdrop-filters, a fixed
+body background repainting on every scroll frame, a CSS `mask-image` over a
+canvas that repaints every frame (33ms frames → 16.7ms without; the fade is
+done per point instead), and a canvas reaching under the masthead so its
+backdrop blur recomputed every frame. `body::before` is the one fixed wash
+layer. Anything that keeps drawing must stop when off-screen or the tab is
+hidden (`HeroField`, `Cursor` both do).
+
+**Zoom.** The root is zoomed, and it bites twice. `clientX/Y` are screen
+pixels while elements move in the root's zoomed pixels — divide by
+`el.currentCSSZoom`. `getBoundingClientRect` is zoom-adjusted, `offsetTop`
+and `clientWidth` are not — a canvas backing store is `clientWidth ×
+currentCSSZoom × devicePixelRatio`.
+
+**Independent transform properties.** `scale` wraps `transform`: a ring at
+`transform: translate(449px)` with `scale: 1.55` drew at 696px. Position with
+the `translate` property (applied outermost) when `scale` is also in play.
+
+**Sticky and stacking.** `.data-table thead th { top: 0 }` — the wrap owns the
+scroll, so a topbar offset parks the header across row 1. `.topbar` is
+`z-index: 1100` because Leaflet stacks 200–1000 and painted over the nav at
+40. The pointer is 10000, above the cover at 9999.
+
+**Navigation.** `app/loading.tsx` answers a click in ~150ms; `lib/api.ts`
+caches every GET for 300s under the tag `api` (the record changes nightly),
+and `app/alerts/actions.ts` calls `updateTag("api")` after a review so the
+reviewer reads their own write. Measured: 130–550ms per click warm, against
+1.3–9.3s cold plus 3.5s blank before.
+
+**Local verification.** `next start` serves the chunks it started with: after
+every `next build`, kill the server **by PID** (`ps -eo pid,args | grep
+next-server`) and start it again, or you will measure the previous build for
+an hour. `pkill -f "next start"` matches the shell that runs it and kills
+that instead. The API on :8000 and the web on :3100 are the local pair; the
+web reads `web/.env.local`.
 
 ---
 
