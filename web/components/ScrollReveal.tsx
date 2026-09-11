@@ -34,6 +34,20 @@ const REVEALABLE = [
 export default function ScrollReveal() {
   const pathname = usePathname();
 
+  // Once, after the loading cover has gone: from here on, every page entrance
+  // is a client navigation with nothing covering it, and globals.css reads
+  // this attribute to drop the entrance delay and shorten the travel. Separate
+  // from the effect below because that one re-runs and cleans up on every
+  // navigation, and a click inside the first few seconds would have cancelled
+  // this before it fired.
+  useEffect(() => {
+    const t = window.setTimeout(
+      () => document.documentElement.setAttribute("data-entered", ""),
+      3400
+    );
+    return () => window.clearTimeout(t);
+  }, []);
+
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!CSS.supports("animation-timeline: view()")) return;

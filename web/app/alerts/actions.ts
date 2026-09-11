@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { postReview } from "@/lib/api";
 import type { ReviewStatus } from "@/lib/api";
 
@@ -45,6 +45,11 @@ export async function submitReview(
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Review failed." };
   }
+  // Expire every cached read, not just the queue: the work page and the
+  // member desk both show the decision, and lib/api.ts caches them all for
+  // five minutes. updateTag rather than revalidateTag so the reviewer's next
+  // request reads the new decision instead of the stale copy.
+  updateTag("api");
   revalidatePath("/alerts");
   return { ok: true };
 }
