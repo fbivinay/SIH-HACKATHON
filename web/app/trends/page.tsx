@@ -78,6 +78,13 @@ export default async function TrendsPage() {
   const complete = t.fiscal_years.filter((f) => f.march_share !== null);
   const first = complete[0];
   const latestFull = complete.length >= 2 ? complete[complete.length - 2] : undefined;
+  // The headline asserted a decline in every year without ever checking one.
+  // The current year is excluded because it is part-way through: its March has
+  // not happened yet, so its share is 0 and would fake a fall.
+  const judged = complete.slice(0, Math.max(0, complete.length - 1));
+  const marchFellEveryYear =
+    judged.length >= 2 &&
+    judged.every((f, i) => i === 0 || Number(f.march_share) < Number(judged[i - 1].march_share));
 
   return (
     <main>
@@ -98,8 +105,9 @@ export default async function TrendsPage() {
           <div>
             <h2 className="section-head">Year-end bunching is falling</h2>
             <p className="lede !mx-0 !max-w-none">
-              March&rsquo;s share of the year&rsquo;s payments has dropped in every fiscal
-              year on record
+              {marchFellEveryYear
+                ? "March\u2019s share of the year\u2019s payments has dropped in every complete fiscal year on record"
+                : "March\u2019s share of the year\u2019s payments is lower now than when the record starts, though not in an unbroken line"}
               {first && latestFull
                 ? ` — from ${first.march_share}% to ${latestFull.march_share}%`
                 : ""}

@@ -872,6 +872,21 @@ def provenance():
         """,
         one=True,
     )
+    # Why our own hop is not zero, counted rather than asserted. The page used
+    # to state these as three typed-in numbers measured once off a CSV; they
+    # drifted the moment the extract changed, which is the same failure the
+    # deck had before its figures were read from here.
+    rejects = query(
+        """WITH dated AS (
+               SELECT reason,
+                      SUBSTRING(source_file FROM '\\d{4}-\\d{2}-\\d{2}') AS extract_date
+               FROM rejected_rows
+           )
+           SELECT reason, COUNT(*) AS rows
+           FROM dated
+           WHERE extract_date = (SELECT MAX(extract_date) FROM dated)
+           GROUP BY reason ORDER BY rows DESC"""
+    )
     worst = max((abs(float(r["gap_pct"])) for r in rows if r["gap_pct"] is not None),
                 default=None)
     # The chain has two hops. Ours-to-aggregator is the one this system is
@@ -895,6 +910,7 @@ def provenance():
         "worst_upstream_hop_pct": upstream_hop,
         "last_refresh": freshness or {},
         "official_interface": OFFICIAL_INTERFACE,
+        "rejects": rejects,
         "chain": [
             {
                 "step": "Ministry of Statistics and Programme Implementation",
@@ -1175,11 +1191,20 @@ def state_detail(state: str, ls_term: int = Query(18, ge=17, le=18)):
         SELECT m.mp_id, m.mp_name, m.constituency, m.house,
                m.allocated_amount, m.total_expenditure, m.utilization_pct,
                m.completion_rate_pct,
+               -- The source's utilization_pct is the COMMITTED rate: measured
+               -- across all 773 funded term-18 members it equals
+               -- amount_recommended / allocated_amount, and equals
+               -- total_expenditure / allocated_amount on only 41 of them. The
+               -- desk ranks members by money actually out the door, so it has
+               -- to compute that itself rather than reuse the source's field.
+               CASE WHEN m.allocated_amount > 0
+                    THEN ROUND(m.total_expenditure / m.allocated_amount * 100, 1)
+                    END AS paid_pct,
                m.allocated_amount - m.amount_recommended AS idle_amount,
                COALESCE(w.works, 0) AS works, COALESCE(w.in_queue, 0) AS in_queue
         FROM mps m LEFT JOIN w USING (mp_id)
         WHERE m.ls_term = %s AND m.state = %s
-        ORDER BY m.utilization_pct ASC NULLS FIRST
+        ORDER BY paid_pct ASC NULLS FIRST
         """,
         [ls_term, state, ls_term, state],
     )

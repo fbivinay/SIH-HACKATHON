@@ -424,3 +424,53 @@ def test_district_desk_agrees_with_its_parent_state_row():
 
 def test_district_desk_404_for_an_unknown_district():
     assert client.get(f"/api/districts/{_a_state()}/NOWHERE").status_code == 404
+
+
+# ------------------------------------------------- claims the data supports
+
+
+def test_the_state_desk_paid_rate_is_paid_not_committed():
+    """The two rates are not interchangeable, and the desk labels one of them
+    "Paid out".
+
+    The source's own utilization_pct is the COMMITTED rate despite its name: it
+    equals amount_recommended / allocated_amount on all 773 funded term-18
+    members, and total_expenditure / allocated_amount on 41. Rendering it under
+    "Paid out" put 46.5% beside the same page's own "Paid out 21.3%".
+    """
+    state = _a_state()
+    body = client.get(f"/api/states/{state}?ls_term=18").json()
+    members = [m for m in body["members"] if m["allocated_amount"] and m["paid_pct"] is not None]
+    assert members, f"{state} has no funded members"
+    for m in members:
+        expected = float(m["total_expenditure"] or 0) / float(m["allocated_amount"]) * 100
+        assert abs(float(m["paid_pct"]) - expected) < 0.15, (
+            f"{m['mp_name']}: paid_pct {m['paid_pct']} is not expenditure/allocated "
+            f"({expected:.1f}) - it is probably the committed rate again"
+        )
+
+
+def test_the_state_desk_orders_members_by_the_column_it_claims():
+    """The lede says "ordered by the share of allocation actually paid out,
+    lowest first". It used to order by the committed rate."""
+    state = _a_state()
+    body = client.get(f"/api/states/{state}?ls_term=18").json()
+    paid = [m["paid_pct"] for m in body["members"] if m["paid_pct"] is not None]
+    assert paid == sorted(paid), "members are not ordered by paid_pct ascending"
+
+
+def test_provenance_reject_counts_come_from_the_latest_extract():
+    """These were three numbers typed into the copy, measured once off a CSV.
+    They drifted the moment the extract changed, which is the failure the deck
+    already had. They must be counted, and must cover one extract rather than
+    every run ever recorded."""
+    body = client.get("/api/provenance").json()
+    rejects = body["rejects"]
+    assert rejects, "no reject breakdown returned"
+    total = sum(r["rows"] for r in rejects)
+    latest = client.get("/api/data-freshness").json()
+    if latest.get("rows_rejected") is not None:
+        assert total == latest["rows_rejected"], (
+            f"reject breakdown sums to {total} but the last run recorded "
+            f"{latest['rows_rejected']} - the query is spanning runs again"
+        )

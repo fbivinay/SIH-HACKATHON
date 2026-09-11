@@ -506,6 +506,16 @@ def load(conn, df, rejects):
             page_size=1000,
         )
         if rejects:
+            # Clear this run's own files first. rejected_rows never cleared, so
+            # loading the same extract twice counted every rejection twice -
+            # 834 rows recorded for a pair of files each run rejects 417 from -
+            # and the table grew without bound on a 512 MB database. Scoped to
+            # the files being loaded, so an earlier extract's rejects survive
+            # as the history this table is for.
+            cur.execute(
+                "DELETE FROM rejected_rows WHERE source_file = ANY(%s)",
+                [sorted({r[2] for r in rejects})],
+            )
             execute_values(
                 cur,
                 "INSERT INTO rejected_rows (raw_row, reason, source_file) VALUES %s",

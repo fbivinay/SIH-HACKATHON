@@ -286,6 +286,10 @@ export type Provenance = {
     verdict: string;
     login_wall: string;
   };
+  // Why our own hop is not zero, counted from the latest extract rather than
+  // stated in prose - three typed-in numbers here drifted the moment the
+  // extract changed.
+  rejects: Array<{ reason: string; rows: number }>;
   last_refresh: {
     finished_at?: string;
     rows_loaded?: number;
@@ -426,7 +430,12 @@ export type StateDesk = {
     house: string | null;
     allocated_amount: number | null;
     total_expenditure: number | null;
+    // The source's own field, which is the COMMITTED rate despite its name -
+    // recommended / allocated, not expenditure / allocated. See /api/states.
     utilization_pct: number | null;
+    // expenditure / allocated, computed by the endpoint. This is the one that
+    // means "paid out", and the only one that may wear that label.
+    paid_pct: number | null;
     completion_rate_pct: number | null;
     idle_amount: number | null;
     works: number;
@@ -537,7 +546,8 @@ export const api = {
   agencies: (params: Record<string, string> = {}) =>
     get<AgencyStat[]>(`/api/agencies?${new URLSearchParams(params)}`),
   mps: () => get<MpStat[]>("/api/mps"),
-  mp: (mpId: string) => get<MpDetail>(`/api/mps/${encodeURIComponent(mpId)}`),
+  mp: (mpId: string, params: Record<string, string> = {}) =>
+    get<MpDetail>(`/api/mps/${encodeURIComponent(mpId)}?${new URLSearchParams(params)}`),
   dataFreshness: () => get<DataFreshness>("/api/data-freshness"),
   filters: () => get<FilterOptions>("/api/filters"),
   alerts: (params: Record<string, string> = {}) =>

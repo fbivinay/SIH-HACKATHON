@@ -154,11 +154,18 @@ export default async function StatesPage({
         </div>
 
         <p className="mt-3 text-[0.78rem]" style={{ color: "var(--ink-3)" }}>
-          &ldquo;Paid out&rdquo; above divides total expenditure by total allocation. The
-          source&rsquo;s own state page reports 33.2% here because it averages the 36 state
-          percentages instead, which counts Lakshadweep&rsquo;s two members equally with Uttar
-          Pradesh&rsquo;s hundred and eleven; its overview page reports 34.2%, the same figure
-          shown here. Per-state values are identical on both sites.
+          &ldquo;Paid out&rdquo; above divides total expenditure by total allocation, which
+          is the figure the source&rsquo;s own overview page reports. Its state page shows a
+          lower number because it averages the {formatCount(states.length)} state
+          percentages instead, counting Lakshadweep&rsquo;s two members equally with Uttar
+          Pradesh&rsquo;s hundred and eleven &mdash; on this term that average is{" "}
+          {states.length
+            ? (
+                states.reduce((sum, s) => sum + (s.paid_rate ?? 0), 0) / states.length
+              ).toFixed(1)
+            : "—"}
+          % against the {allocated > 0 ? ((expenditure / allocated) * 100).toFixed(1) : "—"}%
+          shown above. Per-state values are identical on both sites.
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-2">
