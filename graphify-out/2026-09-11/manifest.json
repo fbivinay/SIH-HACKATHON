@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "web/app/page.tsx": {
-    "mtime": 1789155097.3843997,
-    "seen": 1789156880.490436,
-    "ast_hash": "685faa556aeb6eea324f7e369c8579d3",
+    "mtime": 1789160634.5003693,
+    "seen": 1789161061.4037452,
+    "ast_hash": "b5847115255ab607a6a99ea5525613e8",
     "semantic_hash": ""
   },
   "web/app/projects/[id]/page.tsx": {
@@ -348,9 +348,9 @@
     "semantic_hash": ""
   },
   "web/components/ScrollReveal.tsx": {
-    "mtime": 1789159283.414684,
-    "seen": 1789159636.130168,
-    "ast_hash": "6d5f59aba8ca87a25bbe1b462306223b",
+    "mtime": 1789161510.8219864,
+    "seen": 1789161608.5970428,
+    "ast_hash": "1e2baaef4de71ce30e5e1287662cfff8",
     "semantic_hash": ""
   },
   "web/components/Splash.tsx": {
@@ -525,6 +525,12 @@
     "mtime": 1789159283.382956,
     "seen": 1789159636.12961,
     "ast_hash": "f8e199cd5bc00f4967671c98a31d5cd3",
+    "semantic_hash": ""
+  },
+  "web/components/HeroField.tsx": {
+    "mtime": 1789161510.8221664,
+    "seen": 1789161608.596693,
+    "ast_hash": "a6038c6fe3da415136a83c5c191424af",
     "semantic_hash": ""
   }
 }

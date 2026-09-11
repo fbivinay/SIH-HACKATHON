@@ -209,7 +209,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       {/* Why flagged — the core of this screen */}
       <section className="mt-6">
         <h2 className="text-[0.95rem] font-medium mb-3 flex items-center gap-3 flex-wrap">
-          <span className="ai-badge">AI powered · gemini-flash-lite</span>
+          <span className="ai-badge"><b className="ai-word">AI powered</b> · gemini-flash-lite</span>
           Why was this flagged?
         </h2>
         <div className="stat-card">

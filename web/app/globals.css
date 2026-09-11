@@ -44,6 +44,10 @@
   --risk-medium: #96600a;
   --risk-medium-bg: #f8efdc;
   --risk-high: #a82e22;
+  /* The two words "AI powered", wherever they appear. Darker than the risk
+     red so the two are not confused, and the one place a hue means something
+     other than risk. */
+  --ai-red: #7a1a12;
   --risk-high-bg: #fbe9e7;
   --risk-pending: #6b6b74;
   --risk-pending-bg: #eeeef0;
@@ -132,6 +136,7 @@
     --risk-medium: #e2a03f;
     --risk-medium-bg: rgba(226, 160, 63, 0.12);
     --risk-high: #f2695c;
+    --ai-red: #e0685c;
     --risk-high-bg: rgba(242, 105, 92, 0.13);
     --risk-pending: #8a8a93;
     --risk-pending-bg: rgba(138, 138, 147, 0.13);
@@ -2014,7 +2019,11 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--ink-2);
+  background: var(--risk-low);
+}
+.ai-word {
+  font-weight: inherit;
+  color: var(--ai-red);
 }
 
 /* The overview's eyebrow: same idea, sized to sit over a display heading. */
@@ -2035,8 +2044,54 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--ink);
+  background: var(--risk-low);
 }
+
+/* ------------------------------------------------------------- cursor -- */
+/*
+ * The dot-and-ring pointer (components/Cursor). The native arrow is hidden
+ * only once the component has confirmed a fine pointer and mounted - a
+ * `cursor: none` rule that fires on a device where the script never runs
+ * leaves the reader with no pointer at all. Text fields keep the caret.
+ */
+.has-cursor, .has-cursor * { cursor: none; }
+.has-cursor input,
+.has-cursor textarea,
+.has-cursor [contenteditable="true"] { cursor: auto; }
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: translate;
+}
+.cursor--dot {
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  background: var(--risk-high);
+  transition: opacity 200ms var(--ease), scale 220ms var(--ease);
+}
+.cursor--ring {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1.5px solid var(--risk-high);
+  transition: opacity 200ms var(--ease), scale 260ms var(--ease), border-color 260ms var(--ease);
+}
+.cursor-shown .cursor { opacity: 1; }
+/* Over a link the ring opens and the dot shrinks to a point. */
+.cursor-hover .cursor--ring { scale: 1.55; border-color: color-mix(in srgb, var(--risk-high) 70%, transparent); }
+.cursor-hover .cursor--dot { scale: 0.5; }
+/* Pressed: the ring closes on the dot. */
+.cursor-down .cursor--ring { scale: 0.7; }
+.cursor-down .cursor--dot { scale: 1.4; }
+/* Over a text field the native caret takes over. */
+.cursor-typing .cursor { opacity: 0; }
 
 /* ----------------------------------------------------------- pageload -- */
 /*
