@@ -174,6 +174,7 @@ export default async function OverviewPage({
   return (
     <main>
       <section className="shell page-head">
+        <div className="eyebrow-ai">AI powered · Gemini Flash Lite · Isolation Forest · Sentence-BERT</div>
         <h1 className="display display--hero">
           Every MPLADS work, checked against its peers.
         </h1>
@@ -242,7 +243,10 @@ export default async function OverviewPage({
       <section className="shell mt-9">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div>
-            <h2 className="section-head">Where the AI is</h2>
+            <h2 className="section-head flex items-center gap-3 flex-wrap">
+              <span className="ai-badge">AI powered</span>
+              Where the AI is
+            </h2>
             <p className="lede !mx-0 !max-w-2xl !mt-1">
               Three models run over every work. Each one is named here with what it
               decides and what it does not, because a system that cannot say where its

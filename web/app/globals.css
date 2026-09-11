@@ -1611,26 +1611,57 @@ button,
   to   { opacity: 1; transform: none; }
 }
 
+/* The same two arrivals taken apart, for the scroll timelines: opacity on one
+   range and movement on another. See the @supports block for why. */
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes reveal-move {
+  from { transform: translateY(104px) scale(0.86); }
+  to   { transform: none; }
+}
+@keyframes reveal-lift {
+  from { transform: translateY(74px) scale(0.95); }
+  to   { transform: none; }
+}
+
 @keyframes value-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 .stat-card__value {
-  animation: value-in 420ms var(--ease-out) 80ms both;
+  animation: value-in 420ms var(--ease-out) calc(var(--enter-at) + 120ms) both;
 }
 
 /*
- * FIRST PAINT. Everything on the opening screen settles in one staggered pass,
- * on a timer, because there is no scroll yet to drive anything.
+ * FIRST PAINT. Everything on the opening screen settles in one staggered pass.
+ *
+ * --enter-at is why there is a variable here at all. These used to start
+ * immediately, which meant they ran and finished entirely behind the two-second
+ * loading cover - so the opening screen was already settled when the cover
+ * lifted and the page looked completely static on arrival. They now begin once
+ * the cover is about half gone (splash-out below starts at 2700ms and takes
+ * 600ms), so the reader watches the page assemble as it is revealed rather than
+ * being handed a finished one. Measured: starting them at the start of the fade
+ * was too early - the cards were three quarters in while the cover was still
+ * three quarters opaque. They also take the softer --ease rather than the expo
+ * --ease-out, which spends 60% of its travel in its first 12% - behind a cover
+ * still fading, that is movement nobody sees.
+ *
+ * Both are CSS animations timed from first paint, so they stay in step without
+ * anything having to coordinate them.
  */
+:root { --enter-at: 3000ms; }
+
 main > section,
 main > .shell {
-  animation: rise-in 560ms var(--ease-out) both;
+  animation: rise-in 900ms var(--ease) var(--enter-at) both;
 }
-main > section:nth-of-type(2) { animation-delay: 70ms; }
-main > section:nth-of-type(3) { animation-delay: 130ms; }
-main > section:nth-of-type(4) { animation-delay: 180ms; }
-main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
+main > section:nth-of-type(2) { animation-delay: calc(var(--enter-at) + 90ms); }
+main > section:nth-of-type(3) { animation-delay: calc(var(--enter-at) + 170ms); }
+main > section:nth-of-type(4) { animation-delay: calc(var(--enter-at) + 240ms); }
+main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300ms); }
 
 .stat-card,
 .grid > .card,
@@ -1638,22 +1669,22 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
 .model-card,
 .statecard,
 .rulecard {
-  animation: card-in 600ms var(--ease-out) both;
+  animation: card-in 960ms var(--ease) var(--enter-at) both;
 }
-.grid > :nth-child(2), .slab-card:nth-child(2) { animation-delay: 60ms; }
-.grid > :nth-child(3), .slab-card:nth-child(3) { animation-delay: 120ms; }
-.grid > :nth-child(4), .slab-card:nth-child(4) { animation-delay: 180ms; }
-.grid > :nth-child(5), .slab-card:nth-child(5) { animation-delay: 240ms; }
-.grid > :nth-child(n + 6), .slab-card:nth-child(n + 6) { animation-delay: 290ms; }
+.grid > :nth-child(2), .slab-card:nth-child(2) { animation-delay: calc(var(--enter-at) + 80ms); }
+.grid > :nth-child(3), .slab-card:nth-child(3) { animation-delay: calc(var(--enter-at) + 160ms); }
+.grid > :nth-child(4), .slab-card:nth-child(4) { animation-delay: calc(var(--enter-at) + 240ms); }
+.grid > :nth-child(5), .slab-card:nth-child(5) { animation-delay: calc(var(--enter-at) + 320ms); }
+.grid > :nth-child(n + 6), .slab-card:nth-child(n + 6) { animation-delay: calc(var(--enter-at) + 390ms); }
 
 .data-table tbody tr:nth-child(-n + 12) {
-  animation: rise-in 460ms var(--ease-out) both;
+  animation: rise-in 700ms var(--ease) var(--enter-at) both;
 }
-.data-table tbody tr:nth-child(2) { animation-delay: 35ms; }
-.data-table tbody tr:nth-child(3) { animation-delay: 70ms; }
-.data-table tbody tr:nth-child(4) { animation-delay: 105ms; }
-.data-table tbody tr:nth-child(5) { animation-delay: 140ms; }
-.data-table tbody tr:nth-child(n + 6) { animation-delay: 175ms; }
+.data-table tbody tr:nth-child(2) { animation-delay: calc(var(--enter-at) + 45ms); }
+.data-table tbody tr:nth-child(3) { animation-delay: calc(var(--enter-at) + 90ms); }
+.data-table tbody tr:nth-child(4) { animation-delay: calc(var(--enter-at) + 135ms); }
+.data-table tbody tr:nth-child(5) { animation-delay: calc(var(--enter-at) + 180ms); }
+.data-table tbody tr:nth-child(n + 6) { animation-delay: calc(var(--enter-at) + 225ms); }
 
 /*
  * SCROLL. Blocks below the fold arrive as the reader reaches them.
@@ -1670,21 +1701,64 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
  * roughly 465px of scrolling to get there.
  */
 @supports (animation-timeline: view()) {
-  [data-reveal] {
-    animation: card-in linear both;
-    animation-timeline: view();
-    animation-range: cover 0px cover 340px;
+  /*
+   * Two animations on one timeline, with different lengths.
+   *
+   * One range had to serve two masters. Short, and the arrival was over
+   * before anyone saw it; long, and content sat translucent while it was being
+   * read - the "first few rows very light" defect. The two things a range
+   * governs want different lengths: opacity must be solid early, because text
+   * is read as soon as it is on screen, while movement can go on being watched
+   * for as long as it likes. So they are split. The fade completes over 300px
+   * of travel; the lift and scale continue over 680px. The block is readable
+   * well before it has finished settling, and the settling is what the eye
+   * follows.
+   *
+   * Pixels, not percentages, because a percentage of `cover` on a tall table
+   * is thousands of pixels of scrolling before solid.
+   */
+  /* Both selectors, because specificity: `.grid > .card` above is (0,2,0)
+     and a bare attribute is (0,1,0), so the first card of every grid on the
+     overview kept its first-paint animation and never took a timeline. That
+     was the overview "having no transitions". */
+  [data-reveal],
+  .grid > [data-reveal] {
+    /* Longhands, and `auto` written out. The build (Lightning CSS, under
+       Tailwind) expands the shorthand and fills the duration in as `0s`, which
+       for a scroll timeline is a zero-length effect: the block sat at
+       opacity 0 until its range began and snapped to 1 the moment it did.
+       Verified in the compiled chunk - `animation-duration:0s,0s`. */
+    animation-name: reveal-fade, reveal-move;
+    animation-duration: auto, auto;
+    /* The fade is linear so it tracks the scroll exactly. The movement eases
+       out: a block arriving from 104px below overlaps whatever sits under it
+       until it has settled, and linear over 680px left half that overlap
+       still on screen after the block was solid and being read - a card
+       drifting across the next heading. Eased, three quarters of the travel is
+       done by the time the fade is, and the long tail is a few pixels. */
+    animation-timing-function: linear, var(--ease);
+    animation-fill-mode: both, both;
     animation-delay: 0s;
+    animation-timeline: view(), view();
+    animation-range: cover 0px cover 300px, cover 0px cover 680px;
   }
 
   /* A row arrives as a wave: the stagger moves the start, every column shares
      the finish, so the row settles as one object. Scoped to grid children -
      unscoped, `:nth-child(2)` also caught body text that happened to be its
      parent's second child and made it arrive late. */
-  .grid > [data-reveal]:nth-child(2) { animation-range: cover 32px cover 340px; }
-  .grid > [data-reveal]:nth-child(3) { animation-range: cover 64px cover 340px; }
-  .grid > [data-reveal]:nth-child(4) { animation-range: cover 96px cover 340px; }
-  .grid > [data-reveal]:nth-child(n + 5) { animation-range: cover 128px cover 340px; }
+  .grid > [data-reveal]:nth-child(2) {
+    animation-range: cover 28px cover 300px, cover 28px cover 680px;
+  }
+  .grid > [data-reveal]:nth-child(3) {
+    animation-range: cover 56px cover 300px, cover 56px cover 680px;
+  }
+  .grid > [data-reveal]:nth-child(4) {
+    animation-range: cover 84px cover 300px, cover 84px cover 680px;
+  }
+  .grid > [data-reveal]:nth-child(n + 5) {
+    animation-range: cover 112px cover 300px, cover 112px cover 680px;
+  }
 
   /* The table is the page's main object and can be ten thousand pixels tall. A
      block that size travelling a hundred pixels reads as the page shifting
@@ -1692,8 +1766,8 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   .data-table-wrap[data-reveal],
   .leaflet-container[data-reveal],
   .section-head[data-reveal] {
-    animation-name: rise-in;
-    animation-range: cover 0px cover 280px;
+    animation-name: reveal-fade, reveal-lift;
+    animation-range: cover 0px cover 260px, cover 0px cover 520px;
   }
 
   /* Rows never take a timeline: a table is one object and its wrap animates.
@@ -1854,6 +1928,59 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   margin-right: 0.3rem;
 }
 
+/* ----------------------------------------------------------- ai badge -- */
+/*
+ * Says which model did a piece of work, next to the thing it did.
+ *
+ * Monochrome like everything else - rule 10 of the project rules reserves
+ * colour for risk, and a model name is not a risk.
+ */
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2em 0.6em;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass);
+  font-family: var(--font-data);
+  font-size: 0.66rem;
+  font-weight: 550;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.ai-badge::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink-2);
+}
+
+/* The overview's eyebrow: same idea, sized to sit over a display heading. */
+.eyebrow-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  margin-bottom: 0.85rem;
+  font-family: var(--font-data);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.eyebrow-ai::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
 /* ------------------------------------------------------------- splash -- */
 /*
  * The loading cover, driven entirely from here.
@@ -1863,8 +1990,17 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
  * on React, which is what the first version got wrong: it hid itself from a
  * useEffect timer, so on a slow hydration it sat at 0% and would not leave.
  *
- * Timings: the bar fills over 1.6s, everything holds until 2s, then the cover
- * fades over 0.45s and is taken out of the page with `visibility: hidden`.
+ * Timings: the bar fills over 2.5s, holds until 2.7s, then the cover fades over
+ * 0.6s and is taken out of the page with `visibility: hidden` - gone at 3.3s.
+ *
+ * It is deliberately unhurried. A bar that finishes in 1.6s and then waits is
+ * read as a stutter, and the two easings had the fill rushing to four fifths in
+ * its first third and crawling the rest. The curve below is close to linear
+ * through the middle and eases only at the ends, which is what makes it look
+ * like progress rather than an animation of progress.
+ *
+ * --enter-at is timed off the end of this: the page behind begins assembling as
+ * the cover starts to lift, so the reader watches it arrive.
  */
 
 /* A registered property can be interpolated, which is what lets a counter
@@ -1883,12 +2019,12 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   display: grid;
   place-items: center;
   background: var(--ground);
-  animation: splash-out 450ms var(--ease) 2000ms forwards;
+  animation: splash-out 600ms var(--ease) 2700ms forwards;
 }
 
 @keyframes splash-out {
   /* pointer-events goes at the first frame of the fade, not the last: without
-     it the cover kept swallowing clicks for the whole 450ms it spent
+     it the cover kept swallowing clicks for the whole 600ms it spent
      disappearing, which is exactly when a reader starts reaching for the page.
      During the 2s hold before this animation begins the element has its normal
      style, so it still blocks interaction while it is genuinely covering. */
@@ -1903,7 +2039,7 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   align-items: center;
   gap: 0.55rem;
   transform: translateY(-6%);
-  animation: splash-in 620ms var(--ease-out) both;
+  animation: splash-in 900ms var(--ease-out) both;
 }
 @keyframes splash-in {
   from { opacity: 0; transform: translateY(-2%) scale(0.96); }
@@ -1923,6 +2059,17 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   color: var(--ink-2);
 }
 
+.splash__ai {
+  margin-top: 0.5rem;
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  animation: splash-in 900ms var(--ease-out) 260ms both;
+}
+
 .splash__track {
   margin-top: 1.3rem;
   width: 240px;
@@ -1938,7 +2085,7 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   height: 100%;
   border-radius: 999px;
   background: var(--ink);
-  animation: splash-fill 1600ms cubic-bezier(0.25, 0.8, 0.35, 1) both;
+  animation: splash-fill 2500ms cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
 }
 @keyframes splash-fill {
   from { width: 0%; }
@@ -1951,7 +2098,7 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
   font-variant-numeric: tabular-nums;
   color: var(--ink-2);
   counter-reset: splash-pct var(--splash-pct);
-  animation: splash-count 1600ms cubic-bezier(0.25, 0.8, 0.35, 1) both;
+  animation: splash-count 2500ms cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
 }
 .splash__pct::after { content: counter(splash-pct) "%"; }
 @keyframes splash-count {
