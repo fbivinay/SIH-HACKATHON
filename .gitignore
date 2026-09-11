@@ -15,3 +15,8 @@ docs/deck/references/
 graphify-out/cache/
 # Per-developer permission grants, not a project decision.
 .claude/settings.local.json
+
+# Installed agent skills. The lockfile beside this records what to install
+# (`npx skills experimental_install`); the skills themselves are a local tool,
+# and /brag alone ships 17 MB of bundled music.
+.claude/skills/
