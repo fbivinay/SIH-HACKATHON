@@ -314,8 +314,18 @@ def test_provenance_traces_the_chain_to_the_designated_dataset():
     from an aggregator of it, which is a claim - this endpoint is where the
     claim gets checked rather than asserted."""
     body = client.get("/api/provenance").json()
-    assert len(body["chain"]) == 3
-    assert any("mospi.gov.in" in c["what"] for c in body["chain"])
+    chain = body["chain"]
+    # Asserted on what the chain says rather than how many steps it has: the
+    # count was hard-coded at 3 and broke the moment the sector classifier was
+    # added to it, which is a step the chain should describe.
+    assert len(chain) >= 3
+    assert any("mospi.gov.in" in c["what"] for c in chain), "designated dataset unnamed"
+    assert chain[0]["step"].startswith("Ministry"), "the chain must start at the source"
+    assert "This system" in chain[-1]["step"], "the chain must end here"
+    joined = " ".join(f"{c['step']} {c['what']}" for c in chain)
+    assert "Empowered Indian" in joined or "empoweredindian" in joined, (
+        "the aggregator this system actually loads from must appear in the chain"
+    )
     for row in body["rows"]:
         assert row["unit"] in ("crore", "count")
         assert row["official"] is not None
@@ -509,3 +519,61 @@ def test_queue_tiles_count_the_queue_beneath_them():
     )
     national = client.get("/api/alerts/summary?min_score=40").json()
     assert tiles["in_scope"] < national["in_scope"], "the state filter did nothing"
+
+
+def test_findings_carry_what_their_detector_does_not_claim():
+    """A detector finding must never be shown without its own limits.
+
+    D-02 renders against a named implementing agency as "leading digits depart
+    from the expected distribution (MAD 16.56)". The caveat that makes that
+    honest - the whole MPLADS population fails the textbook test, so this ranks
+    agencies against each other and not against the law - lived only on the
+    detector catalogue page, and that page was removed from the interface.
+    """
+    state = _a_state()
+    body = client.get(f"/api/states/{state}?ls_term=18").json()
+    findings = body["findings"]
+    if not findings:
+        return  # nothing to check in this state; other states cover it
+    for f in findings:
+        assert f.get("limit"), f"{f['code']} reached a page with no stated limit"
+        assert f.get("detector_name"), f"{f['code']} has no name"
+
+
+def test_the_queue_exports_exactly_what_it_shows():
+    """"Reduce manual monitoring efforts" means the filtered list has to leave
+    the screen. The export shares _alert_filters with the table, so a download
+    can never disagree with what was on screen when it was asked for."""
+    state = _a_state()
+    params = f"state={state}&min_score=40"
+    table = client.get(f"/api/alerts?{params}&limit=1").json()
+    resp = client.get(f"/api/alerts/export?{params}&limit=20000")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/csv")
+    assert "attachment" in resp.headers.get("content-disposition", "")
+    import csv
+    import io as _io
+
+    records = list(csv.reader(_io.StringIO(resp.text)))
+    assert records[0][0] == "work_key", "missing header row"
+    assert len(records) - 1 == table["total"], (
+        f"exported {len(records) - 1} rows for a queue of {table['total']}"
+    )
+    # One record per LINE too, not merely per CSV record: work names carry
+    # literal newlines, and a file whose line count disagrees with its row
+    # count breaks every consumer rougher than a real CSV parser.
+    lines = [l for l in resp.text.splitlines() if l.strip()]
+    assert len(lines) == len(records), (
+        f"{len(records)} records span {len(lines)} lines - unflattened whitespace"
+    )
+
+
+def test_a_member_can_be_handed_their_own_queue():
+    """The two desks each end on "open this place in the queue"; the MP page
+    ended on a ten-row table with no route into acting on it."""
+    mps = client.get("/api/mps").json()
+    with_works = next((m for m in mps if m["total_projects"] > 0), None)
+    assert with_works, "no member has works"
+    scoped = client.get(f"/api/alerts?mp_id={with_works['mp_id']}&min_score=40&limit=1").json()
+    whole = client.get("/api/alerts?min_score=40&limit=1").json()
+    assert scoped["total"] < whole["total"], "mp_id did not filter the queue"

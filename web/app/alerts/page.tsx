@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, alertsExportUrl } from "@/lib/api";
 import type { Alert } from "@/lib/api";
 import ProjectFilters from "@/components/ProjectFilters";
 import ReviewActions from "@/components/ReviewActions";
@@ -64,6 +64,17 @@ export default async function AlertsPage({
       )
       .catch(() => null),
   ]);
+
+  // Both desks send an officer here with the queue silently scoped to their
+  // place, and nothing on the page said so - now that the tiles count the
+  // filtered set, an unexplained 261 is more confusing, not less.
+  const scope: string[] = [];
+  if (filters.q) scope.push(`matching \u201c${filters.q}\u201d`);
+  if (filters.district) scope.push(`in ${filters.district}`);
+  if (filters.state) scope.push(`in ${filters.state}`);
+  if (filters.sector) scope.push(`in ${filters.sector}`);
+  if (filters.risk_level) scope.push(`at ${filters.risk_level} risk`);
+  if (filters.mp_id) scope.push("recommended by one member");
 
   const tiles = summary
     ? [
@@ -169,6 +180,31 @@ export default async function AlertsPage({
               page.total
             )}`}
       </p>
+
+      {scope.length > 0 && (
+        <p className="mt-4 text-[0.82rem]" style={{ color: "var(--ink-2)" }}>
+          Showing works {scope.join(", ")}.{" "}
+          <Link href="/alerts" className="link-quiet">
+            Clear and see the whole queue
+          </Link>
+        </p>
+      )}
+
+      {/* The brief asks this platform to reduce manual monitoring effort. An
+          officer who narrows the queue to their district and finds work to
+          inspect needs to hand that list to whoever inspects it. */}
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <a
+          href={alertsExportUrl(filters)}
+          className="review-btn"
+          download
+        >
+          Download this queue (CSV)
+        </a>
+        <span className="text-[0.78rem]" style={{ color: "var(--ink-3)" }}>
+          {formatCount(page.total)} works, with the reason each was flagged.
+        </span>
+      </div>
 
       <div className="mt-2 data-table-wrap">
         <table className="data-table">

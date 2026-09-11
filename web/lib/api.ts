@@ -358,7 +358,16 @@ export type MpDetail = {
     sanctioned_amount: number; overall_risk_score: number | null;
     risk_level: string | null; flagged_reasons: string[];
   }>;
-  findings: Array<{ code: string; headline: string; severity: number }>;
+  // limit is what the detector explicitly does not claim. It travels with the
+  // finding because a member is a named individual, and a D-03 headline without
+  // its caveat reads as an accusation of hoarding.
+  findings: Array<{
+    code: string;
+    headline: string;
+    severity: number;
+    detector_name: string | null;
+    limit: string | null;
+  }>;
 };
 
 // ------------------------------------------------ state and district desks
@@ -539,6 +548,16 @@ async function get<T>(path: string): Promise<T> {
   });
   if (!res.ok) throw new Error(`API error ${res.status} on ${path}`);
   return res.json();
+}
+
+/** The queue as CSV, under the current filters. A plain href rather than a
+ * fetch: the browser's own download is what an officer wants, and it needs no
+ * JavaScript on the page. */
+export function alertsExportUrl(params: Record<string, string>): string {
+  const qs = new URLSearchParams(params);
+  qs.delete("limit");
+  qs.delete("offset");
+  return `${API_BASE}/api/alerts/export?${qs}`;
 }
 
 export const api = {

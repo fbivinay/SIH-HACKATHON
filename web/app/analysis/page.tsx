@@ -39,7 +39,10 @@ export default async function AnalysisPage({
         works are left out: an average over one work is whatever that work scored, and
         those agencies were crowding out ones with a thousand. Vendor share is the
         portion of an agency&apos;s recorded spend going to its single largest vendor. A
-        high share is not wrongdoing — it is a reason to look.
+        high share is not wrongdoing — it is a reason to look. The score behind that column
+        is not the column: it is a Herfindahl-Hirschman index over the agency&apos;s whole
+        vendor spend, so an agency spreading money across three vendors still concentrates
+        where one spreading it across forty does not.
       </p>
 
       {trends && trends.quiet_agencies.length > 0 && (
