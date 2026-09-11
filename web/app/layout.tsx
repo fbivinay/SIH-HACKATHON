@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import Logo from "@/components/Logo";
 import NavLinks from "@/components/NavLinks";
+import RiskTicker from "@/components/RiskTicker";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const mono = Geist_Mono({
@@ -59,6 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body className="flex min-h-screen flex-col">
+        <div className="topbar">
         <header className="masthead">
           <div className="shell masthead__inner">
             <Link href="/" className="wordmark">
@@ -74,6 +76,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </Link>
           </div>
         </header>
+
+        {/* Under the masthead rather than inside it: the nav is navigation and
+            this is content, and a reader who wants the nav should not have to
+            wait for an API call to render it. Both sit in one sticky wrapper so
+            the strip follows the nav without either knowing the other's height. */}
+        <RiskTicker />
+        </div>
 
         <div className="flex-1">{children}</div>
 
