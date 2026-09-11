@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 export const metadata = { title: "Where the numbers come from" };
 
@@ -29,6 +30,23 @@ export default async function ProvenancePage() {
       </section>
 
       <section className="shell">
+        <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: "Figures reconciled", value: formatCount(p.rows.length), note: "Against the Ministry's own dashboard" },
+            { label: "Our largest gap", value: p.worst_our_hop_pct === null ? "—" : `${p.worst_our_hop_pct.toFixed(2)}%`, note: "Between this system and its source" },
+            { label: "Upstream lag", value: p.worst_upstream_hop_pct === null ? "—" : `${Math.abs(p.worst_upstream_hop_pct).toFixed(2)}%`, note: "Source behind the Ministry", tone: "medium" },
+            { label: "Rows refused", value: formatCount(p.rejects.reduce((t, r) => t + r.rows, 0)), note: "Recorded, not silently dropped" },
+          ].map((c) => (
+            <div key={c.label} className={`stat-card${c.tone ? ` stat-card--${c.tone}` : ""}`}>
+              <div className="stat-card__label">{c.label}</div>
+              <div className="stat-card__value">
+                <CountUp text={String(c.value)} />
+              </div>
+              <div className="stat-card__note">{c.note}</div>
+            </div>
+          ))}
+        </div>
+
         <div className="grid gap-3 md:grid-cols-3">
           {p.chain.map((c, i) => (
             <div key={c.step} className="card">

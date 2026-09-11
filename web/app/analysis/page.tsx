@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatINR, isAggregateScoringPending, riskLevelClass, riskLevelLabel, riskScoreToLevel } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 // The page used to render every one of the 1,539 agency-terms, which is 2.5 MB
 // of HTML and an 80,000-pixel scroll. It shows a page at a time now.
@@ -44,6 +45,23 @@ export default async function AnalysisPage({
         vendor spend, so an agency spreading money across three vendors still concentrates
         where one spreading it across forty does not.
       </p>
+
+      <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Agencies ranked", value: formatCount(agencies.length), note: "Ten works or more, this page" },
+          { label: "Works they hold", value: formatCount(agencies.reduce((t, a) => t + a.total_projects, 0)), note: "Across the agencies shown" },
+          { label: "Gone quiet", value: formatCount(trends?.quiet_agencies.length ?? 0), note: trends ? `No payment in ${trends.quiet_rule.days} days` : "—", tone: "medium" },
+          { label: "Members listed", value: formatCount(mps.length), note: "Ranked by idle allocation" },
+        ].map((c) => (
+          <div key={c.label} className={`stat-card${c.tone ? ` stat-card--${c.tone}` : ""}`}>
+            <div className="stat-card__label">{c.label}</div>
+            <div className="stat-card__value">
+              <CountUp text={String(c.value)} />
+            </div>
+            <div className="stat-card__note">{c.note}</div>
+          </div>
+        ))}
+      </div>
 
       {trends && trends.quiet_agencies.length > 0 && (
         <section className="mt-8">

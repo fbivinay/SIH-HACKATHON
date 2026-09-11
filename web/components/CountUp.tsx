@@ -47,9 +47,6 @@ export default function CountUp({ text }: { text: string }) {
   // strength no matter when the JavaScript lands.
   const [dim, setDim] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
-  // The last text this component animated to. Without it, a re-render for an
-  // unrelated reason restarts the count.
-  const done = useRef<string | null>(null);
 
   useIsomorphicLayoutEffect(() => {
     const match = text.match(NUMBER);
@@ -62,7 +59,7 @@ export default function CountUp({ text }: { text: string }) {
       setShown(text);
       return;
     }
-    if (done.current === text) return;
+
 
     const raw = match[0];
     const target = Number(raw.replace(/,/g, ""));
@@ -89,20 +86,29 @@ export default function CountUp({ text }: { text: string }) {
       setShown(t === 1 ? text : render(target * easeOut(t)));
       if (t > 0.05) setDim(false);
       if (t < 1) frame = requestAnimationFrame(step);
-      else done.current = text;
     };
 
-    // Only once it is actually on screen — a figure that finished counting
-    // before the reader scrolled to it was never animated as far as they know.
+    // Runs every time the figure comes into view, not once per page load.
+    // Disconnecting after the first pass meant scrolling away and back left a
+    // dead number on screen, which is the opposite of looking live.
+    let running = false;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (!entries[0].isIntersecting) return;
-        observer.disconnect();
+        if (!entries[0].isIntersecting) {
+          // Left the screen: stop, and arm it to count again on return.
+          cancelAnimationFrame(frame);
+          running = false;
+          start = 0;
+          return;
+        }
+        if (running) return;
+        running = true;
         setDim(true);
         setShown(render(0));
+        start = 0;
         frame = requestAnimationFrame(step);
       },
-      { threshold: 0.2 }
+      { threshold: 0.25 }
     );
     observer.observe(node);
 
