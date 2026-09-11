@@ -253,10 +253,18 @@ export default async function DistrictDeskPage({
               <ul className="reason-list">
                 {desk.findings.slice(0, 6).map((f, i) => (
                   <li key={`${f.code}-${f.subject}-${i}`}>
-                    <span style={{ fontFamily: "var(--font-data)", color: "var(--ink-3)" }}>
+                    <span
+                      style={{ fontFamily: "var(--font-data)", color: "var(--ink-3)" }}
+                      title={f.detector_name ?? undefined}
+                    >
                       {f.code}
                     </span>{" "}
                     {f.headline}
+                    {/* The caveat travels with the finding. D-02 reads as a
+                        statistical accusation against a named agency without
+                        it, and the page that used to carry these was removed
+                        from the interface. */}
+                    {f.limit ? <p className="finding-limit">{f.limit}</p> : null}
                     <div className="cell-sub">
                       {f.subject}
                       {f.period ? ` · FY ${f.period}` : ""}

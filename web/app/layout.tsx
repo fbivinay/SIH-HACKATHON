@@ -32,11 +32,15 @@ export const metadata: Metadata = {
 // Seven, in the order an official actually works: what is happening, what needs
 // me, where, and then the supporting evidence.
 //
-// /signals, /compliance and /trends are deliberately NOT here. They are still
-// built, still reachable, and still answer parts of the problem statement
-// (cohort detectors, the compliance rule book, trend analysis) - they are just
-// not top-level navigation. Every one is linked from the page whose reader
-// wants it, so nothing is orphaned. See the footer.
+// /signals, /compliance and /trends were deleted, not just de-navigated - the
+// comment here used to say otherwise and was wrong the moment the files went.
+// Their endpoints still serve, and because the problem statement names all
+// three capabilities, their content moved rather than left:
+//
+//   cohort detectors + compliance rule book + blind spots -> /provenance
+//   trend analysis + the quiet-agency early warning       -> /analysis
+//
+// If any of that goes missing again, those are the pages to look at.
 export const navLinks = [
   { href: "/", label: "Overview" },
   { href: "/alerts", label: "Alerts" },

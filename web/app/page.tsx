@@ -37,8 +37,43 @@ const COMPONENTS = [
     name: "Compliance",
     weight: "15%",
     method:
-      "Four stated rules: spend beyond the sanction, a recommended work with no schedule, a completed work with no completion date, and a completed work with no photograph.",
-    guard: "Each breach names the rule it breaks.",
+      "Four stated rules: a recommended work with no schedule, a completed work with no completion date, a completed work with no photograph, and spend beyond the sanction — which cannot fire, because the source publishes one figure per completed work and it serves as both.",
+    guard: "Each breach names the rule it breaks. The full book is on Sources.",
+  },
+];
+
+// What actually runs, with the file that runs it. Named on the page because the
+// brief asks for an AI-powered system and a visitor could not previously tell
+// what was intelligent about this one - the methods were described in the
+// component table, in language that never said "model".
+//
+// Every entry here was checked against the source before being written. Nothing
+// is called AI that is really a sum.
+const MODELS = [
+  {
+    name: "Isolation Forest",
+    kind: "Unsupervised anomaly detection · scikit-learn",
+    does:
+      "Learns what an ordinary MPLADS work looks like across sanctioned amount, delay and spend ratio together, then scores how far each work sits from that shape. It catches works that are unremarkable on every single measure but odd in combination — which a threshold on any one column cannot see.",
+    decides: "Raises the cost component when it disagrees with the peer median.",
+    where: "data/scoring.py",
+  },
+  {
+    name: "Sentence-BERT embeddings",
+    kind: "Neural language model · all-MiniLM-L6-v2, runs locally",
+    does:
+      "Turns every work description into a 384-dimension vector, so two works are compared by what they mean rather than by the words they share. “Construction of CC road” and “Cement concrete road construction” land in the same place; a keyword match would miss it.",
+    decides: "Flags near-duplicate sanctions above 0.94 similarity in the same district and sector.",
+    where: "data/scoring.py",
+  },
+  {
+    name: "Gemini",
+    kind: "Large language model · sector labelling only",
+    does:
+      "Reads the 41,691 descriptions the keyword rules could not classify and assigns each a sector, so a school building is compared against school buildings. It is allowed to answer “unclear”, and did so 5,167 times rather than guess — which is exactly why a generative model was used instead of a nearest-match classifier.",
+    decides:
+      "Nothing directly. It only decides which works are a work’s peers — and because cost is judged against those peers, a wrong label makes a comparison wrong.",
+    where: "data/llm_sectors.py",
   },
 ];
 
@@ -52,8 +87,12 @@ const LIMITS = [
     body: "Progress percentages, beneficiary counts, geo-tags and bill values are not published for MPLADS works, so this system does not show them.",
   },
   {
-    title: "The model never decides",
-    body: "Scoring is deterministic and rule-weighted. Nothing an LLM writes can move a score, and every flag names the record it came from.",
+    title: "It reports, it does not forecast",
+    body: "Every figure describes what the record already shows — how late a work is, how far its cost sits from its peers. The portal publishes no progress milestones, so there is nothing to project a completion date from. The closest thing to an early warning here is money committed to an agency that has paid nobody in six months, which is an observation, not a prediction.",
+  },
+  {
+    title: "No model decides alone",
+    body: "The score itself is deterministic and rule-weighted, and every flag names the record it came from. The language model only labels what a work is, so it meets the right peers; it never scores, ranks or flags anything.",
   },
 ];
 
@@ -193,7 +232,42 @@ export default async function OverviewPage({
         </div>
       </section>
 
-      <section className="shell mt-6">
+      {/* Placed directly under the figures, because "AI-powered" is the first
+          claim the brief makes and a visitor could not previously find a single
+          sentence supporting it. Three models, what each one actually decides,
+          and where the code is. */}
+      <section className="shell mt-9">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+          <div>
+            <h2 className="section-head">Where the AI is</h2>
+            <p className="lede !mx-0 !max-w-2xl !mt-1">
+              Three models run over every work. Each one is named here with what it
+              decides and what it does not, because a system that cannot say where its
+              intelligence sits is asking to be taken on trust.
+            </p>
+          </div>
+          <Link href="/provenance" className="link-quiet whitespace-nowrap">
+            How the figures are checked &rarr;
+          </Link>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-3">
+          {MODELS.map((m) => (
+            <article key={m.name} className="card model-card">
+              <h3 className="model-card__name">{m.name}</h3>
+              <p className="model-card__kind">{m.kind}</p>
+              <p className="model-card__does">{m.does}</p>
+              <p className="model-card__decides">
+                <span>Decides</span>
+                {m.decides}
+              </p>
+              <code className="model-card__where">{m.where}</code>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="shell mt-9">
         <div className="slab">
           <div className="text-center">
             <h2 className="section-head">What the score is made of</h2>
