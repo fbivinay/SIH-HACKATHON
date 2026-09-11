@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Kasauti — brag</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      /* The product's own fonts, lifted out of its Next build rather than
+         pulled from Google at render time. A render that depends on the
+         network is a render that can silently fall back to Arial. */
+      @font-face {
+        font-family: "Geist";
+        src: url("assets/fonts/geist.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Geist Mono";
+        src: url("assets/fonts/geist-mono.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: block;
+      }
+
+      /* Straight from web/app/globals.css. Colour only ever means risk. */
+      :root {
+        --slab: #0b0b0c;
+        --ground: #f1f1f2;
+        --surface: #ffffff;
+        --on-slab: #fafafa;
+        --on-slab-2: #b6b6bf;
+        /* Measured 5.9:1 on the slab. #6b6b74 is the light-ground
+           tertiary and gives 3.73:1 here - the product lightens these
+           in dark mode for the same reason. */
+        --on-slab-3: #8e8e99;
+        --ink: #0b0b0c;
+        --ink-2: #4a4a52;
+        --ink-3: #6b6b74;
+        --risk-high: #a82e22;
+        --risk-low: #16704a;
+        --ai-red: #7a1a12;
+        /* The product's dark-mode value for the same token. */
+        --ai-red-dark: #e0685c;
+        --line: #e3e3e6;
+        --radius-card: 18px;
+        --radius-pill: 999px;
+        --ui: "Geist", ui-sans-serif, system-ui, sans-serif;
+        --mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+      }
+
+      body {
+        margin: 0;
+        background: #000;
+        font-family: var(--ui);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+      .dark { background: var(--slab); color: var(--on-slab); }
+      .light { background: var(--ground); color: var(--ink); }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      /* The uppercase mono label the product uses above every figure. */
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 22px;
+        font-weight: 500;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+      }
+      .eyebrow.on-dark { color: var(--on-slab-3); }
+
+      /* Every figure in the product is monospaced with tabular numerals.
+         Without tabular-nums a count-up jitters as digit widths change. */
+      .figure {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+
+      .display {
+        font-family: var(--ui);
+        font-weight: 650;
+        letter-spacing: -0.035em;
+        line-height: 1.05;
+        margin: 0;
+      }
+
+      /* ---------------------------------------------------- scene 1 -- */
+      #s1-label { margin-bottom: 40px; }
+      #s1-count { font-size: 260px; color: var(--on-slab); }
+      #s1-line {
+        margin-top: 54px;
+        font-size: 46px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        color: var(--on-slab-2);
+      }
+
+      /* ---------------------------------------------------- scene 2 -- */
+      /* The eyebrow exactly as the overview renders it: a green dot, the two
+         words in AI red, then the model names in grey mono. */
+      .ai-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 0.55em;
+        font-family: var(--mono);
+        font-size: 21px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+      }
+      .ai-dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--risk-low);
+      }
+      .ai-word { color: var(--ai-red); }
+      .dark .ai-word { color: var(--ai-red-dark); }
+      #s2-head {
+        margin-top: 42px;
+        font-size: 96px;
+        max-width: 1500px;
+        text-align: center;
+      }
+      #s2-sub {
+        margin-top: 38px;
+        font-size: 32px;
+        font-weight: 450;
+        color: var(--ink-2);
+        letter-spacing: -0.01em;
+      }
+
+      /* ---------------------------------------------------- scene 3 -- */
+      #s3-wrap {
+        display: flex;
+        align-items: center;
+        gap: 90px;
+      }
+      #s3-card {
+        width: 1080px;
+        padding: 54px 60px 58px;
+        border-radius: 28px;
+        background: #17171a;
+        border: 1px solid rgba(255, 255, 255, 0.11);
+      }
+      #s3-title { margin-bottom: 40px; }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: baseline;
+        row-gap: 14px;
+        margin-bottom: 26px;
+      }
+      .row:last-child { margin-bottom: 0; }
+      .row-name {
+        font-size: 38px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        color: var(--on-slab);
+      }
+      .row-weight {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
+        font-size: 28px;
+        color: var(--on-slab-3);
+      }
+      .bar-track {
+        grid-column: 1 / -1;
+        height: 6px;
+        border-radius: var(--radius-pill);
+        background: rgba(255, 255, 255, 0.11);
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        border-radius: var(--radius-pill);
+        background: var(--on-slab-2);
+        transform-origin: left center;
+      }
+      #s3-score-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #s3-score {
+        font-size: 230px;
+        color: var(--risk-high);
+      }
+      #s3-score-label { margin-top: 24px; }
+
+      /* ---------------------------------------------------- scene 4 -- */
+      #s4-wrap {
+        display: flex;
+        align-items: flex-start;
+        gap: 0;
+        position: relative;
+      }
+      /* 600px, not 480: "2,50,839" is eight monospace glyphs, and at the
+         size below that is ~480px of text. In a 480px column the three
+         figures ran into each other and read as one number. The layout
+         audit does not catch this - nothing here clips, the text simply
+         overlaps its neighbour - so it was caught by looking at a frame. */
+      .funnel-col {
+        width: 600px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .funnel-fig {
+        font-size: 100px;
+        color: var(--ink);
+      }
+      .funnel-fig.is-risk { color: var(--risk-high); }
+      .funnel-label {
+        margin-top: 26px;
+        font-family: var(--mono);
+        font-size: 21px;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+      }
+      /* The rules sit in the gaps the centred figures leave, at the height
+         of their optical middle. Measured from the glyph widths above, not
+         guessed: the columns are 600px, so their centres are 300, 900 and
+         1500, and each figure straddles its centre by half its own width. */
+      .funnel-rule {
+        position: absolute;
+        top: 50px;
+        height: 1px;
+        background: #d2d2d7;
+        transform-origin: left center;
+      }
+      #s4-rule-a { left: 575px; width: 130px; }
+      #s4-rule-b { left: 1135px; width: 170px; }
+
+      /* ---------------------------------------------------- scene 5 -- */
+      #s5-panel { width: 1280px; }
+      /* The badge from the work page, dot and all. */
+      #s5-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5em;
+        padding: 0.4em 1em;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: var(--radius-pill);
+        background: rgba(255, 255, 255, 0.05);
+        font-family: var(--mono);
+        font-size: 22px;
+        font-weight: 550;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--on-slab-2);
+      }
+      #s5-head {
+        margin-top: 34px;
+        font-size: 68px;
+        color: var(--on-slab);
+      }
+      #s5-list { margin-top: 52px; }
+      .reason {
+        padding: 24px 0 24px 34px;
+        border-left: 2px solid rgba(255, 255, 255, 0.16);
+        margin-bottom: 26px;
+      }
+      .reason:last-child { margin-bottom: 0; }
+      .reason-text {
+        font-size: 38px;
+        font-weight: 450;
+        letter-spacing: -0.015em;
+        color: var(--on-slab);
+      }
+      .reason-method {
+        margin-top: 12px;
+        font-family: var(--mono);
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--on-slab-3);
+      }
+
+      /* ---------------------------------------------------- scene 6 -- */
+      #s6-l1 {
+        font-size: 62px;
+        font-weight: 500;
+        letter-spacing: -0.025em;
+        color: var(--on-slab-2);
+      }
+      #s6-l2 {
+        margin-top: 26px;
+        font-size: 78px;
+        font-weight: 650;
+        letter-spacing: -0.03em;
+        color: var(--on-slab);
+      }
+      #s6-mark {
+        margin-top: 96px;
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      /* The product's logo: a filled square with two slashes. */
+      #s6-logo {
+        width: 82px;
+        height: 82px;
+        border-radius: 22px;
+        background: var(--on-slab);
+        position: relative;
+        overflow: hidden;
+      }
+      .slash {
+        position: absolute;
+        width: 13px;
+        height: 108px;
+        background: var(--slab);
+        top: -13px;
+        transform: rotate(26deg);
+      }
+      .slash.a { left: 22px; }
+      .slash.b { left: 47px; }
+      #s6-name {
+        font-size: 74px;
+        font-weight: 650;
+        letter-spacing: -0.035em;
+        color: var(--on-slab);
+      }
+      #s6-sub {
+        margin-top: 30px;
+        font-family: var(--mono);
+        font-size: 21px;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        color: var(--on-slab-3);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="24.8"
+      data-fps="30"
+    >
+      <!-- ============================================ 1. the number -- -->
+      <section id="s1" class="clip dark" data-start="0" data-duration="3.3" data-track-index="0">
+        <div class="stack">
+          <div id="s1-label" class="eyebrow on-dark">MPLADS works published</div>
+          <div id="s1-count" class="figure">0</div>
+          <div id="s1-line">Nobody has read them all.</div>
+        </div>
+      </section>
+
+      <!-- ================================================ 2. kasauti -- -->
+      <section id="s2" class="clip light" data-start="3.3" data-duration="3.8" data-track-index="1">
+        <div class="stack">
+          <div id="s2-eyebrow" class="ai-eyebrow">
+            <span class="ai-dot"></span>
+            <span class="ai-word">AI powered</span>
+            <span>· Gemini Flash Lite · Isolation Forest · Sentence-BERT</span>
+          </div>
+          <h1 id="s2-head" class="display">Every MPLADS work, checked against its peers.</h1>
+          <div id="s2-sub">2,50,839 works across every district in India.</div>
+        </div>
+      </section>
+
+      <!-- ========================================== 3. the score -- -->
+      <section id="s3" class="clip dark" data-start="7.1" data-duration="4.4" data-track-index="2">
+        <div id="s3-wrap">
+          <div id="s3-card">
+            <div id="s3-title" class="eyebrow on-dark">Overall risk score</div>
+
+            <div class="row" id="s3-r1">
+              <div class="row-name">Cost</div>
+              <div class="row-weight">25%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="1"></div></div>
+            </div>
+            <div class="row" id="s3-r2">
+              <div class="row-name">Delay</div>
+              <div class="row-weight">25%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="1"></div></div>
+            </div>
+            <div class="row" id="s3-r3">
+              <div class="row-name">Duplication</div>
+              <div class="row-weight">20%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="0.8"></div></div>
+            </div>
+            <div class="row" id="s3-r4">
+              <div class="row-name">Agency</div>
+              <div class="row-weight">15%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="0.6"></div></div>
+            </div>
+            <div class="row" id="s3-r5">
+              <div class="row-name">Compliance</div>
+              <div class="row-weight">15%</div>
+              <div class="bar-track"><div class="bar-fill" data-w="0.6"></div></div>
+            </div>
+          </div>
+
+          <div id="s3-score-box">
+            <div id="s3-score" class="figure">85</div>
+            <div id="s3-score-label" class="eyebrow on-dark">High risk</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================= 4. the funnel -- -->
+      <section id="s4" class="clip light" data-start="11.5" data-duration="3.9" data-track-index="3">
+        <div id="s4-wrap">
+          <div id="s4-rule-a" class="funnel-rule"></div>
+          <div id="s4-rule-b" class="funnel-rule"></div>
+
+          <div class="funnel-col" id="s4-c1">
+            <div class="funnel-fig figure">2,50,839</div>
+            <div class="funnel-label">Works scored</div>
+          </div>
+          <div class="funnel-col" id="s4-c2">
+            <div class="funnel-fig figure">48,296</div>
+            <div class="funnel-label">Worth a look</div>
+          </div>
+          <div class="funnel-col" id="s4-c3">
+            <div class="funnel-fig figure is-risk">2,316</div>
+            <div class="funnel-label">High risk</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================== 5. why flagged -- -->
+      <section id="s5" class="clip dark" data-start="15.4" data-duration="5.6" data-track-index="4">
+        <div id="s5-panel">
+          <div>
+            <span id="s5-badge">
+              <span class="ai-dot"></span>
+              <span class="ai-word">AI powered</span>
+              <span>· gemini-flash-lite</span>
+            </span>
+          </div>
+          <h2 id="s5-head" class="display">Why was this flagged?</h2>
+          <div id="s5-list">
+            <div class="reason" id="s5-a">
+              <div class="reason-text">298% above the median for this sector and district</div>
+              <div class="reason-method">Peer comparison</div>
+            </div>
+            <div class="reason" id="s5-b">
+              <div class="reason-text">100% similarity with another nearby work</div>
+              <div class="reason-method">AI · Sentence-BERT embeddings</div>
+            </div>
+            <div class="reason" id="s5-c">
+              <div class="reason-text">191 days beyond expected completion</div>
+              <div class="reason-method">Published dates</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================ 6. the refusal -- -->
+      <section id="s6" class="clip dark" data-start="21" data-duration="3.8" data-track-index="5">
+        <div class="stack">
+          <div id="s6-l1">A kasauti says which pieces are worth assaying.</div>
+          <div id="s6-l2">Never which are false.</div>
+          <div id="s6-mark">
+            <div id="s6-logo" data-layout-allow-overflow="true">
+              <span class="slash a"></span>
+              <span class="slash b"></span>
+            </div>
+            <div id="s6-name">Kasauti</div>
+          </div>
+          <div id="s6-sub">SIH26102 · MoSPI</div>
+        </div>
+      </section>
+
+      <!-- ===================================================== audio -- -->
+      <audio id="bed" src="assets/music/bed.mp3" data-start="0" data-duration="24.8" data-volume="0.5"></audio>
+      <audio id="sfx-tick" src="assets/sfx/tick.ogg" data-start="2.15" data-duration="0.19" data-volume="0.28"></audio>
+      <audio id="sfx-resolve" src="assets/sfx/resolve.ogg" data-start="10.93" data-duration="0.05" data-volume="0.24"></audio>
+      <audio id="sfx-land" src="assets/sfx/land.ogg" data-start="13.11" data-duration="0.14" data-volume="0.3"></audio>
+      <audio id="sfx-mark" src="assets/sfx/mark.ogg" data-start="22.93" data-duration="1.48" data-volume="0.38"></audio>
+    </div>
+
+    <script>
+      // Indian digit grouping — 2,50,839, not 250,839. The product formats
+      // every count this way and the video has to match it.
+      function formatIN(n) {
+        const s = Math.round(n).toString();
+        if (s.length <= 3) return s;
+        const last3 = s.slice(-3);
+        const rest = s.slice(0, -3);
+        return rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + last3;
+      }
+
+      function build() {
+        const tl = gsap.timeline({ paused: true });
+
+        // Every entrance is a `from`, never a CSS transform plus a tween on
+        // the same property — that pairing is a lint error and the two start
+        // values fight each other.
+        const rise = (target, at, opts) =>
+          tl.from(target, Object.assign({ y: 34, opacity: 0, duration: 0.55, ease: "power3.out" }, opts || {}), at);
+
+        // ---- 1. the number ------------------------------------------------
+        rise("#s1-label", 0.25, { y: 18, duration: 0.5 });
+
+        // Count-up driven off a tweened object, so any seek lands on the
+        // value that time deserves. Reading a clock here would break the
+        // deterministic render.
+        const counter = { v: 0 };
+        const countEl = document.getElementById("s1-count");
+        tl.to(
+          counter,
+          {
+            v: 250839,
+            duration: 1.7,
+            ease: "power2.out",
+            onUpdate: () => { countEl.textContent = formatIN(counter.v); },
+          },
+          0.4
+        );
+        tl.from("#s1-count", { opacity: 0, duration: 0.4, ease: "power2.out" }, 0.4);
+        rise("#s1-line", 2.4, { y: 22, duration: 0.6 });
+
+        // ---- 2. kasauti ---------------------------------------------------
+        rise("#s2-eyebrow", 3.5, { y: 16, duration: 0.5 });
+        rise("#s2-head", 3.95, { y: 40, duration: 0.75 });
+        rise("#s2-sub", 4.6, { y: 20, duration: 0.6 });
+
+        // ---- 3. the score -------------------------------------------------
+        rise("#s3-title", 7.25, { y: 16, duration: 0.5 });
+
+        // Five rows, one per beat of the 110 BPM bed (~0.545s apart). The
+        // music carries the rhythm so no sound effect has to.
+        const rowBeats = [7.64, 8.19, 8.74, 9.29, 9.83];
+        rowBeats.forEach((beat, i) => {
+          const row = "#s3-r" + (i + 1);
+          rise(row, beat, { y: 26, duration: 0.5 });
+          // The bar draws from the left to the width its weight earns.
+          tl.fromTo(
+            row + " .bar-fill",
+            { scaleX: 0 },
+            {
+              scaleX: Number(document.querySelector(row + " .bar-fill").dataset.w),
+              duration: 0.6,
+              ease: "power2.out",
+            },
+            beat + 0.1
+          );
+        });
+
+        // Lands on the strong cue at 10.93s. Ends at 11.38, comfortably
+        // inside the scene's 11.5 boundary — a clip's window is half-open,
+        // so an animation that finishes on the boundary never renders.
+        tl.from("#s3-score", { opacity: 0, scale: 0.94, duration: 0.45, ease: "power3.out" }, 10.93);
+        tl.from("#s3-score-label", { opacity: 0, duration: 0.4, ease: "power2.out" }, 11.05);
+
+        // ---- 4. the funnel ------------------------------------------------
+        rise("#s4-c1", 11.7, { y: 28, duration: 0.55 });
+        tl.fromTo("#s4-rule-a", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, 12.05);
+        rise("#s4-c2", 12.3, { y: 28, duration: 0.55 });
+        tl.fromTo("#s4-rule-b", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, 12.75);
+        // Strong cue: the one red figure in the video.
+        rise("#s4-c3", 13.11, { y: 28, duration: 0.6 });
+
+        // ---- 5. why flagged -----------------------------------------------
+        rise("#s5-badge", 15.55, { y: 16, duration: 0.5 });
+        rise("#s5-head", 16.0, { y: 30, duration: 0.6 });
+        // Three reasons, the middle two on strong cues. Each holds well past
+        // a second so it can actually be read - the scene runs to 21.0 and
+        // the last one settles by 19.0.
+        rise("#s5-a", 16.93, { y: 24, duration: 0.5 });
+        rise("#s5-b", 17.47, { y: 24, duration: 0.5 });
+        rise("#s5-c", 18.56, { y: 24, duration: 0.5 });
+
+        // ---- 6. the refusal -----------------------------------------------
+        rise("#s6-l1", 21.3, { y: 24, duration: 0.6 });
+        rise("#s6-l2", 22.0, { y: 26, duration: 0.6 });
+        // The wordmark lands on the last strong cue at 22.93s.
+        tl.from("#s6-mark", { opacity: 0, y: 26, duration: 0.55, ease: "power3.out" }, 22.93);
+        tl.from("#s6-sub", { opacity: 0, duration: 0.5, ease: "power2.out" }, 23.35);
+
+        // ---- audio --------------------------------------------------------
+        // Fade the bed in, and out under the wordmark so the last second is
+        // nearly silent. Animating `volume` on the timeline is what the
+        // framework mixes; data-volume is only the baseline.
+        const bed = document.getElementById("bed");
+        tl.fromTo(bed, { volume: 0 }, { volume: 0.5, duration: 0.6, ease: "power1.out" }, 0);
+        tl.to(bed, { volume: 0, duration: 1.5, ease: "power1.in" }, 23.2);
+
+        window.__timelines["main"] = tl;
+      }
+
+      // Built after the fonts are in, so every measurement the tweens take is
+      // of the real Geist metrics rather than the fallback's.
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(build);
+      } else {
+        build();
+      }
+    </script>
+  </body>
+</html>

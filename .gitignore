@@ -20,3 +20,9 @@ graphify-out/cache/
 # (`npx skills experimental_install`); the skills themselves are a local tool,
 # and /brag alone ships 17 MB of bundled music.
 .claude/skills/
+
+# The /brag video's borrowed assets: bundled music whose licence has not been
+# verified for redistribution, CC0 sound effects, font files copied out of the
+# Next build, and a vendored GSAP. All restorable - see the README beside them.
+brag-output/composition/assets/*
+!brag-output/composition/assets/README.md

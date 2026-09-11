@@ -1,0 +1,38 @@
+2,50,839 MPLADS works are published. Nobody has read them all.
+
+Kasauti scores every one against comparable works — cost, delay, duplication,
+the agency, the scheme's own rules — and hands officials the 48,296 worth a
+second look, each one with the reason and the model that produced it.
+
+A touchstone, not a verdict: it says which pieces are worth assaying, never
+which are false.
+
+Built for SIH26102 · MoSPI → https://mplads-risk-monitor-web.vercel.app
+
+---
+
+SHORTER (X / Discord, 280):
+
+2,50,839 MPLADS works. Nobody has read them all — so we built something that
+did. Kasauti scores every published work against its peers and tells you
+exactly why each flag exists. A touchstone, not a verdict.
+#SIH2026 #MPLADS
+
+---
+
+LINKEDIN:
+
+India publishes every MPLADS work — 2,50,839 of them across two Lok Sabha
+terms, ₹19,804 crore. The record is open. It is also unreadable at that size.
+
+Kasauti scores each work against comparable works in the same sector and
+district using an isolation forest, Sentence-BERT for near-duplicate
+detection, and Gemini to label the sectors that keyword rules cannot. 48,296
+works come out worth a second look; 2,316 are high risk.
+
+The part we care about most is the part that refuses: every flag carries the
+method that produced it, so it can be argued with rather than obeyed, and the
+site has a section saying what the published record does not support. A
+kasauti says which pieces are worth assaying. Never which are false.
+
+SIH26102, Ministry of Statistics and Programme Implementation.
