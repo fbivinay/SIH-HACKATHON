@@ -185,7 +185,7 @@ def add_base_features(df):
 def add_duplicate_features(df):
     model = SentenceTransformer("all-MiniLM-L6-v2")
     df["max_similarity_score"] = 0.0
-    df["similar_work_id"] = None
+    df["similar_work_key"] = None
 
     for (_district, _sector), group in df.groupby(["district", "sector"]):
         if len(group) < 2:
@@ -199,7 +199,7 @@ def add_duplicate_features(df):
             best_score = row_sims[best_local]
             if best_score > df.loc[idx, "max_similarity_score"]:
                 df.loc[idx, "max_similarity_score"] = round(float(best_score), 4)
-                df.loc[idx, "similar_work_id"] = int(group.iloc[best_local]["id"])
+                df.loc[idx, "similar_work_key"] = group.iloc[best_local]["work_key"]
     return df
 
 
@@ -487,9 +487,9 @@ def finish_scoring_run(conn, run_id, status, rows_scored):
 
 
 SCORE_COLUMNS = [
-    "project_id", "delay_days", "cost_deviation_pct", "expenditure_ratio", "sector",
+    "work_key", "delay_days", "cost_deviation_pct", "expenditure_ratio", "sector",
     "peer_median_cost", "peer_count", "agency_delay_rate", "max_similarity_score",
-    "similar_work_id", "cost_risk", "delay_risk", "duplicate_risk", "agency_risk",
+    "similar_work_key", "cost_risk", "delay_risk", "duplicate_risk", "agency_risk",
     "compliance_risk", "overall_risk_score", "risk_level", "flagged_reasons",
 ]
 
@@ -506,14 +506,19 @@ def write_scores(conn, df):
     TRUNCATE reclaims in the same statement, so this table stays the size of
     its contents and `projects` is never rewritten after the load. Reads go
     through the projects_scored view, which joins the two back together.
+
+    The TRUNCATE and the INSERT share one transaction, so a reader either sees
+    the whole previous run or the whole new one, never an empty table. That is
+    what lets the loader leave this table alone: rows keyed on work_key stay
+    correctly attached to their works until the moment they are replaced.
     """
     rows = [
         (
-            int(row["id"]), int(row["delay_days"]), float(row["cost_deviation_pct"]),
+            row["work_key"], int(row["delay_days"]), float(row["cost_deviation_pct"]),
             float(row["expenditure_ratio"]), row["sector"],
             float(row["peer_median_cost"]), int(row["peer_count"]),
             float(row["agency_delay_rate"]), float(row["max_similarity_score"]),
-            row["similar_work_id"], float(row["cost_risk"]),
+            row["similar_work_key"], float(row["cost_risk"]),
             float(row["delay_risk"]), float(row["duplicate_risk"]),
             float(row["agency_risk"]), float(row["compliance_risk"]),
             float(row["overall_risk_score"]), row["risk_level"],

@@ -491,17 +491,41 @@ def test_fetch_mps_selects_every_column_the_detectors_read():
                    "amount_recommended", "completed_works", "recommended_works"):
         assert column in sql, f"fetch_mps does not select {column}"
 
+def test_scores_are_keyed_on_something_a_reload_cannot_move():
+    """The reason the loader is allowed to leave project_scores alone.
 
-def test_the_loader_clears_scores_when_it_replaces_works():
-    """project_scores is keyed on a serial the reload reassigns. Leaving stale
-    rows behind attaches every score to whichever work inherited its id - which
-    looks right for as long as the upstream row order never changes, and is
-    wrong the first time it does."""
+    It used to truncate, because a score keyed on projects.id attaches to
+    whichever work inherits that id after a reload - right only for as long as
+    the upstream row order never changes. Truncating fixed the correctness
+    problem and created an availability one: no scores anywhere for the ~25
+    minutes until scoring caught up.
+
+    Keying on work_key fixes both, so this pins the three halves of that
+    bargain: the key, the loader not clearing, and the swap being atomic.
+    """
     import inspect
 
     import load_real_data as lrd
+    import scoring
 
-    body = inspect.getsource(lrd.load)
-    assert "TRUNCATE project_scores" in body, (
-        "replacing projects must clear the scores that describe them"
+    assert scoring.SCORE_COLUMNS[0] == "work_key", (
+        "a score must be keyed on the identifier that survives a reload"
+    )
+    assert "similar_work_id" not in scoring.SCORE_COLUMNS, (
+        "the matched duplicate must be named by work_key too - an id here "
+        "points at a different work after the next reload"
+    )
+
+    load_body = inspect.getsource(lrd.load)
+    assert "TRUNCATE project_scores" not in load_body, (
+        "the loader must not clear scores; that is what emptied the site "
+        "between the load finishing and scoring catching up"
+    )
+
+    # TRUNCATE and INSERT in one transaction is what lets the loader leave the
+    # table alone: a reader sees the whole previous run or the whole new one.
+    write_body = inspect.getsource(scoring.write_scores)
+    assert "TRUNCATE project_scores" in write_body
+    assert write_body.count("conn.commit()") == 1, (
+        "the clear and the refill must commit together or readers see empty"
     )
