@@ -2,6 +2,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import ProjectFilters from "@/components/ProjectFilters";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
+import CountUp from "@/components/CountUp";
 
 const PAGE_SIZE = 50;
 
@@ -59,6 +60,25 @@ export default async function ProjectsPage({
 
       <div className="mt-5">
         <ProjectFilters filterOptions={filterOptions} />
+      </div>
+
+      {/* Every page carries live figures, not only the overview: a register
+          that opens straight into a table gives a reader no sense of scale. */}
+      <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Works in this view", value: formatCount(page.total), note: applied.length ? applied.join(", ") : "Every work on record" },
+          { label: "Shown here", value: formatCount(page.projects.length), note: `Page ${Math.floor(offset / PAGE_SIZE) + 1}` },
+          { label: "Sanctioned on this page", value: formatINR(page.projects.reduce((t, x) => t + (x.sanctioned_amount ?? 0), 0)), note: "Sum of the rows below" },
+          { label: "High risk here", value: formatCount(page.projects.filter((x) => x.risk_level === "HIGH").length), note: "Score 70 and above", tone: "high" },
+        ].map((c) => (
+          <div key={c.label} className={`stat-card${c.tone ? ` stat-card--${c.tone}` : ""}`}>
+            <div className="stat-card__label">{c.label}</div>
+            <div className="stat-card__value">
+              <CountUp text={String(c.value)} />
+            </div>
+            <div className="stat-card__note">{c.note}</div>
+          </div>
+        ))}
       </div>
 
       <div className="mt-6 data-table-wrap">
