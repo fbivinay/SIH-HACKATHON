@@ -152,3 +152,18 @@ export function choroplethFill(share: number | null | undefined): string {
   if (share === null || share === undefined || Number.isNaN(share)) return NO_DATA_FILL;
   return (CHOROPLETH_STEPS.find((s) => share < s.upTo) ?? CHOROPLETH_STEPS[4]).fill;
 }
+
+/**
+ * Same value as DUPLICATE_SIMILARITY_THRESHOLD in data/scoring.py.
+ *
+ * Every scored work carries the nearest other work in its district and sector,
+ * whatever the distance - 249,933 of 250,839 of them. Only the 102,290 at or
+ * above this line are what the system calls a near-duplicate. Showing the link
+ * without this check told a reviewer two works resembled each other when the
+ * measured similarity was 0.1.
+ */
+export const DUPLICATE_SIMILARITY_THRESHOLD = 0.94;
+
+export function isNearDuplicate(score: number | null | undefined): boolean {
+  return score !== null && score !== undefined && score >= DUPLICATE_SIMILARITY_THRESHOLD;
+}

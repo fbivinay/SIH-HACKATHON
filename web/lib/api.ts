@@ -65,7 +65,11 @@ export type ProjectDetail = ProjectSummary & {
   cost_deviation_pct: number | null;
   peer_median_cost: number | null;
   peer_count: number | null;
+  // The nearest work in the same district and sector, whatever the distance -
+  // it is set for almost every work, so never show it without checking
+  // max_similarity_score against the duplicate threshold first.
   similar_work_id: number | null;
+  max_similarity_score: number | null;
 };
 
 export type StateStat = {
@@ -136,7 +140,6 @@ export type Alert = ProjectDetail & {
   // what a review is pinned to, because `id` is reassigned on every reload.
   work_key: string | null;
   expenditure: number;
-  max_similarity_score: number | null;
   review_status: ReviewStatus;
   review_note: string | null;
   review_reviewer: string | null;
