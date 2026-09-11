@@ -32,3 +32,11 @@ video-explainer/composition/assets/*
 # video-explainer/README.md. The scripts beside them are the source of truth.
 video-explainer/vo/*.wav
 video-explainer/vo/durations.json
+
+# The deck's diagram renderer is a node package; its node_modules is not ours
+# to commit. `npm install` in docs/deck/diagrams restores it.
+docs/deck/diagrams/node_modules/
+# Generated from boards.template.html at build time.
+docs/deck/diagrams/boards.html
+# Rebuilt by scripts/preview_deck.py whenever the deck changes.
+docs/deck/preview/

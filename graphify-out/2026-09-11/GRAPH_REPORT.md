@@ -1,22 +1,22 @@
 # Graph Report - SIH HACKATHON  (2026-09-11)
 
 ## Corpus Check
-- 81 files · ~689,979 words
+- 82 files · ~690,811 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 887 nodes · 1454 edges · 74 communities (41 shown, 30 thin omitted)
+- 889 nodes · 1458 edges · 69 communities (40 shown, 26 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6fd080e5`
+- Built from commit: `78558229`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - classify_sector
-- test_scoring.py
+- compliance_risk_score
 - query
 - test_detectors.py
 - Data Loading Pipeline
@@ -25,21 +25,20 @@
 - Database Schema
 - build_sih_deck.py
 - api.ts
-- [state]/page.tsx
+- formatINR
 - TypeScript Config
 - format.ts
 - layout.tsx
 - MPLADS Risk Monitor — Design Spec (SIH26102)
-- ReviewActions.tsx
+- [district]/page.tsx
 - MoSPI Figure Verification
-- formatCount
+- riskLevelLabel
 - What You Must Do When Invoked
 - MPLADS Data Fetcher
 - test_current_refresh_run_id_ignores_an_abandoned_run
-- scoring.py
+- score_dataframe
 - _a_state
-- formatINR
-- RiskBar.tsx
+- alerts/page.tsx
 - Synthetic Data Generator
 - Vercel Deploy Config
 - State Totals Verification
@@ -62,11 +61,11 @@
 - _RecordingCursor
 - Kasauti — MPLADS verification
 - projects/[id]/page.tsx
-- build_flagged_reasons
+- test_scoring.py
 - graphify reference: extra exports and benchmark
-- add_base_features
+- scoring.py
 - Data snapshot
-- attach_agency_profile
+- agency_risk_score
 - graphify reference: query, path, explain
 - graphify reference: add a URL and watch a folder
 - graphify reference: commit hook and native CLAUDE.md integration
@@ -80,12 +79,8 @@
 - test_a_member_can_be_handed_their_own_queue
 - .claude/CLAUDE.md
 - extraction-spec.md
-- fetch_expenditures
-- fetch_mps
-- write_scores
-- [district]/page.tsx
+- api
 - AGENTS.md
-- write_detector_findings
 
 ## God Nodes (most connected - your core abstractions)
 1. `query()` - 33 edges
@@ -114,15 +109,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (74 total, 30 thin omitted)
+## Communities (69 total, 26 thin omitted)
 
 ### Community 0 - "classify_sector"
 Cohesion: 0.05
 Nodes (55): apply(), classify_missing(), DailyQuotaExhausted, GeminiClassifier, load_cache(), Classify the works the keyword rules could not, using a language model. WHY…, The per-day free-tier allowance is gone. Unlike a per-minute rate limit this…, One sector per input, in order. Constraining the reply is what stops the model… (+47 more)
 
-### Community 1 - "test_scoring.py"
-Cohesion: 0.14
-Nodes (15): compliance_risk_score(), Adding a component must never lower an existing score. A weighted blend would…, A positional insert tuple fell one value short when `sector` was added to…, D-03 shipped silent for a whole scoring run because fetch_mps did not select…, The reason the loader is allowed to leave project_scores alone. It used to…, The loader is allowed to touch project_scores in exactly one way. Asserting…, Most completed works genuinely have no recommendation date on record (see…, 29% of completed works have Has Images = False in the source data - a real… (+7 more)
+### Community 1 - "compliance_risk_score"
+Cohesion: 0.40
+Nodes (5): compliance_risk_score(), Most completed works genuinely have no recommendation date on record (see…, 29% of completed works have Has Images = False in the source data - a real…, test_missing_dates_flagged_only_for_recommended_works(), test_missing_photo_documentation_flagged_only_for_completed_works()
 
 ### Community 2 - "query"
 Cohesion: 0.06
@@ -153,12 +148,12 @@ Cohesion: 0.16
 Nodes (20): card(), chip(), crore(), figures(), fit_h(), main(), n(), _pointer_text() (+12 more)
 
 ### Community 10 - "api.ts"
-Cohesion: 0.10
-Nodes (20): metadata, ProvenancePage(), AgencyStat, AlertPage, ComplianceBook, ComplianceRule, DeskFinding, DeskSector (+12 more)
+Cohesion: 0.08
+Nodes (24): band(), BAR_TONE, SortKey, SORTS, StatesPage(), AgencyStat, AlertPage, ComplianceBook (+16 more)
 
-### Community 11 - "[state]/page.tsx"
-Cohesion: 0.22
-Nodes (7): next, Params, Search, StateDeskPage(), term(), StateDesk, nextConfig
+### Community 11 - "formatINR"
+Cohesion: 0.31
+Nodes (6): Params, Search, StateDeskPage(), term(), StateDesk, formatINR()
 
 ### Community 12 - "TypeScript Config"
 Cohesion: 0.11
@@ -166,27 +161,27 @@ Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModu
 
 ### Community 13 - "format.ts"
 Cohesion: 0.17
-Nodes (16): react-leaflet, AnalysisPage(), GeoJSON, MapContainer, MapPage(), TileLayer, StateStat, Trends (+8 more)
+Nodes (18): react-leaflet, AnalysisPage(), GeoJSON, MapContainer, MapPage(), TileLayer, Pager(), RiskTicker() (+10 more)
 
 ### Community 14 - "layout.tsx"
-Cohesion: 0.17
-Nodes (12): freshnessLine(), metadata, mono, navLinks, RootLayout(), sans, Logo(), NavLinks() (+4 more)
+Cohesion: 0.09
+Nodes (23): react, ALLOWED, ReviewResult, submitReview(), freshnessLine(), metadata, mono, navLinks (+15 more)
 
 ### Community 15 - "MPLADS Risk Monitor — Design Spec (SIH26102)"
 Cohesion: 0.04
 Nodes (42): Addendum — follow-up tasks from the 2026-08-31 data (Track: data), Global Constraints, MPLADS Risk Monitor Implementation Plan, Task 0: Postgres schema + repo scaffold + shared env contract, Task 10: Final integration / demo dry run (shared, last), Task 11: Derive a sector and fix the cost baseline — DONE, Task 12: Score vendor concentration at the agency grain — DONE, Task 13: Normalize MP identity — DONE (+34 more)
 
-### Community 16 - "ReviewActions.tsx"
-Cohesion: 0.26
-Nodes (9): ALLOWED, ReviewResult, submitReview(), DECISIONS, ReviewActions(), REVIEWER_STORAGE_KEY, ReviewerName(), postReview() (+1 more)
+### Community 16 - "[district]/page.tsx"
+Cohesion: 0.25
+Nodes (6): next, DistrictDeskPage(), Params, Search, DistrictDesk, nextConfig
 
 ### Community 17 - "MoSPI Figure Verification"
 Cohesion: 0.23
 Nodes (11): aggregator(), main(), official(), ours(), post(), Persist the comparison so the interface can show it without calling the portal…, Reconcile our figures against the official MoSPI MPLADS dashboard. The problem…, �83,33,66,73,298.01' -> 83336673298.01 (+3 more)
 
-### Community 18 - "formatCount"
-Cohesion: 0.19
-Nodes (18): AlertsPage(), reviewedLine(), STATUS_LABELS, MpPage(), ProjectsPage(), Pager(), ProjectFilters(), handleQChange() (+10 more)
+### Community 18 - "riskLevelLabel"
+Cohesion: 0.26
+Nodes (10): MpPage(), ProjectsPage(), ProjectFilters(), handleQChange(), updateParams(), STATUS_OPTION_LABELS, FilterOptions, normalizeRiskLevel() (+2 more)
 
 ### Community 19 - "What You Must Do When Invoked"
 Cohesion: 0.08
@@ -200,21 +195,17 @@ Nodes (10): main(), merge_terms(), open_export(), Merge logic survives quoted co
 Cohesion: 0.20
 Nodes (4): current_refresh_run_id(), Find the 'running' data_refresh row load_real_data.py started, so this run's…, A run killed by a workflow timeout leaves its row at 'running' forever.…, test_current_refresh_run_id_ignores_an_abandoned_run()
 
-### Community 22 - "scoring.py"
+### Community 22 - "score_dataframe"
 Cohesion: 0.26
-Nodes (13): add_duplicate_features(), agency_risk_score(), compute_delay_days(), cost_risk_score(), delay_risk_score(), duplicate_risk_score(), Cost risk from deviation above the peer median, 0 when peers are thin.…, Map similarity [THRESHOLD, 1.0] onto risk [0, 100]. Returning raw similarity *… (+5 more)
+Nodes (12): add_duplicate_features(), cost_risk_score(), delay_risk_score(), duplicate_risk_score(), Cost risk from deviation above the peer median, 0 when peers are thin.…, Map similarity [THRESHOLD, 1.0] onto risk [0, 100]. Returning raw similarity *…, risk_level(), score_dataframe() (+4 more)
 
 ### Community 23 - "_a_state"
 Cohesion: 0.12
 Nodes (16): _a_state(), A state that actually has works, taken from the data rather than named., The state desk and /api/states must never disagree about one state., The two rates are not interchangeable, and the desk labels one of them "Paid…, GET /api/trends?state=X returned 500 in production for as long as the parameter…, The header tiles took only min_score, so filtering the table to one district…, A detector finding must never be shown without its own limits. D-02 renders…, Reduce manual monitoring efforts" means the filtered list has to leave the… (+8 more)
 
-### Community 24 - "formatINR"
-Cohesion: 0.18
-Nodes (11): OverviewPage(), band(), BAR_TONE, SortKey, SORTS, StatesPage(), RiskTicker(), get() (+3 more)
-
-### Community 25 - "RiskBar.tsx"
-Cohesion: 0.40
-Nodes (5): RiskBar(), RiskComponents, STEPS, WEIGHTS, riskScoreColorHex()
+### Community 25 - "alerts/page.tsx"
+Cohesion: 0.21
+Nodes (11): AlertsPage(), reviewedLine(), STATUS_LABELS, RiskBar(), RiskComponents, STEPS, WEIGHTS, Alert (+3 more)
 
 ### Community 26 - "Synthetic Data Generator"
 Cohesion: 0.70
@@ -233,28 +224,28 @@ Cohesion: 0.15
 Nodes (12): 10. Interface, 1. Never claim more than the record supports, 2. `work_key` is the only identifier that survives a reload, 3. Source tables and derived tables are separate, and the swap is atomic, 4. Population statistics stay at population grain, 5. Thresholds are measured, not borrowed, 6. Money comes from the source's own aggregates, 7. Provenance is checked, not asserted (+4 more)
 
 ### Community 47 - "projects/[id]/page.tsx"
-Cohesion: 0.22
-Nodes (11): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), api, ReviewHistory, hasPeers() (+3 more)
+Cohesion: 0.23
+Nodes (10): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), ReviewHistory, hasPeers(), isNearDuplicate() (+2 more)
 
-### Community 48 - "build_flagged_reasons"
-Cohesion: 0.22
-Nodes (10): build_flagged_reasons(), _priced(), A work can be a delay/spend outlier without being expensive. cost_risk blends…, A row with a complete cost basis: amount, peer median, peer count., A verifier who cannot see the basis cannot act on the flag., agency_risk is a max, so attributing it to the delay rate unconditionally…, test_agency_reason_names_the_component_that_drove_the_score(), test_cost_reason_never_contradicts_itself() (+2 more)
+### Community 48 - "test_scoring.py"
+Cohesion: 0.14
+Nodes (18): build_flagged_reasons(), _priced(), A work can be a delay/spend outlier without being expensive. cost_risk blends…, A row with a complete cost basis: amount, peer median, peer count., A verifier who cannot see the basis cannot act on the flag., agency_risk is a max, so attributing it to the delay rate unconditionally…, A positional insert tuple fell one value short when `sector` was added to…, D-03 shipped silent for a whole scoring run because fetch_mps did not select… (+10 more)
 
 ### Community 49 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
 Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
 
-### Community 50 - "add_base_features"
-Cohesion: 0.22
-Nodes (9): add_base_features(), The whole point of the fix. Two districts' worth of works, all with category…, A single Rs 7.5 crore work must not drag the baseline for its neighbours. With…, A median over three works is not a baseline., Scoring a database loaded before the sector column must not group every work in…, test_cost_baseline_groups_on_sector_not_category(), test_peer_median_resists_one_huge_work(), test_sector_is_recomputed_when_missing() (+1 more)
+### Community 50 - "scoring.py"
+Cohesion: 0.11
+Nodes (16): add_base_features(), compute_delay_days(), fetch_expenditures(), fetch_mps(), Replace project_scores wholesale. This used to UPDATE every row of `projects`.…, Raw expenditure transactions, or an empty frame if none were loaded. A snapshot…, MP-term aggregates, or an empty frame if the snapshot carried no MP summary…, Replace the whole findings set. They are derived, cheap to recompute and… (+8 more)
 
 ### Community 51 - "Data snapshot"
 Cohesion: 0.25
 Nodes (7): Data snapshot, Reconciliation against the source's own dashboard, Refreshing with newer data, Reproducing the full pipeline, Source, Why the earlier snapshot was half the data, Work IDs are not unique across terms
 
-### Community 52 - "attach_agency_profile"
-Cohesion: 0.29
-Nodes (7): attach_agency_profile(), Left-join the per-agency-per-term vendor profile onto works. Keyed on…, Left join, not inner: no vendor data must cost the signal, not the rows., The same agency, two terms, two different vendor mixes. A work must be matched…, test_a_work_takes_its_own_terms_agency_profile(), test_attach_agency_profile_without_any_expenditure_data(), test_works_of_an_agency_with_no_expenditures_keep_scoring()
+### Community 52 - "agency_risk_score"
+Cohesion: 0.22
+Nodes (11): agency_risk_score(), attach_agency_profile(), Worst of the agency's signals, not a weighted blend. Blending would dilute: an…, Left-join the per-agency-per-term vendor profile onto works. Keyed on…, Adding a component must never lower an existing score. A weighted blend would…, Left join, not inner: no vendor data must cost the signal, not the rows., The same agency, two terms, two different vendor mixes. A work must be matched…, test_a_work_takes_its_own_terms_agency_profile() (+3 more)
 
 ### Community 53 - "graphify reference: query, path, explain"
 Cohesion: 0.33
@@ -276,21 +267,21 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
-### Community 69 - "[district]/page.tsx"
-Cohesion: 0.16
-Nodes (12): react, DistrictDeskPage(), Params, Search, COMPONENTS, LIMITS, MODELS, TERMS (+4 more)
+### Community 69 - "api"
+Cohesion: 0.15
+Nodes (14): COMPONENTS, LIMITS, MODELS, OverviewPage(), TERMS, metadata, ProvenancePage(), CountUp() (+6 more)
 
 ## Knowledge Gaps
 - **203 isolated node(s):** `$schema`, `builds`, `routes`, `agency_vendor_profile`, `rejected_rows` (+198 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 447 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **26 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `normalize()` connect `classify_sector` to `add_base_features`, `Data Loading Pipeline`, `scoring.py`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `classify_sector()` connect `classify_sector` to `add_base_features`, `scoring.py`?**
+- **Why does `normalize()` connect `classify_sector` to `scoring.py`, `Data Loading Pipeline`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `classify_sector()` connect `classify_sector` to `scoring.py`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Why does `query()` connect `query` to `API Endpoint Tests`, `Durable Project Key Test`, `test_mp_dashboard_scopes_everything_to_one_member`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
@@ -298,7 +289,7 @@ _Questions this graph is uniquely positioned to answer:_
   _203 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `classify_sector` be split into smaller, more focused modules?**
   _Cohesion score 0.050921861281826165 - nodes in this community are weakly interconnected._
-- **Should `test_scoring.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.14166666666666666 - nodes in this community are weakly interconnected._
 - **Should `query` be split into smaller, more focused modules?**
   _Cohesion score 0.06299603174603174 - nodes in this community are weakly interconnected._
+- **Should `test_detectors.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.06345848757271286 - nodes in this community are weakly interconnected._

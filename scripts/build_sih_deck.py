@@ -5,15 +5,38 @@ file carries the SIH logo, the blue footer bar, the title placeholders and the
 slide master, and the rules say the provided template must be used. So each
 content slide keeps its heading and its "idea details pointers" verbatim - the
 pointer box is only shrunk to a strip at the top of the content area - and our
-content is drawn into the empty band below it.
+content goes into the empty band below it.
 
-python-pptx does no layout, so every box is sized from an estimated text
-height and the build asserts nothing overflows its card or the slide.
+WHY THE CONTENT IS IMAGES
+
+The template's own instruction slide says to avoid paragraphs and use
+"points / diagrams / Infographics / pictures". The earlier version of this
+script drew cards and text with python-pptx, which meant every layout was an
+estimate of where text would wrap and the result read as a wall of boxes. The
+content is now:
+
+  - six diagram boards, authored as HTML in docs/deck/diagrams/ with the
+    product's own design tokens and fonts, rendered to PNG at 2x;
+  - six screenshots of the running system;
+  - hyperlinks laid over both, so every claim can be opened.
+
+AND WHY THE FIGURES STILL COME FROM THE DATABASE
+
+Putting numbers inside an image is exactly how a deck goes stale, which has
+happened twice on this project. So the diagrams are a *template*:
+`boards.template.html` carries `{{tokens}}`, this script fills them from
+`figures()` - which refuses to build on a null or zero - and only then renders
+the PNGs. No figure in this deck is typed by hand.
+
+Build:
+
+    python3 scripts/build_sih_deck.py            # figures -> diagrams -> pptx
+    python3 scripts/build_sih_deck.py --verify   # check the built file
 """
 
 import json
-import math
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -22,84 +45,42 @@ from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.util import Inches, Pt
 
-REPO = Path("/home/rvina/projects/SIH HACKATHON")
+REPO = Path(__file__).resolve().parent.parent
 TEMPLATE = REPO / "docs/deck/references/SIH2026-IDEA-Presentation-Format.pptx"
 OUT = REPO / "docs/deck/SIH26102-MPLADS-SIH-Idea.pptx"
+DIAG = REPO / "docs/deck/diagrams"
+PNG = DIAG / "png"
+SHOTS = DIAG / "shots"
 
+# Fill these in before submitting; the portal issues both.
 TEAM_NAME = "<Team Name>"
+TEAM_ID = "<Team ID>"
 
 W, H = 13.333, 7.5
 LEFT, CW = 0.67, 12.0
 TOP, BOT = 1.95, 6.85
-PAD = 0.16
 
 C = lambda h: RGBColor.from_string(h)
-BLUE, BLUE_D, BLUE_L = C("0070C0"), C("00548F"), C("BFDCF2")
-INK, MUTED, LINE = C("101828"), C("5A6472"), C("D6DCE5")
-SURF, TINT = C("F5F7FA"), C("EAF2FB")
-RED, AMBER, GREEN = C("A82E22"), C("96600A"), C("16704A")
-
+INK, MUTED = C("101828"), C("5A6472")
+LINKC = C("7A1A12")
 UI = "Calibri"
-MONO = "Consolas"
 
-# Characters per inch at 1pt, per font. Used to estimate wrapping.
-CPI = {UI: 126, MONO: 108}
-
-
-def fit_h(text, w, size, font=UI, spacing=1.22, bold=False):
-    """Estimated rendered height in inches of `text` wrapped into `w` inches."""
-    cpl = max(6, (w * CPI[font] / size) * (0.93 if bold else 1.0))
-    lines = sum(max(1, math.ceil(len(ln) / cpl)) for ln in text.split("\n"))
-    return lines * size * spacing / 72
-
-
-def textbox(slide, x, y, w, h, runs, align=None, spacing=1.22):
-    """runs: list of (text, size, bold, colour, font)."""
-    box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
-    tf = box.text_frame
-    tf.word_wrap = True
-    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
-    for i, (txt, size, bold, colour, font) in enumerate(runs):
-        para = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        if align is not None:
-            para.alignment = align
-        para.line_spacing = spacing
-        r = para.add_run()
-        r.text = txt
-        r.font.size = Pt(size)
-        r.font.bold = bold
-        r.font.color.rgb = colour
-        r.font.name = font
-    return box
+# Three links, and only three. The reference cards cite their sources in text
+# instead of each carrying its own, so a reader is never hunting for which of
+# a dozen links is the working prototype.
+LINKS = {
+    "video": "https://drive.google.com/file/d/1z27mUvNq-KbGzCK_8p_dpdtpBMCligM6/view?usp=drivesdk",
+    "site": "https://mplads-risk-monitor-web.vercel.app",
+    "github": "https://github.com/fbivinay/SIH-HACKATHON",
+}
+LINK_ROW = [
+    ("DEMO VIDEO", "2 minute walkthrough", "video"),
+    ("PROTOTYPE", "the running system", "site"),
+    ("GITHUB", "loader · scorer · API · tests", "github"),
+]
 
 
-def rect(slide, x, y, w, h, fill=None, line=None, line_w=0.75):
-    from pptx.enum.shapes import MSO_SHAPE
-    sh = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x), Inches(y),
-                                Inches(w), Inches(h))
-    sh.adjustments[0] = 0.06
-    if fill is None:
-        sh.fill.background()
-    else:
-        sh.fill.solid()
-        sh.fill.fore_color.rgb = fill
-    if line is None:
-        sh.line.fill.background()
-    else:
-        sh.line.color.rgb = line
-        sh.line.width = Pt(line_w)
-    sh.shadow.inherit = False
-    return sh
-
-
-
-# ---------------------------------------------------------------- figures --
-#
-# Every number on these slides is read from the database at build time. This
-# deck has shipped stale twice because the counts were typed in and the data
-# moved underneath them; a figure nobody can forget to update is the only fix
-# that holds. A missing figure raises rather than rendering a blank, because a
-# slide quietly claiming "0 works scored" is worse than a build that fails.
+# --------------------------------------------------------------- figures ---
 
 
 def figures():
@@ -141,7 +122,7 @@ def figures():
             "SELECT COALESCE(SUM(sanctioned_amount), 0) FROM projects_scored "
             "WHERE overall_risk_score >= 40"
         ),
-        "allocated_18": one("SELECT COALESCE(SUM(allocated_amount), 0) FROM mps WHERE ls_term = 18"),
+        "allocated": one("SELECT COALESCE(SUM(allocated_amount), 0) FROM mps"),
         "findings": one("SELECT COUNT(*) FROM detector_findings"),
         "worst_gap": one("SELECT MAX(ABS(gap_pct)) FROM source_reconciliation"),
     }
@@ -150,7 +131,7 @@ def figures():
     conn.close()
 
     cache = REPO / "data/sector_cache.json"
-    f["llm_labels"] = len(json.loads(cache.read_text())) if cache.exists() else 0
+    f["labels"] = len(json.loads(cache.read_text())) if cache.exists() else 0
 
     # The claim "N automated tests" is checked the same way anyone else would
     # check it, rather than being remembered.
@@ -170,47 +151,56 @@ def figures():
     return f
 
 
+def indian(value) -> str:
+    """2,50,839 - the grouping the product uses everywhere."""
+    s = str(int(value))
+    if len(s) <= 3:
+        return s
+    head, tail = s[:-3], s[-3:]
+    return re.sub(r"\B(?=(\d{2})+(?!\d))", ",", head) + "," + tail
+
+
 def crore(amount) -> str:
-    return f"Rs {float(amount) / 1e7:,.0f} Cr"
+    return f"₹{float(amount) / 1e7:,.0f} Cr"
 
 
-def n(value) -> str:
-    return f"{int(value):,}"
+# ------------------------------------------------------------- diagrams ---
 
 
-PROBLEMS = []
+def render_diagrams(f):
+    """Fill the board template from the figures, then render each to PNG."""
+    tpl = (DIAG / "boards.template.html").read_text()
+    values = {
+        "works": indian(f["works"]),
+        "payments": indian(f["payments"]),
+        "queue": indian(f["queue"]),
+        "high": indian(f["high"]),
+        "labels": indian(f["labels"]),
+        "states": str(f["states"]),
+        "tests": str(f["tests"]),
+        "allocated": crore(f["allocated"]),
+    }
+    missing = set(re.findall(r"\{\{(\w+)\}\}", tpl)) - set(values)
+    if missing:
+        raise SystemExit(f"deck: board template wants {sorted(missing)} - no figure for it")
+    for k, v in values.items():
+        tpl = tpl.replace("{{%s}}" % k, v)
+    (DIAG / "boards.html").write_text(tpl)
+
+    subprocess.run(
+        ["node", str(DIAG / "render.mjs")],
+        cwd=DIAG, check=True,
+        env={**os.environ, "LD_LIBRARY_PATH": os.environ.get(
+            "LD_LIBRARY_PATH",
+            str(Path.home() / ".local/chromium-deps/root/usr/lib/x86_64-linux-gnu"))},
+    )
+    return json.loads((PNG / "sizes.json").read_text())
 
 
-def card(slide, x, y, w, title, body, accent=BLUE, fill=SURF, ts=14, bs=12,
-         min_h=0.0, tag=None):
-    """A titled card sized to its own text. Returns its height."""
-    tw = w - 2 * PAD - 0.08
-    th = fit_h(title, tw, ts, UI, 1.16, True) if title else 0.0
-    bh = fit_h(body, tw, bs, UI) if body else 0.0
-    h = max(min_h, PAD + th + (0.09 if title and body else 0) + bh + PAD)
-    rect(slide, x, y, w, h, fill=fill, line=LINE)
-    # Accent rule down the left edge, so the card reads as a unit without a
-    # heavy border.
-    rect(slide, x, y, 0.045, h, fill=accent, line=None)
-    yy = y + PAD
-    if title:
-        textbox(slide, x + PAD + 0.06, yy, tw, th, [(title, ts, True, INK, UI)], spacing=1.16)
-        yy += th + (0.09 if body else 0)
-    if body:
-        textbox(slide, x + PAD + 0.06, yy, tw, bh, [(body, bs, False, MUTED, UI)])
-    if tag:
-        PROBLEMS.append((tag, y + h))
-    return h
+# ---------------------------------------------------------------- slides ---
 
 
-def chip(slide, x, y, w, label, value, colour=BLUE, h=0.74):
-    rect(slide, x, y, w, h, fill=TINT, line=BLUE_L)
-    textbox(slide, x + 0.14, y + 0.09, w - 0.28, 0.30, [(value, 15, True, colour, MONO)])
-    textbox(slide, x + 0.14, y + 0.43, w - 0.28, 0.26, [(label, 10, False, MUTED, UI)])
-    return h
-
-
-def restyle_pointers(slide, size=10):
+def restyle_pointers(slide):
     """Shrink the template's pointer textbox to a strip at the top of the
     content area. The wording is left exactly as the template ships it - the
     rules forbid changing the idea-detail pointers, only their placement."""
@@ -219,11 +209,19 @@ def restyle_pointers(slide, size=10):
             continue
         t = sh.text_frame.text.strip()
         if len(t) > 40 and "Team Name" not in t:
-            sh.left, sh.top = Inches(LEFT), Inches(1.30)
-            sh.width, sh.height = Inches(CW), Inches(0.52)
+            top, height = 1.18, 0.74
+            lines = max(1, len([q for q in sh.text_frame.paragraphs if q.text.strip()]))
+            # 1.45 for leading. At 1.25 the four-line strip on slide 2 came out
+            # a hair too tall and clipped "Innovation and uniqueness".
+            size = min(9.5, (height * 72) / (lines * 1.45))
+            sh.left, sh.top = Inches(LEFT), Inches(top)
+            sh.width, sh.height = Inches(CW), Inches(height)
+            sh.text_frame.word_wrap = True
             for para in sh.text_frame.paragraphs:
+                para.line_spacing = 1.0
+                para.space_after = Pt(0)
                 for r in para.runs:
-                    r.font.size = Pt(9.5)
+                    r.font.size = Pt(size)
                     r.font.italic = True
                     r.font.bold = False
                     r.font.color.rgb = MUTED
@@ -232,12 +230,17 @@ def restyle_pointers(slide, size=10):
     return None
 
 
-def set_title(slide, text):
+def set_title(slide, text, size=None):
+    from pptx.enum.text import PP_ALIGN
     for sh in slide.shapes:
         if sh.is_placeholder and sh.has_text_frame and sh.text_frame.text.strip():
             para = sh.text_frame.paragraphs[0]
             if not para.runs:
                 continue
+            para.alignment = PP_ALIGN.CENTER
+            if size:
+                for r in para.runs:
+                    r.font.size = Pt(size)
             # The placeholder holds a soft line break and several runs; setting
             # runs[0] alone leaves the template's own word on a second line.
             para.runs[0].text = text
@@ -259,12 +262,109 @@ def set_team_badge(slide):
             return
 
 
+def place(slide, png, x, y, w, sizes=None, url=None):
+    """Drop an image at width `w`, height from its own pixels. Returns bottom."""
+    if sizes is not None:
+        pw, ph = sizes
+    else:
+        from PIL import Image
+        with Image.open(png) as im:
+            pw, ph = im.size
+    h = w * ph / pw
+    pic = slide.shapes.add_picture(str(png), Inches(x), Inches(y), Inches(w), Inches(h))
+    if url:
+        pic.click_action.hyperlink.address = url
+    return y + h
+
+
+def caption(slide, x, y, w, text, url=None, size=9.5, align=None, h=0.26):
+    from pptx.enum.text import PP_ALIGN
+    box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
+    tf = box.text_frame
+    tf.word_wrap = True
+    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+    p = tf.paragraphs[0]
+    if align:
+        p.alignment = PP_ALIGN.CENTER if align == "c" else PP_ALIGN.RIGHT
+    r = p.add_run()
+    r.text = text
+    r.font.size = Pt(size)
+    r.font.name = UI
+    r.font.color.rgb = LINKC if url else MUTED
+    if url:
+        r.font.bold = True
+        r.hyperlink.address = url
+    return box
+
+
+def link_row(slide, x, y, w, h=0.52, gap=0.18, size=11, stack=False):
+    """The three links as real buttons - visible, clickable, same on every slide."""
+    from pptx.enum.shapes import MSO_SHAPE
+    from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+    bw = w if stack else (w - gap * (len(LINK_ROW) - 1)) / len(LINK_ROW)
+    for i, (label, sub, key) in enumerate(LINK_ROW):
+        bx = x if stack else x + i * (bw + gap)
+        by = y + i * (h + gap) if stack else y
+        box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(bx),
+                                     Inches(by), Inches(bw), Inches(h))
+        box.fill.solid()
+        box.fill.fore_color.rgb = C("FFFFFF")
+        box.line.color.rgb = LINKC
+        box.line.width = Pt(1.25)
+        box.shadow.inherit = False
+        box.click_action.hyperlink.address = LINKS[key]
+        tf = box.text_frame
+        tf.word_wrap = True
+        tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+        tf.margin_left = tf.margin_right = Inches(0.06)
+        tf.margin_top = tf.margin_bottom = 0
+        p0 = tf.paragraphs[0]
+        p0.alignment = PP_ALIGN.CENTER
+        r = p0.add_run(); r.text = label
+        r.font.size = Pt(size); r.font.bold = True
+        r.font.color.rgb = LINKC; r.font.name = UI
+        p1 = tf.add_paragraph()
+        p1.alignment = PP_ALIGN.CENTER
+        r2 = p1.add_run(); r2.text = sub
+        r2.font.size = Pt(size - 3); r2.font.color.rgb = MUTED; r2.font.name = UI
+    return y + (len(LINK_ROW) * h + (len(LINK_ROW) - 1) * gap if stack else h)
+
+
+def hotspot(slide, x, y, w, h, url):
+    """An invisible clickable rectangle - used to make a region of a rendered
+    diagram open the thing it names, since the PNG cannot carry a link."""
+    from pptx.enum.shapes import MSO_SHAPE
+    sh = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x), Inches(y),
+                                Inches(w), Inches(h))
+    sh.fill.background()
+    sh.line.fill.background()
+    sh.shadow.inherit = False
+    sh.click_action.hyperlink.address = url
+    return sh
+
+
+# ------------------------------------------------------------------ main ---
+
+
 def main():
     f = figures()
+    sizes = render_diagrams(f)
     prs = Presentation(str(TEMPLATE))
     s = list(prs.slides)
 
     # ---------------------------------------------------------------- title --
+    # The template's subtitle placeholder ships reading "TITLE PAGE". It is not
+    # one of the idea-detail pointers, so naming the product there is allowed
+    # and stops the opening slide being anonymous.
+    for sh in s[0].shapes:
+        if sh.has_text_frame and sh.text_frame.text.strip() == "TITLE PAGE":
+            para = sh.text_frame.paragraphs[0]
+            if para.runs:
+                para.runs[0].text = "KASAUTI — AI-powered MPLADS verification"
+                for extra in list(para.runs[1:]):
+                    extra._r.getparent().remove(extra._r)
+            break
+
     for sh in s[0].shapes:
         if sh.has_text_frame and "Problem Statement ID" in sh.text_frame.text:
             tf = sh.text_frame
@@ -276,7 +376,7 @@ def main():
                  "and inefficiencies in MPLAD Scheme implementation regd."),
                 ("Theme", "Smart Automation"),
                 ("PS Category", "Software"),
-                ("Team ID", "<Team ID>"),
+                ("Team ID", TEAM_ID),
                 ("Team Name", TEAM_NAME),
             ]
             for i, (k, v) in enumerate(lines):
@@ -291,294 +391,157 @@ def main():
                 b.font.color.rgb = MUTED; b.font.name = UI
             break
 
-    # ------------------------------------------------------------- slide 2 --
-    set_title(s[1], "KASAUTI")
+    # ------------------------------------------------- 2. idea / solution --
+    set_title(s[1], "KASAUTI", size=40)
     set_team_badge(s[1])
     restyle_pointers(s[1])
-    y = TOP
-    steps = [
-        ("READ", f"{n(f['works'])} works, {n(f['payments'])}\npayments, {n(f['mp_terms'])} MP-terms"),
-        ("COMPARE", "Each work against its own\ndistrict-and-sector peers"),
-        ("DETECT", "5 work signals, 4 cohort\ndetectors, 4 written rules"),
-        ("SCORE", "One 0-100 number, with\nthe records behind it"),
-        ("ACT", "A ranked queue, and a trail\nof every decision on it"),
-    ]
-    sw = (CW - 4 * 0.14) / 5
-    for i, (name, body) in enumerate(steps):
-        x = LEFT + i * (sw + 0.14)
-        rect(s[1], x, y, sw, 1.24, fill=TINT, line=BLUE_L)
-        textbox(s[1], x + 0.14, y + 0.12, sw - 0.28, 0.28, [(name, 13, True, BLUE_D, UI)])
-        textbox(s[1], x + 0.14, y + 0.46, sw - 0.28, 0.68, [(body, 10, False, MUTED, UI)], spacing=1.16)
-    y += 1.24 + 0.24
 
-    cw3 = (CW - 2 * 0.18) / 3
-    hs = [
-        card(s[1], LEFT, y, cw3, "Kasauti — the touchstone",
-             "A jeweller rubs gold against a kasauti and reads the streak: the stone "
-             "says which pieces are worth assaying, never which are false. This reads "
-             "the published MPLADS record end to end and scores every work against "
-             f"comparable works in the same district and sector. {n(f['queue'])} clear "
-             f"the review threshold, carrying {crore(f['queue_value'])} of sanction. "
-             "Officials get them ranked, not a spreadsheet.", BLUE, min_h=3.35, tag="s2a"),
-        card(s[1], LEFT + cw3 + 0.18, y, cw3, "Innovation and uniqueness",
-             "Every flag names the record that produced it. Cohort patterns are kept "
-             "at cohort grain instead of being blamed on one work. Reviewer decisions "
-             "are pinned to a work identity that survives the nightly reload, so a "
-             "verdict is never reattached to a different work, and every decision "
-             "ever recorded on one survives the next.", GREEN, min_h=3.35, tag="s2b"),
-        card(s[1], LEFT + 2 * (cw3 + 0.18), y, cw3, "What it does not claim",
-             "A score is not an allegation - it means a work does not resemble its "
-             "peers. No field is invented: progress %, beneficiary counts and geo-tags "
-             "are not published, so they are not shown. The rule book states what "
-             "cannot be checked at all. A language model only labels what a work is, "
-             "so it meets the right peers; it never scores or flags anything.",
-             AMBER, min_h=3.35,
-             tag="s2c"),
-    ]
+    place(s[1], PNG / "arch.png", LEFT, TOP, 9.40, sizes["arch"])
+    shot_b = place(s[1], SHOTS / "overview.png", 10.25, TOP, 2.58, url=LINKS["site"])
+    caption(s[1], 10.25, shot_b + 0.06, 2.58,
+            f"{indian(f['queue'])} flagged of {indian(f['works'])}", None, 9, "c")
+    link_row(s[1], 10.25, shot_b + 0.36, 2.58, h=0.52, gap=0.13, size=10, stack=True)
 
-    # ------------------------------------------------------------- slide 3 --
+    # ---------------------------------------------- 3. technical approach --
     set_title(s[2], "TECHNICAL APPROACH")
     set_team_badge(s[2])
     restyle_pointers(s[2])
-    y = TOP
-    stacks = [
-        ("AI / ML", "MiniLM sentence transformer\nIsolation Forest\nBenford + HHI statistics\nGemini sector labelling"),
-        ("BACKEND", "FastAPI, read-mostly\nPostgres on Neon\nPooled, retries dead links\nOne authenticated write"),
-        ("FRONTEND", "Next.js App Router\nTypeScript, Tailwind\nServer-rendered\nLeaflet map"),
-        ("PLATFORM", f"Vercel, two projects\nGitHub Actions nightly\n{n(f['tests'])} automated tests\nLive since day one"),
-    ]
-    sw = (CW - 3 * 0.18) / 4
-    for i, (name, body) in enumerate(stacks):
-        x = LEFT + i * (sw + 0.18)
-        h = 1.50
-        rect(s[2], x, y, sw, h, fill=SURF, line=LINE)
-        rect(s[2], x, y, sw, 0.035, fill=BLUE, line=None)
-        textbox(s[2], x + 0.16, y + 0.15, sw - 0.32, 0.28, [(name, 12, True, BLUE_D, UI)])
-        textbox(s[2], x + 0.16, y + 0.50, sw - 0.32, 1.00, [(body, 10.5, False, MUTED, UI)], spacing=1.26)
-    y += 1.50 + 0.20
 
-    textbox(s[2], LEFT, y, CW, 0.22,
-            [("The risk score: five weighted signals about the work itself", 12, True, INK, UI)])
-    y += 0.34
-    weights = [("COST", "25%"), ("DELAY", "25%"), ("DUPLICATE", "20%"),
-               ("AGENCY", "15%"), ("COMPLIANCE", "15%")]
-    ww = (CW - 4 * 0.14) / 5
-    for i, (name, pct) in enumerate(weights):
-        chip(s[2], LEFT + i * (ww + 0.14), y, ww, name, pct, BLUE_D, h=0.74)
-    y += 0.74 + 0.24
+    pipe_b = place(s[2], PNG / "pipeline.png", LEFT, TOP, CW, sizes["pipeline"])
+    place(s[2], PNG / "stack.png", LEFT, pipe_b + 0.16, 6.05, sizes["stack"])
+    work_b = place(s[2], SHOTS / "work.png", 6.95, pipe_b + 0.16, 5.72,
+                   url=LINKS["site"])
+    caption(s[2], 6.95, work_b + 0.05, 5.72,
+            "Every flag carries the method that produced it — a scored work, live",
+            LINKS["site"], 9.5, h=0.30)
 
-    textbox(s[2], LEFT, y, CW, 0.22,
-            [("Four cohort detectors: patterns that belong to an agency or an MP, never folded into a work's score",
-              12, True, INK, UI)])
-    y += 0.34
-    c = f["by_code"]
-    dets = [("D-01 Year-end burst", n(c["D-01"])), ("D-02 First-digit", n(c["D-02"])),
-            ("D-03 Idle allocation", n(c["D-03"])), ("D-04 Uniform amount", n(c["D-04"]))]
-    dw = (CW - 3 * 0.14) / 4
-    for i, (name, count) in enumerate(dets):
-        chip(s[2], LEFT + i * (dw + 0.14), y, dw, name, count + " findings", GREEN, h=0.74)
-    y += 0.74 + 0.18
-
-    rect(s[2], LEFT, y, CW, 0.62, fill=SURF, line=LINE)
-    textbox(s[2], LEFT + 0.16, y + 0.12, CW - 0.32, 0.40,
-            [("Four compliance rules, each published with the exact condition it tests — "
-              "including the one that cannot fire, because the source publishes a single "
-              "figure per completed work that serves as both sanction and expenditure.",
-              10, False, MUTED, UI)], spacing=1.28)
-    y += 0.62
-    PROBLEMS.append(("s3", y))
-
-    # ------------------------------------------------------------- slide 4 --
+    # ------------------------------------------ 4. feasibility & viability --
     set_title(s[3], "FEASIBILITY AND VIABILITY")
     set_team_badge(s[3])
     restyle_pointers(s[3])
-    y = TOP
-    rect(s[3], LEFT, y, CW, 0.70, fill=TINT, line=BLUE_L)
-    textbox(s[3], LEFT + 0.18, y + 0.17, CW - 0.36, 0.38,
-            [(f"Not a proposal - already built, deployed and refreshing nightly: "
-              f"{n(f['scored'])} works scored, all {n(f['states'])} states reconciled against "
-              f"the official MoSPI dashboard to within {float(f['worst_gap']):.1f}%, live at "
-              "mplads-risk-monitor-web.vercel.app", 12.5, True, BLUE_D, UI)])
-    y += 0.70 + 0.24
 
-    hs = [
-        card(s[3], LEFT, y, cw3, "Feasibility",
-             "The data is already public and machine-readable: four CSVs, refreshed "
-             "nightly by a scheduled job that loads in 2 minutes and scores in about "
-             "20. No ministry integration, no new reporting burden on any officer, "
-             f"no hardware. {n(f['tests'])} automated tests run against the pipeline and the API.",
-             GREEN, min_h=3.90, tag="s4a"),
-        card(s[3], LEFT + cw3 + 0.18, y, cw3, "Challenges and risks",
-             "Work IDs restart per agency, so 271 works had inherited a stranger's "
-             "start date. Cost deviation had no ceiling and overflowed its column, "
-             "losing the very outliers that matter. Dead pooled connections turned "
-             "one expiry into a rolling outage. All three were found and fixed.",
-             AMBER, min_h=3.90, tag="s4b"),
-        card(s[3], LEFT + 2 * (cw3 + 0.18), y, cw3, "How we overcome them",
-             "A work's identity is (Work ID, term, agency), unique across both "
-             "extracts. Every threshold is calibrated on the measured distribution, "
-             "not a textbook constant. A killed refresh now records its own death "
-             "instead of being reported as the next run's success.",
-             BLUE, min_h=3.90, tag="s4c"),
-    ]
+    feas_b = place(s[3], PNG / "feas.png", LEFT, TOP, CW, sizes["feas"])
+    # 3.30in wide, not 5.55: at the screenshot's own 2.18 ratio anything wider
+    # runs past the footer bar, which `verify` catches.
+    y = feas_b + 0.14
+    place(s[3], SHOTS / "provenance.png", LEFT, y, 3.30, url=LINKS["site"])
+    caption(s[3], 4.20, y + 0.02, 8.47,
+            "Provenance is checked, not asserted.", None, 12)
+    caption(s[3], 4.20, y + 0.30, 8.47,
+            f"Both hops are published separately — ours to the source, and the source "
+            f"to MoSPI — so a gap is never read as our error when it is upstream lag. "
+            f"Worst gap on the last run: {float(f['worst_gap']):.2f}%. "
+            f"{f['states']} of {f['states']} states match the source exactly.",
+            None, 10, h=0.62)
+    link_row(s[3], 4.20, y + 0.92, 8.47, h=0.50, gap=0.14, size=10)
 
-    # ------------------------------------------------------------- slide 5 --
+    # ------------------------------------------------ 5. impact & benefits --
     set_title(s[4], "IMPACT AND BENEFITS")
     set_team_badge(s[4])
     restyle_pointers(s[4])
-    y = TOP
-    stats = [(n(f["scored"]), "works scored, both terms"),
-             (crore(f["allocated_18"]), "allocated, 18th Lok Sabha"),
-             (n(f["queue"]), "works above the threshold"),
-             (crore(f["queue_value"]), "sanction awaiting review"),
-             (n(f["findings"]), "cohort findings")]
-    sw = (CW - 4 * 0.14) / 5
-    for i, (value, label) in enumerate(stats):
-        chip(s[4], LEFT + i * (sw + 0.14), y, sw, label, value, BLUE_D, h=0.82)
-    y += 0.82 + 0.24
 
-    who = [("Member of Parliament",
-            "Their own page: what they recommended, what got built, how much allocation "
-            "was never committed to any work, and which of it is flagged."),
-           ("District authority",
-            "A district desk led by the implementing agencies it supervises, with vendor "
-            "concentration and a ranked shortlist instead of a register."),
-           ("State nodal officer",
-            f"A state desk ranking every district by the queue it has to clear, and all "
-            f"{n(f['states'])} states on money committed against money paid."),
-           ("Ministry (MoSPI)",
-            "National patterns, the compliance rule book and a provenance page reconciling "
-            "every headline figure against the Ministry's own dashboard.")]
-    cw4 = (CW - 3 * 0.16) / 4
-    for i, (name, body) in enumerate(who):
-        card(s[4], LEFT + i * (cw4 + 0.16), y, cw4, name, body, BLUE, ts=12, bs=10.5,
-             min_h=2.55, tag=f"s5-{i}")
-    y += 2.55 + 0.24
+    imp_b = place(s[4], PNG / "impact.png", 1.17, TOP, 11.0, sizes["impact"])
+    y = imp_b + 0.16
+    place(s[4], SHOTS / "alerts.png", 1.30, y, 5.00, url=LINKS["site"])
+    shot2_b = place(s[4], SHOTS / "map.png", 7.00, y, 5.00, url=LINKS["site"])
+    caption(s[4], 1.30, shot2_b + 0.04, 5.00,
+            "The queue an official works through", None, 9.5, "c")
+    caption(s[4], 7.00, shot2_b + 0.04, 5.00,
+            "Risk by state, every district covered", None, 9.5, "c")
 
-    rect(s[4], LEFT, y, CW, 1.02, fill=SURF, line=LINE)
-    textbox(s[4], LEFT + 0.18, y + 0.15, CW - 0.36, 0.76,
-            [("Social — public money is checked against its own record, not against nobody.  "
-              "Economic — verification effort goes where the deviation is, so a fixed audit "
-              "budget covers more ground.  Governance — every flag is traceable to the rows "
-              "that produced it, so a finding can be argued with rather than merely believed.",
-              11.5, False, MUTED, UI)], spacing=1.32)
-    y += 1.02
-    PROBLEMS.append(("s5", y))
-
-    # ------------------------------------------------------------- slide 6 --
+    # --------------------------------------------- 6. research & references --
     set_title(s[5], "RESEARCH AND REFERENCES")
     set_team_badge(s[5])
     restyle_pointers(s[5])
-    y = TOP
-    cw2 = (CW - 0.20) / 2
-    h_data = card(s[5], LEFT, y, cw2, "The designated dataset, and what it serves",
-         "The problem statement names mplads.mospi.gov.in. Its public interface, "
-         "enumerated from its own JavaScript and called directly: totals, "
-         "states, districts and member names are open to anyone. Works are not. Completed "
-         "works come only through a citizen rating form that needs an SMS one-time password "
-         "on an Indian mobile, returns one member's works in one ward per call, and is rate "
-         "limited. Recommended works, payments and vendors are not served at all; every "
-         "other path answers 302 to the login page.\n"
-         "Empowered Indian republishes that record as machine-readable exports. Its own "
-         "uploader reads the State Bank disbursement portal that MPLADS money is paid "
-         "through, with a signed-in session cookie at one request every three seconds.\n"
-         f"So this system loads those exports - {n(f['works'])} works, {n(f['payments'])} "
-         f"payments, {n(f['mp_terms'])} MP-terms, {n(f['districts'])} districts, "
-         f"{n(f['vendors'])} vendors - and reconciles against the official endpoints on "
-         f"every refresh: five figures within {float(f['worst_gap']):.1f}%, every gap "
-         "negative because our snapshot trails a portal that gains works overnight. "
-         f"{n(f['rejected'])} rows rejected and recorded, not silently dropped.",
-         BLUE, bs=10, min_h=3.85, tag="s6a")
-    h_left = card(s[5], LEFT + cw2 + 0.20, y, cw2, "Methods",
-         "Liu, Ting and Zhou (2008), Isolation Forest — multivariate outliers over "
-         "amount, delay and spend.\n"
-         "Reimers and Gurevych (2019), Sentence-BERT — all-MiniLM-L6-v2 embeddings, "
-         "cosine 0.94 within a district and sector, for duplicate sanctions.\n"
-         "Newcomb-Benford first-digit law, with Nigrini's MAD — used peer-relative, "
-         "because the population itself does not conform.\n"
-         "Herfindahl-Hirschman Index - vendor concentration per implementing agency.\n"
-         "MPLADS Guidelines, MoSPI - permissible works, sanction ceilings, entitlement per MP.",
-         GREEN, bs=11, min_h=3.85, tag="s6b")
-    y += max(h_data, h_left) + 0.24
 
-    rect(s[5], LEFT, y, CW, 0.72, fill=TINT, line=BLUE_L)
-    textbox(s[5], LEFT + 0.18, y + 0.13, CW - 0.36, 0.50,
-            [("Working prototype   mplads-risk-monitor-web.vercel.app          "
-              "API   mplads-risk-monitor.vercel.app/api/overview          "
-              "Source   github.com/fbivinay/SIH-HACKATHON", 11, True, BLUE_D, MONO)],
-            spacing=1.32)
-    y += 0.72
-    PROBLEMS.append(("s6", y))
+    refs_b = place(s[5], PNG / "refs.png", LEFT, TOP, CW, sizes["refs"])
 
-    # ------------------------------------------- drop the instructions slide --
-    ids = prs.slides._sldIdLst
-    ids.remove(list(ids)[6])
+    y = refs_b + 0.14
+    for i, name in enumerate(["agencies", "alerts", "overview"]):
+        b = place(s[5], SHOTS / f"{name}.png", LEFT + i * 4.05, y, 3.85,
+                  url=LINKS["site"])
+    caption(s[5], LEFT, b + 0.04, CW,
+            "Every figure in this deck is live on the prototype, refreshed nightly "
+            "and reconciled against the ministry's own dashboard.", None, 9.5, "c")
+    link_row(s[5], 2.17, b + 0.28, 9.0, h=0.46, gap=0.16, size=10.5)
 
+    OUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(str(OUT))
-    return prs
+    print(f"wrote {OUT}")
+    print(f"  {indian(f['works'])} works, {indian(f['queue'])} flagged, "
+          f"{indian(f['high'])} high risk, {f['tests']} tests")
+    verify()
+
+
+# ---------------------------------------------------------------- verify ---
 
 
 def verify():
-    """Check only the shapes this script added.
-
-    The template's own furniture - the footer bar, the slide number, the SIH
-    logo, the title slide's decorative freeforms - legitimately runs to the
-    bottom edge, so comparing every shape against the content band flags the
-    template rather than our work. Shape ids present in the template are
-    therefore excluded by id.
-    """
-    template_ids = {}
-    for i, slide in enumerate(Presentation(str(TEMPLATE)).slides, 1):
-        template_ids[i] = {sh.shape_id for sh in slide.shapes}
-
+    """Check the built file rather than trust that it built."""
     prs = Presentation(str(OUT))
-    print(f"slides: {len(prs.slides)}")
-    band = H - 0.55
-    bad = 0
-    for i, slide in enumerate(prs.slides, 1):
-        lowest, added = 0.0, 0
+    slides = list(prs.slides)
+    problems = []
+
+    if len(slides) > 7:
+        problems.append(f"{len(slides)} slides; the rules allow six plus the instructions page")
+
+    tmpl_pointers = {}
+    for i, slide in enumerate(Presentation(str(TEMPLATE)).slides, 1):
         for sh in slide.shapes:
-            if sh.shape_id in template_ids.get(i, set()):
+            if sh.has_text_frame and not sh.is_placeholder:
+                t = sh.text_frame.text.strip()
+                if len(t) > 40 and "Team Name" not in t:
+                    tmpl_pointers[i] = t
+                    break
+
+    for i, slide in enumerate(slides, 1):
+        pics = [sh for sh in slide.shapes if sh.shape_type == 13]
+        links = 0
+        for sh in slide.shapes:
+            if getattr(sh, "click_action", None) and sh.click_action.hyperlink.address:
+                links += 1
+            if sh.has_text_frame:
+                for p in sh.text_frame.paragraphs:
+                    for r in p.runs:
+                        if r.hyperlink.address:
+                            links += 1
+            # Nothing may run off the slide.
+            if sh.left is None:
                 continue
-            if sh.left is None or sh.top is None:
-                continue
-            added += 1
             l, t = sh.left / 914400, sh.top / 914400
-            w = (sh.width or 0) / 914400
-            h = (sh.height or 0) / 914400
-            if l < -0.05 or t < -0.05 or l + w > W + 0.05 or t + h > H + 0.05:
-                print(f"  slide {i}: OFF-SLIDE {l:.2f},{t:.2f} {w:.2f}x{h:.2f} "
-                      f"{sh.text_frame.text[:40] if sh.has_text_frame else ''}")
-                bad += 1
-            lowest = max(lowest, t + h)
-        flag = "  <-- past the footer band" if lowest > band else ""
-        print(f"  slide {i}: {added:>2} added shapes, bottom {lowest:.2f} (band {band:.2f}){flag}")
-        if lowest > band:
-            bad += 1
+            r = l + (sh.width or 0) / 914400
+            b = t + (sh.height or 0) / 914400
+            if l < -0.05 or t < -0.7 or r > W + 0.05 or b > H + 0.05:
+                problems.append(f"slide {i}: {sh.name!r} runs off the slide "
+                                f"({l:.2f},{t:.2f})-({r:.2f},{b:.2f})")
+        # The pointers must survive verbatim - the rules forbid changing them.
+        if i in tmpl_pointers:
+            found = any(sh.has_text_frame and sh.text_frame.text.strip() == tmpl_pointers[i]
+                        for sh in slide.shapes)
+            if not found:
+                problems.append(f"slide {i}: the template's idea pointers were changed")
+        if 2 <= i <= 6:
+            # 2 is the SIH logo plus one of ours; a content slide needs more.
+            if len(pics) < 3:
+                problems.append(f"slide {i}: only {len(pics)} images - this deck is meant to be visual")
+            if links == 0:
+                problems.append(f"slide {i}: no links")
+        print(f"  slide {i}: {len(pics)} images, {links} links")
 
-    # Pointer wording must survive byte for byte - the rules allow moving the
-    # idea-detail pointers, not editing them.
-    tmpl = Presentation(str(TEMPLATE))
-    for i in range(1, 6):
-        want = _pointer_text(tmpl.slides[i])
-        got = _pointer_text(prs.slides[i])
-        if want and want != got:
-            print(f"  slide {i+1}: POINTER TEXT CHANGED")
-            bad += 1
-    print(f"problems: {bad}")
-    return bad
+    for placeholder in (TEAM_NAME, TEAM_ID):
+        if placeholder.startswith("<"):
+            print(f"  NOTE: {placeholder} is still a placeholder - fill it before submitting")
 
-
-def _pointer_text(slide):
-    for sh in slide.shapes:
-        if not sh.has_text_frame or sh.is_placeholder:
-            continue
-        t = sh.text_frame.text.strip()
-        if len(t) > 40 and "Team Name" not in t:
-            return t
-    return None
+    if problems:
+        print("\nFAILED:")
+        for p in problems:
+            print("  -", p)
+        raise SystemExit(1)
+    print("  ok")
 
 
 if __name__ == "__main__":
-    main()
-    sys.exit(1 if verify() else 0)
+    if "--verify" in sys.argv:
+        verify()
+    else:
+        main()
