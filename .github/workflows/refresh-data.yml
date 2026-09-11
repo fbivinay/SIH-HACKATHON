@@ -49,6 +49,11 @@ jobs:
     # genuine hang still dies instead of burning the full allowance.
     timeout-minutes: 120
 
+    # The run commits any sector labels it learns, so the cache stays complete
+    # for a clone with no API key. Write is the only elevated permission needed.
+    permissions:
+      contents: write
+
     steps:
       # v4/v5 target Node 20, which the runners now force onto Node 24 with a
       # deprecation warning. v7 targets a supported runtime, so runs stay clean.
@@ -145,6 +150,42 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           MPLADS_DATA_DIR: mplads-data
         run: python data/load_real_data.py
+
+      # Between load and score, so a description arriving tonight is grouped
+      # with its real peers tonight rather than next time. Never fails the run:
+      # a work with no sector falls back to "Other", which is a legitimate peer
+      # group, and losing a refresh over a missing label would be the wrong
+      # trade. Skipped entirely when no key is configured - all 41,691 labels
+      # so far are committed in data/sector_cache.json, so a clone with no key
+      # still gets them.
+      - name: Label new sectors
+        if: steps.config.outputs.configured == 'true'
+        continue-on-error: true
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "${GEMINI_API_KEY:-}" ]; then
+            echo "No GEMINI_API_KEY secret set - keeping the committed labels as they are."
+            exit 0
+          fi
+          python scripts/classify_sectors.py
+
+      # The cache is committed so a clone needs no key. A run that labelled
+      # nothing changes nothing here and the commit is skipped.
+      - name: Commit any new labels
+        if: steps.config.outputs.configured == 'true'
+        continue-on-error: true
+        run: |
+          if git diff --quiet -- data/sector_cache.json; then
+            echo "No new labels."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/sector_cache.json
+          git commit -m "Cache sector labels for descriptions new in this refresh"
+          git push
 
       - name: Score works
         if: steps.config.outputs.configured == 'true'

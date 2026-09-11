@@ -33,39 +33,46 @@ load_dotenv(pathlib.Path(__file__).resolve().parent.parent / ".env")
 
 
 def unclassified_descriptions(limit=None, cache=None):
-    """Distinct descriptions currently sitting in Other, commonest first, so a
-    partial run buys the most works per request.
+    """Descriptions the keyword rules cannot label and the cache has not answered.
 
-    A description the model has already answered "Other" for is indistinguishable
-    in the database from one it has never seen - both sit in the Other bucket.
-    So the cache is subtracted here, before `limit` is applied. Applying LIMIT in
-    SQL instead meant a partial run kept re-picking the same commonest rows,
-    every one of them already answered, and reported "0 newly labelled" while
-    22,030 descriptions waited behind them.
+    Read from `projects` rather than `project_scores`, so this does not depend
+    on scoring having run. That dependency was real cost: it forced the nightly
+    order to be load -> score -> classify, which left every new label unused
+    until the following night, and the join it needed (p.id = s.project_id)
+    silently broke when scores were rekeyed on work_key.
+
+    Commonest first, so a partial run buys the most works per request. The
+    cache is subtracted BEFORE `limit` is applied: a description the model has
+    already answered "Other" for is indistinguishable in the data from one it
+    has never seen, so limiting first meant re-asking the same answered rows
+    forever and reporting "0 newly labelled".
     """
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT p.description, COUNT(*) AS works
-                FROM project_scores s JOIN projects p ON p.work_key = s.work_key
-                WHERE s.sector = %s AND p.description IS NOT NULL
-                GROUP BY p.description
-                ORDER BY works DESC
-                """,
-                [llm_sectors.OTHER],
+                SELECT description, COUNT(*) AS works
+                FROM projects WHERE description IS NOT NULL
+                GROUP BY description ORDER BY works DESC
+                """
             )
             rows = cur.fetchall()
     finally:
         conn.close()
 
-    if cache is None:
-        return rows[:limit] if limit else rows
-    from sectors import normalize
-    fresh = [(d, n) for d, n in rows
-             if (key := normalize(d)) and key not in cache]
-    return fresh[:limit] if limit else fresh
+    from sectors import classify_sector, normalize
+
+    cache = cache if cache is not None else {}
+    pending = []
+    for description, works in rows:
+        key = normalize(description)
+        if not key or key in cache:
+            continue
+        if classify_sector(description) != llm_sectors.OTHER:
+            continue
+        pending.append((description, works))
+    return pending[:limit] if limit else pending
 
 
 def main():
