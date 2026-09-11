@@ -1543,15 +1543,25 @@ button,
 }
 
 @keyframes rise-in {
-  from { opacity: 0; transform: translateY(26px) scale(0.985); }
+  from { opacity: 0; transform: translateY(52px) scale(0.97); }
   to   { opacity: 1; transform: none; }
 }
 
-/* Cards come from below and slightly behind, so a grid resolves into place
-   rather than blinking on. The scale is small on purpose: at 0.97 it reads as
-   depth, and anything more reads as a slideshow. */
+/*
+ * Cards arrive from below and from behind the screen.
+ *
+ * The travel is 72px and the scale starts at 0.9, which is a long way further
+ * than this began: the first version moved 34px at 0.97 and read as barely
+ * moving at all once it was spread across the seconds a reader takes to scroll
+ * a card into view. Motion tuned by looking at a single frame is always too
+ * subtle - what matters is how much has visibly changed over the distance the
+ * eye tracks it.
+ *
+ * Still no rotation and no overshoot. These are audited public-spending
+ * figures; the movement should read as confident, not playful.
+ */
 @keyframes card-in {
-  from { opacity: 0; transform: translateY(34px) scale(0.97); }
+  from { opacity: 0; transform: translateY(72px) scale(0.9); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1649,17 +1659,17 @@ main > section:nth-of-type(n + 5) { animation-delay: 220ms; }
        cover spans the viewport as well as the element, so the movement plays
        while the card travels up into view and settles around the middle of the
        screen, where the reader is actually looking. */
-    animation-range: cover 0% cover 34%;
+    animation-range: cover 0% cover 42%;
     animation-delay: 0s;
   }
 
   /* Cards sharing a row enter together, so the stagger is a slightly later
      finish per column - a wave across the row rather than five boxes moving
      as one plate. */
-  .grid > :nth-child(2), .slab-card:nth-child(2) { animation-range: cover 2% cover 38%; }
-  .grid > :nth-child(3), .slab-card:nth-child(3) { animation-range: cover 4% cover 42%; }
-  .grid > :nth-child(4), .slab-card:nth-child(4) { animation-range: cover 6% cover 46%; }
-  .grid > :nth-child(n + 5), .slab-card:nth-child(n + 5) { animation-range: cover 8% cover 50%; }
+  .grid > :nth-child(2), .slab-card:nth-child(2) { animation-range: cover 3% cover 46%; }
+  .grid > :nth-child(3), .slab-card:nth-child(3) { animation-range: cover 6% cover 50%; }
+  .grid > :nth-child(4), .slab-card:nth-child(4) { animation-range: cover 9% cover 54%; }
+  .grid > :nth-child(n + 5), .slab-card:nth-child(n + 5) { animation-range: cover 12% cover 58%; }
 
   /* Rows keep their first-paint stagger and take no scroll timeline: a table
      is one object, and its wrap already animates. */
