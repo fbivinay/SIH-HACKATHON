@@ -422,12 +422,31 @@ def alerts(
 
 
 @app.get("/api/alerts/summary")
-def alerts_summary(min_score: float = Query(40, ge=0, le=100)):
+def alerts_summary(
+    q: Optional[str] = None,
+    state: Optional[str] = None,
+    district: Optional[str] = None,
+    sector: Optional[str] = None,
+    risk_level: Optional[str] = None,
+    ls_term: Optional[int] = Query(None, ge=17, le=18),
+    status: Optional[str] = None,
+    min_score: float = Query(40, ge=0, le=100),
+):
     """Counts for the queue header. min_score defaults to 40 because that is
     where risk_level leaves LOW (see RISK_LEVEL_THRESHOLDS in data/scoring.py) -
-    below it there is nothing to triage."""
+    below it there is nothing to triage.
+
+    Takes the same filters as /api/alerts and builds its WHERE with the same
+    helper, so the tiles describe the queue underneath them. They used to take
+    only min_score: filter the table to one district and the header still
+    reported the whole country, which reads as "47,719 awaiting review in
+    Kozhikode".
+    """
+    where, params = _alert_filters(
+        q, state, district, sector, risk_level, ls_term, status, min_score
+    )
     return query(
-        """
+        f"""
         SELECT
           COUNT(*) AS in_scope,
           COUNT(*) FILTER (WHERE r.status IS NULL)          AS pending,
@@ -440,9 +459,9 @@ def alerts_summary(min_score: float = Query(40, ge=0, le=100)):
             AS pending_sanctioned_amount
         FROM projects_scored p
         LEFT JOIN work_reviews r ON r.work_key = p.work_key
-        WHERE p.overall_risk_score >= %s
+        {where}
         """,
-        [min_score],
+        params,
         one=True,
     )
 
@@ -979,6 +998,12 @@ def trends(state: Optional[str] = None):
         params,
     )
 
+    # Bound parameters rather than %-formatting the finished string. The
+    # f-string interpolates the state filter twice, each carrying its own
+    # placeholder, so formatting the result left four placeholders against a
+    # two-tuple and /api/trends?state=X raised TypeError before psycopg2 saw
+    # it. Nothing here may carry a literal percent sign either - psycopg2
+    # scans the whole string, SQL comments included.
     quiet = query(
         f"""
         WITH last_pay AS (
@@ -997,12 +1022,12 @@ def trends(state: Optional[str] = None):
                o.open_works, o.open_value,
                (CURRENT_DATE - l.last_paid) AS days_silent
         FROM last_pay l JOIN open_work o USING (implementing_agency)
-        WHERE l.last_paid < CURRENT_DATE - INTERVAL '%s days'
+        WHERE l.last_paid < CURRENT_DATE - (%s || ' days')::interval
           AND o.open_works >= %s
         ORDER BY o.open_value DESC
         LIMIT 50
-        """ % (QUIET_DAYS, QUIET_MIN_OPEN_WORKS),
-        params + params,
+        """,
+        params + params + [QUIET_DAYS, QUIET_MIN_OPEN_WORKS],
     )
 
     return {

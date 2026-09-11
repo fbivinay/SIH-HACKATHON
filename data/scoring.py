@@ -587,17 +587,30 @@ if __name__ == "__main__":
 
     # Cohort detectors run on the same frames but never touch a work's score -
     # see data/detectors.py for why a population statistic stays at population
-    # grain. A detector failing must not lose a completed scoring pass, so this
-    # is deliberately after the scores are computed and reported separately.
-    findings = detectors.run_all(df, expenditures, mp_rows)
-
+    # grain.
+    #
+    # The scores are written FIRST. This comment used to claim a detector
+    # failure could not lose a completed scoring pass, and it was wrong: the
+    # detectors ran before the write, outside the try/except above, so any
+    # exception from run_all discarded fifty minutes of finished work that was
+    # sitting in memory. That was not theoretical - run_all raised KeyError on
+    # the empty frames fetch_expenditures documents as supported.
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     write_agency_vendor_profile(conn, agency_profile)
     write_scores(conn, scored)
-    written = write_detector_findings(conn, findings)
     finish_scoring_run(conn, run_id, "success", len(scored))
-    conn.close()
     print(f"Scored {len(scored)} projects.")
+
+    # Now the detectors, with the scores already safe. A failure here costs the
+    # findings and says so; it no longer costs the pass.
+    findings, written = [], 0
+    try:
+        findings = detectors.run_all(df, expenditures, mp_rows)
+        written = write_detector_findings(conn, findings)
+    except Exception as err:  # noqa: BLE001 - the scores are already committed
+        print(f"Detectors failed after the scores were written: "
+              f"{type(err).__name__}: {err}")
+    conn.close()
     by_code = {}
     for f in findings:
         by_code[f["code"]] = by_code.get(f["code"], 0) + 1

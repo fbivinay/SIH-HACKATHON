@@ -323,8 +323,13 @@ export default async function StateDeskPage({
                   </li>
                 ))}
               </ul>
-              <Link href={`/signals?state=${encodeURIComponent(state)}`} className="link-quiet">
-                All signals →
+              {/* /api/detectors/findings has no state parameter - a finding
+                  belongs to an agency or a member, not a place - so a state
+                  query string here promised a scope the page could not honour
+                  and silently showed every state's signals. Link unscoped and
+                  say so. */}
+              <Link href="/signals" className="link-quiet">
+                All signals, nationally →
               </Link>
             </>
           ) : null}
@@ -355,7 +360,10 @@ export default async function StateDeskPage({
               {desk.top_flagged.map((w) => (
                 <tr key={w.id}>
                   <td>
-                    <Link href={`/projects/${w.id}`} className="link-quiet">
+                    <Link
+                      href={`/projects/${encodeURIComponent(w.work_key ?? String(w.id))}`}
+                      className="link-quiet"
+                    >
                       {w.work_name}
                     </Link>
                     {w.flagged_reasons?.length ? (

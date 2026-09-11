@@ -474,3 +474,38 @@ def test_provenance_reject_counts_come_from_the_latest_extract():
             f"reject breakdown sums to {total} but the last run recorded "
             f"{latest['rows_rejected']} - the query is spanning runs again"
         )
+
+
+def test_trends_accepts_the_state_filter_it_advertises():
+    """GET /api/trends?state=X returned 500 in production for as long as the
+    parameter has existed.
+
+    The quiet-agency SQL was an f-string interpolating the state filter twice -
+    each carrying a placeholder - and the finished string was then %-formatted
+    against a two-tuple. Four placeholders, two arguments, TypeError before
+    psycopg2 was ever reached. Both existing trends tests called it without a
+    state, so nothing caught it.
+    """
+    national = client.get("/api/trends")
+    assert national.status_code == 200
+    state = _a_state()
+    scoped = client.get(f"/api/trends?state={state}")
+    assert scoped.status_code == 200, scoped.text[:200]
+    body = scoped.json()
+    assert body["state"] == state
+    # A real filter, not an ignored parameter.
+    assert len(body["monthly"]) <= len(national.json()["monthly"])
+
+
+def test_queue_tiles_count_the_queue_beneath_them():
+    """The header tiles took only min_score, so filtering the table to one
+    district still reported the whole country above it."""
+    state = _a_state()
+    params = f"state={state}&min_score=40"
+    tiles = client.get(f"/api/alerts/summary?{params}").json()
+    table = client.get(f"/api/alerts?{params}&limit=1").json()
+    assert tiles["in_scope"] == table["total"], (
+        f"tiles say {tiles['in_scope']}, the table says {table['total']}"
+    )
+    national = client.get("/api/alerts/summary?min_score=40").json()
+    assert tiles["in_scope"] < national["in_scope"], "the state filter did nothing"
