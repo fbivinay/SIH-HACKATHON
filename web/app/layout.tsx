@@ -29,15 +29,20 @@ export const metadata: Metadata = {
     "Reads every MPLADS work, scores the ones that do not resemble their peers, and hands officials a ranked list of what to verify.",
 };
 
+// Seven, in the order an official actually works: what is happening, what needs
+// me, where, and then the supporting evidence.
+//
+// /signals, /compliance and /trends are deliberately NOT here. They are still
+// built, still reachable, and still answer parts of the problem statement
+// (cohort detectors, the compliance rule book, trend analysis) - they are just
+// not top-level navigation. Every one is linked from the page whose reader
+// wants it, so nothing is orphaned. See the footer.
 export const navLinks = [
   { href: "/", label: "Overview" },
   { href: "/alerts", label: "Alerts" },
-  { href: "/signals", label: "Signals" },
-  { href: "/compliance", label: "Rules" },
-  { href: "/projects", label: "Works" },
-  { href: "/trends", label: "Trends" },
   { href: "/states", label: "States" },
   { href: "/map", label: "Map" },
+  { href: "/projects", label: "Works" },
   { href: "/analysis", label: "Agencies" },
   { href: "/provenance", label: "Sources" },
 ];

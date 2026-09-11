@@ -181,6 +181,30 @@ select:focus-visible {
 
 /* ---------------------------------------------------------------- header -- */
 
+/*
+ * How tall the sticky bar is, so anything that has to clear it can say so
+ * rather than guess. Measured, not estimated: 67px masthead + 46px ticker at
+ * every width above the mobile breakpoint, and 62 + 37 below it, where the
+ * ticker drops its label and tail.
+ *
+ * These are layout pixels, not device pixels, which is why one pair of values
+ * covers all three zoom levels - `zoom` scales the rem and the layout by the
+ * same factor, so their ratio never moves. Verified at 1440, 900, 800 and 390.
+ *
+ * :has() rather than a class, so the fallback is honest: if the ticker fails
+ * to render (the API is down, RiskTicker returns null) the bar really is just
+ * the masthead, and everything below it moves up to match.
+ */
+:root { --topbar-h: 4.2rem; }
+:root:has(.ticker) { --topbar-h: 7.125rem; }
+@media (max-width: 640px) {
+  :root { --topbar-h: 3.9rem; }
+  :root:has(.ticker) { --topbar-h: 6.2rem; }
+}
+
+/* An in-page anchor would otherwise land its target underneath the bar. */
+html { scroll-padding-top: calc(var(--topbar-h) + 1rem); }
+
 /* The masthead and the risk ticker stick together as one unit. The ticker used
    to carry its own `top` offset, which meant hard-coding the masthead's height -
    and the zoom block below changes that height at two breakpoints, so a fixed
@@ -188,7 +212,13 @@ select:focus-visible {
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 40;
+  /* Above Leaflet, which is the whole reason this is not 40.
+     Leaflet stacks its own layers from 200 (tiles) to 1000 (.leaflet-top and
+     .leaflet-bottom control corners), all inside the page's normal flow - so at
+     40 the map painted straight over the navigation as soon as /map was
+     scrolled, leaving fragments of the bar showing through the states. Anything
+     that must stay above the map has to clear 1000. */
+  z-index: 1100;
 }
 .masthead {
   background: color-mix(in srgb, var(--ground) 88%, transparent);
@@ -561,7 +591,13 @@ select:focus-visible {
 
 .data-table thead th {
   position: sticky;
-  top: 0;
+  /* Clears the bar rather than sticking at 0, where it would pin underneath it.
+     Note this is inert today: .data-table-wrap sets overflow-x, which makes it
+     the scroll container, so the header sticks within a box that never scrolls
+     vertically instead of to the viewport. Keeping the honest value means the
+     header lands in the right place if that structure is ever changed, rather
+     than appearing halfway up the page. */
+  top: var(--topbar-h);
   z-index: 1;
   text-align: left;
   background: var(--surface-2);
