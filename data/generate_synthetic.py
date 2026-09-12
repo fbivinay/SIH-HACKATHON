@@ -120,7 +120,6 @@ def make_project(force_anomaly=None):
     description = random.choice(WORK_TEMPLATES[category]).format(place=place)
 
     return {
-        "work_name": description[:60],
         "description": description,
         "mp_name": fake.name(),
         "constituency": f"{district} constituency",
@@ -142,7 +141,6 @@ def make_project(force_anomaly=None):
 def make_duplicate_pair():
     p1 = make_project()
     p2 = dict(p1)
-    p2["work_name"] = (p1["work_name"] + " Phase 2")[:60]
     p2["description"] = p1["description"] + ", phase 2 continuation"
     return [p1, p2]
 

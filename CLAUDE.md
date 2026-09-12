@@ -71,6 +71,32 @@ version per update; doing this once took the database from 300 MB to 457 MB
 against Neon's 512 MB limit, recoverable only by a `VACUUM FULL` that needs room
 for a full copy at the moment there is none.
 
+**`TRUNCATE` inside a transaction holds the old file until COMMIT.** Measured on
+2026-09-12: a 35 MB table showed +35 MB mid-transaction, +0 after. So the atomic
+swap above costs headroom equal to the table being replaced — 355 MB at rest +
+150 MB for `projects` = 505 MB against 512, and the 2026-09-11 nightly died with
+`DiskFull` two thirds through the INSERT. Three things now stand between the
+pipeline and that wall, and all three must stay:
+
+- **The loader skips the rewrite when the extract is unchanged.** It
+  fingerprints the prepared frames (`extract_fingerprint`) and compares against
+  `data_refresh.extract_sha256` of the most recent run that *wrote* — any status,
+  not just success. A run that wrote and then failed has still changed the
+  tables; comparing against an older success skipped a rewrite while the table
+  held a mutated row. `scoring.py` reads the same "unchanged:" note and does
+  nothing (`SCORE_FORCE=1` overrides, e.g. after changing the scorer).
+- **Both writers check headroom first** (`check_headroom`, and the guard in
+  `write_scores`) and refuse with the arithmetic printed rather than die
+  mid-INSERT. Refusing leaves the previous run intact; dying leaves an aborted
+  transaction that then eats the "failed" mark too.
+- **`work_name` is derived in the view, not stored.** It was `description[:60]`
+  duplicated across 250,839 rows — 13 MB in the one table that is rewritten
+  nightly, on a database 6 MB short. Never add a derived column to `projects`.
+
+If the wall is hit again, the one-time way out is to compact in halves: move
+half of `projects` to a side table, `VACUUM FULL` the remainder, move them back.
+Peak extra is half the table, which fits when a whole one does not.
+
 ## 4. Population statistics stay at population grain
 
 Cohort detectors (`D-01`..`D-04` in `data/detectors.py`) describe an agency or a

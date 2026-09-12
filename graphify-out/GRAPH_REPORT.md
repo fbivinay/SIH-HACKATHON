@@ -1,21 +1,21 @@
 # Graph Report - SIH HACKATHON  (2026-09-12)
 
 ## Corpus Check
-- 94 files · ~862,629 words
+- 94 files · ~864,550 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 969 nodes · 1529 edges · 85 communities (55 shown, 27 thin omitted)
+- 987 nodes · 1548 edges · 88 communities (52 shown, 33 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `823fa13a`
+- Built from commit: `dd04cc73`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- test_llm_sectors.py
+- classify_sector
 - compliance_risk_score
 - query
 - test_detectors.py
@@ -30,16 +30,16 @@
 - format.ts
 - layout.tsx
 - MPLADS Risk Monitor — Design Spec (SIH26102)
-- [district]/page.tsx
+- test_load_real_data.py
 - MoSPI Figure Verification
 - formatCount
 - What You Must Do When Invoked
 - MPLADS Data Fetcher
 - test_current_refresh_run_id_ignores_an_abandoned_run
-- score_dataframe
+- scoring.py
 - _a_state
 - Brag Plan: Kasauti
-- alerts/page.tsx
+- ProjectFilters
 - Synthetic Data Generator
 - Vercel Deploy Config
 - State Totals Verification
@@ -64,9 +64,9 @@
 - projects/[id]/page.tsx
 - test_scoring.py
 - graphify reference: extra exports and benchmark
-- scoring.py
+- add_base_features
 - Data snapshot
-- agency_risk_score
+- attach_agency_profile
 - graphify reference: query, path, explain
 - graphify reference: add a URL and watch a folder
 - graphify reference: commit hook and native CLAUDE.md integration
@@ -82,21 +82,24 @@
 - extraction-spec.md
 - mp_key
 - MPLADS Risk Monitor Implementation Plan
-- classify_sector
+- test_loaded_fingerprint_follows_what_was_written_not_what_succeeded
 - app/page.tsx
 - AGENTS.md
-- GeminiClassifier
-- ReviewActions.tsx
+- build_rows
+- alerts/page.tsx
 - build.py
 - Hyperframes Composition Brief: Kasauti
 - Kasauti — AI-powered MPLADS verification
-- llm_sectors.py
-- normalize
+- build_mp_rows
+- fetch_expenditures
 - states/page.tsx
 - preview_deck.py
 - The two-minute explainer
 - brag-output/composition/assets/README.md
 - video-explainer/composition/assets/README.md
+- fetch_mps
+- write_detector_findings
+- test_agency_risk_takes_the_worst_signal_not_a_blend
 
 ## God Nodes (most connected - your core abstractions)
 1. `query()` - 33 edges
@@ -111,25 +114,25 @@
 10. `Brag Plan: Kasauti` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `main()` --calls--> `classify_sector()`  [INFERRED]
-  scripts/classify_sectors.py → data/sectors.py
-- `unclassified_descriptions()` --calls--> `classify_sector()`  [INFERRED]
-  scripts/classify_sectors.py → data/sectors.py
 - `set_review()` --references--> `post()`  [EXTRACTED]
   api/main.py → scripts/verify_mospi.py
 - `main()` --calls--> `normalize()`  [INFERRED]
   scripts/classify_sectors.py → data/sectors.py
 - `unclassified_descriptions()` --calls--> `normalize()`  [INFERRED]
   scripts/classify_sectors.py → data/sectors.py
+- `main()` --calls--> `classify_sector()`  [INFERRED]
+  scripts/classify_sectors.py → data/sectors.py
+- `unclassified_descriptions()` --calls--> `classify_sector()`  [INFERRED]
+  scripts/classify_sectors.py → data/sectors.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (85 total, 27 thin omitted)
+## Communities (88 total, 33 thin omitted)
 
-### Community 0 - "test_llm_sectors.py"
-Cohesion: 0.14
-Nodes (18): classify_missing(), Label every description the keyword rules could not. `client` is injectable so…, FakeClient, Offline tests for the LLM sector classifier. No key, no network., A per-minute rate limit recovers inside a run; a per-day quota does not.…, Records what it was asked and returns a fixed label per call., The keyword rules always win; the model never sees a work they placed., 50,720 works are 42,098 distinct strings; the model is paid per string. (+10 more)
+### Community 0 - "classify_sector"
+Cohesion: 0.05
+Nodes (55): apply(), classify_missing(), DailyQuotaExhausted, GeminiClassifier, load_cache(), Classify the works the keyword rules could not, using a language model. WHY…, The per-day free-tier allowance is gone. Unlike a per-minute rate limit this…, One sector per input, in order. Constraining the reply is what stops the model… (+47 more)
 
 ### Community 1 - "compliance_risk_score"
 Cohesion: 0.40
@@ -144,8 +147,8 @@ Cohesion: 0.06
 Nodes (60): benford_mad(), digit_shares(), _finding(), first_digit(), first_digit_anomaly(), fiscal_year(), idle_allocation(), mad_from_shares() (+52 more)
 
 ### Community 4 - "load_real_data.py"
-Cohesion: 0.08
-Nodes (27): build_expenditure_rows(), build_mp_rows(), build_rows(), load(), _newest(), _newest_optional(), parse_district(), prepare_insert_frame() (+19 more)
+Cohesion: 0.12
+Nodes (16): check_headroom(), extract_fingerprint(), load(), loaded_fingerprint(), _newest(), _newest_optional(), prepare_insert_frame(), Load the real MPLADS CSV extracts into the `projects` table. Source: the four… (+8 more)
 
 ### Community 5 - "Frontend Dependencies"
 Cohesion: 0.06
@@ -164,8 +167,8 @@ Cohesion: 0.13
 Nodes (21): caption(), crore(), figures(), hotspot(), indian(), link_row(), main(), place() (+13 more)
 
 ### Community 10 - "api.ts"
-Cohesion: 0.11
-Nodes (18): STATUS_OPTION_LABELS, AgencyStat, AlertPage, ComplianceBook, ComplianceRule, DeskFinding, DeskSector, Detector (+10 more)
+Cohesion: 0.10
+Nodes (19): STATUS_OPTION_LABELS, AgencyStat, AlertPage, ComplianceBook, ComplianceRule, DeskFinding, DeskSector, Detector (+11 more)
 
 ### Community 11 - "[state]/page.tsx"
 Cohesion: 0.22
@@ -176,28 +179,28 @@ Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 13 - "format.ts"
-Cohesion: 0.21
-Nodes (13): react-leaflet, GeoJSON, MapContainer, MapPage(), TileLayer, StateStat, CHOROPLETH_STEPS, choroplethFill() (+5 more)
+Cohesion: 0.15
+Nodes (17): react-leaflet, GeoJSON, MapContainer, MapPage(), TileLayer, RiskBar(), RiskComponents, STEPS (+9 more)
 
 ### Community 14 - "layout.tsx"
 Cohesion: 0.15
-Nodes (14): react, freshnessLine(), metadata, mono, navLinks, RootLayout(), sans, Cursor() (+6 more)
+Nodes (13): freshnessLine(), metadata, mono, navLinks, RootLayout(), sans, Cursor(), Logo() (+5 more)
 
 ### Community 15 - "MPLADS Risk Monitor — Design Spec (SIH26102)"
 Cohesion: 0.09
 Nodes (22): 10. Tech stack, 11. Explicitly cut from the original plan (2-day scope), 12. Error handling, 13. Testing, 14.1 Fixed in the snapshot that carries this addendum, 14.2 Confirmed at larger scale, no change needed, 14.3 Fixed — the cost baseline was measuring almost nothing, 14.4 Fixed — vendor concentration and payment ageing (+14 more)
 
-### Community 16 - "[district]/page.tsx"
-Cohesion: 0.38
-Nodes (5): DistrictDeskPage(), Params, Search, DistrictDesk, workStatusLabel()
+### Community 16 - "test_load_real_data.py"
+Cohesion: 0.24
+Nodes (10): A work's identity is (Work ID, ls_term, IDA). The agency is part of the key,…, work_key(), Checks on work identity. Run: python data/test_load_real_data.py, Older snapshots hold one term only; the key still forms, with term 0., The nightly skips a rewrite when the extract fingerprints the same as what is…, Work IDs restart per implementing agency, not just per term. Two real rows from…, test_fingerprint_is_order_independent_and_value_sensitive(), test_work_key_is_stable_for_identical_input() (+2 more)
 
 ### Community 17 - "MoSPI Figure Verification"
 Cohesion: 0.23
 Nodes (11): aggregator(), main(), official(), ours(), post(), Persist the comparison so the interface can show it without calling the portal…, Reconcile our figures against the official MoSPI MPLADS dashboard. The problem…, �83,33,66,73,298.01' -> 83336673298.01 (+3 more)
 
 ### Community 18 - "formatCount"
-Cohesion: 0.32
-Nodes (12): AnalysisPage(), MpPage(), ProjectsPage(), Pager(), RiskTicker(), Trends, formatCount(), formatINR() (+4 more)
+Cohesion: 0.23
+Nodes (17): AnalysisPage(), DistrictDeskPage(), Params, Search, MpPage(), ProjectsPage(), Pager(), RiskTicker() (+9 more)
 
 ### Community 19 - "What You Must Do When Invoked"
 Cohesion: 0.08
@@ -211,9 +214,9 @@ Nodes (10): main(), merge_terms(), open_export(), Merge logic survives quoted co
 Cohesion: 0.20
 Nodes (4): current_refresh_run_id(), Find the 'running' data_refresh row load_real_data.py started, so this run's…, A run killed by a workflow timeout leaves its row at 'running' forever.…, test_current_refresh_run_id_ignores_an_abandoned_run()
 
-### Community 22 - "score_dataframe"
-Cohesion: 0.26
-Nodes (12): add_duplicate_features(), cost_risk_score(), delay_risk_score(), duplicate_risk_score(), Cost risk from deviation above the peer median, 0 when peers are thin.…, Map similarity [THRESHOLD, 1.0] onto risk [0, 100]. Returning raw similarity *…, risk_level(), score_dataframe() (+4 more)
+### Community 22 - "scoring.py"
+Cohesion: 0.18
+Nodes (17): add_duplicate_features(), agency_risk_score(), compute_delay_days(), cost_risk_score(), delay_risk_score(), duplicate_risk_score(), load_was_skipped(), Cost risk from deviation above the peer median, 0 when peers are thin.… (+9 more)
 
 ### Community 23 - "_a_state"
 Cohesion: 0.12
@@ -223,9 +226,9 @@ Nodes (16): _a_state(), A state that actually has works, taken from the data rat
 Cohesion: 0.09
 Nodes (21): Audio direction, Brag Plan: Kasauti, Duration: 24 seconds, Every figure in this video is real, Format: landscape — 1920x1080, Hook (first 2-3 seconds), Key moments (the middle), Outro / punchline (+13 more)
 
-### Community 25 - "alerts/page.tsx"
-Cohesion: 0.15
-Nodes (14): AlertsPage(), reviewedLine(), STATUS_LABELS, ProjectFilters(), handleQChange(), updateParams(), RiskBar(), RiskComponents (+6 more)
+### Community 25 - "ProjectFilters"
+Cohesion: 0.67
+Nodes (3): ProjectFilters(), handleQChange(), updateParams()
 
 ### Community 26 - "Synthetic Data Generator"
 Cohesion: 0.70
@@ -249,7 +252,7 @@ Nodes (13): 10. Interface, 11. Motion, measured, 1. Never claim more than the re
 
 ### Community 47 - "projects/[id]/page.tsx"
 Cohesion: 0.23
-Nodes (10): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), api, ReviewHistory, hasPeers() (+2 more)
+Nodes (10): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), ReviewHistory, hasPeers(), isNearDuplicate() (+2 more)
 
 ### Community 48 - "test_scoring.py"
 Cohesion: 0.14
@@ -259,17 +262,17 @@ Nodes (18): build_flagged_reasons(), _priced(), A work can be a delay/spend outl
 Cohesion: 0.22
 Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
 
-### Community 50 - "scoring.py"
-Cohesion: 0.11
-Nodes (16): add_base_features(), compute_delay_days(), fetch_expenditures(), fetch_mps(), Replace project_scores wholesale. This used to UPDATE every row of `projects`.…, Raw expenditure transactions, or an empty frame if none were loaded. A snapshot…, MP-term aggregates, or an empty frame if the snapshot carried no MP summary…, Replace the whole findings set. They are derived, cheap to recompute and… (+8 more)
+### Community 50 - "add_base_features"
+Cohesion: 0.22
+Nodes (9): add_base_features(), The whole point of the fix. Two districts' worth of works, all with category…, A single Rs 7.5 crore work must not drag the baseline for its neighbours. With…, A median over three works is not a baseline., Scoring a database loaded before the sector column must not group every work in…, test_cost_baseline_groups_on_sector_not_category(), test_peer_median_resists_one_huge_work(), test_sector_is_recomputed_when_missing() (+1 more)
 
 ### Community 51 - "Data snapshot"
 Cohesion: 0.25
 Nodes (7): Data snapshot, Reconciliation against the source's own dashboard, Refreshing with newer data, Reproducing the full pipeline, Source, Why the earlier snapshot was half the data, Work IDs are not unique across terms
 
-### Community 52 - "agency_risk_score"
-Cohesion: 0.22
-Nodes (11): agency_risk_score(), attach_agency_profile(), Worst of the agency's signals, not a weighted blend. Blending would dilute: an…, Left-join the per-agency-per-term vendor profile onto works. Keyed on…, Adding a component must never lower an existing score. A weighted blend would…, Left join, not inner: no vendor data must cost the signal, not the rows., The same agency, two terms, two different vendor mixes. A work must be matched…, test_a_work_takes_its_own_terms_agency_profile() (+3 more)
+### Community 52 - "attach_agency_profile"
+Cohesion: 0.29
+Nodes (7): attach_agency_profile(), Left-join the per-agency-per-term vendor profile onto works. Keyed on…, Left join, not inner: no vendor data must cost the signal, not the rows., The same agency, two terms, two different vendor mixes. A work must be matched…, test_a_work_takes_its_own_terms_agency_profile(), test_attach_agency_profile_without_any_expenditure_data(), test_works_of_an_agency_with_no_expenditures_keep_scoring()
 
 ### Community 53 - "graphify reference: query, path, explain"
 Cohesion: 0.33
@@ -299,21 +302,17 @@ Nodes (17): mp_key(), normalize_mp_name(), Stable identity for a Member of Parli
 Cohesion: 0.11
 Nodes (18): Addendum — follow-up tasks from the 2026-08-31 data (Track: data), Global Constraints, MPLADS Risk Monitor Implementation Plan, Task 0: Postgres schema + repo scaffold + shared env contract, Task 10: Final integration / demo dry run (shared, last), Task 11: Derive a sector and fix the cost baseline — DONE, Task 12: Score vendor concentration at the agency grain — DONE, Task 13: Normalize MP identity — DONE (+10 more)
 
-### Community 68 - "classify_sector"
-Cohesion: 0.22
-Nodes (14): classify_sector(), Derive a work sector from its description. WHY THIS EXISTS ---------------…, Assert the classifier still stratifies. Returns the sector counts. A classifier…, verify(), 2,307 real works name both. The road is the primary asset and sets the cost…, Place names are full of accidental hits: 'marg' inside 'Margao', 'rasta' inside…, test_common_real_descriptions(), test_hindi_transliterations_classify() (+6 more)
-
 ### Community 69 - "app/page.tsx"
 Cohesion: 0.15
-Nodes (13): COMPONENTS, LIMITS, MODELS, OverviewPage(), TERMS, metadata, ProvenancePage(), CountUp() (+5 more)
+Nodes (14): react, COMPONENTS, LIMITS, MODELS, OverviewPage(), TERMS, metadata, ProvenancePage() (+6 more)
 
-### Community 72 - "GeminiClassifier"
-Cohesion: 0.18
-Nodes (8): DailyQuotaExhausted, GeminiClassifier, The per-day free-tier allowance is gone. Unlike a per-minute rate limit this…, One sector per input, in order. Constraining the reply is what stops the model…, The Gemini backend. Constructed lazily so importing this module never requires…, _schema(), test_schema_pins_the_count_and_the_allowed_names(), RuntimeError
+### Community 72 - "build_rows"
+Cohesion: 0.33
+Nodes (7): build_expenditure_rows(), build_rows(), parse_district(), District is the IDA prefix before the first '(' - e.g. 'CHITTOOR(DISTRICT…, Return (rows_df, rejects) where rejects is a list of (raw_row, reason, file)., Expenditure transactions, at their own grain. No join to works is attempted:…, to_date()
 
-### Community 73 - "ReviewActions.tsx"
-Cohesion: 0.26
-Nodes (9): ALLOWED, ReviewResult, submitReview(), DECISIONS, ReviewActions(), REVIEWER_STORAGE_KEY, ReviewerName(), postReview() (+1 more)
+### Community 73 - "alerts/page.tsx"
+Cohesion: 0.17
+Nodes (15): ALLOWED, ReviewResult, submitReview(), AlertsPage(), reviewedLine(), STATUS_LABELS, DECISIONS, ReviewActions() (+7 more)
 
 ### Community 74 - "build.py"
 Cohesion: 0.18
@@ -326,14 +325,6 @@ Nodes (9): Audio, Creative Direction, Hyperframes Composition Brief: Kasauti, Hy
 ### Community 77 - "Kasauti — AI-powered MPLADS verification"
 Cohesion: 0.20
 Nodes (9): Kasauti — AI-powered MPLADS verification, Repository, Running it, The API, The deck, The interface, The nightly refresh, What it does (+1 more)
-
-### Community 78 - "llm_sectors.py"
-Cohesion: 0.28
-Nodes (8): apply(), load_cache(), Classify the works the keyword rules could not, using a language model. WHY…, Labels keyed by normalised description. Missing or corrupt reads as empty - a…, Sector per description, rules first and the cache only for their gaps., save_cache(), test_apply_prefers_the_rules_and_falls_back_to_the_cache(), test_cache_round_trips_and_survives_corruption()
-
-### Community 79 - "normalize"
-Cohesion: 0.28
-Nodes (7): normalize(), Casefold, strip accents and punctuation, collapse whitespace., test_normalize_ignores_case_punctuation_and_spacing(), main(), Label the works the keyword rules could not, and cache the answers.…, Descriptions the keyword rules cannot label and the cache has not answered.…, unclassified_descriptions()
 
 ### Community 80 - "states/page.tsx"
 Cohesion: 0.25
@@ -349,22 +340,22 @@ Nodes (4): Assets, How it is built, Rebuilding, The two-minute explainer
 
 ## Knowledge Gaps
 - **251 isolated node(s):** `$schema`, `builds`, `routes`, `agency_vendor_profile`, `rejected_rows` (+246 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 512 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **27 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 524 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `normalize()` connect `normalize` to `test_llm_sectors.py`, `mp_key`, `classify_sector`, `llm_sectors.py`, `scoring.py`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
-- **Why does `classify_sector()` connect `classify_sector` to `test_llm_sectors.py`, `scoring.py`, `llm_sectors.py`, `normalize`?**
+- **Why does `normalize()` connect `classify_sector` to `mp_key`, `add_base_features`, `scoring.py`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `classify_sector()` connect `classify_sector` to `add_base_features`, `scoring.py`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `query()` connect `query` to `API Endpoint Tests`, `Durable Project Key Test`, `test_mp_dashboard_scopes_everything_to_one_member`?**
+- **Why does `add_base_features()` connect `add_base_features` to `classify_sector`, `test_scoring.py`, `scoring.py`?**
   _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `$schema`, `builds`, `routes` to the rest of the system?**
   _251 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `test_llm_sectors.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
+- **Should `classify_sector` be split into smaller, more focused modules?**
+  _Cohesion score 0.050921861281826165 - nodes in this community are weakly interconnected._
 - **Should `query` be split into smaller, more focused modules?**
   _Cohesion score 0.06299603174603174 - nodes in this community are weakly interconnected._
 - **Should `test_detectors.py` be split into smaller, more focused modules?**

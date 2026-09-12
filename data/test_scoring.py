@@ -435,7 +435,9 @@ def test_insert_columns_match_what_the_loader_builds():
     # `sector` is deliberately absent: it is derived, lives in project_scores,
     # and the loader inserting it broke every nightly refresh for two days.
     assert "sector" not in lrd.INSERT_COLUMNS
-    assert prepared.iloc[0]["work_name"] == "Construction of CC road"
+    # work_name is derived in the projects_scored view since 2026-09-12, not
+    # stored: a loader that still emitted it would fail against the schema.
+    assert "work_name" not in lrd.INSERT_COLUMNS
     assert prepared.iloc[0]["source"] == "real"
     assert prepared.iloc[0]["work_key"] == "4021|18|PATNA(DM_IDA)"
 
