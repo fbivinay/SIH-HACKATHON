@@ -211,9 +211,10 @@ def restyle_pointers(slide):
         if len(t) > 40 and "Team Name" not in t:
             top, height = 1.18, 0.74
             lines = max(1, len([q for q in sh.text_frame.paragraphs if q.text.strip()]))
-            # 1.45 for leading. At 1.25 the four-line strip on slide 2 came out
-            # a hair too tall and clipped "Innovation and uniqueness".
-            size = min(9.5, (height * 72) / (lines * 1.45))
+            # 1.7, not the ~1.45 that PowerPoint actually leads at: solving for
+            # the exact box makes the text precisely as tall as its container and
+            # the last line's descenders get clipped. The extra is slack.
+            size = min(9.5, (height * 72) / (lines * 1.7))
             sh.left, sh.top = Inches(LEFT), Inches(top)
             sh.width, sh.height = Inches(CW), Inches(height)
             sh.text_frame.word_wrap = True
@@ -396,11 +397,17 @@ def main():
     set_team_badge(s[1])
     restyle_pointers(s[1])
 
-    place(s[1], PNG / "arch.png", LEFT, TOP, 9.40, sizes["arch"])
-    shot_b = place(s[1], SHOTS / "overview.png", 10.25, TOP, 2.58, url=LINKS["site"])
-    caption(s[1], 10.25, shot_b + 0.06, 2.58,
-            f"{indian(f['queue'])} flagged of {indian(f['works'])}", None, 9, "c")
-    link_row(s[1], 10.25, shot_b + 0.36, 2.58, h=0.52, gap=0.13, size=10, stack=True)
+    # The architecture drawing is the slide. It is authored at 2400px, so
+    # shrinking it into a column makes its body type ~4pt - unreadable. It gets
+    # the full content width, and the width is derived from the board's own
+    # ratio so the link row underneath always fits rather than being nudged by
+    # hand every time the board's content changes height.
+    LINK_H, GAP = 0.40, 0.11
+    ar = sizes["arch"][0] / sizes["arch"][1]
+    aw = min(CW, (BOT - TOP - LINK_H - GAP) * ar)
+    ax = LEFT + (CW - aw) / 2
+    arch_b = place(s[1], PNG / "arch.png", ax, TOP, aw, sizes["arch"])
+    link_row(s[1], ax + aw * 0.28, arch_b + GAP, aw * 0.44, h=LINK_H, gap=0.14, size=9.5)
 
     # ---------------------------------------------- 3. technical approach --
     set_title(s[2], "TECHNICAL APPROACH")
@@ -521,12 +528,23 @@ def verify():
             if not found:
                 problems.append(f"slide {i}: the template's idea pointers were changed")
         if 2 <= i <= 6:
-            # 2 is the SIH logo plus one of ours; a content slide needs more.
-            if len(pics) < 3:
-                problems.append(f"slide {i}: only {len(pics)} images - this deck is meant to be visual")
+            # How much of the content band is picture, not how many pictures -
+            # a count said slide 2 had regressed when it became one full-width
+            # architecture drawing, which is the most visual it has ever been.
+            band = CW * (BOT - TOP)
+            covered = sum(
+                (sh.width or 0) / 914400 * (sh.height or 0) / 914400
+                for sh in pics if sh.top is not None and sh.top / 914400 > 1.0
+            )
+            share = covered / band
+            if share < 0.45:
+                problems.append(f"slide {i}: images cover {share:.0%} of the content "
+                                f"band - this deck is meant to be diagrams, not text")
             if links == 0:
                 problems.append(f"slide {i}: no links")
-        print(f"  slide {i}: {len(pics)} images, {links} links")
+            print(f"  slide {i}: {len(pics)} images covering {share:.0%}, {links} links")
+        else:
+            print(f"  slide {i}: {len(pics)} images, {links} links")
 
     for placeholder in (TEAM_NAME, TEAM_ID):
         if placeholder.startswith("<"):

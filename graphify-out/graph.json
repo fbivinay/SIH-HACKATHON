@@ -4820,7 +4820,7 @@
       "file_type": "code",
       "norm_label": "caption()",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L280"
+      "source_location": "L281"
     },
     {
       "id": "scripts_build_sih_deck_crore",
@@ -4868,7 +4868,7 @@
       "file_type": "code",
       "norm_label": "hotspot()",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L333"
+      "source_location": "L334"
     },
     {
       "id": "scripts_build_sih_deck_indian",
@@ -4892,7 +4892,7 @@
       "file_type": "code",
       "norm_label": "link_row()",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L300"
+      "source_location": "L301"
     },
     {
       "id": "scripts_build_sih_deck_main",
@@ -4904,7 +4904,7 @@
       "file_type": "code",
       "norm_label": "main()",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L349"
+      "source_location": "L350"
     },
     {
       "id": "scripts_build_sih_deck_place",
@@ -4916,7 +4916,7 @@
       "file_type": "code",
       "norm_label": "place()",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L265"
+      "source_location": "L266"
     },
     {
       "id": "scripts_build_sih_deck_render_diagrams",
@@ -4952,7 +4952,7 @@
       "file_type": "code",
       "norm_label": "set_team_badge()",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L256"
+      "source_location": "L257"
     },
     {
       "id": "scripts_build_sih_deck_set_title",
@@ -4964,7 +4964,7 @@
       "file_type": "code",
       "norm_label": "set_title()",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L233"
+      "source_location": "L234"
     },
     {
       "id": "scripts_build_sih_deck_verify",
@@ -4976,7 +4976,7 @@
       "file_type": "code",
       "norm_label": "verify()",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L479"
+      "source_location": "L486"
     },
     {
       "id": "data_test_llm_sectors",
@@ -11261,7 +11261,7 @@
       "source_location": "L204"
     },
     {
-      "id": "scripts_build_sih_deck_rationale_266",
+      "id": "scripts_build_sih_deck_rationale_267",
       "label": "Drop an image at width `w`, height from its own pixels. Returns bottom.",
       "_origin": "ast",
       "community": 9,
@@ -11269,10 +11269,10 @@
       "file_type": "rationale",
       "norm_label": "drop an image at width `w`, height from its own pixels. returns bottom.",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L266"
+      "source_location": "L267"
     },
     {
-      "id": "scripts_build_sih_deck_rationale_301",
+      "id": "scripts_build_sih_deck_rationale_302",
       "label": "The three links as real buttons - visible, clickable, same on every slide.",
       "_origin": "ast",
       "community": 9,
@@ -11280,10 +11280,10 @@
       "file_type": "rationale",
       "norm_label": "the three links as real buttons - visible, clickable, same on every slide.",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L301"
+      "source_location": "L302"
     },
     {
-      "id": "scripts_build_sih_deck_rationale_334",
+      "id": "scripts_build_sih_deck_rationale_335",
       "label": "An invisible clickable rectangle - used to make a region of a rendered diagram\u2026",
       "_origin": "ast",
       "community": 9,
@@ -11291,10 +11291,10 @@
       "file_type": "rationale",
       "norm_label": "an invisible clickable rectangle - used to make a region of a rendered diagram...",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L334"
+      "source_location": "L335"
     },
     {
-      "id": "scripts_build_sih_deck_rationale_480",
+      "id": "scripts_build_sih_deck_rationale_487",
       "label": "Check the built file rather than trust that it built.",
       "_origin": "ast",
       "community": 9,
@@ -11302,7 +11302,7 @@
       "file_type": "rationale",
       "norm_label": "check the built file rather than trust that it built.",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L480"
+      "source_location": "L487"
     }
   ],
   "links": [
@@ -14291,7 +14291,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L350",
+      "source_location": "L351",
       "weight": 1.0
     },
     {
@@ -14303,7 +14303,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L351",
+      "source_location": "L352",
       "weight": 1.0
     },
     {
@@ -14315,7 +14315,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L395",
+      "source_location": "L396",
       "weight": 1.0
     },
     {
@@ -14327,7 +14327,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L396",
+      "source_location": "L397",
       "weight": 1.0
     },
     {
@@ -14339,7 +14339,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L397",
+      "source_location": "L398",
       "weight": 1.0
     },
     {
@@ -14351,31 +14351,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L399",
-      "weight": 1.0
-    },
-    {
-      "source": "scripts_build_sih_deck_main",
-      "target": "scripts_build_sih_deck_caption",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L401",
-      "weight": 1.0
-    },
-    {
-      "source": "scripts_build_sih_deck_main",
-      "target": "scripts_build_sih_deck_indian",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L402",
+      "source_location": "L409",
       "weight": 1.0
     },
     {
@@ -14387,7 +14363,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L403",
+      "source_location": "L410",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_build_sih_deck_main",
+      "target": "scripts_build_sih_deck_caption",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "scripts/build_sih_deck.py",
+      "source_location": "L421",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_build_sih_deck_main",
+      "target": "scripts_build_sih_deck_indian",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "scripts/build_sih_deck.py",
+      "source_location": "L478",
       "weight": 1.0
     },
     {
@@ -14399,7 +14399,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L473",
+      "source_location": "L480",
       "weight": 1.0
     },
     {
@@ -23976,7 +23976,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L233",
+      "source_location": "L234",
       "weight": 1.0
     },
     {
@@ -23987,7 +23987,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L256",
+      "source_location": "L257",
       "weight": 1.0
     },
     {
@@ -23998,7 +23998,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L265",
+      "source_location": "L266",
       "weight": 1.0
     },
     {
@@ -24009,7 +24009,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L280",
+      "source_location": "L281",
       "weight": 1.0
     },
     {
@@ -24020,7 +24020,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L300",
+      "source_location": "L301",
       "weight": 1.0
     },
     {
@@ -24031,7 +24031,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L333",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -24042,7 +24042,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L349",
+      "source_location": "L350",
       "weight": 1.0
     },
     {
@@ -24053,7 +24053,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L479",
+      "source_location": "L486",
       "weight": 1.0
     },
     {
@@ -28312,47 +28312,47 @@
       "weight": 1.0
     },
     {
-      "source": "scripts_build_sih_deck_rationale_266",
+      "source": "scripts_build_sih_deck_rationale_267",
       "target": "scripts_build_sih_deck_place",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L266",
+      "source_location": "L267",
       "weight": 1.0
     },
     {
-      "source": "scripts_build_sih_deck_rationale_301",
+      "source": "scripts_build_sih_deck_rationale_302",
       "target": "scripts_build_sih_deck_link_row",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L301",
+      "source_location": "L302",
       "weight": 1.0
     },
     {
-      "source": "scripts_build_sih_deck_rationale_334",
+      "source": "scripts_build_sih_deck_rationale_335",
       "target": "scripts_build_sih_deck_hotspot",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L334",
+      "source_location": "L335",
       "weight": 1.0
     },
     {
-      "source": "scripts_build_sih_deck_rationale_480",
+      "source": "scripts_build_sih_deck_rationale_487",
       "target": "scripts_build_sih_deck_verify",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/build_sih_deck.py",
-      "source_location": "L480",
+      "source_location": "L487",
       "weight": 1.0
     },
     {
@@ -28792,5 +28792,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "dbc785e7ad81b0ef9518657f6d1d9e78ef192df5"
+  "built_at_commit": "823fa13a8264a0936a88f13c7a75b4a9aacd4ee2"
 }
