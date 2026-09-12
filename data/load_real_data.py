@@ -49,6 +49,7 @@ analysis, just not joined per-work here.
 """
 
 import os
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -113,7 +114,7 @@ MIN_SANCTIONED_AMOUNT = 1000
 # had. Scoring recomputes it from the description on every run, so the loader
 # does not need it at all.
 INSERT_COLUMNS = [
-    "work_key", "work_name", "description", "ls_term", "mp_name", "mp_id", "house",
+    "work_key", "description", "ls_term", "mp_name", "mp_id", "house",
     "constituency", "state", "district",
     "category", "implementing_agency", "recommended_amount",
     "sanctioned_amount", "expenditure", "work_status", "start_date",
@@ -258,6 +259,94 @@ def build_rows():
     return df, rejects
 
 
+# Neon's project size limit. Not read from the server because the GUC that
+# holds it (neon.max_cluster_size) is only visible once you are already inside
+# the limit; this is the documented free-tier figure.
+NEON_LIMIT_BYTES = 512 * 1024 * 1024
+
+
+def extract_fingerprint(df, mp_df, exp_df):
+    """A sha256 of exactly what would be written, in a stable order.
+
+    Row order in the source files is not stable between fetches, so the frames
+    are sorted on their keys first. The hash is of the prepared insert frames -
+    the columns as they would land - so a change in how a column is derived
+    changes the fingerprint and forces a rewrite, which is what you want.
+    """
+    import hashlib
+    h = hashlib.sha256()
+    frames = [("projects", prepare_insert_frame(df).sort_values("work_key"))]
+    if mp_df is not None:
+        frames.append(("mps", mp_df.sort_values(list(mp_df.columns[:2]))))
+    if exp_df is not None:
+        frames.append(("expenditures", exp_df.sort_values(list(exp_df.columns[:3]))))
+    for name, frame in frames:
+        h.update(name.encode())
+        h.update(pd.util.hash_pandas_object(frame.reset_index(drop=True), index=False).values.tobytes())
+    return h.hexdigest()
+
+
+def loaded_fingerprint(conn):
+    """The fingerprint of whatever is actually in the tables right now.
+
+    That is the most recent run that WROTE - any status. Not "the last
+    success": a load that wrote the tables and then failed at scoring (or was
+    marked failed by hand) has still changed what is on disk, and comparing
+    tonight's extract against an older success would skip the rewrite while
+    the tables held something else. Caught during the 2026-09-12 repair - a
+    test load of a mutated extract, closed as 'failed', left its one changed
+    row in place and the next run of the real extract declared itself
+    "unchanged".
+
+    A skipped load records the same fingerprint as the run before it (it
+    wrote nothing, so the tables still match), so the chain stays truthful.
+    """
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT extract_sha256 FROM data_refresh
+                   WHERE extract_sha256 IS NOT NULL AND rows_loaded IS NOT NULL
+                   ORDER BY id DESC LIMIT 1"""
+            )
+            row = cur.fetchone()
+        return row[0] if row else None
+    except Exception as e:  # noqa: BLE001
+        print(f"data_refresh: could not read last fingerprint: {e}")
+        conn.rollback()
+        return None
+
+
+def check_headroom(conn, tables):
+    """Refuse before writing if the rewrite cannot fit under Neon's limit.
+
+    TRUNCATE inside a transaction keeps the old file until COMMIT - measured:
+    a 35 MB table showed +35 MB mid-transaction and +0 after. So replacing a
+    table needs headroom equal to its own size, on top of the database as it
+    stands. On 2026-09-11 that was 355 MB at rest plus 150 MB for projects, or
+    505 MB against 512, and the INSERT died with DiskFull two thirds of the way
+    through. Failing here instead, with the arithmetic printed, is the
+    difference between a clear message and a mystery.
+    """
+    with conn.cursor() as cur:
+        cur.execute("SELECT pg_database_size(current_database())")
+        at_rest = cur.fetchone()[0]
+        biggest = 0
+        for t in tables:
+            cur.execute("SELECT pg_total_relation_size(%s)", [t])
+            biggest = max(biggest, cur.fetchone()[0])
+    conn.rollback()
+    peak = at_rest + biggest
+    mb = lambda b: f"{b / 1048576:.0f} MB"
+    print(f"headroom: database {mb(at_rest)} at rest, largest rewrite {mb(biggest)}, "
+          f"peak {mb(peak)} against {mb(NEON_LIMIT_BYTES)}")
+    if peak > NEON_LIMIT_BYTES * 0.97:
+        raise SystemExit(
+            f"refusing to load: a full rewrite would peak at {mb(peak)}, over the "
+            f"{mb(NEON_LIMIT_BYTES)} limit. Nothing has been written. Free space "
+            f"(VACUUM FULL a table, drop rejected_rows history) or raise the plan."
+        )
+
+
 def start_refresh_run(conn, source):
     """Insert a 'running' data_refresh row and return its id, or None on any
     failure. Audit bookkeeping must never block the pipeline itself.
@@ -295,16 +384,26 @@ def start_refresh_run(conn, source):
         return None
 
 
-def finish_load_run(conn, run_id, status, rows_loaded, rows_rejected):
+def finish_load_run(conn, run_id, status, rows_loaded, rows_rejected,
+                    fingerprint=None, notes=None):
     if run_id is None:
         return
+    # The failure path arrives here with the load's own transaction still open
+    # and aborted, and Postgres refuses every statement on it until rollback -
+    # so the "failed" mark itself failed, and run 24 sat at "running" with the
+    # real error printed to a log nobody reads. Roll back first, always.
+    conn.rollback()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """UPDATE data_refresh
-                   SET finished_at = now(), status = %s, rows_loaded = %s, rows_rejected = %s
+                   SET finished_at = now(), status = %s, rows_loaded = %s,
+                       rows_rejected = %s,
+                       extract_sha256 = COALESCE(%s, extract_sha256),
+                       notes = CASE WHEN %s IS NULL THEN notes
+                                    ELSE COALESCE(notes || ' | ', '') || %s END
                    WHERE id = %s""",
-                [status, rows_loaded, rows_rejected, run_id],
+                [status, rows_loaded, rows_rejected, fingerprint, notes, notes, run_id],
             )
         conn.commit()
     except Exception as e:  # noqa: BLE001
@@ -459,7 +558,8 @@ def prepare_insert_frame(df):
     after a full load has already run.
     """
     df = df.copy()
-    df["work_name"] = df["description"].str[:60]
+    # work_name used to be materialised here as description[:60]; the view
+    # derives it now (see schema.sql) so the nightly rewrite carries 13 MB less.
     # A completed work's Final Amount is both what was recommended and what it
     # cost; the source records one figure (see the module docstring).
     df["recommended_amount"] = df["amount"]
@@ -554,6 +654,33 @@ if __name__ == "__main__":
         if EXPENDITURES_CSV is not None:
             exp_df, exp_dropped = build_expenditure_rows()
 
+        # The source republishes the same record most nights. Rewriting
+        # 250,839 identical rows costs 150 MB of transient space on a 512 MB
+        # database and was what tipped the 2026-09-11 run over the limit. When
+        # nothing has changed, say so and stop; scoring.py reads the same flag
+        # and skips too, so the previous run's scores stay exactly as they are.
+        fingerprint = extract_fingerprint(df, mp_df, exp_df)
+        if fingerprint == loaded_fingerprint(conn):
+            # Closed as a success with the previous run's score count, so the
+            # site's "last refreshed" line - which reads the newest success -
+            # stays true: the record WAS checked tonight, and the scores it
+            # shows were computed from exactly these rows.
+            with conn.cursor() as cur:
+                cur.execute("SELECT rows_scored FROM data_refresh WHERE rows_scored IS NOT NULL ORDER BY id DESC LIMIT 1")
+                prev = cur.fetchone()
+            finish_load_run(conn, run_id, "success", len(df), len(rejects),
+                            fingerprint=fingerprint,
+                            notes="unchanged: extract matches what is loaded, nothing rewritten")
+            if prev:
+                with conn.cursor() as cur:
+                    cur.execute("UPDATE data_refresh SET rows_scored = %s WHERE id = %s", [prev[0], run_id])
+                conn.commit()
+            conn.close()
+            print(f"Extract is unchanged since the last successful load "
+                  f"({fingerprint[:12]}). Nothing rewritten.")
+            sys.exit(0)
+
+        check_headroom(conn, ["projects", "expenditures", "mps"])
         inserted, rejected = load(conn, df, rejects)
         if mp_df is None:
             print("No mplads_mp_summary_*.csv in the snapshot - skipping MP aggregates.")
@@ -567,16 +694,20 @@ if __name__ == "__main__":
         else:
             print(f"Inserted {load_expenditures(conn, exp_df)} expenditure transactions "
                   f"({exp_dropped} dropped for missing vendor, agency or amount).")
-    except Exception:
+    except SystemExit:
+        raise
+    except Exception as e:
         # The row stays honest as 'failed' rather than parked at 'running'
-        # forever. scoring.py's own bookkeeping is unaffected since it never
-        # finds this run to update.
-        finish_load_run(conn, run_id, "failed", None, None)
+        # forever, and carries the error, so the reason is in the table and
+        # not only in a runner log that expires. scoring.py's own bookkeeping
+        # is unaffected since it never finds this run to update.
+        finish_load_run(conn, run_id, "failed", None, None,
+                        notes=f"{type(e).__name__}: {str(e).splitlines()[0][:300]}")
         conn.close()
         raise
 
     # Still 'running': scoring.py finishes this same row once it completes.
-    finish_load_run(conn, run_id, "running", inserted, rejected)
+    finish_load_run(conn, run_id, "running", inserted, rejected, fingerprint=fingerprint)
     conn.close()
     print(f"Inserted {inserted} real projects, rejected {rejected} rows.")
     print(f"Completed works' final amounts: Rs {df['expenditure'].sum():,.2f}")

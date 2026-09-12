@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS projects (
     -- load_real_data.py deletes and re-inserts every real row, so `id` is a new
     -- number each night. Anything that has to outlive a reload keys on this.
     work_key TEXT,
-    work_name TEXT NOT NULL,
     description TEXT,
     ls_term SMALLINT,
     mp_name TEXT,
@@ -180,6 +179,13 @@ CREATE TABLE IF NOT EXISTS data_refresh (
     notes TEXT
 );
 
+-- Added 2026-09-12. A fingerprint of the rows the loader was about to write.
+-- When tonight's extract fingerprints the same as the last successful load,
+-- the loader skips the rewrite - see load_real_data.py:extract_fingerprint.
+-- Rewriting 250,839 identical rows was what pushed the database through
+-- Neon's 512 MB limit on 2026-09-11.
+ALTER TABLE data_refresh ADD COLUMN IF NOT EXISTS extract_sha256 TEXT;
+
 
 -- Reviewer triage state for the alert queue: which flagged works someone has
 -- actually looked at, and what they concluded. Absence of a row means
@@ -311,8 +317,20 @@ CREATE INDEX IF NOT EXISTS idx_project_scores_sector ON project_scores(sector);
 -- `projects` used to carry, so the queries did not have to change shape.
 -- LEFT JOIN: a work loaded but not yet scored still appears, with nulls, which
 -- is what the "scoring pending" states in the interface are for.
-CREATE OR REPLACE VIEW projects_scored AS
-SELECT p.id, p.work_key, p.work_name, p.description, p.ls_term, p.mp_name,
+-- work_name is the first 60 characters of the description. It was a stored
+-- column until 2026-09-12: 13 MB of exact duplication inside the one table the
+-- nightly rewrites, on a database 6 MB short of the headroom that rewrite
+-- needs. Derived here instead; the API reads it through this view and never
+-- knew the difference.
+-- The DROP has to come AFTER the view is redefined below - the old view
+-- references the column and Postgres refuses to drop a column a view depends
+-- on. CREATE OR REPLACE VIEW cannot change a column's source expression while
+-- keeping the same output list either, so the view is dropped and recreated;
+-- it is derived, holds nothing, and its readers hold no locks.
+DROP VIEW IF EXISTS projects_scored;
+
+CREATE VIEW projects_scored AS
+SELECT p.id, p.work_key, LEFT(p.description, 60) AS work_name, p.description, p.ls_term, p.mp_name,
        p.mp_id, p.house, p.constituency, p.state, p.district, p.category,
        p.implementing_agency, p.recommended_amount, p.sanctioned_amount,
        p.expenditure, p.work_status, p.start_date, p.expected_completion,
@@ -329,6 +347,8 @@ LEFT JOIN project_scores s ON s.work_key = p.work_key
 -- Resolved here so callers keep getting an id they can link to, while what is
 -- stored stays reload-proof.
 LEFT JOIN projects sim ON sim.work_key = s.similar_work_key;
+
+ALTER TABLE projects DROP COLUMN IF EXISTS work_name;
 
 
 -- How our figures compare with the official MoSPI dashboard, recorded each

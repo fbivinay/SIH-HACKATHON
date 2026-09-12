@@ -253,15 +253,17 @@ jobs:
           import os, psycopg2
           conn = psycopg2.connect(os.environ["DATABASE_URL"])
           cur = conn.cursor()
-          cur.execute("""SELECT finished_at, rows_loaded, rows_scored, rows_rejected
+          cur.execute("""SELECT finished_at, rows_loaded, rows_scored, rows_rejected, notes
                          FROM data_refresh WHERE status = 'success'
                          ORDER BY finished_at DESC LIMIT 1;""")
           row = cur.fetchone()
-          print("### Refresh complete\n")
+          skipped = bool(row and row[4] and row[4].startswith("unchanged:"))
+          print("### Refresh complete — extract unchanged, nothing rewritten\n" if skipped
+                else "### Refresh complete\n")
           if row:
               print(f"- Finished: {row[0]}")
-              print(f"- Loaded: {row[1]:,}")
-              print(f"- Scored: {row[2]:,}")
+              print(f"- Loaded: {row[1]:,}" + (" (verified identical, not rewritten)" if skipped else ""))
+              print(f"- Scored: {row[2]:,}" + (" (previous run's scores retained)" if skipped else ""))
               print(f"- Rejected: {row[3]:,}")
           else:
               print("No successful run recorded — check the logs above.")

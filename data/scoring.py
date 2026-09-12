@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import date
 from pathlib import Path
 import pandas as pd
@@ -464,6 +465,28 @@ def score_dataframe(df, agency_profile=None):
 MAX_RUN_ADOPTION_AGE = "12 hours"
 
 
+def load_was_skipped(conn):
+    """True when the most recent load finished 'success' with the unchanged
+    note and no scoring has happened since - i.e. load_real_data.py found
+    tonight's extract identical to the last one and rewrote nothing. There is
+    then nothing for this pass to do either: the scores in the table were
+    computed from exactly these rows. Rewriting them would cost 113 MB of
+    transient space on a database that has ~157 MB to spare."""
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT notes FROM data_refresh
+                   WHERE finished_at > now() - INTERVAL '2 hours'
+                   ORDER BY id DESC LIMIT 1"""
+            )
+            row = cur.fetchone()
+        return bool(row and row[0] and row[0].startswith("unchanged:"))
+    except Exception as e:  # noqa: BLE001
+        print(f"data_refresh: could not check for a skipped load: {e}")
+        conn.rollback()
+        return False
+
+
 def current_refresh_run_id(conn):
     """Find the 'running' data_refresh row load_real_data.py started, so this
     run's rows_scored/status lands on the same audit row. Best-effort: audit
@@ -543,6 +566,23 @@ def write_scores(conn, df):
         )
         for _, row in df.iterrows()
     ]
+    # TRUNCATE holds the old file until COMMIT (measured - see
+    # load_real_data.check_headroom), so this rewrite needs headroom equal to
+    # the table's own size. Refuse with the arithmetic rather than die on
+    # DiskFull two thirds of the way through the INSERT.
+    with conn.cursor() as cur:
+        cur.execute("SELECT pg_database_size(current_database()), "
+                    "pg_total_relation_size('project_scores')")
+        at_rest, table = cur.fetchone()
+    conn.rollback()
+    limit = 512 * 1024 * 1024
+    mb = lambda b: f"{b / 1048576:.0f} MB"
+    print(f"headroom: database {mb(at_rest)} at rest, project_scores {mb(table)}, "
+          f"peak {mb(at_rest + table)} against {mb(limit)}")
+    if at_rest + table > limit * 0.97:
+        raise SystemExit(f"refusing to write scores: rewrite would peak at "
+                         f"{mb(at_rest + table)} against {mb(limit)}. Nothing written; "
+                         f"the previous run's scores are intact.")
     with conn.cursor() as cur:
         cur.execute("TRUNCATE project_scores")
         execute_values(
@@ -560,6 +600,12 @@ if __name__ == "__main__":
     # the time we get to write_scores. Fetch on one connection, close it,
     # compute, then open a fresh connection to write.
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    if os.environ.get("SCORE_FORCE") != "1" and load_was_skipped(conn):
+        conn.close()
+        print("Load reported the extract unchanged; the scores in project_scores "
+              "were computed from these exact rows. Nothing to do. "
+              "(SCORE_FORCE=1 to re-score anyway, e.g. after changing scoring.py.)")
+        sys.exit(0)
     run_id = current_refresh_run_id(conn)
     df = fetch_projects(conn)
     expenditures = fetch_expenditures(conn)
