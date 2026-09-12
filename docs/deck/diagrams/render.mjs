@@ -30,7 +30,7 @@ const browser = await chromium.launch({
 });
 // 2x so the images stay sharp when a slide is shown full screen or printed.
 const page = await browser.newPage({
-  viewport: { width: 1700, height: 1000 },
+  viewport: { width: 2500, height: 1400 },
   deviceScaleFactor: 2,
 });
 await page.goto("file://" + path.join(DIR, "boards.html"));

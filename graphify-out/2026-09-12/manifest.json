@@ -126,9 +126,9 @@
     "semantic_hash": "a7295a74f693f0977221c66cd9e7a3eb"
   },
   "scripts/build_sih_deck.py": {
-    "mtime": 1789171299.232146,
-    "seen": 1789171369.2835374,
-    "ast_hash": "ff28dac149929223c52bbc51bd4909ef",
+    "mtime": 1789168940.6483324,
+    "seen": 1789169013.0291061,
+    "ast_hash": "2382cf3ce93d9003c54fd4225408becb",
     "semantic_hash": ""
   },
   "scripts/classify_sectors.py": {
@@ -552,15 +552,15 @@
     "semantic_hash": ""
   },
   "docs/deck/diagrams/png/sizes.json": {
-    "mtime": 1789171322.4954062,
-    "seen": 1789171369.2835302,
-    "ast_hash": "df45f676abfec3e813e5326c7afc9aa3",
+    "mtime": 1789168964.6635082,
+    "seen": 1789169013.029101,
+    "ast_hash": "4346bcfeb9cdf341f23f93174f473035",
     "semantic_hash": ""
   },
   "docs/deck/diagrams/render.mjs": {
-    "mtime": 1789171028.407682,
-    "seen": 1789171369.2835343,
-    "ast_hash": "53b3e206f25abd4cac202755ee2d1944",
+    "mtime": 1789168597.1873348,
+    "seen": 1789169013.0291033,
+    "ast_hash": "53502e31b72c18a1b467e7a65ed838ff",
     "semantic_hash": ""
   },
   "scripts/preview_deck.py": {
@@ -612,9 +612,9 @@
     "semantic_hash": ""
   },
   "docs/deck/diagrams/boards.template.html": {
-    "mtime": 1789171181.830187,
-    "seen": 1789171369.2876225,
-    "ast_hash": "04480e7823bd6e211f80f9a8c9497a17",
+    "mtime": 1789168319.607772,
+    "seen": 1789169013.032232,
+    "ast_hash": "fcb0d29f058756e535e0d8c842d7d70a",
     "semantic_hash": ""
   },
   "video-explainer/README.md": {
@@ -720,39 +720,39 @@
     "semantic_hash": ""
   },
   "docs/deck/diagrams/png/arch.png": {
-    "mtime": 1789171321.6757452,
-    "seen": 1789171369.2886076,
-    "ast_hash": "1fa5aebfca00ac24400f23f511ef6112",
+    "mtime": 1789168963.9279041,
+    "seen": 1789169013.0324976,
+    "ast_hash": "8e3ad944ecb74fab0839d366cecd56a6",
     "semantic_hash": ""
   },
   "docs/deck/diagrams/png/feas.png": {
-    "mtime": 1789171322.1890516,
-    "seen": 1789171369.2886097,
-    "ast_hash": "18819ed19e14945637476d2c4582ee3e",
+    "mtime": 1789168964.358681,
+    "seen": 1789169013.0324993,
+    "ast_hash": "fead9cceb5e9ecc6d24b9e26f0154e70",
     "semantic_hash": ""
   },
   "docs/deck/diagrams/png/impact.png": {
-    "mtime": 1789171322.3427374,
-    "seen": 1789171369.2886114,
-    "ast_hash": "0eee5f5a733ac20a37322fa3705af646",
+    "mtime": 1789168964.5160625,
+    "seen": 1789169013.032501,
+    "ast_hash": "f27afc2014fe0194ffd77437054cc8d1",
     "semantic_hash": ""
   },
   "docs/deck/diagrams/png/pipeline.png": {
-    "mtime": 1789171321.830414,
-    "seen": 1789171369.2886145,
+    "mtime": 1789168964.036578,
+    "seen": 1789169013.0325024,
     "ast_hash": "34540699f1308cc6a04fe0ec651fadb0",
     "semantic_hash": ""
   },
   "docs/deck/diagrams/png/refs.png": {
-    "mtime": 1789171322.4890194,
-    "seen": 1789171369.2886162,
-    "ast_hash": "5784609040cf39fa0253ff9b7093471b",
+    "mtime": 1789168964.6608698,
+    "seen": 1789169013.032504,
+    "ast_hash": "7af004a196372828dcd05b0f3a06a678",
     "semantic_hash": ""
   },
   "docs/deck/diagrams/png/stack.png": {
-    "mtime": 1789171321.963307,
-    "seen": 1789171369.2886188,
-    "ast_hash": "705dc44cca38a80cbfe965b9b7f51623",
+    "mtime": 1789168964.1428678,
+    "seen": 1789169013.0325062,
+    "ast_hash": "73e18eae93d7af44f5754f8af4c70592",
     "semantic_hash": ""
   },
   "docs/deck/diagrams/shots/agencies.png": {
@@ -807,12 +807,6 @@
     "mtime": 1789166813.620214,
     "seen": 1789169013.0328681,
     "ast_hash": "f5af7b81339243c0c9de14f030ae2607",
-    "semantic_hash": ""
-  },
-  "docs/deck/Kasauti-architecture-HD.png": {
-    "mtime": 1789171331.4815397,
-    "seen": 1789171369.288605,
-    "ast_hash": "1fa5aebfca00ac24400f23f511ef6112",
     "semantic_hash": ""
   }
 }

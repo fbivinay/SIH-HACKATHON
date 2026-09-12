@@ -53,39 +53,112 @@
                font-size: 22px; color: var(--ink-3); }
 
       /* ============================================ 1. architecture ==== */
-      #arch { width: 1400px; }
-      #arch .col-h { font-family: var(--mono); font-size: 12px; letter-spacing: .16em;
-                     text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
-      .lane { display: grid; grid-template-columns: 250px 40px 1fr 40px 250px; gap: 0;
-              align-items: stretch; }
-      .stackv { display: flex; flex-direction: column; gap: 10px; }
-      .model { background: var(--slab); color: var(--on-slab); border-radius: 12px;
-               padding: 11px 14px; border: 1px solid rgba(255,255,255,.14); }
-      .model .mn { font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
-      .model .md { font-size: 12.5px; color: var(--on-slab-2); margin-top: 3px; line-height: 1.35; }
-      .model .mk { font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
-                   text-transform: uppercase; color: var(--on-slab-3); }
-      .scorebox { background: var(--surface); border: 2px solid var(--ink);
-                  border-radius: 16px; padding: 14px 16px; }
-      .wrow { display: flex; justify-content: space-between; font-size: 13.5px;
-              padding: 3px 0; }
-      .wrow b { font-family: var(--mono); font-weight: 500; }
-      .bands { display: flex; gap: 7px; margin-top: 10px; }
-      .bd { flex: 1; text-align: center; border-radius: 8px; padding: 6px 2px;
-            font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); }
-      .role { background: var(--surface); border: 1px solid var(--line);
-              border-radius: 11px; padding: 9px 12px; font-size: 14px; font-weight: 550; }
-      .role span { display: block; font-family: var(--mono); font-size: 10.5px;
-                   color: var(--ink-3); font-weight: 400; margin-top: 2px;
-                   letter-spacing: .1em; text-transform: uppercase; }
-      /* A full hairline border and the risk tint, the way the product's own
-         .notice is built - no accent stripe down one side. The product never
-         does that: every border-left in globals.css is a neutral 1-2px line,
-         and the bold red lead-in already carries the emphasis. */
-      .never { margin-top: 14px; background: #fbe9e7; padding: 11px 15px;
-               border: 1px solid color-mix(in srgb, var(--risk-high) 26%, transparent);
-               border-radius: 12px; }
-      .never b { color: var(--risk-high); }
+      /* The centrepiece. One image that has to answer all four of the
+         template's slide-2 pointers: what the solution is, how it works in
+         detail, how that addresses the problem, and what is actually new about
+         it. Authored at 2400px and rendered at 2x, so it holds up full screen
+         and in print. */
+      #arch { width: 2400px; padding: 0; }
+      .ah { display: flex; align-items: baseline; justify-content: space-between;
+            padding: 26px 34px 20px; }
+      .ah-t { font-size: 34px; font-weight: 650; letter-spacing: -.03em; }
+      .ah-t .dim { color: var(--ink-3); font-weight: 500; }
+      .ah-r { display: flex; gap: 10px; }
+      .ah-pill { font-family: var(--mono); font-size: 14px; padding: 7px 14px;
+                 border-radius: 999px; border: 1px solid var(--line-strong);
+                 background: var(--surface); color: var(--ink-2); }
+      .ah-pill b { color: var(--ink); font-weight: 600; }
+
+      /* The five stages, as a left-to-right rail. */
+      .stages { display: grid; grid-template-columns: 320px 1fr 430px 330px;
+                gap: 0; padding: 0 34px; align-items: start; }
+      .stage { position: relative; padding-right: 30px; }
+      .stage:last-child { padding-right: 0; }
+      /* The chevron between stages is drawn, not a glyph, so it lines up. */
+      .stage::after { content: ""; position: absolute; right: 9px; top: 46px;
+                      width: 13px; height: 13px; border-top: 3px solid var(--line-strong);
+                      border-right: 3px solid var(--line-strong); transform: rotate(45deg); }
+      .stage:last-child::after { display: none; }
+      .st-n { font-family: var(--mono); font-size: 13px; letter-spacing: .2em;
+              color: var(--ink-3); }
+      .st-h { font-size: 21px; font-weight: 650; letter-spacing: -.025em;
+              margin: 6px 0 14px; }
+
+      .unit { background: var(--surface); border: 1px solid var(--line);
+              border-radius: 13px; padding: 12px 15px; margin-bottom: 9px; }
+      .unit:last-child { margin-bottom: 0; }
+      .unit .uk { font-family: var(--mono); font-size: 11px; letter-spacing: .13em;
+                  text-transform: uppercase; color: var(--ink-3); }
+      .unit .un { font-size: 17px; font-weight: 600; letter-spacing: -.015em; margin-top: 4px; }
+      .unit .ud { font-size: 13.5px; color: var(--ink-2); margin-top: 5px; line-height: 1.4; }
+      .unit.good { border-color: color-mix(in srgb, var(--risk-low) 42%, transparent); }
+      .unit.good .uk { color: var(--risk-low); }
+
+      /* The models are the one dark surface in the diagram - they are the part
+         the brief is actually about, so they read as the engine. */
+      .mdl { background: var(--slab); color: var(--on-slab); border-radius: 13px;
+             padding: 12px 15px; margin-bottom: 9px;
+             border: 1px solid rgba(255,255,255,.15); }
+      .mdl .uk { color: var(--on-slab-3); }
+      .mdl .un { color: var(--on-slab); }
+      .mdl .ud { color: var(--on-slab-2); }
+      .mdl .tagai { color: #e0685c; font-weight: 700; }
+      .mdl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+      /* Cohort detectors branch off the engine and never rejoin the score. */
+      .branch { margin-top: 12px; border: 1px dashed var(--line-strong);
+                border-radius: 13px; padding: 11px 14px; background: transparent; }
+      .branch-h { display: flex; align-items: center; gap: 9px;
+                  font-family: var(--mono); font-size: 11.5px; letter-spacing: .13em;
+                  text-transform: uppercase; color: var(--ink-3); }
+      .branch-h .cut { font-size: 14px; color: var(--risk-high); }
+      .dets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+              margin-top: 9px; }
+      .det { background: var(--surface); border: 1px solid var(--line);
+             border-radius: 9px; padding: 7px 9px; }
+      .det .dc { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+      .det .dn { font-size: 12.5px; font-weight: 550; margin-top: 2px; line-height: 1.25; }
+
+      /* The score, written as the arithmetic it is. */
+      .formula { background: var(--surface); border: 2px solid var(--ink);
+                 border-radius: 15px; padding: 14px 17px; }
+      .frow { display: flex; justify-content: space-between; align-items: baseline;
+              font-size: 15px; padding: 4px 0; }
+      .frow .fw { font-family: var(--mono); font-size: 15px; color: var(--ink-2); }
+      .fsum { display: flex; justify-content: space-between; align-items: center;
+              margin-top: 10px; padding-top: 11px; border-top: 1px solid var(--line-strong); }
+      .fsum .fl { font-family: var(--mono); font-size: 12px; letter-spacing: .14em;
+                  text-transform: uppercase; color: var(--ink-3); }
+      .fsum .fv { font-family: var(--mono); font-size: 30px; font-weight: 500; }
+      .bandrow { display: flex; gap: 8px; margin-top: 11px; }
+      .bandrow .bd { flex: 1; text-align: center; border-radius: 9px; padding: 7px 2px;
+                     font-family: var(--mono); font-size: 12px;
+                     border: 1px solid var(--line); background: var(--surface); }
+
+      .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+      .rl { background: var(--surface); border: 1px solid var(--line);
+            border-radius: 11px; padding: 10px 12px; }
+      .rl .rn { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+      .rl .rd { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em;
+                text-transform: uppercase; color: var(--ink-3); margin-top: 3px; }
+
+      /* The two answers the pointers ask for, as a footer band. */
+      .afoot { display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+               margin: 18px 0 0; border-top: 1px solid var(--line-strong); }
+      .afoot > div { padding: 16px 34px 20px; }
+      .afoot > div + div { border-left: 1px solid var(--line-strong); }
+      .afoot-h { font-family: var(--mono); font-size: 12.5px; letter-spacing: .18em;
+                 text-transform: uppercase; color: var(--ink-3); margin-bottom: 13px; }
+      .pmap { display: grid; grid-template-columns: 1fr 26px 1fr; gap: 9px;
+              align-items: center; margin-bottom: 6px; font-size: 14px; }
+      .pmap .pl { color: var(--risk-high); font-weight: 550; }
+      .pmap .pa { text-align: center; font-family: var(--mono); color: var(--ink-3); }
+      .pmap .pr { color: var(--ink); }
+      .pmap .pr b { font-weight: 650; }
+      .uq { display: grid; grid-template-columns: 20px 1fr; gap: 10px;
+            margin-bottom: 7px; font-size: 14px; line-height: 1.38; }
+      .uq .un2 { font-family: var(--mono); font-size: 12px; color: var(--ink-3); padding-top: 2px; }
+      .uq b { font-weight: 650; }
 
       /* ============================================ 2. pipeline ======== */
       #pipeline { width: 1600px; }
@@ -170,92 +243,176 @@
 
     <!-- ============================================ 1. ARCHITECTURE -->
     <div class="board" id="arch">
-      <div class="eyebrow">System architecture &mdash; published record to a ranked queue</div>
+      <div class="ah">
+        <div class="ah-t">Kasauti &mdash; <span class="dim">how a published record becomes a ranked queue</span></div>
+        <div class="ah-r">
+          <div class="ah-pill"><b>{{works}}</b> works scored</div>
+          <div class="ah-pill"><b>{{queue}}</b> flagged</div>
+          <div class="ah-pill">refreshed <b>nightly</b></div>
+        </div>
+      </div>
 
-      <div class="lane" style="margin-top:16px">
-        <!-- sources -->
-        <div>
-          <div class="col-h">Source</div>
-          <div class="stackv">
-            <div class="card">
-              <div class="k">Designated</div>
-              <div class="t">MoSPI portal</div>
-              <div class="d">Totals and members open. Works only behind an OTP-gated form &mdash; no bulk export.</div>
+      <div class="stages">
+        <!-- 1 -->
+        <div class="stage">
+          <div class="st-n">01</div>
+          <div class="st-h">Source &amp; ingest</div>
+          <div class="unit">
+            <div class="uk">Designated source</div>
+            <div class="un">MoSPI MPLADS portal</div>
+            <div class="ud">Totals and members open. Individual works only behind an OTP-gated citizen form &mdash; no bulk export exists.</div>
+          </div>
+          <div class="unit">
+            <div class="uk">Bulk export of the same record</div>
+            <div class="un">Empowered Indian</div>
+            <div class="ud">{{works}} works, {{payments}} payments, both Lok Sabha terms, as CSV.</div>
+          </div>
+          <div class="unit">
+            <div class="uk">Load</div>
+            <div class="un">Parse-all-before-write</div>
+            <div class="ud">Every frame validated before a row is committed; rejects go to a ledger, never silently dropped.</div>
+          </div>
+          <div class="unit good">
+            <div class="uk">Every night</div>
+            <div class="un">Reconciled to MoSPI</div>
+            <div class="ud">{{states}} of {{states}} states match the source exactly. Our hop and the upstream hop are published apart.</div>
+          </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="stage">
+          <div class="st-n">02</div>
+          <div class="st-h">Intelligence &mdash; three models and the rules</div>
+
+          <div class="mdl">
+            <div class="uk">Peer group resolution &middot; <span class="tagai">AI powered</span> &middot; gemini-flash-lite</div>
+            <div class="un">Sector labelling that can abstain</div>
+            <div class="ud">98.1% of works carry one useless category, so a peer group had to be derived from the description. Keyword rules handle most of it; Gemini reads the rest and answers "Other" rather than guessing. {{labels}} labels cached and committed, so scoring runs offline with no API key.</div>
+          </div>
+
+          <div class="mdl-grid">
+            <div class="mdl">
+              <div class="uk">scikit-learn</div>
+              <div class="un">Isolation Forest</div>
+              <div class="ud">Learns the normal sanction for a sector in a district over amount, delay and spend; isolates what sits outside it. Blended into cost risk by max().</div>
             </div>
-            <div class="card">
-              <div class="k">Bulk export</div>
-              <div class="t">Empowered Indian</div>
-              <div class="d">The same record as CSV. {{works}} works, {{payments}} payments, both LS terms.</div>
+            <div class="mdl">
+              <div class="uk">sentence-transformers</div>
+              <div class="un">Sentence-BERT</div>
+              <div class="ud">Embeds every work description and compares inside the same district and sector at 0.94 cosine &mdash; the measured foot of the near-duplicate tail.</div>
             </div>
-            <div class="card" style="border-color:var(--risk-low)">
-              <div class="k" style="color:var(--risk-low)">Every night</div>
-              <div class="t" style="font-size:16px">Reconciled to MoSPI</div>
-              <div class="d">{{states}} / {{states}} states match exactly. Both hops shown separately.</div>
+          </div>
+          <div class="unit" style="margin-top:9px">
+            <div class="uk">Deterministic rules &amp; statistics</div>
+            <div class="ud" style="margin-top:4px">Published recommendation and completion dates &middot; the scheme's stated compliance rules &middot; Herfindahl-Hirschman index over an agency's whole vendor spend</div>
+          </div>
+
+          <div class="branch">
+            <div class="branch-h">
+              <span>Cohort detectors &mdash; agency and member grain</span>
+              <span class="cut">&#10007; never folded into a work's score</span>
+            </div>
+            <div class="dets">
+              <div class="det"><div class="dc">D-01</div><div class="dn">Year-end payment burst</div></div>
+              <div class="det"><div class="dc">D-02</div><div class="dn">First-digit anomaly</div></div>
+              <div class="det"><div class="dc">D-03</div><div class="dn">Idle allocation</div></div>
+              <div class="det"><div class="dc">D-04</div><div class="dn">Uniform sanction</div></div>
             </div>
           </div>
         </div>
 
-        <div class="arrow">&rarr;</div>
-
-        <!-- engine -->
-        <div>
-          <div class="col-h">Scoring engine &mdash; offline, deterministic, no key required</div>
-          <div class="stackv">
-            <div class="model">
-              <div class="mk">Model 1 &middot; scikit-learn</div>
-              <div class="mn">Isolation Forest</div>
-              <div class="md">Learns the normal sanction for a sector and district; isolates what sits outside. Blended into cost risk.</div>
+        <!-- 3 -->
+        <div class="stage">
+          <div class="st-n">03</div>
+          <div class="st-h">Score</div>
+          <div class="formula">
+            <div class="frow"><span>Cost deviation vs peers</span><span class="fw">&times; 25%</span></div>
+            <div class="frow"><span>Delay past expected completion</span><span class="fw">&times; 25%</span></div>
+            <div class="frow"><span>Duplication of another work</span><span class="fw">&times; 20%</span></div>
+            <div class="frow"><span>Implementing agency history</span><span class="fw">&times; 15%</span></div>
+            <div class="frow"><span>Compliance with scheme rules</span><span class="fw">&times; 15%</span></div>
+            <div class="fsum">
+              <span class="fl">Overall risk</span>
+              <span class="fv">0 &ndash; 100</span>
             </div>
-            <div class="model">
-              <div class="mk">Model 2 &middot; sentence-transformers</div>
-              <div class="mn">Sentence-BERT &middot; all-MiniLM-L6-v2</div>
-              <div class="md">Embeds every description, compares within district and sector at 0.94 cosine &mdash; measured, not borrowed.</div>
-            </div>
-            <div class="model">
-              <div class="mk">Model 3 &middot; <span style="color:#e0685c">AI powered</span></div>
-              <div class="mn">Gemini Flash Lite</div>
-              <div class="md">Labels the sectors keyword rules cannot read. Can abstain. {{labels}} labels cached and committed.</div>
-            </div>
-            <div class="card" style="padding:10px 14px">
-              <div class="k">Rules &amp; statistics</div>
-              <div class="d" style="margin-top:3px">Published dates &middot; compliance rules &middot; Herfindahl-Hirschman over vendor spend</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="arrow">&rarr;</div>
-
-        <!-- score and out -->
-        <div>
-          <div class="col-h">Score &amp; route</div>
-          <div class="scorebox">
-            <div class="k">Overall risk score &middot; 0&ndash;100</div>
-            <div style="margin-top:8px">
-              <div class="wrow"><span>Cost</span><b>25%</b></div>
-              <div class="wrow"><span>Delay</span><b>25%</b></div>
-              <div class="wrow"><span>Duplication</span><b>20%</b></div>
-              <div class="wrow"><span>Agency</span><b>15%</b></div>
-              <div class="wrow"><span>Compliance</span><b>15%</b></div>
-            </div>
-            <div class="bands">
-              <div class="bd" style="color:var(--risk-low)">LOW &lt;40</div>
+            <div class="bandrow">
+              <div class="bd" style="color:var(--risk-low)">LOW &lt; 40</div>
               <div class="bd" style="color:var(--risk-medium)">MED 40&ndash;70</div>
-              <div class="bd" style="color:var(--risk-high)">HIGH &ge;70</div>
+              <div class="bd" style="color:var(--risk-high)">HIGH &ge; 70</div>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
-            <div class="role">MPs<span>own works</span></div>
-            <div class="role">District<span>verify on site</span></div>
-            <div class="role">State nodal<span>oversight</span></div>
-            <div class="role">Ministry<span>programme view</span></div>
+          <div class="unit" style="margin-top:9px">
+            <div class="uk">Swap</div>
+            <div class="un">One transaction</div>
+            <div class="ud">Derived scores are rebuilt and swapped whole, so a reader sees the previous run or the new one &mdash; never a half-empty table.</div>
+          </div>
+          <div class="unit">
+            <div class="uk">Serve</div>
+            <div class="un">projects_scored &rarr; 24 endpoints</div>
+            <div class="ud">FastAPI over Postgres, Next.js front end, both on Vercel.</div>
+          </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="stage">
+          <div class="st-n">04</div>
+          <div class="st-h">Decision</div>
+          <div class="unit">
+            <div class="uk">What reaches a desk</div>
+            <div class="un">{{queue}} of {{works}}</div>
+            <div class="ud">Ranked highest first, filterable by state, district, sector, term and member. Exportable as CSV.</div>
+          </div>
+          <div class="unit">
+            <div class="uk">Beside every flag</div>
+            <div class="un">The method that produced it</div>
+            <div class="ud">"298% above the median for this sector" &middot; "0.94 similarity" &middot; "191 days late" &mdash; each tagged with the model or rule behind it.</div>
+          </div>
+          <div class="roles">
+            <div class="rl"><div class="rn">MPs</div><div class="rd">own works</div></div>
+            <div class="rl"><div class="rn">District</div><div class="rd">verify on site</div></div>
+            <div class="rl"><div class="rn">State nodal</div><div class="rd">oversight</div></div>
+            <div class="rl"><div class="rn">Ministry</div><div class="rd">programme view</div></div>
+          </div>
+          <div class="unit" style="margin-top:9px">
+            <div class="uk">Closing the loop</div>
+            <div class="un">Decision trail</div>
+            <div class="ud">Escalate, verify or dismiss &mdash; recorded against the work's stable key and shown to whoever opens it next.</div>
           </div>
         </div>
       </div>
 
-      <div class="never">
-        <b>What never happens:</b> no model output becomes a risk number, and no
-        cohort statistic is folded into a single work&rsquo;s score. A score says a work
-        does not resemble its peers &mdash; it is a reason to look, never an allegation.
+      <div class="afoot">
+        <div>
+          <div class="afoot-h">How it addresses the problem</div>
+          <div class="pmap">
+            <div class="pl">{{works}} works, no human path through them</div>
+            <div class="pa">&rarr;</div>
+            <div class="pr">Every work scored against <b>comparable</b> works, ranked, so a morning's verification replaces a year's reading</div>
+          </div>
+          <div class="pmap">
+            <div class="pl">Cost overruns invisible at this scale</div>
+            <div class="pa">&rarr;</div>
+            <div class="pr">Peer medians by sector <b>and</b> district, blended with an isolation forest over the same population</div>
+          </div>
+          <div class="pmap">
+            <div class="pl">Duplicate works across agencies</div>
+            <div class="pa">&rarr;</div>
+            <div class="pr">Embeddings, not string matching &mdash; catches the same work <b>reworded</b>, transliterated or abbreviated</div>
+          </div>
+          <div class="pmap">
+            <div class="pl">Delays and stalled money go unnoticed</div>
+            <div class="pa">&rarr;</div>
+            <div class="pr">Days past expected completion per work, and agencies that have <b>paid nobody</b> in 180 days</div>
+          </div>
+        </div>
+        <div>
+          <div class="afoot-h">What is new about it</div>
+          <div class="uq"><div class="un2">01</div><div><b>Every flag is arguable.</b> The reason and the method that produced it travel with the score, so an officer can disagree with it on the evidence rather than obey or ignore it.</div></div>
+          <div class="uq"><div class="un2">02</div><div><b>A model that abstains.</b> Gemini was chosen over embeddings because it can answer "Other" instead of forcing a nearest sector &mdash; which is what made peer groups mean anything.</div></div>
+          <div class="uq"><div class="un2">03</div><div><b>Population statistics stay at population grain.</b> An agency's year-end burst never becomes any one invoice's risk. No model output ever becomes a risk number.</div></div>
+          <div class="uq"><div class="un2">04</div><div><b>Provenance is checked, not asserted.</b> Reconciled against the ministry's own endpoints nightly, with our error and upstream lag reported separately.</div></div>
+          <div class="uq"><div class="un2">05</div><div><b>It states what it cannot know.</b> MPLADS publishes no progress %, beneficiary count or geo-tag, and the system says so instead of inventing them.</div></div>
+        </div>
       </div>
     </div>
 
