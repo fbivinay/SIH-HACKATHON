@@ -197,7 +197,7 @@ Monochrome. **Colour only ever means risk** — `--risk-low/medium/high`. Two
 deliberate exceptions, both on the owner's call: the two words "AI powered" are
 `--ai-red` wherever they appear (eyebrow, badges, masthead, loading cover) and
 the dot beside them is `--risk-low` green; the pointer is `--risk-high`. And
-the logo — `web/public/logo.png`, a tricolour badge, rendered by `Logo` as an
+the logo — `web/public/logo.png`, a tricolour K, rendered by `Logo` as an
 image, cut to `web/app/icon.png` for the favicon and shown in the README. It
 takes no CSS colour. Nothing else earns a hue.
 
