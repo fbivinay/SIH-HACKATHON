@@ -1,3 +1,5 @@
+<p align="center"><img src="web/public/logo.png" width="180" alt="Kasauti"></p>
+
 # Kasauti — AI-powered MPLADS verification
 
 A *kasauti* (कसौटी) is the touchstone a jeweller rubs gold against to judge it.

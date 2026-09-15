@@ -25,7 +25,8 @@ export default function Splash() {
   return (
     <div className="splash" aria-hidden="true">
       <div className="splash__inner">
-        <Logo size={58} />
+        {/* Preloaded: the cover is the first thing painted and must not wait for its own mark. */}
+        <Logo size={58} priority />
         <div className="splash__name">Kasauti</div>
         <div className="splash__sub">MPLADS verification</div>
         <div className="splash__ai"><b className="ai-word">AI powered</b> · Gemini Flash Lite · Isolation Forest · Sentence-BERT</div>

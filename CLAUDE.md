@@ -193,12 +193,26 @@ deterministic and free; keep it that way.
 
 ## 10. Interface
 
-Monochrome. **Colour only ever means risk** — `--risk-low/medium/high`. One
-deliberate exception, on the owner's call: the two words "AI powered" are
+Monochrome. **Colour only ever means risk** — `--risk-low/medium/high`. Two
+deliberate exceptions, both on the owner's call: the two words "AI powered" are
 `--ai-red` wherever they appear (eyebrow, badges, masthead, loading cover) and
-the dot beside them is `--risk-low` green; the pointer is `--risk-high`. Nothing
-else earns a hue. Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at
-700–1023px, none below, because 456px of content does not fit a 390px phone.
+the dot beside them is `--risk-low` green; the pointer is `--risk-high`. And
+the logo — `web/public/logo.png`, a tricolour badge, rendered by `Logo` as an
+image, cut to `web/app/icon.png` for the favicon and shown in the README. It
+takes no CSS colour. Nothing else earns a hue.
+
+**Light mode only.** The site ignores the OS and browser colour-scheme
+preference: `:root { color-scheme: light }`, `viewport.colorScheme` in
+`app/layout.tsx`, and no `prefers-color-scheme: dark` block anywhere. The dark
+palette was removed on 2026-09-15 at the owner's request; do not bring it back.
+
+Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at 700–1023px, none
+below. **Phones are refused outright** (owner's call, 2026-09-15): the inline
+script at the top of `<body>` sets `<html data-phone>` and `.phone-wall` shows
+one sentence in place of the page. Tablets, laptops and desktops pass. It has
+to survive "Desktop site" on a phone, which rewrites the user agent, so the
+second test is hardware: a coarse pointer on a screen taller than 5:3. Do not
+replace it with a width query — the desktop-site viewport is 980px wide.
 
 Tables scroll inside their own container; the page body never scrolls
 sideways — so nothing may be wider than the shell, including the hero canvas.

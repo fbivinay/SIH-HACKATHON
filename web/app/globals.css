@@ -5,7 +5,9 @@
 
    Monochrome by default. The only saturated colour on any screen is a risk
    colour, so colour always means "this work needs attention" and never means
-   decoration. Structure comes from ground/surface contrast and rounded slabs
+   decoration. The two exceptions are the owner's: the words "AI powered"
+   (--ai-red) and the logo, a tricolour badge that is a raster and takes no
+   CSS colour at all. Structure comes from ground/surface contrast and rounded slabs
    rather than from tint.
 
    Two grounds alternate down a page: the light ground carries dense working
@@ -100,69 +102,9 @@
   --font-display: var(--font-ui);
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background: none;
-  }
-  body::before {
-    background-image:
-      radial-gradient(ellipse 70rem 38rem at 8% -6%, rgba(242, 105, 92, 0.13), transparent 58%),
-      radial-gradient(ellipse 58rem 34rem at 96% 2%, rgba(76, 195, 138, 0.10), transparent 56%),
-      radial-gradient(ellipse 52rem 40rem at 62% 108%, rgba(226, 160, 63, 0.07), transparent 58%);
-  }
-  :root {
-    color-scheme: dark;
-
-    --ground: #0a0a0b;
-    --surface: #151517;
-    --surface-2: #1c1c1f;
-    --line: #2a2a2e;
-    --line-strong: #3a3a40;
-
-    --ink: #f5f5f6;
-    --ink-2: #b8b8c0;
-    --ink-3: #92929c;
-
-    /* On a dark page the contrast panel has to go lighter, not darker — the
-       slab is defined by standing apart from the ground, not by being black. */
-    --slab: #17171a;
-    --slab-2: #202024;
-    --slab-line: rgba(255, 255, 255, 0.09);
-    --on-slab: #f5f5f6;
-    --on-slab-2: #b6b6bf;
-
-    --risk-low: #4cc38a;
-    --risk-low-bg: rgba(76, 195, 138, 0.12);
-    --risk-medium: #e2a03f;
-    --risk-medium-bg: rgba(226, 160, 63, 0.12);
-    --risk-high: #f2695c;
-    --ai-red: #e0685c;
-    --risk-high-bg: rgba(242, 105, 92, 0.13);
-    --risk-pending: #8a8a93;
-    --risk-pending-bg: rgba(138, 138, 147, 0.13);
-
-    /* Glass on a dark ground is a lightened pane, not a darkened one: the same
-       white at 62% would wash the page out, so these are near-surface values
-       with just enough lift to separate. The shadow goes deeper because a soft
-       grey shadow is invisible against near-black. */
-    --glass: rgba(34, 34, 39, 0.52);
-    --glass-strong: rgba(26, 26, 30, 0.78);
-    /* On a dark ground the rim highlight is the only thing separating one pane
-       from the next, so it carries more of the work and the bottom edge goes
-       to shadow rather than to a darker line. */
-    --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.10),
-                  inset 0 -1px 0 rgba(0, 0, 0, 0.30);
-    --glass-border: rgba(255, 255, 255, 0.09);
-    --glass-shadow:
-      0 1px 1px rgba(0, 0, 0, 0.34),
-      0 4px 10px -4px rgba(0, 0, 0, 0.42),
-      0 18px 40px -22px rgba(0, 0, 0, 0.7);
-    --glass-shadow-lift:
-      0 1px 1px rgba(0, 0, 0, 0.4),
-      0 8px 18px -6px rgba(0, 0, 0, 0.5),
-      0 28px 60px -28px rgba(0, 0, 0, 0.85);
-  }
-}
+/* Light only. There is no dark palette: the site renders in light mode
+   whatever the OS or browser asks for (`color-scheme: light` above, and
+   `viewport.colorScheme` in app/layout.tsx), on the owner's call. */
 
 @theme inline {
   --color-ground: var(--ground);
@@ -2269,4 +2211,42 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
 /* A cover nobody asked for is motion like any other. */
 @media (prefers-reduced-motion: reduce) {
   .splash { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Phones are refused. The working screens are tables 456px wide at their
+   narrowest, and the owner chose a wall over a squeeze: a phone gets one
+   sentence and nothing else, even with "Desktop site" on.
+
+   The flag is `<html data-phone>`, set by the inline script at the top of
+   <body> before anything paints. Detection there is two tests OR-ed: the
+   user agent (iPhone, or Android's "Mobile" token), which "Desktop site"
+   rewrites; and coarse-pointer hardware whose screen is taller than 5:3,
+   which it cannot rewrite - phones are 2:1 or taller, tablets 16:10 or
+   squarer. ponytail: a 16:9 Android tablet reads as a phone; none is
+   current enough to matter. */
+.phone-wall { display: none; }
+html[data-phone] body > :not(.phone-wall) { display: none !important; }
+html[data-phone] .phone-wall {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.9rem;
+  min-height: 100dvh;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: var(--ground);
+}
+.phone-wall h1 {
+  max-width: 22ch;
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.phone-wall p {
+  max-width: 34ch;
+  font-size: 0.95rem;
+  color: var(--ink-2);
 }

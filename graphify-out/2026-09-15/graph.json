@@ -43,19 +43,6 @@
       "source_location": "L10"
     },
     {
-      "id": "web_app_states_page_sortkey",
-      "label": "SortKey",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "sortkey",
-      "source_file": "web/app/states/page.tsx",
-      "source_location": "L19"
-    },
-    {
       "id": "web_lib_api_agencystat",
       "label": "AgencyStat",
       "_callable": true,
@@ -173,6 +160,19 @@
       "source_location": "L208"
     },
     {
+      "id": "web_lib_api_filteroptions",
+      "label": "FilterOptions",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "filteroptions",
+      "source_file": "web/lib/api.ts",
+      "source_location": "L523"
+    },
+    {
       "id": "web_lib_api_mpdetail",
       "label": "MpDetail",
       "_callable": true,
@@ -264,30 +264,17 @@
       "source_location": "L382"
     },
     {
-      "id": "web_lib_api_statesummary",
-      "label": "StateSummary",
+      "id": "web_lib_api_statestat",
+      "label": "StateStat",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 10,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "statesummary",
+      "norm_label": "statestat",
       "source_file": "web/lib/api.ts",
-      "source_location": "L219"
-    },
-    {
-      "id": "web_lib_api_trends",
-      "label": "Trends",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "trends",
-      "source_file": "web/lib/api.ts",
-      "source_location": "L305"
+      "source_location": "L78"
     },
     {
       "id": "web_app_state_state_page_params",
@@ -296,7 +283,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "formatINR",
+      "community_name": "[state]/page.tsx",
       "file_type": "code",
       "norm_label": "params",
       "source_file": "web/app/state/[state]/page.tsx",
@@ -309,7 +296,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "formatINR",
+      "community_name": "[state]/page.tsx",
       "file_type": "code",
       "norm_label": "search",
       "source_file": "web/app/state/[state]/page.tsx",
@@ -322,24 +309,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "formatINR",
+      "community_name": "[state]/page.tsx",
       "file_type": "code",
       "norm_label": "statedesk",
       "source_file": "web/lib/api.ts",
       "source_location": "L419"
     },
     {
-      "id": "web_lib_api_statestat",
-      "label": "StateStat",
+      "id": "web_components_riskbar_riskcomponents",
+      "label": "RiskComponents",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 13,
       "community_name": "format.ts",
       "file_type": "code",
-      "norm_label": "statestat",
-      "source_file": "web/lib/api.ts",
-      "source_location": "L78"
+      "norm_label": "riskcomponents",
+      "source_file": "web/components/RiskBar.tsx",
+      "source_location": "L19"
     },
     {
       "id": "web_lib_format_risklevel",
@@ -355,19 +342,6 @@
       "source_location": "L23"
     },
     {
-      "id": "web_app_alerts_actions_reviewresult",
-      "label": "ReviewResult",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "reviewresult",
-      "source_file": "web/app/alerts/actions.ts",
-      "source_location": "L13"
-    },
-    {
       "id": "web_lib_api_datafreshness",
       "label": "DataFreshness",
       "_callable": true,
@@ -381,30 +355,56 @@
       "source_location": "L530"
     },
     {
-      "id": "web_lib_api_reviewstatus",
-      "label": "ReviewStatus",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "reviewstatus",
-      "source_file": "web/lib/api.ts",
-      "source_location": "L137"
-    },
-    {
-      "id": "web_lib_api_filteroptions",
-      "label": "FilterOptions",
+      "id": "web_app_district_state_district_page_params",
+      "label": "Params",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
-      "norm_label": "filteroptions",
+      "norm_label": "params",
+      "source_file": "web/app/district/[state]/[district]/page.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "web_app_district_state_district_page_search",
+      "label": "Search",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "search",
+      "source_file": "web/app/district/[state]/[district]/page.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "web_lib_api_districtdesk",
+      "label": "DistrictDesk",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "districtdesk",
       "source_file": "web/lib/api.ts",
-      "source_location": "L523"
+      "source_location": "L478"
+    },
+    {
+      "id": "web_lib_api_trends",
+      "label": "Trends",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "trends",
+      "source_file": "web/lib/api.ts",
+      "source_location": "L305"
     },
     {
       "id": "api_main_reviewin",
@@ -418,45 +418,6 @@
       "norm_label": "reviewin",
       "source_file": "api/main.py",
       "source_location": "L562"
-    },
-    {
-      "id": "web_app_district_state_district_page_params",
-      "label": "Params",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "[district]/page.tsx",
-      "file_type": "code",
-      "norm_label": "params",
-      "source_file": "web/app/district/[state]/[district]/page.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "web_app_district_state_district_page_search",
-      "label": "Search",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "[district]/page.tsx",
-      "file_type": "code",
-      "norm_label": "search",
-      "source_file": "web/app/district/[state]/[district]/page.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "web_lib_api_districtdesk",
-      "label": "DistrictDesk",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "[district]/page.tsx",
-      "file_type": "code",
-      "norm_label": "districtdesk",
-      "source_file": "web/lib/api.ts",
-      "source_location": "L478"
     },
     {
       "id": "data_test_scoring_recordingconn",
@@ -504,7 +465,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "overview",
       "source_file": "web/lib/api.ts",
@@ -517,24 +478,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "provenance",
       "source_file": "web/lib/api.ts",
       "source_location": "L264"
     },
     {
-      "id": "web_components_riskbar_riskcomponents",
-      "label": "RiskComponents",
+      "id": "web_app_alerts_actions_reviewresult",
+      "label": "ReviewResult",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 73,
       "community_name": "alerts/page.tsx",
       "file_type": "code",
-      "norm_label": "riskcomponents",
-      "source_file": "web/components/RiskBar.tsx",
-      "source_location": "L19"
+      "norm_label": "reviewresult",
+      "source_file": "web/app/alerts/actions.ts",
+      "source_location": "L13"
     },
     {
       "id": "web_lib_api_alert",
@@ -561,6 +522,45 @@
       "norm_label": "alertsummary",
       "source_file": "web/lib/api.ts",
       "source_location": "L173"
+    },
+    {
+      "id": "web_lib_api_reviewstatus",
+      "label": "ReviewStatus",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "alerts/page.tsx",
+      "file_type": "code",
+      "norm_label": "reviewstatus",
+      "source_file": "web/lib/api.ts",
+      "source_location": "L137"
+    },
+    {
+      "id": "web_app_states_page_sortkey",
+      "label": "SortKey",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "sortkey",
+      "source_file": "web/app/states/page.tsx",
+      "source_location": "L19"
+    },
+    {
+      "id": "web_lib_api_statesummary",
+      "label": "StateSummary",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "statesummary",
+      "source_file": "web/lib/api.ts",
+      "source_location": "L219"
     },
     {
       "id": "data_llm_sectors_apply",
@@ -1055,60 +1055,12 @@
       "source_location": "L88"
     },
     {
-      "id": "web_app_states_page_band",
-      "label": "band()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "band()",
-      "source_file": "web/app/states/page.tsx",
-      "source_location": "L21"
-    },
-    {
-      "id": "web_app_states_page_rate",
-      "label": "Rate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "rate()",
-      "source_file": "web/app/states/page.tsx",
-      "source_location": "L34"
-    },
-    {
-      "id": "web_app_states_page_statespage",
-      "label": "StatesPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "statespage()",
-      "source_file": "web/app/states/page.tsx",
-      "source_location": "L59"
-    },
-    {
-      "id": "web_lib_api_get",
-      "label": "get()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "get()",
-      "source_file": "web/lib/api.ts",
-      "source_location": "L553"
-    },
-    {
       "id": "web_app_state_state_page_generatemetadata",
       "label": "generateMetadata()",
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "formatINR",
+      "community_name": "[state]/page.tsx",
       "file_type": "code",
       "norm_label": "generatemetadata()",
       "source_file": "web/app/state/[state]/page.tsx",
@@ -1120,7 +1072,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "formatINR",
+      "community_name": "[state]/page.tsx",
       "file_type": "code",
       "norm_label": "rate()",
       "source_file": "web/app/state/[state]/page.tsx",
@@ -1132,7 +1084,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "formatINR",
+      "community_name": "[state]/page.tsx",
       "file_type": "code",
       "norm_label": "statedeskpage()",
       "source_file": "web/app/state/[state]/page.tsx",
@@ -1144,35 +1096,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 11,
-      "community_name": "formatINR",
+      "community_name": "[state]/page.tsx",
       "file_type": "code",
       "norm_label": "term()",
       "source_file": "web/app/state/[state]/page.tsx",
       "source_location": "L12"
-    },
-    {
-      "id": "web_lib_format_formatinr",
-      "label": "formatINR()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "formatINR",
-      "file_type": "code",
-      "norm_label": "formatinr()",
-      "source_file": "web/lib/format.ts",
-      "source_location": "L5"
-    },
-    {
-      "id": "web_app_analysis_page_analysispage",
-      "label": "AnalysisPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "format.ts",
-      "file_type": "code",
-      "norm_label": "analysispage()",
-      "source_file": "web/app/analysis/page.tsx",
-      "source_location": "L11"
     },
     {
       "id": "web_app_map_page_mappage",
@@ -1187,28 +1115,16 @@
       "source_location": "L22"
     },
     {
-      "id": "web_components_pager_pager",
-      "label": "Pager()",
+      "id": "web_components_riskbar_riskbar",
+      "label": "RiskBar()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
       "community_name": "format.ts",
       "file_type": "code",
-      "norm_label": "pager()",
-      "source_file": "web/components/Pager.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "web_components_riskticker_riskticker",
-      "label": "RiskTicker()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "format.ts",
-      "file_type": "code",
-      "norm_label": "riskticker()",
-      "source_file": "web/components/RiskTicker.tsx",
-      "source_location": "L29"
+      "norm_label": "riskbar()",
+      "source_file": "web/components/RiskBar.tsx",
+      "source_location": "L34"
     },
     {
       "id": "web_lib_format_choroplethfill",
@@ -1221,18 +1137,6 @@
       "norm_label": "choroplethfill()",
       "source_file": "web/lib/format.ts",
       "source_location": "L151"
-    },
-    {
-      "id": "web_lib_format_formatcount",
-      "label": "formatCount()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "format.ts",
-      "file_type": "code",
-      "norm_label": "formatcount()",
-      "source_file": "web/lib/format.ts",
-      "source_location": "L18"
     },
     {
       "id": "web_lib_format_isaggregatescoringpending",
@@ -1259,28 +1163,16 @@
       "source_location": "L117"
     },
     {
-      "id": "web_lib_format_riskscoretolevel",
-      "label": "riskScoreToLevel()",
+      "id": "web_lib_format_riskscorecolorhex",
+      "label": "riskScoreColorHex()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
       "community_name": "format.ts",
       "file_type": "code",
-      "norm_label": "riskscoretolevel()",
+      "norm_label": "riskscorecolorhex()",
       "source_file": "web/lib/format.ts",
-      "source_location": "L56"
-    },
-    {
-      "id": "web_app_alerts_actions_submitreview",
-      "label": "submitReview()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "submitreview()",
-      "source_file": "web/app/alerts/actions.ts",
-      "source_location": "L24"
+      "source_location": "L63"
     },
     {
       "id": "web_app_layout_freshnessline",
@@ -1292,7 +1184,7 @@
       "file_type": "code",
       "norm_label": "freshnessline()",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L64"
+      "source_location": "L59"
     },
     {
       "id": "web_app_layout_rootlayout",
@@ -1304,7 +1196,7 @@
       "file_type": "code",
       "norm_label": "rootlayout()",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L75"
+      "source_location": "L70"
     },
     {
       "id": "web_components_cursor_cursor",
@@ -1328,7 +1220,7 @@
       "file_type": "code",
       "norm_label": "logo()",
       "source_file": "web/components/Logo.tsx",
-      "source_location": "L17"
+      "source_location": "L16"
     },
     {
       "id": "web_components_navlinks_navlinks",
@@ -1341,30 +1233,6 @@
       "norm_label": "navlinks()",
       "source_file": "web/components/NavLinks.tsx",
       "source_location": "L11"
-    },
-    {
-      "id": "web_components_reviewactions_reviewactions",
-      "label": "ReviewActions()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "reviewactions()",
-      "source_file": "web/components/ReviewActions.tsx",
-      "source_location": "L30"
-    },
-    {
-      "id": "web_components_reviewername_reviewername",
-      "label": "ReviewerName()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "reviewername()",
-      "source_file": "web/components/ReviewerName.tsx",
-      "source_location": "L17"
     },
     {
       "id": "web_components_scrollreveal_scrollreveal",
@@ -1389,18 +1257,6 @@
       "norm_label": "splash()",
       "source_file": "web/components/Splash.tsx",
       "source_location": "L24"
-    },
-    {
-      "id": "web_lib_api_postreview",
-      "label": "postReview()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "postreview()",
-      "source_file": "web/lib/api.ts",
-      "source_location": "L622"
     },
     {
       "id": "data_load_real_data_work_key",
@@ -1559,12 +1415,48 @@
       "source_location": "L152"
     },
     {
+      "id": "web_app_analysis_page_analysispage",
+      "label": "AnalysisPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "analysispage()",
+      "source_file": "web/app/analysis/page.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "web_app_district_state_district_page_districtdeskpage",
+      "label": "DistrictDeskPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "districtdeskpage()",
+      "source_file": "web/app/district/[state]/[district]/page.tsx",
+      "source_location": "L27"
+    },
+    {
+      "id": "web_app_district_state_district_page_generatemetadata",
+      "label": "generateMetadata()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "generatemetadata()",
+      "source_file": "web/app/district/[state]/[district]/page.tsx",
+      "source_location": "L18"
+    },
+    {
       "id": "web_app_mp_id_page_mppage",
       "label": "MpPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
       "norm_label": "mppage()",
       "source_file": "web/app/mp/[id]/page.tsx",
@@ -1576,59 +1468,59 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
       "norm_label": "projectspage()",
       "source_file": "web/app/projects/page.tsx",
       "source_location": "L10"
     },
     {
-      "id": "web_components_projectfilters_projectfilters",
-      "label": "ProjectFilters()",
+      "id": "web_components_pager_pager",
+      "label": "Pager()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
-      "norm_label": "projectfilters()",
-      "source_file": "web/components/ProjectFilters.tsx",
-      "source_location": "L17"
+      "norm_label": "pager()",
+      "source_file": "web/components/Pager.tsx",
+      "source_location": "L15"
     },
     {
-      "id": "web_components_projectfilters_projectfilters_clearall",
-      "label": "clearAll()",
+      "id": "web_components_riskticker_riskticker",
+      "label": "RiskTicker()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
-      "norm_label": "clearall()",
-      "source_file": "web/components/ProjectFilters.tsx",
-      "source_location": "L70"
+      "norm_label": "riskticker()",
+      "source_file": "web/components/RiskTicker.tsx",
+      "source_location": "L29"
     },
     {
-      "id": "web_components_projectfilters_projectfilters_handleqchange",
-      "label": "handleQChange()",
+      "id": "web_lib_format_formatcount",
+      "label": "formatCount()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
-      "norm_label": "handleqchange()",
-      "source_file": "web/components/ProjectFilters.tsx",
-      "source_location": "L64"
+      "norm_label": "formatcount()",
+      "source_file": "web/lib/format.ts",
+      "source_location": "L18"
     },
     {
-      "id": "web_components_projectfilters_projectfilters_updateparams",
-      "label": "updateParams()",
+      "id": "web_lib_format_formatinr",
+      "label": "formatINR()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
-      "norm_label": "updateparams()",
-      "source_file": "web/components/ProjectFilters.tsx",
-      "source_location": "L50"
+      "norm_label": "formatinr()",
+      "source_file": "web/lib/format.ts",
+      "source_location": "L5"
     },
     {
       "id": "web_lib_format_normalizerisklevel",
@@ -1636,7 +1528,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
       "norm_label": "normalizerisklevel()",
       "source_file": "web/lib/format.ts",
@@ -1648,7 +1540,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
       "norm_label": "risklevelclass()",
       "source_file": "web/lib/format.ts",
@@ -1660,11 +1552,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
       "norm_label": "risklevellabel()",
       "source_file": "web/lib/format.ts",
       "source_location": "L41"
+    },
+    {
+      "id": "web_lib_format_riskscoretolevel",
+      "label": "riskScoreToLevel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "riskscoretolevel()",
+      "source_file": "web/lib/format.ts",
+      "source_location": "L56"
     },
     {
       "id": "api_db_execute",
@@ -2507,28 +2411,52 @@
       "source_location": "L489"
     },
     {
-      "id": "web_app_district_state_district_page_districtdeskpage",
-      "label": "DistrictDeskPage()",
+      "id": "web_components_projectfilters_projectfilters",
+      "label": "ProjectFilters()",
       "_callable": true,
       "_origin": "ast",
       "community": 25,
-      "community_name": "[district]/page.tsx",
+      "community_name": "ProjectFilters",
       "file_type": "code",
-      "norm_label": "districtdeskpage()",
-      "source_file": "web/app/district/[state]/[district]/page.tsx",
-      "source_location": "L27"
+      "norm_label": "projectfilters()",
+      "source_file": "web/components/ProjectFilters.tsx",
+      "source_location": "L17"
     },
     {
-      "id": "web_app_district_state_district_page_generatemetadata",
-      "label": "generateMetadata()",
+      "id": "web_components_projectfilters_projectfilters_clearall",
+      "label": "clearAll()",
       "_callable": true,
       "_origin": "ast",
       "community": 25,
-      "community_name": "[district]/page.tsx",
+      "community_name": "ProjectFilters",
       "file_type": "code",
-      "norm_label": "generatemetadata()",
-      "source_file": "web/app/district/[state]/[district]/page.tsx",
-      "source_location": "L18"
+      "norm_label": "clearall()",
+      "source_file": "web/components/ProjectFilters.tsx",
+      "source_location": "L70"
+    },
+    {
+      "id": "web_components_projectfilters_projectfilters_handleqchange",
+      "label": "handleQChange()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ProjectFilters",
+      "file_type": "code",
+      "norm_label": "handleqchange()",
+      "source_file": "web/components/ProjectFilters.tsx",
+      "source_location": "L64"
+    },
+    {
+      "id": "web_components_projectfilters_projectfilters_updateparams",
+      "label": "updateParams()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ProjectFilters",
+      "file_type": "code",
+      "norm_label": "updateparams()",
+      "source_file": "web/components/ProjectFilters.tsx",
+      "source_location": "L50"
     },
     {
       "id": "data_generate_synthetic_build_dataset",
@@ -4324,7 +4252,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "overviewpage()",
       "source_file": "web/app/page.tsx",
@@ -4336,7 +4264,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "provenancepage()",
       "source_file": "web/app/provenance/page.tsx",
@@ -4348,7 +4276,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "countup()",
       "source_file": "web/components/CountUp.tsx",
@@ -4360,7 +4288,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "easeout()",
       "source_file": "web/components/CountUp.tsx",
@@ -4372,7 +4300,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "herofield()",
       "source_file": "web/components/HeroField.tsx",
@@ -4384,7 +4312,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "formatfreshnesstimestamp()",
       "source_file": "web/lib/format.ts",
@@ -4439,6 +4367,18 @@
       "source_location": "L131"
     },
     {
+      "id": "web_app_alerts_actions_submitreview",
+      "label": "submitReview()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "alerts/page.tsx",
+      "file_type": "code",
+      "norm_label": "submitreview()",
+      "source_file": "web/app/alerts/actions.ts",
+      "source_location": "L24"
+    },
+    {
       "id": "web_app_alerts_page_alertspage",
       "label": "AlertsPage()",
       "_callable": true,
@@ -4463,16 +4403,28 @@
       "source_location": "L27"
     },
     {
-      "id": "web_components_riskbar_riskbar",
-      "label": "RiskBar()",
+      "id": "web_components_reviewactions_reviewactions",
+      "label": "ReviewActions()",
       "_callable": true,
       "_origin": "ast",
       "community": 73,
       "community_name": "alerts/page.tsx",
       "file_type": "code",
-      "norm_label": "riskbar()",
-      "source_file": "web/components/RiskBar.tsx",
-      "source_location": "L34"
+      "norm_label": "reviewactions()",
+      "source_file": "web/components/ReviewActions.tsx",
+      "source_location": "L30"
+    },
+    {
+      "id": "web_components_reviewername_reviewername",
+      "label": "ReviewerName()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "alerts/page.tsx",
+      "file_type": "code",
+      "norm_label": "reviewername()",
+      "source_file": "web/components/ReviewerName.tsx",
+      "source_location": "L17"
     },
     {
       "id": "web_lib_api_alertsexporturl",
@@ -4487,16 +4439,16 @@
       "source_location": "L565"
     },
     {
-      "id": "web_lib_format_riskscorecolorhex",
-      "label": "riskScoreColorHex()",
+      "id": "web_lib_api_postreview",
+      "label": "postReview()",
       "_callable": true,
       "_origin": "ast",
       "community": 73,
       "community_name": "alerts/page.tsx",
       "file_type": "code",
-      "norm_label": "riskscorecolorhex()",
-      "source_file": "web/lib/format.ts",
-      "source_location": "L63"
+      "norm_label": "postreview()",
+      "source_file": "web/lib/api.ts",
+      "source_location": "L622"
     },
     {
       "id": "video_explainer_build_at",
@@ -4869,6 +4821,54 @@
       "norm_label": "test_unknown_mp_404s()",
       "source_file": "api/test_api.py",
       "source_location": "L381"
+    },
+    {
+      "id": "web_app_states_page_band",
+      "label": "band()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "band()",
+      "source_file": "web/app/states/page.tsx",
+      "source_location": "L21"
+    },
+    {
+      "id": "web_app_states_page_rate",
+      "label": "Rate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "rate()",
+      "source_file": "web/app/states/page.tsx",
+      "source_location": "L34"
+    },
+    {
+      "id": "web_app_states_page_statespage",
+      "label": "StatesPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "statespage()",
+      "source_file": "web/app/states/page.tsx",
+      "source_location": "L59"
+    },
+    {
+      "id": "web_lib_api_get",
+      "label": "get()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "get()",
+      "source_file": "web/lib/api.ts",
+      "source_location": "L553"
     },
     {
       "id": "scripts_preview_deck_colour",
@@ -5442,37 +5442,26 @@
       "source_location": "L89"
     },
     {
-      "id": "web_app_states_page",
-      "label": "states/page.tsx",
+      "id": "web_components_projectfilters",
+      "label": "ProjectFilters.tsx",
       "_origin": "ast",
       "community": 10,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "states/page.tsx",
-      "source_file": "web/app/states/page.tsx",
+      "norm_label": "projectfilters.tsx",
+      "source_file": "web/components/ProjectFilters.tsx",
       "source_location": "L1"
     },
     {
-      "id": "web_app_states_page_bar_tone",
-      "label": "BAR_TONE",
+      "id": "web_components_projectfilters_status_option_labels",
+      "label": "STATUS_OPTION_LABELS",
       "_origin": "ast",
       "community": 10,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "bar_tone",
-      "source_file": "web/app/states/page.tsx",
-      "source_location": "L28"
-    },
-    {
-      "id": "web_app_states_page_sorts",
-      "label": "SORTS",
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "sorts",
-      "source_file": "web/app/states/page.tsx",
-      "source_location": "L11"
+      "norm_label": "status_option_labels",
+      "source_file": "web/components/ProjectFilters.tsx",
+      "source_location": "L10"
     },
     {
       "id": "web_lib_api",
@@ -5490,11 +5479,44 @@
       "label": "[state]/page.tsx",
       "_origin": "ast",
       "community": 11,
-      "community_name": "formatINR",
+      "community_name": "[state]/page.tsx",
       "file_type": "code",
       "norm_label": "[state]/page.tsx",
       "source_file": "web/app/state/[state]/page.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "web_next_config",
+      "label": "next.config.ts",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "[state]/page.tsx",
+      "file_type": "code",
+      "norm_label": "next.config.ts",
+      "source_file": "web/next.config.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_next_config_nextconfig",
+      "label": "nextConfig",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "[state]/page.tsx",
+      "file_type": "code",
+      "norm_label": "nextconfig",
+      "source_file": "web/next.config.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "ref_next",
+      "label": "next",
+      "_origin": "ast",
+      "community": 11,
+      "community_name": "[state]/page.tsx",
+      "file_type": "concept",
+      "norm_label": "next",
+      "source_file": "web/package.json",
+      "source_location": "L13"
     },
     {
       "id": "web_tsconfig",
@@ -5717,17 +5739,6 @@
       "source_file": "react-leaflet"
     },
     {
-      "id": "web_app_analysis_page",
-      "label": "analysis/page.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "format.ts",
-      "file_type": "code",
-      "norm_label": "analysis/page.tsx",
-      "source_file": "web/app/analysis/page.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "web_app_map_page",
       "label": "map/page.tsx",
       "_origin": "ast",
@@ -5772,26 +5783,37 @@
       "source_location": "L19"
     },
     {
-      "id": "web_components_pager",
-      "label": "Pager.tsx",
+      "id": "web_components_riskbar",
+      "label": "RiskBar.tsx",
       "_origin": "ast",
       "community": 13,
       "community_name": "format.ts",
       "file_type": "code",
-      "norm_label": "pager.tsx",
-      "source_file": "web/components/Pager.tsx",
+      "norm_label": "riskbar.tsx",
+      "source_file": "web/components/RiskBar.tsx",
       "source_location": "L1"
     },
     {
-      "id": "web_components_riskticker",
-      "label": "RiskTicker.tsx",
+      "id": "web_components_riskbar_steps",
+      "label": "STEPS",
       "_origin": "ast",
       "community": 13,
       "community_name": "format.ts",
       "file_type": "code",
-      "norm_label": "riskticker.tsx",
-      "source_file": "web/components/RiskTicker.tsx",
-      "source_location": "L1"
+      "norm_label": "steps",
+      "source_file": "web/components/RiskBar.tsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "web_components_riskbar_weights",
+      "label": "WEIGHTS",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "format.ts",
+      "file_type": "code",
+      "norm_label": "weights",
+      "source_file": "web/components/RiskBar.tsx",
+      "source_location": "L6"
     },
     {
       "id": "web_lib_format",
@@ -5849,28 +5871,6 @@
       "source_location": "L16"
     },
     {
-      "id": "web_app_alerts_actions",
-      "label": "actions.ts",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "actions.ts",
-      "source_file": "web/app/alerts/actions.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_app_alerts_actions_allowed",
-      "label": "ALLOWED",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "allowed",
-      "source_file": "web/app/alerts/actions.ts",
-      "source_location": "L7"
-    },
-    {
       "id": "web_app_layout",
       "label": "layout.tsx",
       "_origin": "ast",
@@ -5912,7 +5912,7 @@
       "file_type": "code",
       "norm_label": "navlinks",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L52"
+      "source_location": "L47"
     },
     {
       "id": "web_app_layout_sans",
@@ -5924,17 +5924,6 @@
       "norm_label": "sans",
       "source_file": "web/app/layout.tsx",
       "source_location": "L15"
-    },
-    {
-      "id": "web_app_layout_viewport",
-      "label": "viewport",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "viewport",
-      "source_file": "web/app/layout.tsx",
-      "source_location": "L38"
     },
     {
       "id": "web_components_cursor",
@@ -5970,50 +5959,6 @@
       "source_location": "L1"
     },
     {
-      "id": "web_components_reviewactions",
-      "label": "ReviewActions.tsx",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "reviewactions.tsx",
-      "source_file": "web/components/ReviewActions.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_components_reviewactions_decisions",
-      "label": "DECISIONS",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "decisions",
-      "source_file": "web/components/ReviewActions.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "web_components_reviewername",
-      "label": "ReviewerName.tsx",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "reviewername.tsx",
-      "source_file": "web/components/ReviewerName.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_components_reviewername_reviewer_storage_key",
-      "label": "REVIEWER_STORAGE_KEY",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "reviewer_storage_key",
-      "source_file": "web/components/ReviewerName.tsx",
-      "source_location": "L5"
-    },
-    {
       "id": "web_components_scrollreveal",
       "label": "ScrollReveal.tsx",
       "_origin": "ast",
@@ -6045,17 +5990,6 @@
       "norm_label": "splash.tsx",
       "source_file": "web/components/Splash.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "ref_react",
-      "label": "react",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "concept",
-      "norm_label": "react",
-      "source_file": "web/package.json",
-      "source_location": "L14"
     },
     {
       "id": "docs_superpowers_specs_2026_08_29_mplads_risk_monitor_design",
@@ -6455,37 +6389,81 @@
       "source_location": "L86"
     },
     {
+      "id": "web_app_analysis_page",
+      "label": "analysis/page.tsx",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "analysis/page.tsx",
+      "source_file": "web/app/analysis/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_app_district_state_district_page",
+      "label": "[district]/page.tsx",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "[district]/page.tsx",
+      "source_file": "web/app/district/[state]/[district]/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_app_mp_id_page",
+      "label": "mp/[id]/page.tsx",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "mp/[id]/page.tsx",
+      "source_file": "web/app/mp/[id]/page.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "web_app_projects_page",
       "label": "projects/page.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
       "norm_label": "projects/page.tsx",
       "source_file": "web/app/projects/page.tsx",
       "source_location": "L1"
     },
     {
-      "id": "web_components_projectfilters",
-      "label": "ProjectFilters.tsx",
+      "id": "web_components_pager",
+      "label": "Pager.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
-      "norm_label": "projectfilters.tsx",
-      "source_file": "web/components/ProjectFilters.tsx",
+      "norm_label": "pager.tsx",
+      "source_file": "web/components/Pager.tsx",
       "source_location": "L1"
     },
     {
-      "id": "web_components_projectfilters_status_option_labels",
-      "label": "STATUS_OPTION_LABELS",
+      "id": "web_components_riskticker",
+      "label": "RiskTicker.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "riskLevelLabel",
+      "community_name": "formatCount",
       "file_type": "code",
-      "norm_label": "status_option_labels",
-      "source_file": "web/components/ProjectFilters.tsx",
-      "source_location": "L10"
+      "norm_label": "riskticker.tsx",
+      "source_file": "web/components/RiskTicker.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_lib_api_api",
+      "label": "api",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "formatCount",
+      "file_type": "code",
+      "norm_label": "api",
+      "source_file": "web/lib/api.ts",
+      "source_location": "L572"
     },
     {
       "id": "claude_skills_graphify_skill",
@@ -7606,50 +7584,6 @@
       "source_location": "L3"
     },
     {
-      "id": "web_app_district_state_district_page",
-      "label": "[district]/page.tsx",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "[district]/page.tsx",
-      "file_type": "code",
-      "norm_label": "[district]/page.tsx",
-      "source_file": "web/app/district/[state]/[district]/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_next_config",
-      "label": "next.config.ts",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "[district]/page.tsx",
-      "file_type": "code",
-      "norm_label": "next.config.ts",
-      "source_file": "web/next.config.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_next_config_nextconfig",
-      "label": "nextConfig",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "[district]/page.tsx",
-      "file_type": "code",
-      "norm_label": "nextconfig",
-      "source_file": "web/next.config.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "ref_next",
-      "label": "next",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "[district]/page.tsx",
-      "file_type": "concept",
-      "norm_label": "next",
-      "source_file": "web/package.json",
-      "source_location": "L13"
-    },
-    {
       "id": "data_generate_synthetic",
       "label": "generate_synthetic.py",
       "_origin": "ast",
@@ -8486,7 +8420,7 @@
       "node_kind": "heading",
       "norm_label": "11. motion, measured",
       "source_file": "CLAUDE.md",
-      "source_location": "L252"
+      "source_location": "L238"
     },
     {
       "id": "claude_1_never_claim_more_than_the_record_supports",
@@ -8606,7 +8540,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "CLAUDE.md",
-      "source_location": "L349"
+      "source_location": "L335"
     },
     {
       "id": "claude_kasauti_mplads_verification",
@@ -10328,22 +10262,11 @@
       "source_location": "L74"
     },
     {
-      "id": "web_app_mp_id_page",
-      "label": "mp/[id]/page.tsx",
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "api",
-      "file_type": "code",
-      "norm_label": "mp/[id]/page.tsx",
-      "source_file": "web/app/mp/[id]/page.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "web_app_page",
       "label": "app/page.tsx",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "app/page.tsx",
       "source_file": "web/app/page.tsx",
@@ -10354,7 +10277,7 @@
       "label": "COMPONENTS",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "components",
       "source_file": "web/app/page.tsx",
@@ -10365,7 +10288,7 @@
       "label": "LIMITS",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "limits",
       "source_file": "web/app/page.tsx",
@@ -10376,7 +10299,7 @@
       "label": "MODELS",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "models",
       "source_file": "web/app/page.tsx",
@@ -10387,7 +10310,7 @@
       "label": "TERMS",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "terms",
       "source_file": "web/app/page.tsx",
@@ -10398,7 +10321,7 @@
       "label": "provenance/page.tsx",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "provenance/page.tsx",
       "source_file": "web/app/provenance/page.tsx",
@@ -10409,7 +10332,7 @@
       "label": "metadata",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "metadata",
       "source_file": "web/app/provenance/page.tsx",
@@ -10420,7 +10343,7 @@
       "label": "CountUp.tsx",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "countup.tsx",
       "source_file": "web/components/CountUp.tsx",
@@ -10431,22 +10354,22 @@
       "label": "HeroField.tsx",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "herofield.tsx",
       "source_file": "web/components/HeroField.tsx",
       "source_location": "L1"
     },
     {
-      "id": "web_lib_api_api",
-      "label": "api",
+      "id": "ref_react",
+      "label": "react",
       "_origin": "ast",
       "community": 69,
-      "community_name": "api",
-      "file_type": "code",
-      "norm_label": "api",
-      "source_file": "web/lib/api.ts",
-      "source_location": "L572"
+      "community_name": "app/page.tsx",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": "web/package.json",
+      "source_location": "L14"
     },
     {
       "id": "data_schema",
@@ -10848,6 +10771,28 @@
       "source_location": "L415"
     },
     {
+      "id": "web_app_alerts_actions",
+      "label": "actions.ts",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "alerts/page.tsx",
+      "file_type": "code",
+      "norm_label": "actions.ts",
+      "source_file": "web/app/alerts/actions.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_app_alerts_actions_allowed",
+      "label": "ALLOWED",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "alerts/page.tsx",
+      "file_type": "code",
+      "norm_label": "allowed",
+      "source_file": "web/app/alerts/actions.ts",
+      "source_location": "L7"
+    },
+    {
       "id": "web_app_alerts_page",
       "label": "alerts/page.tsx",
       "_origin": "ast",
@@ -10870,37 +10815,48 @@
       "source_location": "L20"
     },
     {
-      "id": "web_components_riskbar",
-      "label": "RiskBar.tsx",
+      "id": "web_components_reviewactions",
+      "label": "ReviewActions.tsx",
       "_origin": "ast",
       "community": 73,
       "community_name": "alerts/page.tsx",
       "file_type": "code",
-      "norm_label": "riskbar.tsx",
-      "source_file": "web/components/RiskBar.tsx",
+      "norm_label": "reviewactions.tsx",
+      "source_file": "web/components/ReviewActions.tsx",
       "source_location": "L1"
     },
     {
-      "id": "web_components_riskbar_steps",
-      "label": "STEPS",
+      "id": "web_components_reviewactions_decisions",
+      "label": "DECISIONS",
       "_origin": "ast",
       "community": 73,
       "community_name": "alerts/page.tsx",
       "file_type": "code",
-      "norm_label": "steps",
-      "source_file": "web/components/RiskBar.tsx",
-      "source_location": "L17"
+      "norm_label": "decisions",
+      "source_file": "web/components/ReviewActions.tsx",
+      "source_location": "L8"
     },
     {
-      "id": "web_components_riskbar_weights",
-      "label": "WEIGHTS",
+      "id": "web_components_reviewername",
+      "label": "ReviewerName.tsx",
       "_origin": "ast",
       "community": 73,
       "community_name": "alerts/page.tsx",
       "file_type": "code",
-      "norm_label": "weights",
-      "source_file": "web/components/RiskBar.tsx",
-      "source_location": "L6"
+      "norm_label": "reviewername.tsx",
+      "source_file": "web/components/ReviewerName.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_components_reviewername_reviewer_storage_key",
+      "label": "REVIEWER_STORAGE_KEY",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "alerts/page.tsx",
+      "file_type": "code",
+      "norm_label": "reviewer_storage_key",
+      "source_file": "web/components/ReviewerName.tsx",
+      "source_location": "L5"
     },
     {
       "id": "video_explainer_build",
@@ -11121,7 +11077,7 @@
       "node_kind": "heading",
       "norm_label": "kasauti \u2014 ai-powered mplads verification",
       "source_file": "README.md",
-      "source_location": "L3"
+      "source_location": "L1"
     },
     {
       "id": "readme_repository",
@@ -11133,7 +11089,7 @@
       "node_kind": "heading",
       "norm_label": "repository",
       "source_file": "README.md",
-      "source_location": "L177"
+      "source_location": "L175"
     },
     {
       "id": "readme_running_it",
@@ -11145,7 +11101,7 @@
       "node_kind": "heading",
       "norm_label": "running it",
       "source_file": "README.md",
-      "source_location": "L195"
+      "source_location": "L193"
     },
     {
       "id": "readme_the_api",
@@ -11157,7 +11113,7 @@
       "node_kind": "heading",
       "norm_label": "the api",
       "source_file": "README.md",
-      "source_location": "L145"
+      "source_location": "L143"
     },
     {
       "id": "readme_the_deck",
@@ -11169,7 +11125,7 @@
       "node_kind": "heading",
       "norm_label": "the deck",
       "source_file": "README.md",
-      "source_location": "L231"
+      "source_location": "L229"
     },
     {
       "id": "readme_the_interface",
@@ -11181,7 +11137,7 @@
       "node_kind": "heading",
       "norm_label": "the interface",
       "source_file": "README.md",
-      "source_location": "L98"
+      "source_location": "L96"
     },
     {
       "id": "readme_the_nightly_refresh",
@@ -11193,7 +11149,7 @@
       "node_kind": "heading",
       "norm_label": "the nightly refresh",
       "source_file": "README.md",
-      "source_location": "L75"
+      "source_location": "L73"
     },
     {
       "id": "readme_what_it_does",
@@ -11205,7 +11161,7 @@
       "node_kind": "heading",
       "norm_label": "what it does",
       "source_file": "README.md",
-      "source_location": "L24"
+      "source_location": "L22"
     },
     {
       "id": "readme_where_the_data_comes_from_and_how_that_is_checked",
@@ -11217,7 +11173,7 @@
       "node_kind": "heading",
       "norm_label": "where the data comes from, and how that is checked",
       "source_file": "README.md",
-      "source_location": "L59"
+      "source_location": "L57"
     },
     {
       "id": "data_load_real_data_rationale_499",
@@ -11251,6 +11207,39 @@
       "norm_label": "test_api.py",
       "source_file": "api/test_api.py",
       "source_location": "L1"
+    },
+    {
+      "id": "web_app_states_page",
+      "label": "states/page.tsx",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "states/page.tsx",
+      "source_file": "web/app/states/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_app_states_page_bar_tone",
+      "label": "BAR_TONE",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "bar_tone",
+      "source_file": "web/app/states/page.tsx",
+      "source_location": "L28"
+    },
+    {
+      "id": "web_app_states_page_sorts",
+      "label": "SORTS",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "states/page.tsx",
+      "file_type": "code",
+      "norm_label": "sorts",
+      "source_file": "web/app/states/page.tsx",
+      "source_location": "L11"
     },
     {
       "id": "scripts_preview_deck",
@@ -15124,7 +15113,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L66",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -15136,7 +15125,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L68",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -15148,7 +15137,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L69",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -15160,7 +15149,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L76",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -20579,7 +20568,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L252",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
@@ -20590,7 +20579,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L349",
+      "source_location": "L335",
       "weight": 1.0
     },
     {
@@ -24198,7 +24187,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L3",
+      "source_location": "L1",
       "weight": 1.0
     },
     {
@@ -24209,7 +24198,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L145",
+      "source_location": "L143",
       "weight": 1.0
     },
     {
@@ -24220,7 +24209,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L177",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -24231,18 +24220,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L195",
-      "weight": 1.0
-    },
-    {
-      "source": "readme_kasauti_ai_powered_mplads_verification",
-      "target": "readme_the_deck",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "README.md",
-      "source_location": "L231",
+      "source_location": "L193",
       "weight": 1.0
     },
     {
@@ -24253,7 +24231,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L24",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "readme_kasauti_ai_powered_mplads_verification",
+      "target": "readme_the_deck",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "L229",
       "weight": 1.0
     },
     {
@@ -24264,7 +24253,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L59",
+      "source_location": "L57",
       "weight": 1.0
     },
     {
@@ -24275,7 +24264,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L75",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -24286,7 +24275,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L98",
+      "source_location": "L96",
       "weight": 1.0
     },
     {
@@ -24918,24 +24907,13 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_app_layout_viewport",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "web/app/layout.tsx",
-      "source_location": "L38",
-      "weight": 1.0
-    },
-    {
-      "source": "web_app_layout",
       "target": "web_app_layout_navlinks",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L52",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -24946,7 +24924,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L64",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -24957,7 +24935,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L75",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -25331,7 +25309,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/components/Logo.tsx",
-      "source_location": "L17",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -29234,5 +29212,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a7f6f6852b8a68dec289c21608090f6a99947987"
+  "built_at_commit": "dd04cc73d05241762d4eb3172748cfb2e3d6aea9"
 }

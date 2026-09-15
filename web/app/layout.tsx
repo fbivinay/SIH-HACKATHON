@@ -1,6 +1,6 @@
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -31,6 +31,11 @@ export const metadata: Metadata = {
   description:
     "Reads every MPLADS work, scores the ones that do not resemble their peers, and hands officials a ranked list of what to verify.",
 };
+
+// Light only, whatever the OS or browser asks for: this writes the
+// `color-scheme` meta so even the first paint before CSS arrives is light.
+// The palette itself has no dark variant (globals.css).
+export const viewport: Viewport = { colorScheme: "light" };
 
 // Seven, in the order an official actually works: what is happening, what needs
 // me, where, and then the supporting evidence.
@@ -72,6 +77,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body className="flex min-h-screen flex-col">
+        {/* Phones are refused (see .phone-wall in globals.css). Inline and
+            first in <body> so the flag lands before the first paint; a
+            component would run after hydration and flash the site first. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              '(function(){var s=screen,r=Math.min(s.width,s.height)/Math.max(s.width,s.height),' +
+              'c=matchMedia("(pointer: coarse)").matches;' +
+              'if(/iPhone|Mobi/i.test(navigator.userAgent)||(c&&r<=0.6))document.documentElement.dataset.phone="1"})()',
+          }}
+        />
+        <div className="phone-wall">
+          <Logo size={72} />
+          <h1>Kasauti can only be opened on a desktop or laptop.</h1>
+          <p>Open this link on a larger screen to see the verification queue.</p>
+        </div>
         {/* Client-only: with no JavaScript the page is simply there. */}
         <Splash />
         {/* Marks below-fold blocks so only those animate on scroll. */}
