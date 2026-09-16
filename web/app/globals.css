@@ -1462,8 +1462,11 @@ body::before {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-card);
   box-shadow: var(--glass-edge), var(--glass-shadow);
-  overflow: hidden;
 }
+/* Each cell lifts under the pointer like a card does elsewhere: it takes a
+   surface and a radius of its own for the moment, so it rises out of the
+   table rather than bulging inside it. The panel is not overflow-hidden for
+   exactly this reason. */
 .figure {
   display: flex;
   flex-direction: column;
@@ -1926,6 +1929,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
  * the transform is cheap enough without it.
  */
 .stat-card,
+.figure,
 .card,
 .slab-card,
 .model-card,
@@ -1942,7 +1946,12 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
  * the arrival animation's transform, are never fought over.
  */
 @media (hover: hover) and (pointer: fine) {
+  .figure:hover {
+    background: var(--surface);
+    border-radius: var(--radius-card);
+  }
   .stat-card:hover,
+  .figure:hover,
   .card:hover,
   .slab-card:hover,
   .model-card:hover,
@@ -1976,6 +1985,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
  * buttons being clicked. Faster than the hover so the response feels immediate.
  */
 .stat-card:active,
+.figure:active,
 .card:active,
 .slab-card:active,
 .model-card:active,
@@ -1989,6 +1999,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
 /* The transition has to name transform explicitly, or the hover lift snaps
    while the box-shadow eases and the two arrive at different times. */
 .stat-card,
+.figure,
 .card,
 .slab-card,
 .model-card,
@@ -2004,9 +2015,9 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
 /* Nothing moves under the pointer when motion is declined. The sheen stays,
    because a highlight that does not move is not motion. */
 @media (prefers-reduced-motion: reduce) {
-  .stat-card:hover, .card:hover, .slab-card:hover, .model-card:hover,
+  .stat-card:hover, .figure:hover, .card:hover, .slab-card:hover, .model-card:hover,
   .statecard:hover, .rulecard:hover,
-  .stat-card:active, .card:active, .slab-card:active, .model-card:active,
+  .stat-card:active, .figure:active, .card:active, .slab-card:active, .model-card:active,
   .statecard:active, .rulecard:active {
     scale: 1;
     translate: none;
