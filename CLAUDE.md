@@ -224,11 +224,13 @@ render in IST with the label written literally.
 Seven nav pages in this order: Overview `/`, Alerts `/alerts`, States
 `/states`, Map `/map`, Works `/projects`, Agencies `/analysis`, Sources
 `/provenance`. Signals, Rules and Trends were deleted; what they carried lives
-on `/provenance`. **The overview is one screen** (owner's call, 2026-09-16):
-hero, term switcher, six figures, filling the space between the masthead and
-the ticker (`.viewport-column`, `main.home`). The score's components and
-limits (`components/ScoreMethod.tsx`) and the three models
-(`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
+on `/provenance`. **The overview's first screen is the hero, the term switcher
+and the six figures, filling the viewport between the masthead and the ticker
+with no slack** (owner's call, 2026-09-16): `.home-fold` is `100dvh / --zoom`
+minus the 132px of masthead and ticker, everything inside is set larger than
+elsewhere, and a `max-height: 820px` query shrinks it to fit a 768px laptop.
+The score's components and limits (`components/ScoreMethod.tsx`) follow below
+the fold; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
 the masthead on every page except the overview, where it runs along the bottom
 of the viewport (`OnHome` in `app/layout.tsx`); it carries only the works —
 no label, no "all high risk" link. "AI powered" must be visible on every page

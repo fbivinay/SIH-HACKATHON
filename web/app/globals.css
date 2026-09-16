@@ -1418,6 +1418,50 @@ body::before {
   backdrop-filter: none;
 }
 
+/* The overview's first screen: hero and figures fill the viewport between the
+   masthead and the ticker with no slack, and everything is set larger than
+   the same pieces elsewhere (owner's call). 132px is the masthead (80.5) plus
+   the ticker (51.1) in zoomed px, measured on 2026-09-16; both are fixed by
+   the CSS above, so re-measure if either changes. */
+.home-fold {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh / var(--zoom, 1) - 132px);
+  padding-bottom: 1.2rem;
+}
+.home-fold .page-head { padding-block: 2rem 1.3rem; }
+.home-fold .display--hero { font-size: clamp(2.4rem, 4.6vw, 3.6rem); }
+.home-fold .lede { font-size: 1.15rem; max-width: 52rem; }
+.home-figures {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.home-figures .grid {
+  flex: 1;
+  grid-auto-rows: 1fr;
+}
+.home-fold .stat-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.3rem 1.6rem;
+}
+.home-fold .stat-card__label { font-size: 1.05rem; }
+.home-fold .stat-card__value { margin-top: 0.45rem; font-size: clamp(2.2rem, 3.2vw, 3rem); }
+.home-fold .stat-card__note { margin-top: 0.4rem; font-size: 0.95rem; }
+/* A 768px laptop screen has 446 zoomed px between the masthead and the
+   ticker. The same six figures and the hero fit only set smaller. */
+@media (max-height: 820px) {
+  .home-fold .page-head { padding-block: 1.2rem 0.8rem; }
+  .home-fold .display--hero { font-size: clamp(1.9rem, 3.4vw, 2.4rem); }
+  .home-fold .lede { margin-top: 0.4rem; font-size: 1rem; }
+  .home-fold .stat-card { padding: 0.8rem 1.3rem; }
+  .home-fold .stat-card__label { font-size: 0.95rem; }
+  .home-fold .stat-card__value { margin-top: 0.2rem; font-size: clamp(1.8rem, 2.6vw, 2.3rem); }
+  .home-fold .stat-card__note { margin-top: 0.2rem; font-size: 0.85rem; }
+}
+
 .ticker__viewport {
   flex: 1 1 auto;
   min-width: 0;
