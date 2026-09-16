@@ -1,16 +1,16 @@
 # Graph Report - SIH HACKATHON  (2026-09-16)
 
 ## Corpus Check
-- 95 files · ~866,565 words
+- 96 files · ~866,631 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 990 nodes · 1552 edges · 87 communities (51 shown, 33 thin omitted)
+- 992 nodes · 1555 edges · 88 communities (52 shown, 33 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `eeb5b78b`
+- Built from commit: `3af737e5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -20,26 +20,26 @@
 - query
 - test_detectors.py
 - load_real_data.py
-- Frontend Dependencies
+- web/package.json
 - Vendor Concentration Tests
 - Database Schema
 - build_sih_deck.py
 - api.ts
-- formatINR
+- [state]/page.tsx
 - TypeScript Config
 - format.ts
 - layout.tsx
 - MPLADS Risk Monitor — Design Spec (SIH26102)
 - test_load_real_data.py
 - MoSPI Figure Verification
-- riskLevelLabel
+- formatCount
 - What You Must Do When Invoked
 - MPLADS Data Fetcher
 - test_current_refresh_run_id_ignores_an_abandoned_run
 - scoring.py
 - _a_state
 - Brag Plan: Kasauti
-- [district]/page.tsx
+- states/page.tsx
 - Synthetic Data Generator
 - Vercel Deploy Config
 - State Totals Verification
@@ -61,7 +61,7 @@
 - PostCSS Config
 - _RecordingCursor
 - Kasauti — MPLADS verification
-- projects/[id]/page.tsx
+- api
 - test_scoring.py
 - graphify reference: extra exports and benchmark
 - add_base_features
@@ -83,7 +83,7 @@
 - mp_key
 - MPLADS Risk Monitor Implementation Plan
 - test_loaded_fingerprint_follows_what_was_written_not_what_succeeded
-- api
+- app/page.tsx
 - AGENTS.md
 - build_rows
 - alerts/page.tsx
@@ -92,6 +92,7 @@
 - Kasauti — AI-powered MPLADS verification
 - build_mp_rows
 - fetch_expenditures
+- ProjectFilters
 - preview_deck.py
 - The two-minute explainer
 - brag-output/composition/assets/README.md
@@ -127,7 +128,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (87 total, 33 thin omitted)
+## Communities (88 total, 33 thin omitted)
 
 ### Community 0 - "classify_sector"
 Cohesion: 0.05
@@ -149,9 +150,9 @@ Nodes (60): benford_mad(), digit_shares(), _finding(), first_digit(), first_digi
 Cohesion: 0.12
 Nodes (16): check_headroom(), extract_fingerprint(), load(), loaded_fingerprint(), _newest(), _newest_optional(), prepare_insert_frame(), Load the real MPLADS CSV extracts into the `projects` table. Source: the four… (+8 more)
 
-### Community 5 - "Frontend Dependencies"
-Cohesion: 0.06
-Nodes (35): eslint, eslint-config-next, leaflet, react-dom, tailwindcss, @tailwindcss/postcss, @types/leaflet, @types/node (+27 more)
+### Community 5 - "web/package.json"
+Cohesion: 0.05
+Nodes (37): eslint, eslint-config-next, leaflet, next, react-dom, tailwindcss, @tailwindcss/postcss, @types/leaflet (+29 more)
 
 ### Community 6 - "Vendor Concentration Tests"
 Cohesion: 0.11
@@ -166,20 +167,20 @@ Cohesion: 0.13
 Nodes (21): caption(), crore(), figures(), hotspot(), indian(), link_row(), main(), place() (+13 more)
 
 ### Community 10 - "api.ts"
-Cohesion: 0.08
-Nodes (24): band(), BAR_TONE, SortKey, SORTS, StatesPage(), AgencyStat, AlertPage, ComplianceBook (+16 more)
+Cohesion: 0.11
+Nodes (18): STATUS_OPTION_LABELS, AgencyStat, AlertPage, ComplianceBook, ComplianceRule, DeskFinding, DeskSector, Detector (+10 more)
 
-### Community 11 - "formatINR"
-Cohesion: 0.31
-Nodes (6): Params, Search, StateDeskPage(), term(), StateDesk, formatINR()
+### Community 11 - "[state]/page.tsx"
+Cohesion: 0.32
+Nodes (5): Params, Search, StateDeskPage(), term(), StateDesk
 
 ### Community 12 - "TypeScript Config"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 13 - "format.ts"
-Cohesion: 0.17
-Nodes (18): react-leaflet, AnalysisPage(), GeoJSON, MapContainer, MapPage(), TileLayer, Pager(), RiskTicker() (+10 more)
+Cohesion: 0.15
+Nodes (18): react-leaflet, GeoJSON, MapContainer, MapPage(), TileLayer, methodFor(), ProjectPage(), StateStat (+10 more)
 
 ### Community 14 - "layout.tsx"
 Cohesion: 0.09
@@ -197,9 +198,9 @@ Nodes (10): A work's identity is (Work ID, ls_term, IDA). The agency is part of 
 Cohesion: 0.23
 Nodes (11): aggregator(), main(), official(), ours(), post(), Persist the comparison so the interface can show it without calling the portal…, Reconcile our figures against the official MoSPI MPLADS dashboard. The problem…, �83,33,66,73,298.01' -> 83336673298.01 (+3 more)
 
-### Community 18 - "riskLevelLabel"
-Cohesion: 0.26
-Nodes (10): MpPage(), ProjectsPage(), ProjectFilters(), handleQChange(), updateParams(), STATUS_OPTION_LABELS, FilterOptions, normalizeRiskLevel() (+2 more)
+### Community 18 - "formatCount"
+Cohesion: 0.22
+Nodes (17): AnalysisPage(), DistrictDeskPage(), Params, Search, MpPage(), ProjectsPage(), Pager(), RiskTicker() (+9 more)
 
 ### Community 19 - "What You Must Do When Invoked"
 Cohesion: 0.08
@@ -225,9 +226,9 @@ Nodes (16): _a_state(), A state that actually has works, taken from the data rat
 Cohesion: 0.09
 Nodes (21): Audio direction, Brag Plan: Kasauti, Duration: 24 seconds, Every figure in this video is real, Format: landscape — 1920x1080, Hook (first 2-3 seconds), Key moments (the middle), Outro / punchline (+13 more)
 
-### Community 25 - "[district]/page.tsx"
+### Community 25 - "states/page.tsx"
 Cohesion: 0.25
-Nodes (6): next, DistrictDeskPage(), Params, Search, DistrictDesk, nextConfig
+Nodes (7): band(), BAR_TONE, SortKey, SORTS, StatesPage(), get(), StateSummary
 
 ### Community 26 - "Synthetic Data Generator"
 Cohesion: 0.70
@@ -249,9 +250,9 @@ Nodes (6): fetch_projects(), Captures the SQL fetch_projects actually runs, and 
 Cohesion: 0.14
 Nodes (13): 10. Interface, 11. Motion, measured, 1. Never claim more than the record supports, 2. `work_key` is the only identifier that survives a reload, 3. Source tables and derived tables are separate, and the swap is atomic, 4. Population statistics stay at population grain, 5. Thresholds are measured, not borrowed, 6. Money comes from the source's own aggregates (+5 more)
 
-### Community 47 - "projects/[id]/page.tsx"
-Cohesion: 0.23
-Nodes (10): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), ReviewHistory, hasPeers(), isNearDuplicate() (+2 more)
+### Community 47 - "api"
+Cohesion: 0.18
+Nodes (11): metadata, ProvenancePage(), LABELS, ReviewTrail(), when(), MODELS, WhereTheAI(), api (+3 more)
 
 ### Community 48 - "test_scoring.py"
 Cohesion: 0.14
@@ -301,9 +302,9 @@ Nodes (17): mp_key(), normalize_mp_name(), Stable identity for a Member of Parli
 Cohesion: 0.11
 Nodes (18): Addendum — follow-up tasks from the 2026-08-31 data (Track: data), Global Constraints, MPLADS Risk Monitor Implementation Plan, Task 0: Postgres schema + repo scaffold + shared env contract, Task 10: Final integration / demo dry run (shared, last), Task 11: Derive a sector and fix the cost baseline — DONE, Task 12: Score vendor concentration at the agency grain — DONE, Task 13: Normalize MP identity — DONE (+10 more)
 
-### Community 69 - "api"
-Cohesion: 0.15
-Nodes (14): COMPONENTS, LIMITS, MODELS, OverviewPage(), TERMS, metadata, ProvenancePage(), CountUp() (+6 more)
+### Community 69 - "app/page.tsx"
+Cohesion: 0.24
+Nodes (8): COMPONENTS, LIMITS, OverviewPage(), TERMS, CountUp(), easeOut(), HeroField(), Overview
 
 ### Community 72 - "build_rows"
 Cohesion: 0.33
@@ -324,6 +325,10 @@ Nodes (9): Audio, Creative Direction, Hyperframes Composition Brief: Kasauti, Hy
 ### Community 77 - "Kasauti — AI-powered MPLADS verification"
 Cohesion: 0.20
 Nodes (9): Kasauti — AI-powered MPLADS verification, Repository, Running it, The API, The deck, The interface, The nightly refresh, What it does (+1 more)
+
+### Community 80 - "ProjectFilters"
+Cohesion: 0.67
+Nodes (3): ProjectFilters(), handleQChange(), updateParams()
 
 ### Community 81 - "preview_deck.py"
 Cohesion: 0.48
