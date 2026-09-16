@@ -129,16 +129,18 @@ export default async function OverviewPage({
             ))}
           </nav>
         </div>
-        {/* Six figures in two even rows of three. Vendor payments was the
-            seventh and left a hole in the grid; the source still serves it. */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        {/* One panel, six cells, hairlines between: the figures are one set
+            for one scope, not six separate cards. The first row is the record,
+            the second what the scoring made of it. Vendor payments was a
+            seventh and left a hole; the source still serves it. */}
+        <div className="figures">
           {stats.map((s) => (
-            <div key={s.label} className={`stat-card${s.tone ? ` stat-card--${s.tone}` : ""}`}>
-              <div className="stat-card__label">{s.label}</div>
-              <div className="stat-card__value">
+            <div key={s.label} className={`figure${s.tone ? ` figure--${s.tone}` : ""}`}>
+              <div className="figure__label">{s.label}</div>
+              <div className="figure__value">
                 <CountUp text={String(s.value)} />
               </div>
-              <div className="stat-card__note">{s.note}</div>
+              <div className="figure__note">{s.note}</div>
             </div>
           ))}
         </div>

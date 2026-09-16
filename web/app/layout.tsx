@@ -107,7 +107,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="masthead">
           <div className="shell masthead__inner">
             <Link href="/" className="wordmark">
-              <Logo size={62} />
+              <Logo size={74} />
               <span className="wordmark__text">
                 Kasauti
                 <span className="wordmark__sub"><b className="ai-word">AI-powered</b> MPLADS verification</span>

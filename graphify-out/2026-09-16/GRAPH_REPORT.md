@@ -1,7 +1,7 @@
 # Graph Report - SIH HACKATHON  (2026-09-16)
 
 ## Corpus Check
-- 97 files · ~866,812 words
+- 97 files · ~866,877 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a3734169`
+- Built from commit: `db15317f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -61,7 +61,7 @@
 - PostCSS Config
 - _RecordingCursor
 - Kasauti — MPLADS verification
-- provenance/page.tsx
+- CountUp.tsx
 - test_scoring.py
 - graphify reference: extra exports and benchmark
 - add_base_features
@@ -83,7 +83,7 @@
 - mp_key
 - MPLADS Risk Monitor Implementation Plan
 - test_loaded_fingerprint_follows_what_was_written_not_what_succeeded
-- CountUp.tsx
+- app/page.tsx
 - AGENTS.md
 - build_rows
 - alerts/page.tsx
@@ -251,9 +251,9 @@ Nodes (6): fetch_projects(), Captures the SQL fetch_projects actually runs, and 
 Cohesion: 0.14
 Nodes (13): 10. Interface, 11. Motion, measured, 1. Never claim more than the record supports, 2. `work_key` is the only identifier that survives a reload, 3. Source tables and derived tables are separate, and the swap is atomic, 4. Population statistics stay at population grain, 5. Thresholds are measured, not borrowed, 6. Money comes from the source's own aggregates (+5 more)
 
-### Community 47 - "provenance/page.tsx"
-Cohesion: 0.21
-Nodes (9): metadata, ProvenancePage(), COMPONENTS, LIMITS, ScoreMethod(), MODELS, WhereTheAI(), Provenance (+1 more)
+### Community 47 - "CountUp.tsx"
+Cohesion: 0.25
+Nodes (8): metadata, ProvenancePage(), CountUp(), easeOut(), MODELS, WhereTheAI(), Provenance, formatFreshnessTimestamp()
 
 ### Community 48 - "test_scoring.py"
 Cohesion: 0.14
@@ -303,9 +303,9 @@ Nodes (17): mp_key(), normalize_mp_name(), Stable identity for a Member of Parli
 Cohesion: 0.11
 Nodes (18): Addendum — follow-up tasks from the 2026-08-31 data (Track: data), Global Constraints, MPLADS Risk Monitor Implementation Plan, Task 0: Postgres schema + repo scaffold + shared env contract, Task 10: Final integration / demo dry run (shared, last), Task 11: Derive a sector and fix the cost baseline — DONE, Task 12: Score vendor concentration at the agency grain — DONE, Task 13: Normalize MP identity — DONE (+10 more)
 
-### Community 69 - "CountUp.tsx"
-Cohesion: 0.31
-Nodes (6): OverviewPage(), TERMS, CountUp(), easeOut(), HeroField(), Overview
+### Community 69 - "app/page.tsx"
+Cohesion: 0.24
+Nodes (7): OverviewPage(), TERMS, HeroField(), COMPONENTS, LIMITS, ScoreMethod(), Overview
 
 ### Community 72 - "build_rows"
 Cohesion: 0.33

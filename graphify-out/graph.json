@@ -8533,7 +8533,7 @@
       "node_kind": "heading",
       "norm_label": "11. motion, measured",
       "source_file": "CLAUDE.md",
-      "source_location": "L263"
+      "source_location": "L274"
     },
     {
       "id": "claude_1_never_claim_more_than_the_record_supports",
@@ -8653,7 +8653,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "CLAUDE.md",
-      "source_location": "L362"
+      "source_location": "L373"
     },
     {
       "id": "claude_kasauti_mplads_verification",
@@ -20696,7 +20696,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L263",
+      "source_location": "L274",
       "weight": 1.0
     },
     {
@@ -20718,7 +20718,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L362",
+      "source_location": "L373",
       "weight": 1.0
     },
     {
@@ -29384,5 +29384,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "db15317f9300c8ee7fea723c5ef3c01b6060e6e7"
+  "built_at_commit": "e28fa01bb31c600dd0f32dff872f522e030a0e27"
 }

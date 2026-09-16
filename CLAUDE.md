@@ -206,8 +206,10 @@ preference: `:root { color-scheme: light }`, `viewport.colorScheme` in
 `app/layout.tsx`, and no `prefers-color-scheme: dark` block anywhere. The dark
 palette was removed on 2026-09-15 at the owner's request; do not bring it back.
 
-The masthead is ~100px tall, mark 62px, name 1.7rem, on the owner's call; the
-nav links and the masthead gap were tightened so all seven fit at 1280 wide.
+The masthead is ~125px tall, mark 74px, name 2rem, on the owner's call; the
+nav links (0.85rem, 0.5rem side padding) and the masthead gap were tightened
+so all seven fit at 1280 wide, and that is the ceiling without hiding the
+strapline.
 Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at 700–1023px, none
 below. **Phones are refused outright** (owner's call, 2026-09-15): the inline
 script at the top of `<body>` sets `<html data-phone>` and `.phone-wall` shows
@@ -227,12 +229,17 @@ Seven nav pages in this order: Overview `/`, Alerts `/alerts`, States
 on `/provenance`. **The overview's first screen is the hero, the term switcher
 and the six figures, filling the viewport between the masthead and the ticker
 with no slack** (owner's call, 2026-09-16): `.home-fold` is `100dvh / --zoom`
-minus the 132px of masthead and ticker, runs the window's width rather than
-the 1180px shell, and everything inside is set larger than elsewhere. That
-min-height is a floor, so two `max-height` queries (980px, 820px) shrink the
-type to keep the last row of figures above the ticker; measured on six
-viewports from 1280×720 to 1920×1080, the gap is 30–52px. Re-measure after
-touching any size in that block.
+minus `--fold-chrome` (masthead 94 + ticker 51 zoomed px, measured), runs the
+window's width rather than the 1180px shell, and everything inside is set
+larger than elsewhere. The six figures are one panel (`.figures`, a 3×2 grid
+with hairlines, each figure centred in its cell), not six cards — six cards
+at that size read as six empty boxes. The min-height is a floor, so two
+`max-height` queries (980px, 820px) shrink the type to keep the panel above
+the ticker; measured on five viewports from 1280×720 to 1920×1080, the gap
+is 34–51px. Re-measure after touching any size in that block or the
+masthead, and measure with reduced motion forced *and* the fold's sections
+and `.figures` in the reduced-motion list — an element still in its
+entrance delay reports its rect 104px low.
 The score's components and limits (`components/ScoreMethod.tsx`) follow below
 the fold; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
 the masthead on every page except the overview, where it runs along the bottom
