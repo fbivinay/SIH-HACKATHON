@@ -3,10 +3,8 @@ import Link from "next/link";
 /**
  * How the score is built and what it will not say.
  *
- * Both lived on the overview until the owner cut that page down to the hero
- * and the figures. They sit on /provenance with the models, because the page
- * about where the numbers come from is also the page about what they mean.
- * Renders blocks, not sections: that page is one shell.
+ * The overview, below the first screen: the owner wants the figures to own
+ * the opening screen and this to follow it, not to leave the page.
  */
 // Same weights and thresholds as data/scoring.py. Stated on the page because a
 // score nobody can take apart is a score nobody should act on.
@@ -70,7 +68,7 @@ const LIMITS = [
 export default function ScoreMethod() {
   return (
     <>
-    <div className="mt-12">
+    <section className="shell mt-9">
       <div className="slab">
         <div className="text-center">
           <h2 className="section-head">What the score is made of</h2>
@@ -115,9 +113,9 @@ export default function ScoreMethod() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div className="mt-12">
+    <section className="shell mt-6">
       <div className="text-center">
         <h2 className="section-head">What it will not tell you</h2>
         <p className="lede">
@@ -135,7 +133,7 @@ export default function ScoreMethod() {
           </div>
         ))}
       </div>
-    </div>
+    </section>
     </>
   );
 }

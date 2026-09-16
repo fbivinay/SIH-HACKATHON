@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { formatCount, formatINR } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 import HeroField from "@/components/HeroField";
+import ScoreMethod from "@/components/ScoreMethod";
 
 
 const TERMS = [
@@ -71,12 +72,13 @@ export default async function OverviewPage({
     },
   ];
 
-  // The whole landing page: hero, term switcher, six figures, filling the
-  // space between the masthead and the ticker (owner's call). Everything else
-  // that was here - the score's components, its limits, the models - is on
-  // /provenance.
+  // The first screen is the hero, the term switcher and the six figures, sized
+  // to fill the space between the masthead and the ticker with no slack
+  // (.home-fold); the score's components and limits follow below it. The
+  // models are on /provenance.
   return (
-    <main className="home flex flex-1 flex-col justify-center">
+    <main className="home">
+      <div className="home-fold">
       <section className="shell page-head">
         <HeroField />
         <h1 className="display display--hero">
@@ -92,7 +94,7 @@ export default async function OverviewPage({
 
       </section>
 
-      <section className="shell">
+      <section className="shell home-figures">
         {scoringPending && (
           <div className="notice mb-5" role="status">
             <span aria-hidden="true">&#9679;</span>
@@ -108,7 +110,7 @@ export default async function OverviewPage({
           {/* flex-1 min-w-0 so the sentence wraps inside its own column instead of
               pushing the term buttons onto a second row, which cost a whole
               card-row of the fold at 1280. */}
-          <p className="flex-1 min-w-0 text-[0.8rem]" style={{ color: "var(--ink-3)" }}>
+          <p className="flex-1 min-w-0 text-[0.95rem]" style={{ color: "var(--ink-3)" }}>
             {scope.label}
             {scope.note ? ` (${scope.note})` : ""} — figures cover this scope only, matching
             the same view on the source&rsquo;s dashboard.
@@ -141,7 +143,9 @@ export default async function OverviewPage({
           ))}
         </div>
       </section>
+      </div>
 
+      <ScoreMethod />
     </main>
   );
 }

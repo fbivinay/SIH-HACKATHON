@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789558260.8896658,
-    "seen": 1789558344.9454136,
-    "ast_hash": "6739e7330e7e45ec88fab74a36dfcfe2",
+    "mtime": 1789563185.2114918,
+    "seen": 1789563295.348765,
+    "ast_hash": "0b0d63ab9e3064e3cf73e69439d0b75d",
     "semantic_hash": ""
   },
   "web/app/map/page.tsx": {
@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "web/app/page.tsx": {
-    "mtime": 1789558832.2665417,
-    "seen": 1789558968.7301364,
-    "ast_hash": "274ccffe0a19a245437c6740e57f1579",
+    "mtime": 1789562789.701621,
+    "seen": 1789563295.3488648,
+    "ast_hash": "072c4901d844fa16ee9510fd8e83a19f",
     "semantic_hash": ""
   },
   "web/app/projects/[id]/page.tsx": {
@@ -222,9 +222,9 @@
     "semantic_hash": ""
   },
   "web/app/provenance/page.tsx": {
-    "mtime": 1789558851.8852477,
-    "seen": 1789558968.7302353,
-    "ast_hash": "f6165a2c4e5975da431122a3c667d70a",
+    "mtime": 1789562769.9527798,
+    "seen": 1789563295.3489344,
+    "ast_hash": "01cd7e1d0d0b87166d064a9d1fa51141",
     "semantic_hash": ""
   },
   "web/app/state/[state]/page.tsx": {
@@ -342,9 +342,9 @@
     "semantic_hash": ""
   },
   "web/components/RiskTicker.tsx": {
-    "mtime": 1789131076.7352247,
-    "seen": 1789156880.4907758,
-    "ast_hash": "f1f4bfea34f2725f0ec6205c616d55cc",
+    "mtime": 1789562769.9538805,
+    "seen": 1789563295.349431,
+    "ast_hash": "4a43d88cfc2c38f779f6f33eaa090a1f",
     "semantic_hash": ""
   },
   "web/components/ScrollReveal.tsx": {
@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789558966.0021713,
-    "seen": 1789558968.731341,
-    "ast_hash": "f226d5f380b70720fd29ba23e7215ec3",
+    "mtime": 1789561874.5336645,
+    "seen": 1789563295.3501012,
+    "ast_hash": "f9477f2c7d2c2225344817e8a8cb4720",
     "semantic_hash": ""
   },
   "README.md": {
@@ -831,6 +831,12 @@
     "mtime": 1789558851.8847015,
     "seen": 1789558968.7307503,
     "ast_hash": "d98417a7ad1950fe03ed4b933619794d",
+    "semantic_hash": ""
+  },
+  "web/components/ScoreMethod.tsx": {
+    "mtime": 1789562769.9516006,
+    "seen": 1789563295.3494341,
+    "ast_hash": "210b9ff657ceb880c61167f603f73266",
     "semantic_hash": ""
   }
 }
