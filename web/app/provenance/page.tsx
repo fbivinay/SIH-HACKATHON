@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import CountUp from "@/components/CountUp";
+import WhereTheAI from "@/components/WhereTheAI";
 
 export const metadata = { title: "Where the numbers come from" };
 
@@ -227,6 +228,8 @@ export default async function ProvenancePage() {
             </div>
           </>
         )}
+
+        <WhereTheAI />
 
         {detectors.length > 0 && (
           <div className="mt-12">

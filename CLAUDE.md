@@ -227,6 +227,9 @@ on every page except the overview, where it runs along the bottom of the
 viewport (`OnHome` in `app/layout.tsx`, owner's call). "AI powered" must be
 visible on every page (masthead) and in front of "Why was this flagged?" on the work page — the
 brief asks for an AI-powered system and a visitor could not previously tell.
+The "Where the AI is" section (three models, `components/WhereTheAI.tsx`) is
+on `/provenance`, not the overview — the owner wants the opening screen free
+of it; the masthead carries the claim there.
 
 The deck (`scripts/build_sih_deck.py`) reads every figure from the database at
 build time and refuses to build on a null or zero. It shipped stale twice when
