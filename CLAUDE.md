@@ -227,8 +227,12 @@ Seven nav pages in this order: Overview `/`, Alerts `/alerts`, States
 on `/provenance`. **The overview's first screen is the hero, the term switcher
 and the six figures, filling the viewport between the masthead and the ticker
 with no slack** (owner's call, 2026-09-16): `.home-fold` is `100dvh / --zoom`
-minus the 132px of masthead and ticker, everything inside is set larger than
-elsewhere, and a `max-height: 820px` query shrinks it to fit a 768px laptop.
+minus the 132px of masthead and ticker, runs the window's width rather than
+the 1180px shell, and everything inside is set larger than elsewhere. That
+min-height is a floor, so two `max-height` queries (980px, 820px) shrink the
+type to keep the last row of figures above the ticker; measured on six
+viewports from 1280×720 to 1920×1080, the gap is 30–52px. Re-measure after
+touching any size in that block.
 The score's components and limits (`components/ScoreMethod.tsx`) follow below
 the fold; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
 the masthead on every page except the overview, where it runs along the bottom
