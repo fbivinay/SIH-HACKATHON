@@ -141,13 +141,27 @@
 @media (min-width: 1024px) {
   :root {
     zoom: 1.33;
+    --zoom: 1.33;
   }
 }
 
 @media (min-width: 700px) and (max-width: 1023px) {
   :root {
     zoom: 1.15;
+    --zoom: 1.15;
   }
+}
+
+/* Masthead, page and (on the overview) the ticker share one column exactly
+   the height of the viewport, so the overview's main grows to meet the ticker
+   at the bottom of the screen and the footer sits below the fold. Viewport
+   units are scaled by the root zoom like any other length - measured, 100dvh
+   at 1.33 rendered 1436px tall in a 1080px window - so the zoom is divided
+   back out. */
+.viewport-column {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh / var(--zoom, 1));
 }
 
 body {
@@ -1404,32 +1418,6 @@ body::before {
   backdrop-filter: none;
 }
 
-.ticker__label {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex: none;
-  margin: 0.28rem 0.4rem 0.28rem 0;
-  padding: 0.32rem 0.9rem;
-  border-radius: var(--radius-pill);
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-edge);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.045em;
-  text-transform: uppercase;
-  color: var(--ink);
-  white-space: nowrap;
-}
-.ticker__count {
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--ink-2);
-  font-size: 0.68rem;
-}
-
 .ticker__viewport {
   flex: 1 1 auto;
   min-width: 0;
@@ -1510,24 +1498,6 @@ body::before {
   font-weight: 500;
 }
 
-.ticker__all {
-  display: flex;
-  align-items: center;
-  flex: none;
-  margin: 0.28rem 0 0.28rem 0.4rem;
-  padding: 0.32rem 0.9rem;
-  border-radius: var(--radius-pill);
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-edge);
-  color: var(--ink);
-  font-size: 0.74rem;
-  font-weight: 650;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.ticker__all:hover { color: var(--ink); }
-
 /* An animation that cannot be stopped is a barrier, not a flourish. With
    reduced motion the strip becomes an ordinary scrollable row: the same works,
    the same links, no movement. */
@@ -1544,9 +1514,7 @@ body::before {
   .ticker__set[aria-hidden="true"] { display: none; }
 }
 
-/* On a phone the label and tail eat the strip. Keep the works. */
 @media (max-width: 640px) {
-  .ticker__label, .ticker__all { display: none; }
   .ticker__name { max-width: 18ch; }
 }
 

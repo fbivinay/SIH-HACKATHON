@@ -77,7 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const freshness = await freshnessLine();
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body className="flex min-h-screen flex-col">
+      <body>
         {/* Phones are refused (see .phone-wall in globals.css). Inline and
             first in <body> so the flag lands before the first paint; a
             component would run after hydration and flash the site first. */}
@@ -100,6 +100,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ScrollReveal />
         {/* The dot-and-ring pointer; renders nothing on touch devices. */}
         <Cursor />
+        {/* See .viewport-column. On every page but the overview, main is a
+            block child and takes its own height. */}
+        <div className="viewport-column">
         <div className="topbar">
         <header className="masthead">
           <div className="shell masthead__inner">
@@ -128,13 +131,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </OnHome>
         </div>
 
-        <div className="flex-1">{children}</div>
+        <div className="flex flex-1 flex-col">{children}</div>
 
         <OnHome>
           <div className="bottombar">
             <RiskTicker />
           </div>
         </OnHome>
+        </div>
 
         <footer className="footer">
           <div className="shell">
