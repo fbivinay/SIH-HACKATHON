@@ -1427,9 +1427,10 @@ body::before {
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh / var(--zoom, 1) - 132px);
-  padding-bottom: 1.2rem;
+  /* Hero high, figures clear of the ticker: the cards must not sit on it. */
+  padding-bottom: 2.4rem;
 }
-.home-fold .page-head { padding-block: 2rem 1.3rem; }
+.home-fold .page-head { padding-block: 1.1rem 1.1rem; }
 .home-fold .display--hero { font-size: clamp(2.4rem, 4.6vw, 3.6rem); }
 .home-fold .lede { font-size: 1.15rem; max-width: 52rem; }
 .home-figures {
@@ -1453,7 +1454,8 @@ body::before {
 /* A 768px laptop screen has 446 zoomed px between the masthead and the
    ticker. The same six figures and the hero fit only set smaller. */
 @media (max-height: 820px) {
-  .home-fold .page-head { padding-block: 1.2rem 0.8rem; }
+  .home-fold { padding-bottom: 1.4rem; }
+  .home-fold .page-head { padding-block: 0.7rem 0.7rem; }
   .home-fold .display--hero { font-size: clamp(1.9rem, 3.4vw, 2.4rem); }
   .home-fold .lede { margin-top: 0.4rem; font-size: 1rem; }
   .home-fold .stat-card { padding: 0.8rem 1.3rem; }
