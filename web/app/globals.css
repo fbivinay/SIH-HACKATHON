@@ -1430,9 +1430,15 @@ body::before {
   /* Hero high, figures clear of the ticker: the cards must not sit on it. */
   padding-bottom: 2.4rem;
 }
+/* Edge to edge, near enough: the fold uses the window, not the 1180px shell
+   the rest of the site reads at (owner's call). */
+.home-fold .shell {
+  max-width: none;
+  padding-inline: 2.25rem;
+}
 .home-fold .page-head { padding-block: 1.1rem 1.1rem; }
-.home-fold .display--hero { font-size: clamp(2.4rem, 4.6vw, 3.6rem); }
-.home-fold .lede { font-size: 1.15rem; max-width: 52rem; }
+.home-fold .display--hero { font-size: clamp(2.2rem, 4vw, 3.2rem); }
+.home-fold .lede { font-size: 1.15rem; max-width: 56rem; }
 .home-figures {
   flex: 1;
   display: flex;
@@ -1446,22 +1452,32 @@ body::before {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 1.3rem 1.6rem;
+  padding: 1.1rem 1.5rem;
 }
-.home-fold .stat-card__label { font-size: 1.05rem; }
-.home-fold .stat-card__value { margin-top: 0.45rem; font-size: clamp(2.2rem, 3.2vw, 3rem); }
-.home-fold .stat-card__note { margin-top: 0.4rem; font-size: 0.95rem; }
-/* A 768px laptop screen has 446 zoomed px between the masthead and the
-   ticker. The same six figures and the hero fit only set smaller. */
+.home-fold .stat-card__label { font-size: 0.95rem; }
+.home-fold .stat-card__value { margin-top: 0.35rem; font-size: clamp(1.9rem, 2.6vw, 2.5rem); }
+.home-fold .stat-card__note { margin-top: 0.3rem; font-size: 0.88rem; }
+/* The fold's min-height is a floor: content taller than it pushes the last
+   row under the sticky ticker, and a 1080px screen minus browser chrome is a
+   ~940px viewport, 575 zoomed px between masthead and ticker. Two smaller
+   settings, by viewport height, keep the six figures above the strip. */
+@media (max-height: 980px) {
+  .home-fold { padding-bottom: 1.8rem; }
+  .home-fold .page-head { padding-block: 0.9rem 0.9rem; }
+  .home-fold .display--hero { font-size: clamp(2rem, 3.4vw, 2.6rem); }
+  .home-fold .lede { margin-top: 0.5rem; font-size: 1.05rem; }
+  .home-fold .stat-card { padding: 0.9rem 1.3rem; }
+  .home-fold .stat-card__value { margin-top: 0.25rem; font-size: clamp(1.8rem, 2.4vw, 2.2rem); }
+}
 @media (max-height: 820px) {
-  .home-fold { padding-bottom: 1.4rem; }
+  .home-fold { padding-bottom: 1.8rem; }
   .home-fold .page-head { padding-block: 0.7rem 0.7rem; }
-  .home-fold .display--hero { font-size: clamp(1.9rem, 3.4vw, 2.4rem); }
+  .home-fold .display--hero { font-size: clamp(1.9rem, 3.2vw, 2.3rem); }
   .home-fold .lede { margin-top: 0.4rem; font-size: 1rem; }
-  .home-fold .stat-card { padding: 0.8rem 1.3rem; }
-  .home-fold .stat-card__label { font-size: 0.95rem; }
-  .home-fold .stat-card__value { margin-top: 0.2rem; font-size: clamp(1.8rem, 2.6vw, 2.3rem); }
-  .home-fold .stat-card__note { margin-top: 0.2rem; font-size: 0.85rem; }
+  .home-fold .stat-card { padding: 0.75rem 1.2rem; }
+  .home-fold .stat-card__label { font-size: 0.9rem; }
+  .home-fold .stat-card__value { margin-top: 0.2rem; font-size: clamp(1.7rem, 2.3vw, 2rem); }
+  .home-fold .stat-card__note { margin-top: 0.2rem; font-size: 0.82rem; }
 }
 
 .ticker__viewport {
