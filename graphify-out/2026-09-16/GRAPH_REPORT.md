@@ -1,16 +1,16 @@
-# Graph Report - SIH HACKATHON  (2026-09-16)
+# Graph Report - SIH HACKATHON  (2026-09-15)
 
 ## Corpus Check
-- 95 files · ~866,565 words
+- 94 files · ~868,170 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 990 nodes · 1552 edges · 87 communities (51 shown, 33 thin omitted)
+- 988 nodes · 1549 edges · 87 communities (51 shown, 33 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `eeb5b78b`
+- Built from commit: `a7f6f685`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -183,7 +183,7 @@ Nodes (18): react-leaflet, AnalysisPage(), GeoJSON, MapContainer, MapPage(), Til
 
 ### Community 14 - "layout.tsx"
 Cohesion: 0.09
-Nodes (25): react, ALLOWED, ReviewResult, submitReview(), freshnessLine(), metadata, mono, navLinks (+17 more)
+Nodes (24): react, ALLOWED, ReviewResult, submitReview(), freshnessLine(), metadata, mono, navLinks (+16 more)
 
 ### Community 15 - "MPLADS Risk Monitor — Design Spec (SIH26102)"
 Cohesion: 0.09

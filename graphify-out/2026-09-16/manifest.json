@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789558260.8896658,
-    "seen": 1789558344.9454136,
-    "ast_hash": "6739e7330e7e45ec88fab74a36dfcfe2",
+    "mtime": 1789502762.0299785,
+    "seen": 1789502894.2747781,
+    "ast_hash": "b55bf8c3c88289efbb8be9e6651a70d5",
     "semantic_hash": ""
   },
   "web/app/map/page.tsx": {
@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "web/app/page.tsx": {
-    "mtime": 1789558075.8675616,
-    "seen": 1789558344.945514,
-    "ast_hash": "3b9f1fa227d704a3b87e70286cc88c07",
+    "mtime": 1789161939.9989095,
+    "seen": 1789162252.5287404,
+    "ast_hash": "66e8fa191b55a1c025df84bb290b4432",
     "semantic_hash": ""
   },
   "web/app/projects/[id]/page.tsx": {
@@ -240,9 +240,9 @@
     "semantic_hash": ""
   },
   "web/components/Logo.tsx": {
-    "mtime": 1789504005.4059465,
-    "seen": 1789558344.9457603,
-    "ast_hash": "b4d8010c31e9acab5b1b80f73586054c",
+    "mtime": 1789502505.2181551,
+    "seen": 1789502894.2751524,
+    "ast_hash": "52ae23d9e0c46203cb4b243a7d32417c",
     "semantic_hash": ""
   },
   "web/components/NavLinks.tsx": {
@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789558341.6251552,
-    "seen": 1789558344.9466176,
-    "ast_hash": "21ffcbfffdd2db59f5d537a2dab50c17",
+    "mtime": 1789502886.056137,
+    "seen": 1789502894.2760894,
+    "ast_hash": "a002fa681cd9e6e3c9c7d445d13cbcca",
     "semantic_hash": ""
   },
   "README.md": {
@@ -810,21 +810,15 @@
     "semantic_hash": ""
   },
   "web/app/icon.png": {
-    "mtime": 1789504005.3876812,
-    "seen": 1789558344.948557,
-    "ast_hash": "adf25c099252bdf012c4e4ec6cef64d1",
+    "mtime": 1789502187.6901195,
+    "seen": 1789502894.2778862,
+    "ast_hash": "05311f64f4a589285d76899f628018f9",
     "semantic_hash": ""
   },
   "web/public/logo.png": {
-    "mtime": 1789504005.3846066,
-    "seen": 1789558344.9487224,
-    "ast_hash": "cc1a7cc937f4cc51743b51f6c58034df",
-    "semantic_hash": ""
-  },
-  "web/components/OnHome.tsx": {
-    "mtime": 1789558075.8509235,
-    "seen": 1789558344.94579,
-    "ast_hash": "9a6dea75a7341c060cc8f5fb18088872",
+    "mtime": 1789502187.6870642,
+    "seen": 1789502894.27795,
+    "ast_hash": "6b542f403296ec5ff4d53966aac33415",
     "semantic_hash": ""
   }
 }

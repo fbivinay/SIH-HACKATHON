@@ -259,9 +259,9 @@ html { overflow-anchor: none; }
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  /* Tight, because the wordmark grew to fill the bar rather than to make a
-     taller one. The header was 67px before this and has to stay there. */
-  padding-block: 0.26rem;
+  /* Was 67px tall and held there while the ticker sat beneath it; grown to
+     ~84px on the owner's call once the mark became the K. */
+  padding-block: 0.5rem;
 }
 
 .wordmark {
@@ -276,7 +276,7 @@ html { overflow-anchor: none; }
   display: flex;
   flex-direction: column;
   line-height: 1.12;
-  font-size: 1.18rem;
+  font-size: 1.36rem;
   font-weight: 650;
   letter-spacing: -0.035em;
 }
@@ -285,7 +285,7 @@ html { overflow-anchor: none; }
    It is the first thing a stranger reads, so it says what this is, not what it
    is called. */
 .wordmark__sub {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 500;
   letter-spacing: 0.002em;
   color: var(--ink-2);
@@ -1384,6 +1384,23 @@ body::before {
   /* The page body must never scroll sideways: the track is wider than the
      viewport by construction, so the overflow is clipped here. */
   overflow: hidden;
+}
+
+/* On the overview the strip runs along the bottom of the viewport instead of
+   under the masthead, and settles above the footer at the end of the page.
+   Solid rather than glass: the hero canvas repaints every frame, and a blur
+   over it would be recomputed every frame too (CLAUDE.md §11). */
+.bottombar {
+  position: sticky;
+  bottom: 0;
+  z-index: 1100;
+}
+.bottombar .ticker {
+  border-bottom: 0;
+  border-top: 2px solid color-mix(in srgb, var(--ink) 55%, transparent);
+  background: var(--surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .ticker__label {
