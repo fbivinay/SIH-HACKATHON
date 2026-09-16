@@ -8,6 +8,7 @@ import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import Logo from "@/components/Logo";
 import Cursor from "@/components/Cursor";
 import NavLinks from "@/components/NavLinks";
+import OnHome from "@/components/OnHome";
 import RiskTicker from "@/components/RiskTicker";
 import ScrollReveal from "@/components/ScrollReveal";
 import Splash from "@/components/Splash";
@@ -103,7 +104,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="masthead">
           <div className="shell masthead__inner">
             <Link href="/" className="wordmark">
-              <Logo size={37} />
+              <Logo size={46} />
               <span className="wordmark__text">
                 Kasauti
                 <span className="wordmark__sub"><b className="ai-word">AI-powered</b> MPLADS verification</span>
@@ -119,11 +120,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Under the masthead rather than inside it: the nav is navigation and
             this is content, and a reader who wants the nav should not have to
             wait for an API call to render it. Both sit in one sticky wrapper so
-            the strip follows the nav without either knowing the other's height. */}
-        <RiskTicker />
+            the strip follows the nav without either knowing the other's height.
+            Not on the overview, where the strip runs along the bottom instead
+            (owner's call) so the opening screen is the masthead and the hero. */}
+        <OnHome not>
+          <RiskTicker />
+        </OnHome>
         </div>
 
         <div className="flex-1">{children}</div>
+
+        <OnHome>
+          <div className="bottombar">
+            <RiskTicker />
+          </div>
+        </OnHome>
 
         <footer className="footer">
           <div className="shell">

@@ -141,14 +141,6 @@ export default async function OverviewPage({
       note: `Across ${formatCount(data.mp_count)} members`,
     },
     {
-      // The source's dashboard calls this "Total Expenditure". Naming it
-      // vendor payments keeps it distinct from the value of completed works,
-      // which is a different figure entirely.
-      label: "Vendor payments",
-      value: formatINR(data.vendor_payments),
-      note: `${formatCount(data.payment_count)} transactions on record`,
-    },
-    {
       label: "Completed works value",
       value: formatINR(data.completed_works_value),
       note: "What finished works finally cost",
@@ -225,7 +217,9 @@ export default async function OverviewPage({
             ))}
           </nav>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Six figures in two even rows of three. Vendor payments was the
+            seventh and left a hole in the grid; the source still serves it. */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {stats.map((s) => (
             <div key={s.label} className={`stat-card${s.tone ? ` stat-card--${s.tone}` : ""}`}>
               <div className="stat-card__label">{s.label}</div>

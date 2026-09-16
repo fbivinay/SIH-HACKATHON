@@ -222,8 +222,10 @@ render in IST with the label written literally.
 Seven nav pages in this order: Overview `/`, Alerts `/alerts`, States
 `/states`, Map `/map`, Works `/projects`, Agencies `/analysis`, Sources
 `/provenance`. Signals, Rules and Trends were deleted; what they carried lives
-on the overview and `/provenance`. "AI powered" must be visible on every page
-(masthead) and in front of "Why was this flagged?" on the work page — the
+on the overview and `/provenance`. The risk ticker runs under the masthead
+on every page except the overview, where it runs along the bottom of the
+viewport (`OnHome` in `app/layout.tsx`, owner's call). "AI powered" must be
+visible on every page (masthead) and in front of "Why was this flagged?" on the work page — the
 brief asks for an AI-powered system and a visitor could not previously tell.
 
 The deck (`scripts/build_sih_deck.py`) reads every figure from the database at
