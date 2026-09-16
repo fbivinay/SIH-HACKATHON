@@ -272,11 +272,12 @@ html { overflow-anchor: none; }
 .masthead__inner {
   display: flex;
   align-items: center;
-  gap: 1.15rem;
+  gap: 1rem;
   /* Was 67px tall and held there while the ticker sat beneath it; grown to
-     ~100px on the owner's call once the mark became the K. The nav links
-     gave up 0.25rem of side padding each so all seven still fit at 1280. */
-  padding-block: 0.55rem;
+     ~125px on the owner's call once the mark became the K. The nav links
+     gave up 0.3rem of side padding each and a little size so all seven
+     still fit at 1280. */
+  padding-block: 0.6rem;
 }
 
 .wordmark {
@@ -291,7 +292,7 @@ html { overflow-anchor: none; }
   display: flex;
   flex-direction: column;
   line-height: 1.12;
-  font-size: 1.7rem;
+  font-size: 2rem;
   font-weight: 650;
   letter-spacing: -0.035em;
 }
@@ -300,7 +301,7 @@ html { overflow-anchor: none; }
    It is the first thing a stranger reads, so it says what this is, not what it
    is called. */
 .wordmark__sub {
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   font-weight: 500;
   letter-spacing: 0.002em;
   color: var(--ink-2);
@@ -384,9 +385,9 @@ html { overflow-anchor: none; }
 }
 
 .nav__link {
-  padding: 0.42rem 0.55rem;
+  padding: 0.42rem 0.5rem;
   border-radius: var(--radius-pill);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: var(--ink-2);
   white-space: nowrap;
   transition: color 0.15s, background-color 0.15s;
@@ -1426,8 +1427,11 @@ body::before {
 .home-fold {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh / var(--zoom, 1) - 132px);
-  /* Hero high, figures clear of the ticker: the cards must not sit on it. */
+  /* --fold-chrome is the masthead plus the ticker in zoomed px, measured
+     (see the note in CLAUDE.md §10); re-measure when either changes. */
+  --fold-chrome: 145px;
+  min-height: calc(100dvh / var(--zoom, 1) - var(--fold-chrome));
+  /* Hero high, figures clear of the ticker: the panel must not sit on it. */
   padding-bottom: 2.4rem;
 }
 /* Edge to edge, near enough: the fold uses the window, not the 1180px shell
@@ -1437,47 +1441,87 @@ body::before {
   padding-inline: 2.25rem;
 }
 .home-fold .page-head { padding-block: 1.1rem 1.1rem; }
-.home-fold .display--hero { font-size: clamp(2.2rem, 4vw, 3.2rem); }
-.home-fold .lede { font-size: 1.15rem; max-width: 56rem; }
+.home-fold .display--hero { font-size: clamp(2.4rem, 4.4vw, 3.6rem); letter-spacing: -0.04em; }
+.home-fold .lede { font-size: 1.2rem; max-width: 60rem; }
 .home-figures {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-.home-figures .grid {
+
+/* The six figures as one panel: a 3x2 grid of cells divided by hairlines, each
+   figure centred in its cell. Six floating cards each holding a small block
+   of text in one corner read as six empty boxes at this size; one object with
+   an internal grid reads as a single table of figures, which is what it is. */
+.figures {
   flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-auto-rows: 1fr;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+  overflow: hidden;
 }
-.home-fold .stat-card {
+.figure {
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding: 1.1rem 1.5rem;
+  text-align: center;
+  padding: 1.1rem 1.25rem;
+  min-width: 0;
 }
-.home-fold .stat-card__label { font-size: 0.95rem; }
-.home-fold .stat-card__value { margin-top: 0.35rem; font-size: clamp(1.9rem, 2.6vw, 2.5rem); }
-.home-fold .stat-card__note { margin-top: 0.3rem; font-size: 0.88rem; }
+.figure:not(:nth-child(3n + 1)) { border-left: 1px solid var(--line); }
+.figure:nth-child(n + 4) { border-top: 1px solid var(--line); }
+.figure__label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.figure__value {
+  margin-top: 0.3rem;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.figure__note {
+  margin-top: 0.45rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--ink-3);
+  max-width: 36ch;
+  text-wrap: balance;
+}
+.figure--high .figure__value { color: var(--risk-high); }
+.figure--medium .figure__value { color: var(--risk-medium); }
+.figure--low .figure__value { color: var(--risk-low); }
 /* The fold's min-height is a floor: content taller than it pushes the last
    row under the sticky ticker, and a 1080px screen minus browser chrome is a
-   ~940px viewport, 575 zoomed px between masthead and ticker. Two smaller
-   settings, by viewport height, keep the six figures above the strip. */
+   ~940px viewport. Two smaller settings, by viewport height, keep the six
+   figures above the strip. */
 @media (max-height: 980px) {
   .home-fold { padding-bottom: 1.8rem; }
   .home-fold .page-head { padding-block: 0.9rem 0.9rem; }
-  .home-fold .display--hero { font-size: clamp(2rem, 3.4vw, 2.6rem); }
-  .home-fold .lede { margin-top: 0.5rem; font-size: 1.05rem; }
-  .home-fold .stat-card { padding: 0.9rem 1.3rem; }
-  .home-fold .stat-card__value { margin-top: 0.25rem; font-size: clamp(1.8rem, 2.4vw, 2.2rem); }
+  .home-fold .display--hero { font-size: clamp(2.2rem, 3.8vw, 3.1rem); }
+  .home-fold .lede { margin-top: 0.5rem; font-size: 1.08rem; }
+  .figure { padding: 0.9rem 1.2rem; }
+  .figure__value { margin-top: 0.2rem; font-size: clamp(1.9rem, 2.6vw, 2.5rem); }
 }
 @media (max-height: 820px) {
-  .home-fold { padding-bottom: 1.8rem; }
-  .home-fold .page-head { padding-block: 0.7rem 0.7rem; }
-  .home-fold .display--hero { font-size: clamp(1.9rem, 3.2vw, 2.3rem); }
-  .home-fold .lede { margin-top: 0.4rem; font-size: 1rem; }
-  .home-fold .stat-card { padding: 0.75rem 1.2rem; }
-  .home-fold .stat-card__label { font-size: 0.9rem; }
-  .home-fold .stat-card__value { margin-top: 0.2rem; font-size: clamp(1.7rem, 2.3vw, 2rem); }
-  .home-fold .stat-card__note { margin-top: 0.2rem; font-size: 0.82rem; }
+  .home-fold { padding-bottom: 1.6rem; }
+  .home-fold .page-head { padding-block: 0.7rem 0.6rem; }
+  .home-fold .display--hero { font-size: clamp(1.9rem, 3vw, 2.4rem); }
+  .home-fold .lede { margin-top: 0.35rem; font-size: 1rem; }
+  .figure { padding: 0.6rem 1rem; }
+  .figure__label { font-size: 0.9rem; }
+  .figure__value { margin-top: 0.15rem; font-size: clamp(1.7rem, 2.3vw, 2.1rem); }
+  .figure__note { margin-top: 0.25rem; font-size: 0.82rem; }
 }
 
 .ticker__viewport {
@@ -1664,7 +1708,8 @@ button,
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-.stat-card__value {
+.stat-card__value,
+.figure__value {
   animation: value-in 420ms var(--ease-out) calc(var(--enter-at) + 120ms) both;
 }
 
@@ -1707,15 +1752,18 @@ button,
 }
 
 main > section,
-main > .shell {
+main > .shell,
+.home-fold > section {
   animation: rise-in 900ms var(--ease) var(--enter-at) both;
 }
+.home-fold > section:nth-of-type(2),
 main > section:nth-of-type(2) { animation-delay: calc(var(--enter-at) + 90ms); }
 main > section:nth-of-type(3) { animation-delay: calc(var(--enter-at) + 170ms); }
 main > section:nth-of-type(4) { animation-delay: calc(var(--enter-at) + 240ms); }
 main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300ms); }
 
 .stat-card,
+.figures,
 .grid > .card,
 .slab-card,
 .model-card,
@@ -1839,6 +1887,9 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
 @media (prefers-reduced-motion: reduce) {
   main > section,
   main > .shell,
+  .home-fold > section,
+  .figures,
+  .figure__value,
   .stat-card,
   .stat-card__value,
   .card,

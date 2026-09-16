@@ -452,7 +452,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
       "norm_label": "provenance",
       "source_file": "web/lib/api.ts",
@@ -465,7 +465,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "CountUp.tsx",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "overview",
       "source_file": "web/lib/api.ts",
@@ -3448,23 +3448,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
       "norm_label": "provenancepage()",
       "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L9"
+      "source_location": "L8"
     },
     {
-      "id": "web_components_scoremethod_scoremethod",
-      "label": "ScoreMethod()",
+      "id": "web_components_countup_countup",
+      "label": "CountUp()",
       "_callable": true,
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
-      "norm_label": "scoremethod()",
-      "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L70"
+      "norm_label": "countup()",
+      "source_file": "web/components/CountUp.tsx",
+      "source_location": "L40"
+    },
+    {
+      "id": "web_components_countup_easeout",
+      "label": "easeOut()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "CountUp.tsx",
+      "file_type": "code",
+      "norm_label": "easeout()",
+      "source_file": "web/components/CountUp.tsx",
+      "source_location": "L34"
     },
     {
       "id": "web_components_wheretheai_wheretheai",
@@ -3472,7 +3484,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
       "norm_label": "wheretheai()",
       "source_file": "web/components/WhereTheAI.tsx",
@@ -3484,7 +3496,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
       "norm_label": "formatfreshnesstimestamp()",
       "source_file": "web/lib/format.ts",
@@ -4264,35 +4276,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "CountUp.tsx",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "overviewpage()",
       "source_file": "web/app/page.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "web_components_countup_countup",
-      "label": "CountUp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "CountUp.tsx",
-      "file_type": "code",
-      "norm_label": "countup()",
-      "source_file": "web/components/CountUp.tsx",
-      "source_location": "L40"
-    },
-    {
-      "id": "web_components_countup_easeout",
-      "label": "easeOut()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "CountUp.tsx",
-      "file_type": "code",
-      "norm_label": "easeout()",
-      "source_file": "web/components/CountUp.tsx",
-      "source_location": "L34"
+      "source_location": "L15"
     },
     {
       "id": "web_components_herofield_herofield",
@@ -4300,11 +4288,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 69,
-      "community_name": "CountUp.tsx",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "herofield()",
       "source_file": "web/components/HeroField.tsx",
       "source_location": "L23"
+    },
+    {
+      "id": "web_components_scoremethod_scoremethod",
+      "label": "ScoreMethod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "scoremethod()",
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L68"
     },
     {
       "id": "data_load_real_data_build_expenditure_rows",
@@ -8533,7 +8533,7 @@
       "node_kind": "heading",
       "norm_label": "11. motion, measured",
       "source_file": "CLAUDE.md",
-      "source_location": "L259"
+      "source_location": "L263"
     },
     {
       "id": "claude_1_never_claim_more_than_the_record_supports",
@@ -8653,7 +8653,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "CLAUDE.md",
-      "source_location": "L356"
+      "source_location": "L362"
     },
     {
       "id": "claude_kasauti_mplads_verification",
@@ -8672,7 +8672,7 @@
       "label": "provenance/page.tsx",
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
       "norm_label": "provenance/page.tsx",
       "source_file": "web/app/provenance/page.tsx",
@@ -8683,51 +8683,29 @@
       "label": "metadata",
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
       "norm_label": "metadata",
       "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L7"
+      "source_location": "L6"
     },
     {
-      "id": "web_components_scoremethod",
-      "label": "ScoreMethod.tsx",
+      "id": "web_components_countup",
+      "label": "CountUp.tsx",
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
-      "norm_label": "scoremethod.tsx",
-      "source_file": "web/components/ScoreMethod.tsx",
+      "norm_label": "countup.tsx",
+      "source_file": "web/components/CountUp.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "web_components_scoremethod_components",
-      "label": "COMPONENTS",
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "provenance/page.tsx",
-      "file_type": "code",
-      "norm_label": "components",
-      "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L13"
-    },
-    {
-      "id": "web_components_scoremethod_limits",
-      "label": "LIMITS",
-      "_origin": "ast",
-      "community": 47,
-      "community_name": "provenance/page.tsx",
-      "file_type": "code",
-      "norm_label": "limits",
-      "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L51"
     },
     {
       "id": "web_components_wheretheai",
       "label": "WhereTheAI.tsx",
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
       "norm_label": "wheretheai.tsx",
       "source_file": "web/components/WhereTheAI.tsx",
@@ -8738,7 +8716,7 @@
       "label": "MODELS",
       "_origin": "ast",
       "community": 47,
-      "community_name": "provenance/page.tsx",
+      "community_name": "CountUp.tsx",
       "file_type": "code",
       "norm_label": "models",
       "source_file": "web/components/WhereTheAI.tsx",
@@ -10412,7 +10390,7 @@
       "label": "app/page.tsx",
       "_origin": "ast",
       "community": 69,
-      "community_name": "CountUp.tsx",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "app/page.tsx",
       "source_file": "web/app/page.tsx",
@@ -10423,33 +10401,55 @@
       "label": "TERMS",
       "_origin": "ast",
       "community": 69,
-      "community_name": "CountUp.tsx",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "terms",
       "source_file": "web/app/page.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "web_components_countup",
-      "label": "CountUp.tsx",
-      "_origin": "ast",
-      "community": 69,
-      "community_name": "CountUp.tsx",
-      "file_type": "code",
-      "norm_label": "countup.tsx",
-      "source_file": "web/components/CountUp.tsx",
-      "source_location": "L1"
+      "source_location": "L9"
     },
     {
       "id": "web_components_herofield",
       "label": "HeroField.tsx",
       "_origin": "ast",
       "community": 69,
-      "community_name": "CountUp.tsx",
+      "community_name": "app/page.tsx",
       "file_type": "code",
       "norm_label": "herofield.tsx",
       "source_file": "web/components/HeroField.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "web_components_scoremethod",
+      "label": "ScoreMethod.tsx",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "scoremethod.tsx",
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_components_scoremethod_components",
+      "label": "COMPONENTS",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "components",
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "web_components_scoremethod_limits",
+      "label": "LIMITS",
+      "_origin": "ast",
+      "community": 69,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "limits",
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L49"
     },
     {
       "id": "data_schema",
@@ -15337,7 +15337,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/page.tsx",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -15349,7 +15349,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/page.tsx",
-      "source_location": "L40",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -15361,7 +15361,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/page.tsx",
-      "source_location": "L47",
+      "source_location": "L48",
       "weight": 1.0
     },
     {
@@ -15517,7 +15517,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L16",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -15529,7 +15529,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L339",
+      "source_location": "L337",
       "weight": 1.0
     },
     {
@@ -15541,7 +15541,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L37",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -17444,6 +17444,18 @@
       "weight": 1.0
     },
     {
+      "source": "web_app_page",
+      "target": "web_components_scoremethod_scoremethod",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "web/app/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "web_app_projects_id_page",
       "target": "web_lib_api_api",
       "relation": "imports",
@@ -17717,18 +17729,6 @@
       "context": "import",
       "source_file": "web/app/provenance/page.tsx",
       "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "web_app_provenance_page",
-      "target": "web_components_scoremethod_scoremethod",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -18817,6 +18817,18 @@
       "weight": 1.0
     },
     {
+      "source": "web_app_page",
+      "target": "web_components_scoremethod",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "web/app/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "web_app_projects_id_page",
       "target": "web_lib_api",
       "relation": "imports_from",
@@ -18958,18 +18970,6 @@
       "context": "import",
       "source_file": "web/app/provenance/page.tsx",
       "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "web_app_provenance_page",
-      "target": "web_components_scoremethod",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -20696,18 +20696,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L259",
-      "weight": 1.0
-    },
-    {
-      "source": "claude_kasauti_mplads_verification",
-      "target": "claude_graphify",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "CLAUDE.md",
-      "source_location": "L356",
+      "source_location": "L263",
       "weight": 1.0
     },
     {
@@ -20719,6 +20708,17 @@
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
       "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "claude_kasauti_mplads_verification",
+      "target": "claude_graphify",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": "L362",
       "weight": 1.0
     },
     {
@@ -25151,7 +25151,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/page.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -25162,7 +25162,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/page.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -25217,7 +25217,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -25228,7 +25228,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/provenance/page.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -25624,7 +25624,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L13",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -25635,7 +25635,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L51",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -25646,7 +25646,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L70",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -29384,5 +29384,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a3734169bccb626be465a7dbc3461f91cc3c242c"
+  "built_at_commit": "db15317f9300c8ee7fea723c5ef3c01b6060e6e7"
 }
