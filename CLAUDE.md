@@ -206,6 +206,8 @@ preference: `:root { color-scheme: light }`, `viewport.colorScheme` in
 `app/layout.tsx`, and no `prefers-color-scheme: dark` block anywhere. The dark
 palette was removed on 2026-09-15 at the owner's request; do not bring it back.
 
+The masthead is ~100px tall, mark 62px, name 1.7rem, on the owner's call; the
+nav links and the masthead gap were tightened so all seven fit at 1280 wide.
 Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at 700–1023px, none
 below. **Phones are refused outright** (owner's call, 2026-09-15): the inline
 script at the top of `<body>` sets `<html data-phone>` and `.phone-wall` shows
