@@ -2,6 +2,7 @@ import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 import WhereTheAI from "@/components/WhereTheAI";
+import ScoreMethod from "@/components/ScoreMethod";
 
 export const metadata = { title: "Where the numbers come from" };
 
@@ -229,6 +230,7 @@ export default async function ProvenancePage() {
           </>
         )}
 
+        <ScoreMethod />
         <WhereTheAI />
 
         {detectors.length > 0 && (

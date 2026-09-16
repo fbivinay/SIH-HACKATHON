@@ -224,14 +224,16 @@ render in IST with the label written literally.
 Seven nav pages in this order: Overview `/`, Alerts `/alerts`, States
 `/states`, Map `/map`, Works `/projects`, Agencies `/analysis`, Sources
 `/provenance`. Signals, Rules and Trends were deleted; what they carried lives
-on the overview and `/provenance`. The risk ticker runs under the masthead
-on every page except the overview, where it runs along the bottom of the
-viewport (`OnHome` in `app/layout.tsx`, owner's call). "AI powered" must be
-visible on every page (masthead) and in front of "Why was this flagged?" on the work page — the
+on `/provenance`. **The overview is one screen** (owner's call, 2026-09-16):
+hero, term switcher, six figures, filling the space between the masthead and
+the ticker (`.viewport-column`, `main.home`). The score's components and
+limits (`components/ScoreMethod.tsx`) and the three models
+(`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
+the masthead on every page except the overview, where it runs along the bottom
+of the viewport (`OnHome` in `app/layout.tsx`); it carries only the works —
+no label, no "all high risk" link. "AI powered" must be visible on every page
+(masthead) and in front of "Why was this flagged?" on the work page — the
 brief asks for an AI-powered system and a visitor could not previously tell.
-The "Where the AI is" section (three models, `components/WhereTheAI.tsx`) is
-on `/provenance`, not the overview — the owner wants the opening screen free
-of it; the masthead carries the claim there.
 
 The deck (`scripts/build_sih_deck.py`) reads every figure from the database at
 build time and refuses to build on a null or zero. It shipped stale twice when
@@ -323,11 +325,13 @@ backdrop blur recomputed every frame. `body::before` is the one fixed wash
 layer. Anything that keeps drawing must stop when off-screen or the tab is
 hidden (`HeroField`, `Cursor` both do).
 
-**Zoom.** The root is zoomed, and it bites twice. `clientX/Y` are screen
+**Zoom.** The root is zoomed, and it bites three times. `clientX/Y` are screen
 pixels while elements move in the root's zoomed pixels — divide by
 `el.currentCSSZoom`. `getBoundingClientRect` is zoom-adjusted, `offsetTop`
 and `clientWidth` are not — a canvas backing store is `clientWidth ×
-currentCSSZoom × devicePixelRatio`.
+currentCSSZoom × devicePixelRatio`. And viewport units are scaled like any
+other length: `100dvh` at 1.33 rendered 1436px tall in a 1080px window, so
+`--zoom` is set beside `zoom` and `.viewport-column` divides it back out.
 
 **Independent transform properties.** `scale` wraps `transform`: a ring at
 `transform: translate(449px)` with `scale: 1.55` drew at 696px. Position with

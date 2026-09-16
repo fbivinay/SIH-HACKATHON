@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "web/app/page.tsx": {
-    "mtime": 1789558075.8675616,
-    "seen": 1789558344.945514,
-    "ast_hash": "3b9f1fa227d704a3b87e70286cc88c07",
+    "mtime": 1789558832.2665417,
+    "seen": 1789558968.7301364,
+    "ast_hash": "274ccffe0a19a245437c6740e57f1579",
     "semantic_hash": ""
   },
   "web/app/projects/[id]/page.tsx": {
@@ -222,9 +222,9 @@
     "semantic_hash": ""
   },
   "web/app/provenance/page.tsx": {
-    "mtime": 1789144150.9909768,
-    "seen": 1789156880.4904418,
-    "ast_hash": "bc918f55db1a801888c1d2a91c6c8865",
+    "mtime": 1789558851.8852477,
+    "seen": 1789558968.7302353,
+    "ast_hash": "f6165a2c4e5975da431122a3c667d70a",
     "semantic_hash": ""
   },
   "web/app/state/[state]/page.tsx": {
@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789558341.6251552,
-    "seen": 1789558344.9466176,
-    "ast_hash": "21ffcbfffdd2db59f5d537a2dab50c17",
+    "mtime": 1789558966.0021713,
+    "seen": 1789558968.731341,
+    "ast_hash": "f226d5f380b70720fd29ba23e7215ec3",
     "semantic_hash": ""
   },
   "README.md": {
@@ -825,6 +825,12 @@
     "mtime": 1789558075.8509235,
     "seen": 1789558344.94579,
     "ast_hash": "9a6dea75a7341c060cc8f5fb18088872",
+    "semantic_hash": ""
+  },
+  "web/components/WhereTheAI.tsx": {
+    "mtime": 1789558851.8847015,
+    "seen": 1789558968.7307503,
+    "ast_hash": "d98417a7ad1950fe03ed4b933619794d",
     "semantic_hash": ""
   }
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { formatCount, formatINR } from "@/lib/format";
+import { formatINR } from "@/lib/format";
 
 /**
  * The highest-scoring works, scrolling under the masthead.
@@ -12,9 +12,10 @@ import { formatCount, formatINR } from "@/lib/format";
  * cannot desynchronise, and it degrades to a scrollable strip when the reader
  * has asked for reduced motion.
  *
- * A score is not an allegation (CLAUDE.md §1), so the strip says "worth a look"
- * rather than anything stronger, and every row links to the page that shows the
- * peer comparison behind the number.
+ * A score is not an allegation (CLAUDE.md §1): the strip carries nothing but
+ * the works themselves - no label, no "all high risk" link, on the owner's
+ * call - and every row links to the page that shows the peer comparison
+ * behind the number.
  */
 
 // Enough to read as continuous at any viewport, few enough that the duplicated
@@ -62,10 +63,6 @@ export default async function RiskTicker() {
 
   return (
     <div className="ticker">
-      <span className="ticker__label">
-        Highest risk
-        <span className="ticker__count">{formatCount(alerts.length)} shown</span>
-      </span>
       <div className="ticker__viewport">
         {/* Two identical copies. The track translates exactly -50%, so the
             second copy lands where the first began and the loop has no seam.
@@ -77,9 +74,6 @@ export default async function RiskTicker() {
           </div>
         </div>
       </div>
-      <Link href="/alerts?risk_level=HIGH" className="ticker__all">
-        All high risk
-      </Link>
     </div>
   );
 }
