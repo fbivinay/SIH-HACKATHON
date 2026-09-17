@@ -395,7 +395,12 @@ html { overflow-anchor: none; }
    go narrow and tall, so it falls back to its natural height instead. */
 @media (min-width: 1024px) {
   .score-screen {
-    height: var(--fold-h, calc(100dvh / var(--zoom, 1) - var(--fold-chrome)));
+    /* A floor, not a fixed height. It was fixed, and `grid-auto-rows: 1fr`
+       cannot shrink a row below its content, so where the six cards needed
+       more than the screen the second row simply hung out of the bottom of
+       the slab - measured, 26 to 145px past its padding at five of six
+       window sizes. The slab grows instead. */
+    min-height: var(--fold-h, calc(100dvh / var(--zoom, 1) - var(--fold-chrome)));
     display: flex;
     flex-direction: column;
   }
@@ -410,7 +415,14 @@ html { overflow-anchor: none; }
   .score-grid {
     flex: 1;
     min-height: 0;
-    grid-auto-rows: 1fr;
+    /* Auto rows, left to the default stretch: each row is at least its own
+       content and the space the heading leaves is shared out between them.
+       The two alternatives both failed, measured: `1fr` makes every row as
+       tall as the tallest, so two rows want twice the tallest card and the
+       section grew 60-75px past the screen (and, on a fixed height, hung
+       26-145px out of the slab); `space-between` on auto rows left a hole
+       between the rows instead of filling them. */
+    grid-auto-rows: auto;
   }
   /* Every card's title on the same line as its neighbours', and every card's
      last line on the same line as theirs: the content starts at the top and
@@ -427,23 +439,50 @@ html { overflow-anchor: none; }
     margin-top: auto !important;
     padding-top: 0.7rem;
   }
+  /* Narrow as well as short: at 1280 the three cards are 290px wide and the
+     same sentences wrap to half again as many lines, which is its own reason
+     to come down a size. */
+  @media (max-width: 1450px) {
+    .score-screen .slab-card { padding: 0.7rem 0.85rem; }
+    .score-screen .slab-card h3 { font-size: 0.9rem; }
+    .score-screen .slab-card p { font-size: 0.76rem !important; line-height: 1.4 !important; }
+    .score-grid { gap: 0.5rem; }
+  }
+
   /* Two shorter settings, the same way the first screen has them: a 768px
      laptop has 440 of these pixels for a slab whose six cards want 534. */
   @media (max-height: 980px) {
     .score-screen .section-head { font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
     .score-screen .lede { margin-top: 0.3rem; font-size: 0.92rem; }
-    .score-grid { margin-top: 1.1rem !important; }
-    .score-screen .slab-card { padding: 0.85rem 1.05rem; }
+    .score-grid { margin-top: 0.9rem !important; gap: 0.55rem; }
+    .score-screen .slab-card { padding: 0.75rem 0.95rem; }
+    .score-screen .slab-card p { font-size: 0.78rem !important; line-height: 1.42 !important; }
+    .score-screen .slab-card p + p { margin-top: 0.4rem !important; }
   }
-  @media (max-height: 820px) {
-    .score-screen .slab { margin-block: 0.5rem; padding: 1rem; }
-    .score-screen .section-head { font-size: 1.3rem; }
-    .score-screen .lede { margin-top: 0.2rem; font-size: 0.85rem; }
-    .score-grid { margin-top: 0.7rem !important; gap: 0.5rem; }
-    .score-screen .slab-card { padding: 0.6rem 0.8rem; }
-    .score-screen .slab-card h3 { font-size: 0.9rem; }
-    .score-screen .slab-card p { font-size: 0.76rem !important; line-height: 1.4 !important; }
+  /* 900, not 820: these queries see the window's own pixels, not the zoomed
+     ones, so a 864px laptop sat outside an 820px tier while having less room
+     than a 810px one inside it - measured, 47px of overflow at 1536x864. */
+  @media (max-height: 900px) {
+    .score-screen .slab { margin-block: 0.5rem; padding: 0.85rem; }
+    .score-screen .section-head { font-size: 1.2rem; }
+    .score-screen .lede { margin-top: 0.2rem; font-size: 0.8rem; }
+    .score-grid { margin-top: 0.6rem !important; gap: 0.45rem; }
+    .score-screen .slab-card { padding: 0.55rem 0.75rem; }
+    .score-screen .slab-card h3 { font-size: 0.86rem; }
+    .score-screen .slab-card p { font-size: 0.73rem !important; line-height: 1.38 !important; }
     .score-screen .slab-card p + p { margin-top: 0.4rem !important; opacity: 0.8; }
+  }
+  /* 720p: 537 of these pixels for what the same six cards want 656 of. */
+  @media (max-height: 740px) {
+    .score-screen .slab { margin-block: 0.4rem; padding: 0.8rem; }
+    .score-screen .section-head { font-size: 1.1rem; }
+    .score-screen .lede { margin-top: 0.15rem; font-size: 0.76rem; }
+    .score-grid { margin-top: 0.55rem !important; gap: 0.4rem; }
+    .score-screen .slab-card { padding: 0.5rem 0.7rem; }
+    .score-screen .slab-card h3 { font-size: 0.82rem; }
+    .score-screen .slab-card p { font-size: 0.7rem !important; line-height: 1.35 !important; }
+    .score-screen .slab-card p + p { margin-top: 0.3rem !important; padding-top: 0.4rem; }
+    .score-screen .slab-card > .btn { padding-block: 0.35rem; font-size: 0.78rem; }
   }
 }
 
