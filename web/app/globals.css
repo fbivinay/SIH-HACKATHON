@@ -385,6 +385,58 @@ html { overflow-anchor: none; }
   display: none;
 }
 
+/* The scoring method is the second screen, and fills it: the section is exactly
+   the space between the masthead and the ticker (--fold-h, measured by
+   components/FoldHeight.tsx - the same number the first screen uses), the slab
+   fills the section bar a hair of margin, and its six cards share whatever the
+   heading leaves. A definite height, not a floor: a floor let the content push
+   the section past the screen, and then one page down landed on three quarters
+   of the slab with the rest below. Below 1024px there is no zoom and the cards
+   go narrow and tall, so it falls back to its natural height instead. */
+@media (min-width: 1024px) {
+  .score-screen {
+    height: var(--fold-h, calc(100dvh / var(--zoom, 1) - var(--fold-chrome)));
+    display: flex;
+    flex-direction: column;
+  }
+  .score-screen .slab {
+    flex: 1;
+    min-height: 0;
+    margin-block: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.25rem, 2.6vw, 2.25rem);
+  }
+  .score-grid {
+    flex: 1;
+    min-height: 0;
+    grid-auto-rows: 1fr;
+  }
+  .score-screen .slab-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  /* Two shorter settings, the same way the first screen has them: a 768px
+     laptop has 440 of these pixels for a slab whose six cards want 534. */
+  @media (max-height: 980px) {
+    .score-screen .section-head { font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+    .score-screen .lede { margin-top: 0.3rem; font-size: 0.92rem; }
+    .score-grid { margin-top: 1.1rem !important; }
+    .score-screen .slab-card { padding: 0.85rem 1.05rem; }
+  }
+  @media (max-height: 820px) {
+    .score-screen .slab { margin-block: 0.5rem; padding: 1rem; }
+    .score-screen .section-head { font-size: 1.3rem; }
+    .score-screen .lede { margin-top: 0.2rem; font-size: 0.85rem; }
+    .score-grid { margin-top: 0.7rem !important; gap: 0.5rem; }
+    .score-screen .slab-card { padding: 0.6rem 0.8rem; }
+    .score-screen .slab-card h3 { font-size: 0.9rem; }
+    .score-screen .slab-card p { font-size: 0.76rem !important; line-height: 1.4 !important; }
+    .score-screen .slab-card p + p { margin-top: 0.4rem !important; opacity: 0.8; }
+  }
+}
+
 /* A limit is a list of checkable statements, not a paragraph: each point sits
    on its own line behind a small mark, so a reader can take them one at a
    time and find the one they want to argue with. */
