@@ -161,6 +161,30 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 ministry.
               </span>
             </div>
+            {/* Who built it and how to reach them. Every value here is one the
+                owner already publishes on rvinaykumar-my-portfolio.vercel.app;
+                nothing is taken from the machine it was built on. */}
+            <div className="footer__by">
+              <span className="footer__byname">Built by R Vinay Kumar</span>
+              <nav className="footer__links" aria-label="Contact the author">
+                <a
+                  href="https://www.linkedin.com/in/r-vinay-kumar-139938215"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  LinkedIn
+                </a>
+                <a
+                  href="https://github.com/fbivinay/SIH-HACKATHON"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Source on GitHub
+                </a>
+                <a href="mailto:rvinaykumar6924@gmail.com">rvinaykumar6924@gmail.com</a>
+                <a href="tel:***REMOVED***">***REMOVED***</a>
+              </nav>
+            </div>
             <div className="footer__wordmark" aria-hidden="true">
               Kasauti
             </div>
