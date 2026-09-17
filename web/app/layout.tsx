@@ -11,6 +11,7 @@ import NavLinks from "@/components/NavLinks";
 import OnHome from "@/components/OnHome";
 import RiskTicker from "@/components/RiskTicker";
 import ScrollReveal from "@/components/ScrollReveal";
+import WordLift from "@/components/WordLift";
 import Splash from "@/components/Splash";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -98,6 +99,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Splash />
         {/* Marks below-fold blocks so only those animate on scroll. */}
         <ScrollReveal />
+        {/* Wraps words so only the one under the pointer zooms. */}
+        <WordLift />
         {/* The dot-and-ring pointer; renders nothing on touch devices. */}
         <Cursor />
         {/* See .viewport-column. On every page but the overview, main is a
