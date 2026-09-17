@@ -81,17 +81,13 @@ export default async function OverviewPage({
       <div className="home-fold">
       <section className="shell page-head">
         <HeroField />
+        {/* The headline alone. The sentence that stood under it - the count,
+            and the five things a work is scored on - is what the six figures
+            and the sections below the fold say, and it cost the headline the
+            room to be read across a hall. */}
         <h1 className="display display--hero">
           Every MPLADS work, checked against its peers.
         </h1>
-        {/* Shorter than it was: the long version pushed the figures this page
-            exists for below the fold, and the detail it carried is on /provenance
-            and the work pages where a reader can act on it. */}
-        <p className="lede">
-          {formatCount(data.total_projects)} works across every district in India, scored on
-          cost, delay, duplication, the agency and the scheme&rsquo;s own rules.
-        </p>
-
       </section>
 
       <section className="shell home-figures">
