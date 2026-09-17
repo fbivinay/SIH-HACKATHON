@@ -161,29 +161,71 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 ministry.
               </span>
             </div>
-            {/* Who built it and how to reach them. Every value here is one the
-                owner already publishes on rvinaykumar-my-portfolio.vercel.app;
-                nothing is taken from the machine it was built on. */}
-            <div className="footer__by">
-              <span className="footer__byname">Built by R Vinay Kumar</span>
-              <nav className="footer__links" aria-label="Contact the author">
-                <a
-                  href="https://www.linkedin.com/in/r-vinay-kumar-139938215"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  LinkedIn
-                </a>
-                <a
-                  href="https://github.com/fbivinay/SIH-HACKATHON"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Source on GitHub
-                </a>
-                <a href="mailto:rvinaykumar6924@gmail.com">rvinaykumar6924@gmail.com</a>
-                <a href="tel:***REMOVED***">***REMOVED***</a>
-              </nav>
+            {/* Who built it and how to reach him, laid out the way his own
+                portfolio lays it out: labelled rows for the contact details,
+                the profiles as marks beneath the name. Every value here is one
+                he already publishes at rvinaykumar-my-portfolio.vercel.app;
+                nothing is taken from the machine this was built on. The marks
+                are drawn in currentColor - a logo in its own brand colour would
+                be the one hue on this site that does not mean risk. */}
+            <div className="footer__contact">
+              <div className="footer__who">
+                <span className="footer__byname">Built by R Vinay Kumar</span>
+                <nav className="footer__social" aria-label="Profiles">
+                  <a
+                    href="https://www.linkedin.com/in/r-vinay-kumar-139938215"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn"
+                    title="LinkedIn"
+                  >
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+                      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.95v5.66H9.35V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0Z" />
+                    </svg>
+                  </a>
+                  <a
+                    href="https://github.com/fbivinay/SIH-HACKATHON"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="This project on GitHub"
+                    title="This project on GitHub"
+                  >
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+                      <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.1 4.9 18.1 5.2 18.1 5.2c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3Z" />
+                    </svg>
+                  </a>
+                  <a
+                    href="https://rvinaykumar-my-portfolio.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Portfolio"
+                    title="Portfolio"
+                  >
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+                      <circle cx="12" cy="12" r="9.2" />
+                      <path d="M2.8 12h18.4M12 2.8c2.4 2.5 3.7 5.8 3.7 9.2s-1.3 6.7-3.7 9.2c-2.4-2.5-3.7-5.8-3.7-9.2S9.6 5.3 12 2.8Z" />
+                    </svg>
+                  </a>
+                </nav>
+              </div>
+              <dl className="footer__details">
+                <div>
+                  <dt>Email</dt>
+                  <dd>
+                    <a href="mailto:rvinaykumar6924@gmail.com">rvinaykumar6924@gmail.com</a>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Phone</dt>
+                  <dd>
+                    <a href="tel:***REMOVED***">***REMOVED***</a>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Location</dt>
+                  <dd>Bengaluru, Karnataka, India</dd>
+                </div>
+              </dl>
             </div>
             <div className="footer__wordmark" aria-hidden="true">
               Kasauti
