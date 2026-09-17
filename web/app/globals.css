@@ -1330,15 +1330,41 @@ body::before {
   line-height: 1.5;
 }
 
-.footer__meta a {
+.footer__meta a,
+.footer__by a {
   color: var(--ink-2);
   text-decoration: underline;
   text-decoration-color: var(--line-strong);
   text-underline-offset: 3px;
 }
 
-.footer__meta a:hover {
+.footer__meta a:hover,
+.footer__by a:hover {
   color: var(--ink);
+}
+
+/* Who built it, and four ways to reach them. Its own row rather than a third
+   item in the meta line above, which is already a two-column sentence, and
+   spaced rather than joined by dots so each one is its own thing to click. */
+.footer__by {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  padding-block: 0.9rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+.footer__byname {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
 }
 
 .footer__freshness {
