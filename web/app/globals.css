@@ -88,6 +88,15 @@
   --t-fast: 130ms;
   --t-base: 240ms;
 
+  /* How far anything under the pointer zooms (owner's call: everything
+     does). Surfaces, then the press that follows, then a text block, then a
+     table row, which is wide enough that 1% is already 11px. One token each
+     so the whole site moves by the same amount, at --t-base, on --ease. */
+  --lift: 1.04;
+  --lift-press: 1.06;
+  --lift-text: 1.03;
+  --lift-row: 1.01;
+
   --radius-slab: 28px;
   --radius-card: 18px;
   --radius-control: 10px;
@@ -400,7 +409,7 @@ html { overflow-anchor: none; }
 .nav__link:hover {
   color: var(--ink);
   background: color-mix(in srgb, var(--ink) 7%, transparent);
-  scale: 1.07;
+  scale: 1.08;
 }
 .nav__link:active { scale: 1.02; }
 
@@ -1584,7 +1593,7 @@ body::before {
   background: var(--glass);
   border-color: var(--glass-border);
   box-shadow: var(--glass-edge), var(--glass-shadow);
-  scale: 1.04;
+  scale: 1.045;
 }
 .ticker__item:hover .ticker__name { color: var(--ink); }
 
@@ -1975,7 +1984,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
      * transform-origin is the cursor, so the zoom grows FROM the point being
      * pointed at rather than from the middle of the card.
      */
-    scale: 1.03;
+    scale: var(--lift);
     translate: 0 -4px;
     rotate: 0deg;
     box-shadow: var(--glass-edge), var(--glass-shadow-lift);
@@ -1995,7 +2004,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
 .model-card:active,
 .statecard:active,
 .rulecard:active {
-  scale: 1.05;
+  scale: var(--lift-press);
   translate: 0 -6px;
   transition-duration: var(--t-fast);
 }
@@ -2025,6 +2034,58 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   .statecard:active, .rulecard:active {
     scale: 1;
     translate: none;
+  }
+}
+
+/*
+ * And everything else. The owner wants whatever the pointer is over to zoom,
+ * so this extends the lift to text blocks, table rows, buttons and links,
+ * with three rules that keep it from turning into noise:
+ *
+ * - Nothing inside a surface that already lifts zooms on its own: a paragraph
+ *   in a card rides with the card. Otherwise the two multiply and a hovered
+ *   line inside a hovered card jumps 7%.
+ * - Table rows zoom by --lift-row only. A row is the width of the table, the
+ *   wrap clips whatever crosses its edge, and the cells' padding is what
+ *   keeps the text inside that edge.
+ * - All of it sits inside the same hover/pointer/motion gate as the cards, so
+ *   a touch screen and a reader who declined motion get none of it, and none
+ *   of it needs undoing anywhere else.
+ *
+ * `scale`, never `transform`, for the reason given above the card hover.
+ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :where(main, .footer) :where(h1, h2, h3, h4, p, li, dt, dd, blockquote, .eyebrow, .notice):not(:where(.stat-card, .figure, .card, .slab-card, .model-card, .statecard, .rulecard, .data-table, .ticker, .nav, .btn, .review-btn) *),
+  .btn,
+  .review-btn,
+  .link-quiet,
+  .pager__link,
+  .filter-clear,
+  .footer__meta a,
+  .wordmark {
+    transition: scale var(--t-base) var(--ease), background-color var(--t-base) var(--ease),
+      color var(--t-base) var(--ease), border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+  }
+  :where(main, .footer) :where(h1, h2, h3, h4, p, li, dt, dd, blockquote, .eyebrow, .notice):not(:where(.stat-card, .figure, .card, .slab-card, .model-card, .statecard, .rulecard, .data-table, .ticker, .nav, .btn, .review-btn) *):hover,
+  .btn:hover,
+  .review-btn:hover:not(:disabled),
+  .link-quiet:hover,
+  .pager__link:hover,
+  .filter-clear:hover,
+  .footer__meta a:hover,
+  .wordmark:hover {
+    scale: var(--lift-text);
+  }
+  /* The wordmark grows from its left edge, so it never pushes into the nav. */
+  .wordmark { transform-origin: left center; }
+
+  .data-table tbody tr {
+    transition: scale var(--t-base) var(--ease), background-color var(--t-fast) var(--ease);
+  }
+  .data-table tbody tr:hover {
+    position: relative;
+    z-index: 1;
+    scale: var(--lift-row);
   }
 }
 
