@@ -52,7 +52,9 @@ export default function FiguresBoard({ scopes, initial }: { scopes: Scope[]; ini
         {/* flex-1 min-w-0 so the sentence wraps inside its own column instead of
             pushing the term buttons onto a second row, which cost a whole
             card-row of the fold at 1280. */}
-        <p className="flex-1 min-w-0 text-[0.95rem]" style={{ color: "var(--ink-3)" }}>
+        {/* --ink-2, not --ink-3: this line sits over the hero's drifting points
+            and the lighter grey disappeared into them. */}
+        <p className="flex-1 min-w-0 text-[0.95rem] font-medium" style={{ color: "var(--ink-2)" }}>
           {meta.label}
           {meta.note ? ` (${meta.note})` : ""} — figures cover this scope only, matching the
           same view on the source&rsquo;s dashboard.
