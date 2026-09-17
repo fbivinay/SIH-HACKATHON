@@ -347,6 +347,14 @@ currentCSSZoom × devicePixelRatio`. And viewport units are scaled like any
 other length: `100dvh` at 1.33 rendered 1436px tall in a 1080px window, so
 `--zoom` is set beside `zoom` and `.viewport-column` divides it back out.
 
+**Everything under the pointer zooms** (owner's call, 2026-09-17): surfaces by
+`--lift` (1.04, press 1.06), text blocks, buttons and links by `--lift-text`
+(1.03), table rows by `--lift-row` (1.01 — a row is 1100px wide and the wrap
+clips its edges). Nothing inside a lifting surface lifts on its own, or the
+two multiply. All of it sits behind one `hover / pointer: fine /
+prefers-reduced-motion: no-preference` gate, so there is nothing to undo for
+touch or reduced motion. Change the amount in the tokens, nowhere else.
+
 **Independent transform properties.** `scale` wraps `transform`: a ring at
 `transform: translate(449px)` with `scale: 1.55` drew at 696px. Position with
 the `translate` property (applied outermost) when `scale` is also in play.
