@@ -199,7 +199,10 @@ deliberate exceptions, both on the owner's call: the two words "AI powered" are
 the dot beside them is `--risk-low` green; the pointer is `--risk-high`. And
 the logo — `web/public/logo.png`, a tricolour K, rendered by `Logo` as an
 image, cut to `web/app/icon.png` for the favicon and shown in the README. It
-takes no CSS colour. Nothing else earns a hue.
+takes no CSS colour. Nothing else earns a hue: when the owner asked for a
+thick coloured ring on the two pill islands and the figures panel
+(2026-09-17), they got ink at 45% and 55% rather than a third exception —
+noticeable is a matter of weight and contrast, not of hue.
 
 **Light mode only.** The site ignores the OS and browser colour-scheme
 preference: `:root { color-scheme: light }`, `viewport.colorScheme` in
