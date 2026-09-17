@@ -1503,9 +1503,9 @@ main.home {
   flex-direction: column;
   padding: 1.35rem;
   border-radius: var(--radius-slab);
-  background: color-mix(in srgb, var(--ink) 5%, rgba(255, 255, 255, 0.5));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-edge), var(--glass-shadow);
+  background: color-mix(in srgb, var(--ink) 12%, rgba(255, 255, 255, 0.82));
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--glass-edge), var(--glass-shadow-lift);
 }
 
 /* The six figures: six cards on one row of the grid each, the same object the
