@@ -1,16 +1,11 @@
-import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatINR } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 import HeroField from "@/components/HeroField";
+import TermSwitch from "@/components/TermSwitch";
+import { TERMS } from "@/lib/terms";
 import ScoreMethod from "@/components/ScoreMethod";
 
-
-const TERMS = [
-  { value: "18", label: "18th Lok Sabha", note: "2024–29" },
-  { value: "17", label: "17th Lok Sabha", note: "2019–24" },
-  { value: "", label: "Both terms", note: "everything on record" },
-];
 
 export default async function OverviewPage({
   searchParams,
@@ -111,19 +106,7 @@ export default async function OverviewPage({
             {scope.note ? ` (${scope.note})` : ""} — figures cover this scope only, matching
             the same view on the source&rsquo;s dashboard.
           </p>
-          <nav className="flex flex-none flex-wrap gap-2" aria-label="Lok Sabha term">
-            {TERMS.map((t) => (
-              <Link
-                key={t.value || "all"}
-                href={t.value ? `/?ls_term=${t.value}` : "/?ls_term="}
-                className="review-btn"
-                aria-current={term === t.value ? "true" : undefined}
-                style={term === t.value ? { color: "var(--ink)", borderColor: "var(--ink)" } : undefined}
-              >
-                {t.label}
-              </Link>
-            ))}
-          </nav>
+          <TermSwitch current={term} />
         </div>
         {/* One panel, six cells, hairlines between: the figures are one set
             for one scope, not six separate cards. The first row is the record,

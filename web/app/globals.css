@@ -382,6 +382,23 @@ html { overflow-anchor: none; }
   display: none;
 }
 
+/* The same island, used inline rather than centred in a bar of its own. */
+.nav--inline {
+  margin-inline: 0;
+  flex: none;
+}
+
+/* While a term switch is in flight the figures stay where they are and fade,
+   rather than being torn down for a skeleton. The switcher marks itself
+   pending; the panel is its sibling's child, hence :has(). */
+.home-figures .figures-panel {
+  transition: opacity var(--t-base) var(--ease);
+}
+.home-figures:has(.nav--inline[data-pending]) .figures-panel {
+  opacity: 0.45;
+}
+.nav--inline[data-pending] { cursor: progress; }
+
 /* Under ~1100px the wordmark, five links and the button cannot share a line.
    The strapline goes first, then the wordmark's text, so the nav and the
    action both survive rather than sliding off the edge. */
@@ -429,12 +446,12 @@ html { overflow-anchor: none; }
 
 /* The current section is the one solid thing in a bar of glass, so it reads
    as where you are rather than as another option. */
-.nav__link[aria-current="page"] {
+.nav__link[aria-current] {
   color: var(--surface);
   background: var(--ink);
   box-shadow: 0 1px 2px rgba(11, 11, 12, 0.18);
 }
-.nav__link[aria-current="page"]:hover {
+.nav__link[aria-current]:hover {
   color: var(--surface);
   background: var(--ink);
 }
