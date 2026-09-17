@@ -370,6 +370,13 @@ for React's `__reactFiber$` mark and sweeps for ten seconds after load). All
 of it sits behind one `hover / pointer: fine / prefers-reduced-motion:
 no-preference` gate. Change the amount in the tokens, nowhere else.
 
+**The six figures drift** (owner's call, 2026-09-17): ±4px, six periods from
+9.2s to 13.1s with negative delays so they never look like one object
+breathing, paused under the pointer, and absent under reduced motion. On
+`transform`, not the `translate` property — `translate` carries the shared
+hover lift, and an animation's fill state beats a plain declaration, so a
+float there would silently eat it.
+
 **Independent transform properties.** `scale` wraps `transform`: a ring at
 `transform: translate(449px)` with `scale: 1.55` drew at 696px. Position with
 the `translate` property (applied outermost) when `scale` is also in play.
