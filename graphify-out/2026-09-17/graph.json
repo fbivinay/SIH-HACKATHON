@@ -1172,7 +1172,7 @@
       "file_type": "code",
       "norm_label": "freshnessline()",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L66"
+      "source_location": "L67"
     },
     {
       "id": "web_app_layout_rootlayout",
@@ -1184,7 +1184,7 @@
       "file_type": "code",
       "norm_label": "rootlayout()",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L77"
+      "source_location": "L78"
     },
     {
       "id": "web_components_cursor_cursor",
@@ -1197,6 +1197,18 @@
       "norm_label": "cursor()",
       "source_file": "web/components/Cursor.tsx",
       "source_location": "L30"
+    },
+    {
+      "id": "web_components_foldheight_foldheight",
+      "label": "FoldHeight()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "foldheight()",
+      "source_file": "web/components/FoldHeight.tsx",
+      "source_location": "L22"
     },
     {
       "id": "web_components_logo_logo",
@@ -5941,7 +5953,7 @@
       "file_type": "code",
       "norm_label": "metadata",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "id": "web_app_layout_mono",
@@ -5952,7 +5964,7 @@
       "file_type": "code",
       "norm_label": "mono",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "id": "web_app_layout_navlinks",
@@ -5963,7 +5975,7 @@
       "file_type": "code",
       "norm_label": "navlinks",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L54"
+      "source_location": "L55"
     },
     {
       "id": "web_app_layout_sans",
@@ -5974,7 +5986,7 @@
       "file_type": "code",
       "norm_label": "sans",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L17"
+      "source_location": "L18"
     },
     {
       "id": "web_app_layout_viewport",
@@ -5985,7 +5997,7 @@
       "file_type": "code",
       "norm_label": "viewport",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L40"
+      "source_location": "L41"
     },
     {
       "id": "web_components_cursor",
@@ -5996,6 +6008,17 @@
       "file_type": "code",
       "norm_label": "cursor.tsx",
       "source_file": "web/components/Cursor.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_components_foldheight",
+      "label": "FoldHeight.tsx",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "foldheight.tsx",
+      "source_file": "web/components/FoldHeight.tsx",
       "source_location": "L1"
     },
     {
@@ -8603,7 +8626,7 @@
       "node_kind": "heading",
       "norm_label": "11. motion, measured",
       "source_file": "CLAUDE.md",
-      "source_location": "L275"
+      "source_location": "L280"
     },
     {
       "id": "claude_1_never_claim_more_than_the_record_supports",
@@ -8723,7 +8746,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "CLAUDE.md",
-      "source_location": "L388"
+      "source_location": "L403"
     },
     {
       "id": "claude_kasauti_mplads_verification",
@@ -15263,7 +15286,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L68",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -15275,7 +15298,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L70",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -15287,7 +15310,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L71",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -15299,7 +15322,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L78",
+      "source_location": "L79",
       "weight": 1.0
     },
     {
@@ -17263,7 +17286,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_splash_splash",
+      "target": "web_components_foldheight_foldheight",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17271,6 +17294,18 @@
       "context": "import",
       "source_file": "web/app/layout.tsx",
       "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "web_app_layout",
+      "target": "web_components_splash_splash",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "web/app/layout.tsx",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -18755,7 +18790,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_splash",
+      "target": "web_components_foldheight",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18763,6 +18798,18 @@
       "context": "import",
       "source_file": "web/app/layout.tsx",
       "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "web_app_layout",
+      "target": "web_components_splash",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "web/app/layout.tsx",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -19210,6 +19257,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "web/components/Cursor.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_foldheight",
+      "target": "ref_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "web/components/FoldHeight.tsx",
       "source_location": "L3",
       "weight": 1.0
     },
@@ -20838,7 +20897,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L275",
+      "source_location": "L280",
       "weight": 1.0
     },
     {
@@ -20860,7 +20919,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L388",
+      "source_location": "L403",
       "weight": 1.0
     },
     {
@@ -25150,7 +25209,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -25161,7 +25220,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -25172,7 +25231,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -25183,7 +25242,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L40",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -25194,7 +25253,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -25205,7 +25264,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L66",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -25216,7 +25275,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L77",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -25536,6 +25595,17 @@
       "confidence_score": 1.0,
       "source_file": "web/components/Cursor.tsx",
       "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_foldheight",
+      "target": "web_components_foldheight_foldheight",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/FoldHeight.tsx",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -29581,5 +29651,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9ec93d205d8ea838deba3ae177a7dfb4ac8ff888"
+  "built_at_commit": "547f9bab4f61546ea1b21302d21e8624d8bba93f"
 }

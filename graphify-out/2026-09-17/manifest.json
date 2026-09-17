@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789625132.2402842,
-    "seen": 1789625456.0378885,
-    "ast_hash": "49086943c5278d6d05ae608a788edbbb",
+    "mtime": 1789628723.5140903,
+    "seen": 1789628989.4375231,
+    "ast_hash": "21748553ad3c369521e02a095261a9f0",
     "semantic_hash": ""
   },
   "web/app/map/page.tsx": {
@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "web/app/page.tsx": {
-    "mtime": 1789565312.6114361,
-    "seen": 1789565624.3267179,
-    "ast_hash": "b8e9f940a52d66bba49cb6d68567a9c7",
+    "mtime": 1789627717.1710546,
+    "seen": 1789628989.4376726,
+    "ast_hash": "f03e8057e9256d1da35b559c80e38609",
     "semantic_hash": ""
   },
   "web/app/projects/[id]/page.tsx": {
@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789625453.0565574,
-    "seen": 1789625456.0394607,
-    "ast_hash": "f53536c93ba18e0bd53ed9cee937cc10",
+    "mtime": 1789628986.7042022,
+    "seen": 1789628989.4391098,
+    "ast_hash": "c81439e7a1e1f80726792a70f82cfbe7",
     "semantic_hash": ""
   },
   "README.md": {
@@ -843,6 +843,12 @@
     "mtime": 1789625358.1927085,
     "seen": 1789625456.0388775,
     "ast_hash": "767b67588ed916f975001b47d1f25171",
+    "semantic_hash": ""
+  },
+  "web/components/FoldHeight.tsx": {
+    "mtime": 1789628930.964581,
+    "seen": 1789628989.437943,
+    "ast_hash": "ca39bb1a53826d56aa5284a6eaaad1bd",
     "semantic_hash": ""
   }
 }

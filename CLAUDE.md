@@ -386,6 +386,17 @@ scroll, so a topbar offset parks the header across row 1. `.topbar` is
 `z-index: 1100` because Leaflet stacks 200–1000 and painted over the nav at
 40. The pointer is 10000, above the cover at 9999.
 
+**The term switcher is not a navigation the reader should see.** It is the
+nav's own pill island (`.nav--inline`, `components/TermSwitch.tsx`) and it
+switches with `router.replace` inside `startTransition`, so React keeps the
+figures on screen until the new ones are ready instead of tearing them down
+for `app/loading.tsx`'s skeleton — that teardown was the lag, not the fetch.
+While it runs the switcher carries `data-pending` and
+`.home-figures:has(.nav--inline[data-pending]) .figures-panel` fades. `TERMS`
+lives in `lib/terms.ts`, not in the client component: a plain value exported
+from a `"use client"` module reaches the server as a client reference, and
+`TERMS.find is not a function` is what that looks like.
+
 **Navigation.** `app/loading.tsx` answers a click in ~150ms; `lib/api.ts`
 caches every GET for 300s under the tag `api` (the record changes nightly),
 and `app/alerts/actions.ts` calls `updateTag("api")` after a review so the
