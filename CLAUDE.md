@@ -238,8 +238,11 @@ expression left the panel 85px short at 1440×810 and 47px long at 1366×768.
 The CSS `calc` behind it is only the no-JavaScript fallback. The fold runs the
 window's width rather than the 1180px shell, and everything inside is set
 larger than elsewhere. The six figures are six cards on a 3×2 grid
-(`.figures`/`.figure`), each centred in its own card, matching the sections
-below the fold; they were one hairlined panel for a day, on 2026-09-16. The min-height is a floor, so two
+(`.figures`/`.figure`), each centred in its own card, on a light glass panel
+(`.figures-panel`) — the counterpart of the dark slab that carries the
+scoring method below the fold, going a few percent grey where the slab goes
+near-black. No backdrop blur on it: the budget is two per page and the
+masthead and ticker have them. The min-height is a floor, so two
 `max-height` queries (980px, 820px) shrink the type to keep the panel above
 the ticker; measured on six viewports from 1280×720 to 1920×1080, the gap
 is 34–51px. Re-measure after touching any size in that block or the

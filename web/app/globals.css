@@ -1489,6 +1489,25 @@ main.home {
   flex-direction: column;
 }
 
+/* The panel the six figures sit on - the light counterpart of the dark slab
+   that carries the scoring method below the fold. Where the slab separates
+   itself by going near-black, this one goes the other way: a pane of glass a
+   few percent grey, so the cards on it read as white objects rather than as
+   six shapes floating on the page ground. No backdrop blur - the performance
+   budget allows two on a page and the masthead and ticker have them - so the
+   glass is carried by the translucency, the rim highlight and the shadow. */
+.figures-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.35rem;
+  border-radius: var(--radius-slab);
+  background: color-mix(in srgb, var(--ink) 5%, rgba(255, 255, 255, 0.5));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+}
+
 /* The six figures: six cards on one row of the grid each, the same object the
    rest of the site is built from. They were one panel with hairlines between
    the cells for a day; separate cards read the same way the scoring sections
@@ -1513,7 +1532,7 @@ main.home {
   text-align: center;
   padding: 1.25rem 1.25rem 1.35rem;
   min-width: 0;
-  background: var(--glass);
+  background: var(--glass-strong);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-card);
   box-shadow: var(--glass-edge), var(--glass-shadow);
@@ -1552,6 +1571,7 @@ main.home {
   .home-fold { padding-bottom: 1.8rem; }
   .home-fold .page-head { padding-block: 1.1rem 1.1rem; }
   .home-fold .display--hero { font-size: clamp(2.4rem, 4.2vw, 3.4rem); }
+  .figures-panel { padding: 1.1rem; }
   .figures { gap: 1.1rem; }
   .figure { padding: 1.05rem 1.2rem 1.15rem; }
   .figure__value { margin-top: 0.2rem; font-size: clamp(1.9rem, 2.6vw, 2.5rem); }
@@ -1560,6 +1580,7 @@ main.home {
   .home-fold { padding-bottom: 1.6rem; }
   .home-fold .page-head { padding-block: 0.7rem 0.7rem; }
   .home-fold .display--hero { font-size: clamp(1.9rem, 3.2vw, 2.7rem); }
+  .figures-panel { padding: 0.85rem; }
   .figures { gap: 0.9rem; }
   .figure { padding: 0.85rem 1rem 0.95rem; }
   .figure__label { font-size: 0.9rem; }
@@ -1806,7 +1827,7 @@ main > section:nth-of-type(4) { animation-delay: calc(var(--enter-at) + 240ms); 
 main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300ms); }
 
 .stat-card,
-.figures,
+.figures-panel,
 .grid > .card,
 .slab-card,
 .model-card,
@@ -1931,7 +1952,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   main > section,
   main > .shell,
   .home-fold > section,
-  .figures,
+  .figures-panel,
   .figure__value,
   .stat-card,
   .stat-card__value,
