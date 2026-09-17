@@ -1489,25 +1489,18 @@ main.home {
   flex-direction: column;
 }
 
-/* The six figures as one panel: a 3x2 grid of cells divided by hairlines, each
-   figure centred in its cell. Six floating cards each holding a small block
-   of text in one corner read as six empty boxes at this size; one object with
-   an internal grid reads as a single table of figures, which is what it is. */
+/* The six figures: six cards on one row of the grid each, the same object the
+   rest of the site is built from. They were one panel with hairlines between
+   the cells for a day; separate cards read the same way the scoring sections
+   below the fold do, which is what the owner asked for. */
 .figures {
   flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-auto-rows: 1fr;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--glass-edge), var(--glass-shadow);
+  gap: 0.75rem;
 }
-/* Each cell lifts under the pointer like a card does elsewhere: it takes a
-   surface and a radius of its own for the moment, so it rises out of the
-   table rather than bulging inside it. The panel is not overflow-hidden for
-   exactly this reason. */
 .figure {
   display: flex;
   flex-direction: column;
@@ -1516,9 +1509,11 @@ main.home {
   text-align: center;
   padding: 1.1rem 1.25rem;
   min-width: 0;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
 }
-.figure:not(:nth-child(3n + 1)) { border-left: 1px solid var(--line); }
-.figure:nth-child(n + 4) { border-top: 1px solid var(--line); }
 .figure__label {
   font-size: 1rem;
   font-weight: 500;
@@ -1985,10 +1980,6 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
  * the arrival animation's transform, are never fought over.
  */
 @media (hover: hover) and (pointer: fine) {
-  .figure:hover {
-    background: var(--surface);
-    border-radius: var(--radius-card);
-  }
   .stat-card:hover,
   .figure:hover,
   .card:hover,
