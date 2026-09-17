@@ -253,7 +253,9 @@ masthead, and measure with reduced motion forced *and* the fold's sections
 and `.figures` in the reduced-motion list — an element still in its
 entrance delay reports its rect 104px low.
 The score's components and limits (`components/ScoreMethod.tsx`) follow below
-the fold; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
+the fold — three limits of seven points each, every point either a rule in
+`data/scoring.py` or an entry in `COMPLIANCE_BLIND_SPOTS`, and a fourth cell
+that is the way out to `/provenance` rather than a fourth limit; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
 the masthead on every page except the overview, where it runs along the bottom
 of the viewport (`OnHome` in `app/layout.tsx`); it carries only the works —
 no label, no "all high risk" link. "AI powered" must be visible on every page

@@ -46,22 +46,49 @@ const COMPONENTS = [
   },
 ];
 
+// Three limits, seven points each, because a limit stated in one line reads as
+// a disclaimer and a limit itself has to be checkable. Every point here is
+// either a rule in data/scoring.py or an entry in COMPLIANCE_BLIND_SPOTS in
+// api/main.py - none of it is written fresh for this page.
+//
+// The fourth limit, that no model decides alone, moved to /provenance with the
+// models it is about; the fourth cell of this grid points there.
 const LIMITS = [
   {
     title: "It does not allege wrongdoing",
-    body: "A high score means a work does not resemble its peers. That is a reason to look, and nothing more.",
+    points: [
+      "A score is a comparison, not a finding: it says a work does not resemble works like it.",
+      "Its peers are the works in the same district and the same sector, within one Lok Sabha term.",
+      "Five components with fixed weights make it - cost 25%, delay 25%, duplication 20%, agency 15%, the scheme's own rules 15%.",
+      "Each component names the rows it came from, so any flag can be read back to the record and argued with.",
+      "The cost comparison stays silent unless a district has at least eight comparable works.",
+      "What a pattern across an agency or a member shows is reported at that grain, never folded into one work's score.",
+      "A reviewer's decision - verified, escalated, dismissed - records what a person concluded, and never moves the score.",
+    ],
   },
   {
     title: "It invents no fields",
-    body: "Progress percentages, beneficiary counts, geo-tags and bill values are not published for MPLADS works, so this system does not show them.",
+    points: [
+      "No progress percentage is published for an MPLADS work, so none is shown.",
+      "No beneficiary count is published, so the system cannot say who a work served.",
+      "No geo-tag is published, so nothing here can place a work on the ground.",
+      "No bill value or invoice is published, so spending is only ever the totals the source gives.",
+      "The source publishes one figure per completed work, recorded as both sanction and expenditure - so the overspend rule cannot fire on this data, and says so rather than reading as passed.",
+      "The portal's own category column reads \u201cNormal/Others\u201d on 98.1% of works: the sector shown is derived from the description, good enough to compare like with like and not good enough to call a work impermissible.",
+      "Per-work sanction ceilings are not published beside the works, so cost is judged against comparable works rather than against a rule.",
+    ],
   },
   {
     title: "It reports, it does not forecast",
-    body: "Every figure describes what the record already shows — how late a work is, how far its cost sits from its peers. The portal publishes no progress milestones, so there is nothing to project a completion date from. The closest thing to an early warning here is money committed to an agency that has paid nobody in six months, which is an observation, not a prediction.",
-  },
-  {
-    title: "No model decides alone",
-    body: "The score itself is deterministic and rule-weighted, and every flag names the record it came from. The language model only labels what a work is, so it meets the right peers; it never scores, ranks or flags anything.",
+    points: [
+      "Every figure describes the record as it already stands, not where it is heading.",
+      "Delay is days past the completion date the source itself publishes.",
+      "A work with no recorded schedule scores zero on delay, not high - an absent date is not a late one.",
+      "No progress milestones are published, so there is nothing to project a completion date from.",
+      "Cost is distance from the median of comparable works, not an estimate of what a work should have cost.",
+      "The nearest thing to an early warning is money committed to an agency that has paid nobody in six months, which is an observation about payments already made.",
+      "Figures move when the record moves: the published extract is reloaded and rescored nightly, and the page says when that last happened.",
+    ],
   },
 ];
 
@@ -123,15 +150,32 @@ export default function ScoreMethod() {
           over.
         </p>
       </div>
-      <div className="mt-8 grid gap-3 md:grid-cols-3">
+      <div className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         {LIMITS.map((l) => (
           <div key={l.title} className="card">
             <h3 className="text-[0.98rem] font-medium">{l.title}</h3>
-            <p className="mt-2 text-[0.85rem] leading-relaxed" style={{ color: "var(--ink-2)" }}>
-              {l.body}
-            </p>
+            <ul className="limit-points">
+              {l.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
           </div>
         ))}
+        {/* The fourth cell is the way out of this page rather than a fourth
+            limit: the full blind-spot list, the rule book and the detectors are
+            all on Sources, and so is the limit these three used to be joined
+            by - that no model decides alone. */}
+        <div className="card card--more">
+          <h3 className="text-[0.98rem] font-medium">And the rest of it</h3>
+          <p className="mt-2 text-[0.85rem] leading-relaxed" style={{ color: "var(--ink-2)" }}>
+            Four more blind spots are written out in full on Sources, beside the rule
+            book each compliance flag comes from, the detectors that describe an agency
+            rather than a work, and what each of the three models decides.
+          </p>
+          <Link href="/provenance" className="btn btn--quiet mt-4 self-start">
+            Read the rest on Sources
+          </Link>
+        </div>
       </div>
     </section>
     </>

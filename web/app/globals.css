@@ -385,6 +385,40 @@ html { overflow-anchor: none; }
   display: none;
 }
 
+/* A limit is a list of checkable statements, not a paragraph: each point sits
+   on its own line behind a small mark, so a reader can take them one at a
+   time and find the one they want to argue with. */
+.limit-points {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.limit-points li {
+  position: relative;
+  padding-left: 0.85rem;
+  text-wrap: pretty;
+}
+.limit-points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+
+/* The way out of the section, not a fourth limit: it says so by being the one
+   cell with an action in it rather than a list. */
+.card--more {
+  display: flex;
+  flex-direction: column;
+}
+
 /* The same island, used inline rather than centred in a bar of its own, and a
    size down: it names a scope, it is not the site's navigation. */
 .nav--inline {
