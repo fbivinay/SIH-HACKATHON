@@ -367,7 +367,10 @@ html { overflow-anchor: none; }
   padding: 0.28rem;
   border-radius: var(--radius-pill);
   background: var(--glass);
-  border: 1px solid var(--glass-border);
+  /* A definite ink edge rather than the glass hairline, so the island reads as
+     an object on the page at a glance (owner's call). Ink, not a hue: colour
+     still only ever means risk, and a 2px ring is what makes it noticeable. */
+  border: 2px solid color-mix(in srgb, var(--ink) 45%, transparent);
   box-shadow: var(--glass-edge), var(--glass-shadow);
   /* A slow rise and fall, so the island reads as floating rather than as a
      panel that happens to have a shadow. Six seconds and four pixels: long
@@ -1534,7 +1537,7 @@ main.home {
      reads as an object standing off the page rather than as a rectangle with
      a border drawn on it. A solid --line-strong was nearly invisible against
      a fill this close to the ground. */
-  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  border: 3px solid color-mix(in srgb, var(--ink) 55%, transparent);
   /* Five layers, and each does one job: a bright inset line along the top and
      a dark one along the bottom give the pane thickness; then a tight contact
      shadow, a mid lift, and a wide soft one carry the height. Together they
