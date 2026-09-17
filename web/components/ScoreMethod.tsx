@@ -107,7 +107,10 @@ const LIMITS = [
 export default function ScoreMethod() {
   return (
     <>
-    <section className="shell mt-9">
+    {/* The second screen, exactly: the slab fills the space between the masthead
+        and the ticker, so one page down lands on the whole of it rather than
+        three quarters of it with the rest below (owner's call). */}
+    <section className="shell score-screen">
       <div className="slab">
         <div className="text-center">
           <h2 className="section-head">What the score is made of</h2>
@@ -117,7 +120,7 @@ export default function ScoreMethod() {
           </p>
         </div>
 
-        <div className="mt-9 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="score-grid mt-9 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {COMPONENTS.map((c) => (
             <div key={c.name} className="slab-card">
               <div className="flex items-baseline justify-between gap-3">

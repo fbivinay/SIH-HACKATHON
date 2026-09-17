@@ -252,8 +252,15 @@ is 34–51px. Re-measure after touching any size in that block or the
 masthead, and measure with reduced motion forced *and* the fold's sections
 and `.figures` in the reduced-motion list — an element still in its
 entrance delay reports its rect 104px low.
-The score's components and limits (`components/ScoreMethod.tsx`) follow below
-the fold — four limits of seven points each, every point either a rule in
+The scoring method (`.score-screen` in `components/ScoreMethod.tsx`) is the
+**second** screen and fills it exactly: a definite `height: var(--fold-h)`,
+the slab inside it at `flex: 1` with a hair of margin, the six cards sharing
+what the heading leaves, and two `max-height` tiers (980px, 820px) so a 768px
+laptop fits the same six cards. A floor rather than a definite height let the
+content push the section past the screen, which is how one page down landed
+on three quarters of the slab. Measured on five viewports: section = fold
+height, 10–16px of air above and below the slab, no card overflowing. The
+limits follow below — four limits of seven points each, every point either a rule in
 `data/scoring.py` or an entry in `COMPLIANCE_BLIND_SPOTS`, showing three and
 keeping the rest behind a `<details>` "Read more" so the row skims at three
 lines and still reads in full without JavaScript; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
