@@ -129,16 +129,18 @@ export default async function OverviewPage({
             for one scope, not six separate cards. The first row is the record,
             the second what the scoring made of it. Vendor payments was a
             seventh and left a hole; the source still serves it. */}
-        <div className="figures">
-          {stats.map((s) => (
-            <div key={s.label} className={`figure${s.tone ? ` figure--${s.tone}` : ""}`}>
-              <div className="figure__label">{s.label}</div>
-              <div className="figure__value">
-                <CountUp text={String(s.value)} />
+        <div className="figures-panel">
+          <div className="figures">
+            {stats.map((s) => (
+              <div key={s.label} className={`figure${s.tone ? ` figure--${s.tone}` : ""}`}>
+                <div className="figure__label">{s.label}</div>
+                <div className="figure__value">
+                  <CountUp text={String(s.value)} />
+                </div>
+                <div className="figure__note">{s.note}</div>
               </div>
-              <div className="figure__note">{s.note}</div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
       </div>
