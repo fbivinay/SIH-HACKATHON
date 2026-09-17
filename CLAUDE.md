@@ -349,7 +349,7 @@ other length: `100dvh` at 1.33 rendered 1436px tall in a 1080px window, so
 
 **Everything under the pointer zooms** (owner's call, 2026-09-17): surfaces by
 `--lift` (1.05, press 1.07), the single *word* under the pointer, buttons and
-links by `--lift-text` (1.12 — a word is small and needs three times a surface's growth
+links by `--lift-text` (1.08 — a word is small and needs twice a surface's growth
 to read as a zoom), table rows by `--lift-row` (1.015 — a row is
 1100px wide and the wrap clips its edges), on `--t-lift`/`--ease-lift`. Words
 are wrapped in `.w` spans at runtime by `components/WordLift.tsx`, which must

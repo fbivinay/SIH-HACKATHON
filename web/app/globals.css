@@ -94,15 +94,17 @@
      so the whole site moves by the same amount, at --t-base, on --ease. */
   --lift: 1.05;
   --lift-press: 1.07;
-  /* A word is small, so it takes three times the growth a whole surface does
+  /* A word is small, so it takes twice the growth a whole surface does
      before the zoom reads as a zoom at all (owner's call). */
-  --lift-text: 1.12;
+  --lift-text: 1.08;
   /* A row is the width of the table and the wrap clips its edges, so this one
      cannot follow: 1.2% of 1100px is already 13px. */
   --lift-row: 1.015;
-  /* Quick, and out of the way: the zoom should arrive with the pointer. */
-  --t-lift: 140ms;
-  --ease-lift: cubic-bezier(0.2, 0.8, 0.25, 1);
+  /* Quick off the mark and long in the tail: most of the travel is spent in
+     the first third, so the zoom arrives with the pointer, and the last of it
+     eases out rather than stopping dead. */
+  --t-lift: 220ms;
+  --ease-lift: cubic-bezier(0.16, 1, 0.3, 1);
 
   --radius-slab: 28px;
   --radius-card: 18px;
@@ -1600,7 +1602,7 @@ body::before {
   background: var(--glass);
   border-color: var(--glass-border);
   box-shadow: var(--glass-edge), var(--glass-shadow);
-  scale: 1.07;
+  scale: 1.05;
 }
 .ticker__item:hover .ticker__name { color: var(--ink); }
 
@@ -2065,13 +2067,17 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   /* An atomic inline does not inherit its parent's underline by default,
      which would have cut every underlined link into un-underlined words. */
   text-decoration: inherit;
+  /* Positioned from the start, not from :hover. Turning on `position` at the
+     moment the transition begins creates the stacking context in the same
+     frame as the first scale step, and the word flicks as it is repainted
+     into a new layer; only the z-index changes on hover now. */
+  position: relative;
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .w {
     transition: scale var(--t-lift) var(--ease-lift);
   }
   .w:hover {
-    position: relative;
     z-index: 1;
     scale: var(--lift-text);
   }
