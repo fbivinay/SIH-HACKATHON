@@ -1548,15 +1548,15 @@ main.home {
  *
  * Six different periods, none a multiple of another, with negative delays so
  * they start mid-phase: the cards must never look like one object breathing.
- * 4px over ten seconds is under a pixel a second - visible only as the page
- * not being quite still, which is the whole intent.
+ * 8px over five seconds - twice the travel at twice the speed of the first
+ * pass, which the owner could not see at all.
  *
  * A hovered card stops where it is: the pointer is a deliberate act and the
  * thing under it should hold still to be read.
  */
 @keyframes figure-float {
-  from { transform: translateY(-4px); }
-  to   { transform: translateY(4px); }
+  from { transform: translateY(-8px); }
+  to   { transform: translateY(8px); }
 }
 @media (prefers-reduced-motion: no-preference) {
   .figure {
@@ -1568,12 +1568,12 @@ main.home {
     animation-direction: alternate;
     animation-fill-mode: both;
   }
-  .figure:nth-child(1) { --float-dur: 9.2s;  --float-delay: -0.7s; }
-  .figure:nth-child(2) { --float-dur: 11.9s; --float-delay: -4.3s; }
-  .figure:nth-child(3) { --float-dur: 10.4s; --float-delay: -2.1s; }
-  .figure:nth-child(4) { --float-dur: 13.1s; --float-delay: -6.8s; }
-  .figure:nth-child(5) { --float-dur: 9.8s;  --float-delay: -3.4s; }
-  .figure:nth-child(6) { --float-dur: 12.3s; --float-delay: -1.5s; }
+  .figure:nth-child(1) { --float-dur: 4.6s; --float-delay: -0.7s; }
+  .figure:nth-child(2) { --float-dur: 6.0s; --float-delay: -4.3s; }
+  .figure:nth-child(3) { --float-dur: 5.2s; --float-delay: -2.1s; }
+  .figure:nth-child(4) { --float-dur: 6.6s; --float-delay: -6.8s; }
+  .figure:nth-child(5) { --float-dur: 4.9s; --float-delay: -3.4s; }
+  .figure:nth-child(6) { --float-dur: 6.2s; --float-delay: -1.5s; }
   .figure:hover { animation-play-state: paused; }
 }
 
