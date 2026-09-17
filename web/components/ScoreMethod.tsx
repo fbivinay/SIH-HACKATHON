@@ -46,13 +46,13 @@ const COMPONENTS = [
   },
 ];
 
-// Three limits, seven points each, because a limit stated in one line reads as
+// Four limits, seven points each, because a limit stated in one line reads as
 // a disclaimer and a limit itself has to be checkable. Every point here is
 // either a rule in data/scoring.py or an entry in COMPLIANCE_BLIND_SPOTS in
 // api/main.py - none of it is written fresh for this page.
 //
-// The fourth limit, that no model decides alone, moved to /provenance with the
-// models it is about; the fourth cell of this grid points there.
+// A card shows its first three and keeps the rest behind "Read more", so the
+// row can be skimmed at the height of three lines and still be read in full.
 const LIMITS = [
   {
     title: "It does not allege wrongdoing",
@@ -88,6 +88,18 @@ const LIMITS = [
       "Cost is distance from the median of comparable works, not an estimate of what a work should have cost.",
       "The nearest thing to an early warning is money committed to an agency that has paid nobody in six months, which is an observation about payments already made.",
       "Figures move when the record moves: the published extract is reloaded and rescored nightly, and the page says when that last happened.",
+    ],
+  },
+  {
+    title: "No model decides alone",
+    points: [
+      "The score is deterministic and rule-weighted: the same record scores the same way on every run.",
+      "No model chooses those weights, and no model output becomes a risk number.",
+      "Gemini is asked for a sector only where the keyword rules could not decide one.",
+      "It is allowed to answer \u201cOther\u201d, and did so 5,167 times rather than guess - which is why a model that can abstain was used instead of a nearest-match classifier.",
+      "A label only decides which works a work is compared against; a wrong label makes a comparison wrong, not a score high.",
+      "The sentence-transformer only measures how alike two descriptions are, against a 0.94 cutoff measured on this data's own distribution.",
+      "The isolation forest can raise the cost component when it disagrees with the peer median, and can do nothing else.",
     ],
   },
 ];
@@ -147,7 +159,12 @@ export default function ScoreMethod() {
         <h2 className="section-head">What it will not tell you</h2>
         <p className="lede">
           The gaps matter as much as the findings, so they are stated rather than papered
-          over.
+          over. Four more blind spots, the rule book behind every compliance flag and the
+          detectors that describe an agency rather than a work are all on{" "}
+          <Link href="/provenance" className="link-quiet">
+            Sources
+          </Link>
+          .
         </p>
       </div>
       <div className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
@@ -155,27 +172,27 @@ export default function ScoreMethod() {
           <div key={l.title} className="card">
             <h3 className="text-[0.98rem] font-medium">{l.title}</h3>
             <ul className="limit-points">
-              {l.points.map((point) => (
+              {l.points.slice(0, 3).map((point) => (
                 <li key={point}>{point}</li>
               ))}
             </ul>
+            {/* <details>, not state: the rest of a limit has to open without
+                JavaScript, be findable by the browser's own search, and print. */}
+            <details className="limit-more">
+              <summary>
+                <span className="limit-more__open">
+                  Read more ({l.points.length - 3} more)
+                </span>
+                <span className="limit-more__close">Show less</span>
+              </summary>
+              <ul className="limit-points">
+                {l.points.slice(3).map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </details>
           </div>
         ))}
-        {/* The fourth cell is the way out of this page rather than a fourth
-            limit: the full blind-spot list, the rule book and the detectors are
-            all on Sources, and so is the limit these three used to be joined
-            by - that no model decides alone. */}
-        <div className="card card--more">
-          <h3 className="text-[0.98rem] font-medium">And the rest of it</h3>
-          <p className="mt-2 text-[0.85rem] leading-relaxed" style={{ color: "var(--ink-2)" }}>
-            Four more blind spots are written out in full on Sources, beside the rule
-            book each compliance flag comes from, the detectors that describe an agency
-            rather than a work, and what each of the three models decides.
-          </p>
-          <Link href="/provenance" className="btn btn--quiet mt-4 self-start">
-            Read the rest on Sources
-          </Link>
-        </div>
       </div>
     </section>
     </>

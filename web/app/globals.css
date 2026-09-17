@@ -412,12 +412,27 @@ html { overflow-anchor: none; }
   background: var(--line-strong);
 }
 
-/* The way out of the section, not a fourth limit: it says so by being the one
-   cell with an action in it rather than a list. */
-.card--more {
-  display: flex;
-  flex-direction: column;
+/* The rest of a limit. The summary is the only control on the page that is not
+   a button or a link, so it is styled as the quiet link it behaves like, and
+   the browser's own triangle goes - the label already says what it does. */
+.limit-more > summary {
+  margin-top: 0.7rem;
+  display: inline-flex;
+  font-size: 0.8rem;
+  color: var(--ink-3);
+  cursor: pointer;
+  list-style: none;
+  border-bottom: 1px solid var(--line-strong);
+  width: fit-content;
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
 }
+.limit-more > summary::-webkit-details-marker { display: none; }
+.limit-more > summary:hover { color: var(--ink); border-color: var(--ink); }
+.limit-more[open] > summary { margin-bottom: 0.1rem; }
+.limit-more .limit-points { margin-top: 0.55rem; }
+.limit-more__close { display: none; }
+.limit-more[open] .limit-more__open { display: none; }
+.limit-more[open] .limit-more__close { display: inline; }
 
 /* The same island, used inline rather than centred in a bar of its own, and a
    size down: it names a scope, it is not the site's navigation. */
