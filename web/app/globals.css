@@ -1509,12 +1509,18 @@ main.home {
      reads as an object standing off the page rather than as a rectangle with
      a border drawn on it. A solid --line-strong was nearly invisible against
      a fill this close to the ground. */
-  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  /* Five layers, and each does one job: a bright inset line along the top and
+     a dark one along the bottom give the pane thickness; then a tight contact
+     shadow, a mid lift, and a wide soft one carry the height. Together they
+     are what makes it read as a slab held above the page rather than a
+     lighter rectangle printed on it. */
   box-shadow:
-    var(--glass-edge),
-    0 1px 2px rgba(11, 11, 12, 0.07),
-    0 10px 24px -12px rgba(11, 11, 12, 0.22),
-    0 34px 64px -32px rgba(11, 11, 12, 0.32);
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(11, 11, 12, 0.10),
+    0 2px 4px rgba(11, 11, 12, 0.10),
+    0 16px 30px -10px rgba(11, 11, 12, 0.30),
+    0 46px 80px -34px rgba(11, 11, 12, 0.45);
 }
 
 /* The six figures: six cards on one row of the grid each, the same object the
