@@ -1504,8 +1504,17 @@ main.home {
   padding: 2rem;
   border-radius: var(--radius-slab);
   background: color-mix(in srgb, var(--ink) 12%, rgba(255, 255, 255, 0.82));
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--glass-edge), var(--glass-shadow-lift);
+  /* The edge is a shadow rather than a line: a hairline of ink at 16%, the
+     rim highlight inside it, and three shadow layers under it, so the panel
+     reads as an object standing off the page rather than as a rectangle with
+     a border drawn on it. A solid --line-strong was nearly invisible against
+     a fill this close to the ground. */
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  box-shadow:
+    var(--glass-edge),
+    0 1px 2px rgba(11, 11, 12, 0.07),
+    0 10px 24px -12px rgba(11, 11, 12, 0.22),
+    0 34px 64px -32px rgba(11, 11, 12, 0.32);
 }
 
 /* The six figures: six cards on one row of the grid each, the same object the
