@@ -348,12 +348,18 @@ other length: `100dvh` at 1.33 rendered 1436px tall in a 1080px window, so
 `--zoom` is set beside `zoom` and `.viewport-column` divides it back out.
 
 **Everything under the pointer zooms** (owner's call, 2026-09-17): surfaces by
-`--lift` (1.04, press 1.06), text blocks, buttons and links by `--lift-text`
-(1.03), table rows by `--lift-row` (1.01 — a row is 1100px wide and the wrap
-clips its edges). Nothing inside a lifting surface lifts on its own, or the
-two multiply. All of it sits behind one `hover / pointer: fine /
-prefers-reduced-motion: no-preference` gate, so there is nothing to undo for
-touch or reduced motion. Change the amount in the tokens, nowhere else.
+`--lift` (1.05, press 1.07), the single *word* under the pointer, buttons and
+links by `--lift-text` (1.04), table rows by `--lift-row` (1.012 — a row is
+1100px wide and the wrap clips its edges), on `--t-lift`/`--ease-lift`. Words
+are wrapped in `.w` spans at runtime by `components/WordLift.tsx`, which must
+keep two promises: it never takes a text node away from React (the original
+stays in place, emptied, and the words are rebuilt from it when React writes
+into it — that is what keeps a term switch updating the lede), and it never
+touches a node React has not hydrated (the page streams in behind the layout;
+wrapping first was React error #418 and the boundary re-rendered — it checks
+for React's `__reactFiber$` mark and sweeps for ten seconds after load). All
+of it sits behind one `hover / pointer: fine / prefers-reduced-motion:
+no-preference` gate. Change the amount in the tokens, nowhere else.
 
 **Independent transform properties.** `scale` wraps `transform`: a ring at
 `transform: translate(449px)` with `scale: 1.55` drew at 696px. Position with

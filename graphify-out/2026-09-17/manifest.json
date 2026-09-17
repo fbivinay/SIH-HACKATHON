@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789625132.2402842,
-    "seen": 1789625456.0378885,
-    "ast_hash": "49086943c5278d6d05ae608a788edbbb",
+    "mtime": 1789565312.6121252,
+    "seen": 1789565624.32662,
+    "ast_hash": "4b872ff13246bb12df32df50d397d9a7",
     "semantic_hash": ""
   },
   "web/app/map/page.tsx": {
@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789625453.0565574,
-    "seen": 1789625456.0394607,
-    "ast_hash": "f53536c93ba18e0bd53ed9cee937cc10",
+    "mtime": 1789565622.0927184,
+    "seen": 1789565624.32795,
+    "ast_hash": "c873f6997b5585e68c6da1282369961c",
     "semantic_hash": ""
   },
   "README.md": {
@@ -837,12 +837,6 @@
     "mtime": 1789563762.9826777,
     "seen": 1789564021.6558666,
     "ast_hash": "01d658fd59765050d234080038ab388c",
-    "semantic_hash": ""
-  },
-  "web/components/WordLift.tsx": {
-    "mtime": 1789625358.1927085,
-    "seen": 1789625456.0388775,
-    "ast_hash": "767b67588ed916f975001b47d1f25171",
     "semantic_hash": ""
   }
 }

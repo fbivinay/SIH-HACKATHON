@@ -1172,7 +1172,7 @@
       "file_type": "code",
       "norm_label": "freshnessline()",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L66"
+      "source_location": "L65"
     },
     {
       "id": "web_app_layout_rootlayout",
@@ -1184,7 +1184,7 @@
       "file_type": "code",
       "norm_label": "rootlayout()",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L77"
+      "source_location": "L76"
     },
     {
       "id": "web_components_cursor_cursor",
@@ -1281,54 +1281,6 @@
       "norm_label": "splash()",
       "source_file": "web/components/Splash.tsx",
       "source_location": "L24"
-    },
-    {
-      "id": "web_components_wordlift_hasfiber",
-      "label": "hasFiber()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "hasfiber()",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L41"
-    },
-    {
-      "id": "web_components_wordlift_hydrated",
-      "label": "hydrated()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "hydrated()",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L53"
-    },
-    {
-      "id": "web_components_wordlift_render",
-      "label": "render()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "render()",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L59"
-    },
-    {
-      "id": "web_components_wordlift_wordlift",
-      "label": "WordLift()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "wordlift()",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L89"
     },
     {
       "id": "web_lib_api_postreview",
@@ -5941,7 +5893,7 @@
       "file_type": "code",
       "norm_label": "metadata",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L25"
+      "source_location": "L24"
     },
     {
       "id": "web_app_layout_mono",
@@ -5952,7 +5904,7 @@
       "file_type": "code",
       "norm_label": "mono",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L18"
+      "source_location": "L17"
     },
     {
       "id": "web_app_layout_navlinks",
@@ -5963,7 +5915,7 @@
       "file_type": "code",
       "norm_label": "navlinks",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L54"
+      "source_location": "L53"
     },
     {
       "id": "web_app_layout_sans",
@@ -5974,7 +5926,7 @@
       "file_type": "code",
       "norm_label": "sans",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L17"
+      "source_location": "L16"
     },
     {
       "id": "web_app_layout_viewport",
@@ -5985,7 +5937,7 @@
       "file_type": "code",
       "norm_label": "viewport",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L40"
+      "source_location": "L39"
     },
     {
       "id": "web_components_cursor",
@@ -6107,28 +6059,6 @@
       "norm_label": "splash.tsx",
       "source_file": "web/components/Splash.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "web_components_wordlift",
-      "label": "WordLift.tsx",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "wordlift.tsx",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_components_wordlift_made",
-      "label": "made",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "made",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L39"
     },
     {
       "id": "ref_react",
@@ -8603,7 +8533,7 @@
       "node_kind": "heading",
       "norm_label": "11. motion, measured",
       "source_file": "CLAUDE.md",
-      "source_location": "L275"
+      "source_location": "L274"
     },
     {
       "id": "claude_1_never_claim_more_than_the_record_supports",
@@ -8723,7 +8653,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "CLAUDE.md",
-      "source_location": "L388"
+      "source_location": "L373"
     },
     {
       "id": "claude_kasauti_mplads_verification",
@@ -15263,7 +15193,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L68",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -15275,7 +15205,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L70",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -15287,7 +15217,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L71",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -15299,7 +15229,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L78",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -15840,42 +15770,6 @@
       "context": "call",
       "source_file": "web/components/RiskTicker.tsx",
       "source_location": "L58",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift_hydrated",
-      "target": "web_components_wordlift_hasfiber",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L54",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift_wordlift",
-      "target": "web_components_wordlift_hydrated",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L103",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift_wordlift",
-      "target": "web_components_wordlift_render",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L108",
       "weight": 1.0
     },
     {
@@ -17251,18 +17145,6 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_wordlift_wordlift",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "web/app/layout.tsx",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "web_app_layout",
       "target": "web_components_splash_splash",
       "relation": "imports",
       "_origin": "ast",
@@ -17270,7 +17152,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L15",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -18743,18 +18625,6 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_wordlift",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "web/app/layout.tsx",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "web_app_layout",
       "target": "web_components_splash",
       "relation": "imports_from",
       "_origin": "ast",
@@ -18762,7 +18632,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L15",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -19405,18 +19275,6 @@
       "context": "import",
       "source_file": "web/components/Splash.tsx",
       "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift",
-      "target": "ref_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -20838,7 +20696,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L275",
+      "source_location": "L274",
       "weight": 1.0
     },
     {
@@ -20860,7 +20718,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L388",
+      "source_location": "L373",
       "weight": 1.0
     },
     {
@@ -25150,7 +25008,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L17",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -25161,7 +25019,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L18",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -25172,7 +25030,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L25",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -25183,7 +25041,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L40",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -25194,7 +25052,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L54",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -25205,7 +25063,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L66",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -25216,7 +25074,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L77",
+      "source_location": "L76",
       "weight": 1.0
     },
     {
@@ -25844,61 +25702,6 @@
       "confidence_score": 1.0,
       "source_file": "web/components/WhereTheAI.tsx",
       "source_location": "L45",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift",
-      "target": "web_components_wordlift_made",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L39",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift",
-      "target": "web_components_wordlift_hasfiber",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L41",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift",
-      "target": "web_components_wordlift_hydrated",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L53",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift",
-      "target": "web_components_wordlift_render",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L59",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_wordlift",
-      "target": "web_components_wordlift_wordlift",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "web/components/WordLift.tsx",
-      "source_location": "L89",
       "weight": 1.0
     },
     {
@@ -29581,5 +29384,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9ec93d205d8ea838deba3ae177a7dfb4ac8ff888"
+  "built_at_commit": "e28fa01bb31c600dd0f32dff872f522e030a0e27"
 }

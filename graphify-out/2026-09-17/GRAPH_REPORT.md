@@ -1,16 +1,16 @@
-# Graph Report - SIH HACKATHON  (2026-09-17)
+# Graph Report - SIH HACKATHON  (2026-09-16)
 
 ## Corpus Check
-- 98 files · ~868,072 words
+- 97 files · ~867,014 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1000 nodes · 1567 edges · 89 communities (53 shown, 33 thin omitted)
+- 994 nodes · 1556 edges · 89 communities (53 shown, 33 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9ec93d20`
+- Built from commit: `e28fa01b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -184,8 +184,8 @@ Cohesion: 0.21
 Nodes (13): react-leaflet, GeoJSON, MapContainer, MapPage(), TileLayer, StateStat, CHOROPLETH_STEPS, choroplethFill() (+5 more)
 
 ### Community 14 - "layout.tsx"
-Cohesion: 0.08
-Nodes (30): react, ALLOWED, ReviewResult, submitReview(), freshnessLine(), metadata, mono, navLinks (+22 more)
+Cohesion: 0.09
+Nodes (25): react, ALLOWED, ReviewResult, submitReview(), freshnessLine(), metadata, mono, navLinks (+17 more)
 
 ### Community 15 - "MPLADS Risk Monitor — Design Spec (SIH26102)"
 Cohesion: 0.09
@@ -344,21 +344,21 @@ Cohesion: 0.38
 Nodes (5): DistrictDeskPage(), Params, Search, DistrictDesk, workStatusLabel()
 
 ## Knowledge Gaps
-- **253 isolated node(s):** `$schema`, `builds`, `routes`, `agency_vendor_profile`, `rejected_rows` (+248 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 526 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **252 isolated node(s):** `$schema`, `builds`, `routes`, `agency_vendor_profile`, `rejected_rows` (+247 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 525 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `normalize()` connect `classify_sector` to `mp_key`, `add_base_features`, `scoring.py`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
-- **Why does `react` connect `layout.tsx` to `web/package.json`, `app/page.tsx`, `format.ts`, `CountUp.tsx`, `formatCount`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **Why does `classify_sector()` connect `classify_sector` to `add_base_features`, `scoring.py`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `add_base_features()` connect `add_base_features` to `classify_sector`, `test_scoring.py`, `scoring.py`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `$schema`, `builds`, `routes` to the rest of the system?**
-  _253 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _252 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `classify_sector` be split into smaller, more focused modules?**
   _Cohesion score 0.050921861281826165 - nodes in this community are weakly interconnected._
 - **Should `query` be split into smaller, more focused modules?**

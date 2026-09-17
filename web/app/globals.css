@@ -92,10 +92,14 @@
      does). Surfaces, then the press that follows, then a text block, then a
      table row, which is wide enough that 1% is already 11px. One token each
      so the whole site moves by the same amount, at --t-base, on --ease. */
-  --lift: 1.04;
-  --lift-press: 1.06;
-  --lift-text: 1.03;
-  --lift-row: 1.01;
+  --lift: 1.05;
+  --lift-press: 1.07;
+  --lift-text: 1.04;
+  --lift-row: 1.012;
+  /* Slower and softer than the interface's other transitions: a zoom that
+     lands in 240ms on --ease reads as a twitch; this one settles. */
+  --t-lift: 340ms;
+  --ease-lift: cubic-bezier(0.3, 0.7, 0.2, 1);
 
   --radius-slab: 28px;
   --radius-card: 18px;
@@ -409,7 +413,7 @@ html { overflow-anchor: none; }
 .nav__link:hover {
   color: var(--ink);
   background: color-mix(in srgb, var(--ink) 7%, transparent);
-  scale: 1.08;
+  scale: 1.1;
 }
 .nav__link:active { scale: 1.02; }
 
@@ -1593,7 +1597,7 @@ body::before {
   background: var(--glass);
   border-color: var(--glass-border);
   box-shadow: var(--glass-edge), var(--glass-shadow);
-  scale: 1.045;
+  scale: 1.055;
 }
 .ticker__item:hover .ticker__name { color: var(--ink); }
 
@@ -2019,9 +2023,9 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
 .statecard,
 .rulecard {
   transition:
-    scale var(--t-base) var(--ease),
-    translate var(--t-base) var(--ease),
-    box-shadow var(--t-base) var(--ease),
+    scale var(--t-lift) var(--ease-lift),
+    translate var(--t-lift) var(--ease-lift),
+    box-shadow var(--t-lift) var(--ease-lift),
     border-color var(--t-base) var(--ease);
 }
 
@@ -2038,24 +2042,37 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
 }
 
 /*
- * And everything else. The owner wants whatever the pointer is over to zoom,
- * so this extends the lift to text blocks, table rows, buttons and links,
- * with three rules that keep it from turning into noise:
+ * And everything else. The owner wants whatever the pointer is over to zoom -
+ * and for running text, the word under the pointer rather than the line. CSS
+ * lifts elements, not words, so WordLift (components/WordLift.tsx) wraps each
+ * word of running text in a `.w` span at runtime; a block that never gets
+ * that pass simply does not zoom, which is the right failure.
  *
- * - Nothing inside a surface that already lifts zooms on its own: a paragraph
- *   in a card rides with the card. Otherwise the two multiply and a hovered
- *   line inside a hovered card jumps 7%.
- * - Table rows zoom by --lift-row only. A row is the width of the table, the
- *   wrap clips whatever crosses its edge, and the cells' padding is what
- *   keeps the text inside that edge.
- * - All of it sits inside the same hover/pointer/motion gate as the cards, so
- *   a touch screen and a reader who declined motion get none of it, and none
- *   of it needs undoing anywhere else.
+ * Buttons, links, the wordmark and table rows lift as one piece; nothing
+ * inside them is wrapped (WordLift's skip list matches this one). Rows move
+ * by --lift-row only: a row is the width of the table, and the wrap clips
+ * whatever crosses its edge. All of it sits behind the same hover / fine
+ * pointer / motion gate as the cards, so touch screens and readers who
+ * declined motion get none of it and nothing needs undoing elsewhere.
  *
  * `scale`, never `transform`, for the reason given above the card hover.
  */
+.w {
+  display: inline-block;
+  /* An atomic inline does not inherit its parent's underline by default,
+     which would have cut every underlined link into un-underlined words. */
+  text-decoration: inherit;
+}
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  :where(main, .footer) :where(h1, h2, h3, h4, p, li, dt, dd, blockquote, .eyebrow, .notice):not(:where(.stat-card, .figure, .card, .slab-card, .model-card, .statecard, .rulecard, .data-table, .ticker, .nav, .btn, .review-btn) *),
+  .w {
+    transition: scale var(--t-lift) var(--ease-lift);
+  }
+  .w:hover {
+    position: relative;
+    z-index: 1;
+    scale: var(--lift-text);
+  }
+
   .btn,
   .review-btn,
   .link-quiet,
@@ -2063,10 +2080,9 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   .filter-clear,
   .footer__meta a,
   .wordmark {
-    transition: scale var(--t-base) var(--ease), background-color var(--t-base) var(--ease),
-      color var(--t-base) var(--ease), border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);
+    transition: scale var(--t-lift) var(--ease-lift), background-color var(--t-base) var(--ease),
+      color var(--t-base) var(--ease), border-color var(--t-base) var(--ease), box-shadow var(--t-lift) var(--ease-lift);
   }
-  :where(main, .footer) :where(h1, h2, h3, h4, p, li, dt, dd, blockquote, .eyebrow, .notice):not(:where(.stat-card, .figure, .card, .slab-card, .model-card, .statecard, .rulecard, .data-table, .ticker, .nav, .btn, .review-btn) *):hover,
   .btn:hover,
   .review-btn:hover:not(:disabled),
   .link-quiet:hover,
@@ -2080,7 +2096,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   .wordmark { transform-origin: left center; }
 
   .data-table tbody tr {
-    transition: scale var(--t-base) var(--ease), background-color var(--t-fast) var(--ease);
+    transition: scale var(--t-lift) var(--ease-lift), background-color var(--t-fast) var(--ease);
   }
   .data-table tbody tr:hover {
     position: relative;
