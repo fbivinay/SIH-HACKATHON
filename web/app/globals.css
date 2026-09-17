@@ -272,12 +272,16 @@ html { overflow-anchor: none; }
 .masthead__inner {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   /* Was 67px tall and held there while the ticker sat beneath it; grown to
      ~125px on the owner's call once the mark became the K. The nav links
-     gave up 0.3rem of side padding each and a little size so all seven
-     still fit at 1280. */
+     are 0.95rem with 0.42rem of side padding, the nav and masthead gaps are
+     tight, and the action's padding is trimmed: that is what lets all seven
+     links and the action share the bar at 1280, with nothing to spare. */
   padding-block: 0.6rem;
+}
+.masthead__inner > .btn {
+  padding-inline: 0.8rem;
 }
 
 .wordmark {
@@ -332,7 +336,7 @@ html { overflow-anchor: none; }
 .nav {
   display: flex;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.05rem;
   margin-inline: auto;
   min-width: 0;
   overflow-x: auto;
@@ -385,9 +389,9 @@ html { overflow-anchor: none; }
 }
 
 .nav__link {
-  padding: 0.42rem 0.5rem;
+  padding: 0.42rem 0.42rem;
   border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--ink-2);
   white-space: nowrap;
   transition: color 0.15s, background-color 0.15s;

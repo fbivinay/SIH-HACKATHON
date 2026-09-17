@@ -207,7 +207,8 @@ preference: `:root { color-scheme: light }`, `viewport.colorScheme` in
 palette was removed on 2026-09-15 at the owner's request; do not bring it back.
 
 The masthead is ~125px tall, mark 74px, name 2rem, on the owner's call; the
-nav links (0.85rem, 0.5rem side padding) and the masthead gap were tightened
+nav links (0.95rem, 0.42rem side padding), the nav and masthead gaps and the
+action's padding were tightened
 so all seven fit at 1280 wide, and that is the ceiling without hiding the
 strapline.
 Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at 700–1023px, none
