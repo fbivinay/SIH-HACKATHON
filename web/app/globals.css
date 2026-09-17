@@ -94,12 +94,15 @@
      so the whole site moves by the same amount, at --t-base, on --ease. */
   --lift: 1.05;
   --lift-press: 1.07;
-  --lift-text: 1.04;
-  --lift-row: 1.012;
-  /* Slower and softer than the interface's other transitions: a zoom that
-     lands in 240ms on --ease reads as a twitch; this one settles. */
-  --t-lift: 340ms;
-  --ease-lift: cubic-bezier(0.3, 0.7, 0.2, 1);
+  /* A word is small, so it takes three times the growth a whole surface does
+     before the zoom reads as a zoom at all (owner's call). */
+  --lift-text: 1.12;
+  /* A row is the width of the table and the wrap clips its edges, so this one
+     cannot follow: 1.2% of 1100px is already 13px. */
+  --lift-row: 1.015;
+  /* Quick, and out of the way: the zoom should arrive with the pointer. */
+  --t-lift: 140ms;
+  --ease-lift: cubic-bezier(0.2, 0.8, 0.25, 1);
 
   --radius-slab: 28px;
   --radius-card: 18px;
@@ -413,7 +416,7 @@ html { overflow-anchor: none; }
 .nav__link:hover {
   color: var(--ink);
   background: color-mix(in srgb, var(--ink) 7%, transparent);
-  scale: 1.1;
+  scale: var(--lift-text);
 }
 .nav__link:active { scale: 1.02; }
 
@@ -1597,7 +1600,7 @@ body::before {
   background: var(--glass);
   border-color: var(--glass-border);
   box-shadow: var(--glass-edge), var(--glass-shadow);
-  scale: 1.055;
+  scale: 1.07;
 }
 .ticker__item:hover .ticker__name { color: var(--ink); }
 
