@@ -56,6 +56,14 @@ export default function WhereTheAI() {
             decides and what it does not, because a system that cannot say where its
             intelligence sits is asking to be taken on trust.
           </p>
+          {/* Moved here from the overview's limits, where it sat among three
+              caveats about the record and was really a caveat about these. */}
+          <p className="lede !mx-0 !max-w-2xl !mt-3">
+            No model decides alone. The score itself is deterministic and
+            rule-weighted, and every flag names the record it came from; the language
+            model only labels what a work is, so that it meets the right peers. It
+            never scores, ranks or flags anything.
+          </p>
         </div>
       </div>
 
