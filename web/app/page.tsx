@@ -1,8 +1,7 @@
 import { api } from "@/lib/api";
 import { formatCount, formatINR } from "@/lib/format";
-import CountUp from "@/components/CountUp";
 import HeroField from "@/components/HeroField";
-import TermSwitch from "@/components/TermSwitch";
+import FiguresBoard from "@/components/FiguresBoard";
 import { TERMS } from "@/lib/terms";
 import ScoreMethod from "@/components/ScoreMethod";
 
@@ -17,10 +16,44 @@ export default async function OverviewPage({
   // both terms made our figures look wrong beside it while being right.
   const rawTerm = typeof sp.ls_term === "string" ? sp.ls_term : "18";
   const term = ["17", "18", ""].includes(rawTerm) ? rawTerm : "18";
-  const scope = TERMS.find((t) => t.value === term) ?? TERMS[0];
 
-  const data = await api.overview(term ? { ls_term: term } : {});
+  // Every scope, not just the one asked for. Three cached reads cost nothing
+  // a warm page can feel, and they are what lets the switcher change the
+  // figures with no network in the way at all - see components/FiguresBoard.
+  const all = await Promise.all(
+    TERMS.map((t) => api.overview(t.value ? { ls_term: t.value } : {}))
+  );
+  const scopes = TERMS.map((t, i) => ({ term: t.value, ...figures(all[i]) }));
 
+  // The first screen is the hero, the term switcher and the six figures, sized
+  // to fill the space between the masthead and the ticker with no slack
+  // (.home-fold); the score's components and limits follow below it. The
+  // models are on /provenance.
+  return (
+    <main className="home">
+      <div className="home-fold">
+      <section className="shell page-head">
+        <HeroField />
+        {/* The headline alone. The sentence that stood under it - the count,
+            and the five things a work is scored on - is what the six figures
+            and the sections below the fold say, and it cost the headline the
+            room to be read across a hall. */}
+        <h1 className="display display--hero">
+          Every MPLADS work, checked against its peers.
+        </h1>
+      </section>
+
+      <FiguresBoard scopes={scopes} initial={term} />
+      </div>
+
+      <ScoreMethod />
+    </main>
+  );
+}
+
+// One scope's six figures, formatted here so the client component is only a
+// switch and never a second place where money or counts are formatted.
+function figures(data: Awaited<ReturnType<typeof api.overview>>) {
   // Risk counts are legitimately 0 (COUNT(*) FILTER, never null) until scoring
   // has run. Say so rather than presenting a wall of zeros as "nothing flagged".
   const scoringPending =
@@ -67,68 +100,10 @@ export default async function OverviewPage({
     },
   ];
 
-  // The first screen is the hero, the term switcher and the six figures, sized
-  // to fill the space between the masthead and the ticker with no slack
-  // (.home-fold); the score's components and limits follow below it. The
-  // models are on /provenance.
-  return (
-    <main className="home">
-      <div className="home-fold">
-      <section className="shell page-head">
-        <HeroField />
-        {/* The headline alone. The sentence that stood under it - the count,
-            and the five things a work is scored on - is what the six figures
-            and the sections below the fold say, and it cost the headline the
-            room to be read across a hall. */}
-        <h1 className="display display--hero">
-          Every MPLADS work, checked against its peers.
-        </h1>
-      </section>
-
-      <section className="shell home-figures">
-        {scoringPending && (
-          <div className="notice mb-5" role="status">
-            <span aria-hidden="true">&#9679;</span>
-            <span>
-              Scoring is running across all {formatCount(data.total_projects)} works. Risk
-              figures fill in when it finishes.
-            </span>
-          </div>
-        )}
-        {/* The term switcher sits with the figures it filters rather than in the
-            hero, where it cost 66px of the fold and explained nothing. */}
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          {/* flex-1 min-w-0 so the sentence wraps inside its own column instead of
-              pushing the term buttons onto a second row, which cost a whole
-              card-row of the fold at 1280. */}
-          <p className="flex-1 min-w-0 text-[0.95rem]" style={{ color: "var(--ink-3)" }}>
-            {scope.label}
-            {scope.note ? ` (${scope.note})` : ""} — figures cover this scope only, matching
-            the same view on the source&rsquo;s dashboard.
-          </p>
-          <TermSwitch current={term} />
-        </div>
-        {/* One panel, six cells, hairlines between: the figures are one set
-            for one scope, not six separate cards. The first row is the record,
-            the second what the scoring made of it. Vendor payments was a
-            seventh and left a hole; the source still serves it. */}
-        <div className="figures-panel">
-          <div className="figures">
-            {stats.map((s) => (
-              <div key={s.label} className={`figure${s.tone ? ` figure--${s.tone}` : ""}`}>
-                <div className="figure__label">{s.label}</div>
-                <div className="figure__value">
-                  <CountUp text={String(s.value)} />
-                </div>
-                <div className="figure__note">{s.note}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      </div>
-
-      <ScoreMethod />
-    </main>
-  );
+  return {
+    stats,
+    pendingNote: scoringPending
+      ? `Scoring is running across all ${formatCount(data.total_projects)} works. Risk figures fill in when it finishes.`
+      : null,
+  };
 }
