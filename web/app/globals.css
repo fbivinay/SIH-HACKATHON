@@ -1537,6 +1537,46 @@ main.home {
   border-radius: var(--radius-card);
   box-shadow: var(--glass-edge), var(--glass-shadow);
 }
+/* The cards drift, very slowly, inside their panel (owner's call).
+ *
+ * `transform`, not the `translate` property, and deliberately: `translate` is
+ * what the shared hover rule uses to lift a card 4px toward the reader, and an
+ * animation holding its fill state beats a plain declaration, so a float on
+ * `translate` would silently eat the hover lift. On `transform` the two are
+ * independent properties that compose, and the float stays a compositor
+ * transform - no layout, no paint, six elements.
+ *
+ * Six different periods, none a multiple of another, with negative delays so
+ * they start mid-phase: the cards must never look like one object breathing.
+ * 4px over ten seconds is under a pixel a second - visible only as the page
+ * not being quite still, which is the whole intent.
+ *
+ * A hovered card stops where it is: the pointer is a deliberate act and the
+ * thing under it should hold still to be read.
+ */
+@keyframes figure-float {
+  from { transform: translateY(-4px); }
+  to   { transform: translateY(4px); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .figure {
+    animation-name: figure-float;
+    animation-duration: var(--float-dur, 10s);
+    animation-delay: var(--float-delay, 0s);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-fill-mode: both;
+  }
+  .figure:nth-child(1) { --float-dur: 9.2s;  --float-delay: -0.7s; }
+  .figure:nth-child(2) { --float-dur: 11.9s; --float-delay: -4.3s; }
+  .figure:nth-child(3) { --float-dur: 10.4s; --float-delay: -2.1s; }
+  .figure:nth-child(4) { --float-dur: 13.1s; --float-delay: -6.8s; }
+  .figure:nth-child(5) { --float-dur: 9.8s;  --float-delay: -3.4s; }
+  .figure:nth-child(6) { --float-dur: 12.3s; --float-delay: -1.5s; }
+  .figure:hover { animation-play-state: paused; }
+}
+
 .figure__label {
   font-size: 1rem;
   font-weight: 500;
