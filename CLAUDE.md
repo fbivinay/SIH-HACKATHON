@@ -253,12 +253,17 @@ masthead, and measure with reduced motion forced *and* the fold's sections
 and `.figures` in the reduced-motion list — an element still in its
 entrance delay reports its rect 104px low.
 The scoring method (`.score-screen` in `components/ScoreMethod.tsx`) is the
-**second** screen and fills it exactly: a definite `height: var(--fold-h)`,
-the slab inside it at `flex: 1` with a hair of margin, the six cards sharing
-what the heading leaves, and two `max-height` tiers (980px, 820px) so a 768px
-laptop fits the same six cards. A floor rather than a definite height let the
-content push the section past the screen, which is how one page down landed
-on three quarters of the slab. Measured on five viewports: section = fold
+**second** screen and fills it: `min-height: var(--fold-h)`, the slab inside
+at `flex: 1`, and the six cards on **auto rows left to the grid's default
+stretch**. Both alternatives were measured and both failed:
+`grid-auto-rows: 1fr` makes every row as tall as the tallest, so two rows
+want twice the tallest card — on a fixed height the second row hung 26–145px
+out of the slab, and on a floor it pushed the section 60–75px past the
+screen; `align-content: space-between` on auto rows left a hole between the
+rows. Type tiers by window height (900px, 740px) and by width (1450px) keep
+the content inside the screen, and those queries see the **window's** pixels
+rather than the zoomed ones — an 864px laptop sat outside an 820px tier while
+having less room than an 810px one inside it. Measured on five viewports: section = fold
 height, 10–16px of air above and below the slab, no card overflowing.
 
 **"What it will not tell you" is the third screen** (`.limits-screen`), on a
