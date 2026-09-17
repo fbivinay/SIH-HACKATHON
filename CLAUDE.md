@@ -229,14 +229,19 @@ Seven nav pages in this order: Overview `/`, Alerts `/alerts`, States
 `/provenance`. Signals, Rules and Trends were deleted; what they carried lives
 on `/provenance`. **The overview's first screen is the hero, the term switcher
 and the six figures, filling the viewport between the masthead and the ticker
-with no slack** (owner's call, 2026-09-16): `.home-fold` is `100dvh / --zoom`
-minus `--fold-chrome` (masthead 94 + ticker 51 zoomed px, measured), runs the
+with no slack** (owner's call, 2026-09-16): the headline alone (the lede under
+it went, 2026-09-17), the term switcher and the six figures. `.home-fold`'s
+height is **measured, not computed** — `components/FoldHeight.tsx` sets
+`--fold-h` to `(innerHeight − masthead − ticker) / currentCSSZoom`, because
+what `100dvh` means under the root `zoom` was not consistent: the same
+expression left the panel 85px short at 1440×810 and 47px long at 1366×768.
+The CSS `calc` behind it is only the no-JavaScript fallback. The fold runs the
 window's width rather than the 1180px shell, and everything inside is set
 larger than elsewhere. The six figures are one panel (`.figures`, a 3×2 grid
 with hairlines, each figure centred in its cell), not six cards — six cards
 at that size read as six empty boxes. The min-height is a floor, so two
 `max-height` queries (980px, 820px) shrink the type to keep the panel above
-the ticker; measured on five viewports from 1280×720 to 1920×1080, the gap
+the ticker; measured on six viewports from 1280×720 to 1920×1080, the gap
 is 34–51px. Re-measure after touching any size in that block or the
 masthead, and measure with reduced motion forced *and* the fold's sections
 and `.figures` in the reduced-motion list — an element still in its
@@ -376,6 +381,15 @@ caches every GET for 300s under the tag `api` (the record changes nightly),
 and `app/alerts/actions.ts` calls `updateTag("api")` after a review so the
 reviewer reads their own write. Measured: 130–550ms per click warm, against
 1.3–9.3s cold plus 3.5s blank before.
+
+**A headless screenshot is not the viewport.** Measured 2026-09-17: with
+`--window-size=1440,810`, the page's `innerHeight`, `clientHeight` and
+`visualViewport.height` are all 715 — Windows Chrome's own chrome is 95px —
+while `--screenshot` renders an 810-tall image. Anything whose height depends
+on the viewport reads 95px wrong in a screenshot, and four contradictory
+measurements of this fold came from trusting one. Measure such things from a
+page that loads the site in an iframe of a stated size, where the iframe's
+height is the viewport; screenshots stay good for everything else.
 
 **Local verification.** `next start` serves the chunks it started with: after
 every `next build`, kill the server **by PID** (`ps -eo pid,args | grep
