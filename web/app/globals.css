@@ -1553,6 +1553,14 @@ main.home {
  *
  * A hovered card stops where it is: the pointer is a deliberate act and the
  * thing under it should hold still to be read.
+ *
+ * Two things make it smooth rather than merely slow. The curve is a sine
+ * ease-in-out (0.37, 0, 0.63, 1): with `alternate`, any sharper curve spends
+ * the turn sitting still and then leaves abruptly, which reads as a twitch at
+ * each end. And `will-change: transform` promotes the six cards to their own
+ * layers, so the float is composited instead of re-rasterising their text
+ * every frame - the one place in this interface where that promotion is worth
+ * its memory, because it is six elements and they never stop moving.
  */
 @keyframes figure-float {
   from { transform: translateY(-8px); }
@@ -1560,10 +1568,11 @@ main.home {
 }
 @media (prefers-reduced-motion: no-preference) {
   .figure {
+    will-change: transform;
     animation-name: figure-float;
     animation-duration: var(--float-dur, 10s);
     animation-delay: var(--float-delay, 0s);
-    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+    animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
     animation-iteration-count: infinite;
     animation-direction: alternate;
     animation-fill-mode: both;
