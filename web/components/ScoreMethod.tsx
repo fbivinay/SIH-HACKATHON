@@ -157,7 +157,10 @@ export default function ScoreMethod() {
       </div>
     </section>
 
-    <section className="shell mt-6">
+    {/* The third screen, the same way: see .limits-screen. It fills when the
+        cards are closed and grows when one is opened, which is what an
+        expander should do. */}
+    <section className="shell limits-screen">
       <div className="text-center">
         <h2 className="section-head">What it will not tell you</h2>
         <p className="lede">
@@ -170,7 +173,7 @@ export default function ScoreMethod() {
           .
         </p>
       </div>
-      <div className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+      <div className="limits-grid mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
         {LIMITS.map((l) => (
           <div key={l.title} className="card">
             <h3 className="text-[0.98rem] font-medium">{l.title}</h3>

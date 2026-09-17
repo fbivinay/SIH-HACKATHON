@@ -259,8 +259,18 @@ what the heading leaves, and two `max-height` tiers (980px, 820px) so a 768px
 laptop fits the same six cards. A floor rather than a definite height let the
 content push the section past the screen, which is how one page down landed
 on three quarters of the slab. Measured on five viewports: section = fold
-height, 10–16px of air above and below the slab, no card overflowing. The
-limits follow below — four limits of seven points each, every point either a rule in
+height, 10–16px of air above and below the slab, no card overflowing.
+
+**"What it will not tell you" is the third screen** (`.limits-screen`), on a
+`min-height` rather than a definite height, because a card can be opened and
+the section has to grow under it rather than clip what was just asked for;
+three `max-height` tiers (980, 820, 740) fit the four cards down to 1280×720.
+**Cards in both screens align top and foot** — content starts at the top and
+the last line (or the action, or the "Read more") is pushed to the bottom with
+`margin-top: auto`. Centring them instead left every title at a different
+height, which is what made a row read as loose boxes. Measured: identical
+title offsets and identical foot offsets across every card in a row. The
+limits are — four limits of seven points each, every point either a rule in
 `data/scoring.py` or an entry in `COMPLIANCE_BLIND_SPOTS`, showing three and
 keeping the rest behind a `<details>` "Read more" so the row skims at three
 lines and still reads in full without JavaScript; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under

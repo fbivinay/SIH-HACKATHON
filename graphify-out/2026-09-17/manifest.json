@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789641736.3702333,
-    "seen": 1789641741.352084,
-    "ast_hash": "abad3992feff488c90a083588adb498c",
+    "mtime": 1789655322.5690045,
+    "seen": 1789655325.0241148,
+    "ast_hash": "3ff6515dd52293d49e83a18741e7effb",
     "semantic_hash": ""
   },
   "README.md": {
@@ -828,15 +828,15 @@
     "semantic_hash": ""
   },
   "web/components/WhereTheAI.tsx": {
-    "mtime": 1789558851.8847015,
-    "seen": 1789558968.7307503,
-    "ast_hash": "d98417a7ad1950fe03ed4b933619794d",
+    "mtime": 1789654959.587035,
+    "seen": 1789655325.0234962,
+    "ast_hash": "8d342638196b9a0063a8f003450b375e",
     "semantic_hash": ""
   },
   "web/components/ScoreMethod.tsx": {
-    "mtime": 1789563762.9826777,
-    "seen": 1789564021.6558666,
-    "ast_hash": "01d658fd59765050d234080038ab388c",
+    "mtime": 1789654959.5858898,
+    "seen": 1789655325.02343,
+    "ast_hash": "e9c1fcd300856a322fb5da4f10e7442d",
     "semantic_hash": ""
   },
   "web/components/WordLift.tsx": {
