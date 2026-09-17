@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "web/app/page.tsx": {
-    "mtime": 1789640352.1724741,
-    "seen": 1789640797.3118694,
-    "ast_hash": "fde3a60d4cf71e9c959f2a7d3120b0c1",
+    "mtime": 1789641283.7544925,
+    "seen": 1789641741.3497112,
+    "ast_hash": "63a621eb6179f2092e36c7a83c8d85d9",
     "semantic_hash": ""
   },
   "web/app/projects/[id]/page.tsx": {
@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789640792.9444797,
-    "seen": 1789640797.31389,
-    "ast_hash": "f816fecd2b2c28d2ecf309dc45bd9bf9",
+    "mtime": 1789641736.3702333,
+    "seen": 1789641741.352084,
+    "ast_hash": "abad3992feff488c90a083588adb498c",
     "semantic_hash": ""
   },
   "README.md": {
@@ -851,16 +851,16 @@
     "ast_hash": "ca39bb1a53826d56aa5284a6eaaad1bd",
     "semantic_hash": ""
   },
-  "web/components/TermSwitch.tsx": {
-    "mtime": 1789640352.1711478,
-    "seen": 1789640797.3128407,
-    "ast_hash": "16e5469e4109b522de6cd50484adebf2",
-    "semantic_hash": ""
-  },
   "web/lib/terms.ts": {
     "mtime": 1789640352.1426349,
     "seen": 1789640797.3130522,
     "ast_hash": "996cafa1fca2fcbcf14f099d34e02c30",
+    "semantic_hash": ""
+  },
+  "web/components/FiguresBoard.tsx": {
+    "mtime": 1789641211.3823776,
+    "seen": 1789641741.3501382,
+    "ast_hash": "76bcb5d6d8f1d81197e13edae1735dbe",
     "semantic_hash": ""
   }
 }

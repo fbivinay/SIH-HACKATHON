@@ -382,22 +382,30 @@ html { overflow-anchor: none; }
   display: none;
 }
 
-/* The same island, used inline rather than centred in a bar of its own. */
+/* The same island, used inline rather than centred in a bar of its own, and a
+   size down: it names a scope, it is not the site's navigation. */
 .nav--inline {
   margin-inline: 0;
   flex: none;
+  padding: 0.22rem;
+}
+.nav--inline .nav__link {
+  padding: 0.34rem 0.7rem;
+  font-size: 0.85rem;
 }
 
-/* While a term switch is in flight the figures stay where they are and fade,
-   rather than being torn down for a skeleton. The switcher marks itself
-   pending; the panel is its sibling's child, hence :has(). */
-.home-figures .figures-panel {
-  transition: opacity var(--t-base) var(--ease);
+/* The figures carry a key per term, so a switch replaces the cards rather than
+   updating them; this is the fade they arrive on. There is nothing to wait for
+   - every scope was rendered on the server - so it is short. */
+@keyframes figures-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-.home-figures:has(.nav--inline[data-pending]) .figures-panel {
-  opacity: 0.45;
+@media (prefers-reduced-motion: no-preference) {
+  .figures {
+    animation: figures-in 260ms var(--ease-out) both;
+  }
 }
-.nav--inline[data-pending] { cursor: progress; }
 
 /* Under ~1100px the wordmark, five links and the button cannot share a line.
    The strapline goes first, then the wordmark's text, so the nav and the

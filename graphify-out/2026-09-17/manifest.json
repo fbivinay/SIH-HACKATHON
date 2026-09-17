@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "web/app/page.tsx": {
-    "mtime": 1789627717.1710546,
-    "seen": 1789628989.4376726,
-    "ast_hash": "f03e8057e9256d1da35b559c80e38609",
+    "mtime": 1789640352.1724741,
+    "seen": 1789640797.3118694,
+    "ast_hash": "fde3a60d4cf71e9c959f2a7d3120b0c1",
     "semantic_hash": ""
   },
   "web/app/projects/[id]/page.tsx": {
@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789628986.7042022,
-    "seen": 1789628989.4391098,
-    "ast_hash": "c81439e7a1e1f80726792a70f82cfbe7",
+    "mtime": 1789640792.9444797,
+    "seen": 1789640797.31389,
+    "ast_hash": "f816fecd2b2c28d2ecf309dc45bd9bf9",
     "semantic_hash": ""
   },
   "README.md": {
@@ -849,6 +849,18 @@
     "mtime": 1789628930.964581,
     "seen": 1789628989.437943,
     "ast_hash": "ca39bb1a53826d56aa5284a6eaaad1bd",
+    "semantic_hash": ""
+  },
+  "web/components/TermSwitch.tsx": {
+    "mtime": 1789640352.1711478,
+    "seen": 1789640797.3128407,
+    "ast_hash": "16e5469e4109b522de6cd50484adebf2",
+    "semantic_hash": ""
+  },
+  "web/lib/terms.ts": {
+    "mtime": 1789640352.1426349,
+    "seen": 1789640797.3130522,
+    "ast_hash": "996cafa1fca2fcbcf14f099d34e02c30",
     "semantic_hash": ""
   }
 }

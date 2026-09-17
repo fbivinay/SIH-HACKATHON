@@ -386,16 +386,21 @@ scroll, so a topbar offset parks the header across row 1. `.topbar` is
 `z-index: 1100` because Leaflet stacks 200–1000 and painted over the nav at
 40. The pointer is 10000, above the cover at 9999.
 
-**The term switcher is not a navigation the reader should see.** It is the
-nav's own pill island (`.nav--inline`, `components/TermSwitch.tsx`) and it
-switches with `router.replace` inside `startTransition`, so React keeps the
-figures on screen until the new ones are ready instead of tearing them down
-for `app/loading.tsx`'s skeleton — that teardown was the lag, not the fetch.
-While it runs the switcher carries `data-pending` and
-`.home-figures:has(.nav--inline[data-pending]) .figures-panel` fades. `TERMS`
-lives in `lib/terms.ts`, not in the client component: a plain value exported
-from a `"use client"` module reaches the server as a client reference, and
-`TERMS.find is not a function` is what that looks like.
+**The term switcher is not a navigation at all.** The overview renders *every*
+scope's figures on the server (three cached `api.overview` reads) and hands
+all three to `components/FiguresBoard.tsx`; switching is a `useState` and
+`history.replaceState`, with no fetch, no navigation and no server work —
+measured, 0 network requests and the DOM updated within 20ms. Two earlier
+passes tried to *hide* the latency instead (a `<Link>`, which tore the page
+down for `loading.tsx`'s skeleton; then `router.replace` in a
+`startTransition`, which kept the page but still waited on the round trip)
+and both still read as lag, because they were lag. The figures carry
+`key={term}` so the cards are replaced rather than updated — that is what
+makes `CountUp` run again. It wears the nav's pill island a size down
+(`.nav--inline`), and the active rule matches any `aria-current`, so a filter
+can say "true" where a page says "page". `TERMS` lives in `lib/terms.ts`:
+a plain value exported from a `"use client"` module reaches the server as a
+client reference, and `TERMS.find is not a function` is what that looks like.
 
 **Navigation.** `app/loading.tsx` answers a click in ~150ms; `lib/api.ts`
 caches every GET for 300s under the tag `api` (the record changes nightly),
