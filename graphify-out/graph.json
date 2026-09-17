@@ -4330,7 +4330,7 @@
       "file_type": "code",
       "norm_label": "scoremethod()",
       "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L95"
+      "source_location": "L107"
     },
     {
       "id": "web_lib_terms_termhref",
@@ -8677,7 +8677,7 @@
       "node_kind": "heading",
       "norm_label": "11. motion, measured",
       "source_file": "CLAUDE.md",
-      "source_location": "L288"
+      "source_location": "L306"
     },
     {
       "id": "claude_1_never_claim_more_than_the_record_supports",
@@ -8797,7 +8797,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "CLAUDE.md",
-      "source_location": "L434"
+      "source_location": "L452"
     },
     {
       "id": "claude_kasauti_mplads_verification",
@@ -21101,7 +21101,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L288",
+      "source_location": "L306",
       "weight": 1.0
     },
     {
@@ -21123,7 +21123,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L434",
+      "source_location": "L452",
       "weight": 1.0
     },
     {
@@ -26067,6 +26067,17 @@
     },
     {
       "source": "web_components_scoremethod",
+      "target": "web_components_scoremethod_scoremethod",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L107",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_scoremethod",
       "target": "web_components_scoremethod_components",
       "relation": "contains",
       "_origin": "ast",
@@ -26085,17 +26096,6 @@
       "confidence_score": 1.0,
       "source_file": "web/components/ScoreMethod.tsx",
       "source_location": "L56",
-      "weight": 1.0
-    },
-    {
-      "source": "web_components_scoremethod",
-      "target": "web_components_scoremethod_scoremethod",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -29910,5 +29910,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "03a17222fdf4947dfb5484ecceee6e45510a3c2f"
+  "built_at_commit": "04b731b0de8546cb1ff47f2d07ccc52ca0d828dd"
 }
