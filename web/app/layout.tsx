@@ -126,15 +126,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </header>
 
-        {/* Under the masthead rather than inside it: the nav is navigation and
-            this is content, and a reader who wants the nav should not have to
-            wait for an API call to render it. Both sit in one sticky wrapper so
-            the strip follows the nav without either knowing the other's height.
-            Not on the overview, where the strip runs along the bottom instead
-            (owner's call) so the opening screen is the masthead and the hero. */}
-        <OnHome not>
-          <RiskTicker />
-        </OnHome>
         </div>
 
         <div className="flex flex-1 flex-col">{children}</div>

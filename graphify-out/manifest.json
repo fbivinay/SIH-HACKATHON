@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789665362.9782932,
-    "seen": 1789714270.5653925,
-    "ast_hash": "80305ec0b738ebafe35a9c9ad90ea5cd",
+    "mtime": 1789739357.4107988,
+    "seen": 1789739690.9289017,
+    "ast_hash": "b2512bff009459b8efd15d87141b91a9",
     "semantic_hash": ""
   },
   "web/app/map/page.tsx": {
@@ -420,9 +420,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789715405.6962934,
-    "seen": 1789715407.7957954,
-    "ast_hash": "bad746ae91c355c8824ae6f4b23f2b30",
+    "mtime": 1789739461.2105408,
+    "seen": 1789739690.9315472,
+    "ast_hash": "1c8c8bea9627c4a85beccf071187d9c3",
     "semantic_hash": ""
   },
   "README.md": {
@@ -816,9 +816,9 @@
     "semantic_hash": ""
   },
   "web/components/OnHome.tsx": {
-    "mtime": 1789558075.8509235,
-    "seen": 1789558344.94579,
-    "ast_hash": "9a6dea75a7341c060cc8f5fb18088872",
+    "mtime": 1789739385.2132332,
+    "seen": 1789739690.9297988,
+    "ast_hash": "07ab286c99793bfe4e2312ffec692c22",
     "semantic_hash": ""
   },
   "web/components/WhereTheAI.tsx": {
