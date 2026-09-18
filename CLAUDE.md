@@ -190,6 +190,13 @@ deterministic and free; keep it that way.
   many times over.
 - **Run the tests before committing:** `python3 -m pytest data api -q`. They hit
   the live database and take ~2.5 minutes.
+- **Never press a decision in a browser test.** The local web talks to the live
+  API and the live database, so a scripted click on Escalate / Verified /
+  Dismiss writes a real decision onto a real work that the public site then
+  shows. It happened once (2026-09-18, work `161088|17|Bara Banki…`) and was
+  reversed by deleting that one event and restoring the row to the decision
+  it replaced. Test the optimistic flip by reading `aria-pressed` without
+  submitting, or against a copy.
 
 ## 10. Interface
 
@@ -429,6 +436,17 @@ makes `CountUp` run again. It wears the nav's pill island a size down
 can say "true" where a page says "page". `TERMS` lives in `lib/terms.ts`:
 a plain value exported from a `"use client"` module reaches the server as a
 client reference, and `TERMS.find is not a function` is what that looks like.
+
+**The queue's cost is the API, not the page.** Measured 2026-09-18: the
+client does ~200ms of main-thread work on `/alerts`; `/api/alerts` took
+1.1–1.3s in production and ~3s from a laptop, because it is two statements
+(the rows and the total) each a round trip to Neon. They now run together
+on a thread pool; the total is remembered per filter set for five minutes
+(cleared by every decision, which moves the status counts); `/api/filters`
+is remembered for ten; and the rows query sets `work_mem` to 32MB locally,
+which stops its sort spilling ~220MB to disk. Paging went from ~3s to ~1s
+locally. A decision flips its button at once (`useOptimistic`) instead of
+sitting disabled through the write and the re-render.
 
 **Navigation.** `app/loading.tsx` answers a click in ~150ms; `lib/api.ts`
 caches every GET for 300s under the tag `api` (the record changes nightly),

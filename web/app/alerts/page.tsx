@@ -105,9 +105,6 @@ export default async function AlertsPage({
   // page that looks broken. Say what is actually happening instead.
   const scoringPending = summary !== null && summary.in_scope === 0 && page.total === 0;
 
-  const shownTo = Math.min(offset + page.alerts.length, page.total);
-  const prevOffset = Math.max(0, offset - PAGE_SIZE);
-  const nextOffset = offset + PAGE_SIZE;
   const pageHref = (o: number) => {
     const params = new URLSearchParams(filters);
     params.delete("limit");
@@ -153,13 +150,14 @@ export default async function AlertsPage({
         <ProjectFilters filterOptions={filterOptions} statuses={Object.keys(STATUS_LABELS)} />
       </div>
 
-      <p className="mt-4 text-xs" style={{ fontFamily: "var(--font-data)", color: "var(--ink-3)" }}>
-        {page.total === 0
-          ? "No works match these filters."
-          : `Showing ${formatCount(offset + 1)}–${formatCount(shownTo)} of ${formatCount(
-              page.total
-            )}`}
-      </p>
+      {/* The range line above the table went on the owner's call; the pager
+          under it still says where the reader is. An empty result still has
+          to say so, or a blank table reads as a broken one. */}
+      {page.total === 0 && (
+        <p className="mt-4 text-[0.85rem]" style={{ color: "var(--ink-2)" }}>
+          No works match these filters.
+        </p>
+      )}
 
       {scope.length > 0 && (
         <p className="mt-4 text-[0.82rem]" style={{ color: "var(--ink-2)" }}>
@@ -173,17 +171,10 @@ export default async function AlertsPage({
       {/* The brief asks this platform to reduce manual monitoring effort. An
           officer who narrows the queue to their district and finds work to
           inspect needs to hand that list to whoever inspects it. */}
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <a
-          href={alertsExportUrl(filters)}
-          className="review-btn"
-          download
-        >
+      <div className="mt-4 flex justify-end">
+        <a href={alertsExportUrl(filters)} className="btn btn--solid" download>
           Download this queue (CSV)
         </a>
-        <span className="text-[0.78rem]" style={{ color: "var(--ink-3)" }}>
-          {formatCount(page.total)} works, with the reason each was flagged.
-        </span>
       </div>
 
       <div className="mt-2 data-table-wrap">

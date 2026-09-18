@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useOptimistic } from "react";
 import { submitReview, type ReviewResult } from "@/app/alerts/actions";
 import type { ReviewStatus } from "@/lib/api";
 
@@ -37,6 +37,14 @@ export default function ReviewActions({
     submitReview,
     null
   );
+  // The click is answered at once. The action has to write the decision and
+  // then re-render the queue with every cached read expired, which is a full
+  // round trip to the API - measured at 1.2s in production and 3s locally -
+  // and until now the button sat unchanged and disabled for all of it, which
+  // read as the page hanging. The optimistic value is what is shown while
+  // that happens, and React drops it for the real one when the action lands;
+  // if the write fails, the error below says so and the old state returns.
+  const [shown, setShown] = useOptimistic(current);
 
   // Works loaded before work_key existed cannot be pinned to a decision, and a
   // button that silently does nothing is worse than an absent one.
@@ -46,7 +54,12 @@ export default function ReviewActions({
 
   return (
     <form
-      action={formAction}
+      // A form action already runs inside a transition, which is where an
+      // optimistic value has to be set.
+      action={(fd: FormData) => {
+        setShown(String(fd.get("status")) as ReviewStatus);
+        formAction(fd);
+      }}
       className="review-actions"
     >
       <input type="hidden" name="work_key" value={workKey} />
@@ -57,10 +70,13 @@ export default function ReviewActions({
           name="status"
           value={d.status}
           title={d.title}
-          disabled={pending}
-          aria-pressed={current === d.status}
+          // Not disabled while the write is in flight: next.js runs one
+          // client's actions in order and the write is an upsert on
+          // work_key, so a second click simply becomes the decision.
+          aria-busy={pending || undefined}
+          aria-pressed={shown === d.status}
           className={`review-btn review-btn--${d.status}${
-            current === d.status ? " is-current" : ""
+            shown === d.status ? " is-current" : ""
           }`}
         >
           {d.label}
