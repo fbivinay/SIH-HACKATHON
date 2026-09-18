@@ -6,7 +6,41 @@ from typing import Optional
 from fastapi import FastAPI, Header, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from concurrent.futures import ThreadPoolExecutor
+import threading
+import time
 from db import execute, query
+
+# The queue runs two statements per page - the rows and the total - and Neon
+# is a round trip away (measured ~1s from a laptop, ~0.1s from Vercel), so
+# running them one after the other paid for the trip twice. They go to the
+# pool together instead; the connection pool in db.py holds up to 8.
+_queries = ThreadPoolExecutor(max_workers=4)
+
+# Reads whose answer only moves when the data does: the nightly reload, or a
+# reviewer's decision. Held in-process for a few minutes, keyed on everything
+# that shapes them. A decision clears the counts (the status filter counts
+# decisions) - see set_review.
+_memo: dict = {}
+_memo_lock = threading.Lock()
+
+
+def _memoised(key, seconds, compute):
+    now = time.monotonic()
+    with _memo_lock:
+        hit = _memo.get(key)
+        if hit and hit[0] > now:
+            return hit[1]
+    value = compute()
+    with _memo_lock:
+        _memo[key] = (now + seconds, value)
+    return value
+
+
+def _forget(prefix):
+    with _memo_lock:
+        for key in [k for k in _memo if k[0] == prefix]:
+            del _memo[key]
 
 app = FastAPI(title="Kasauti API")
 app.add_middleware(
@@ -139,13 +173,18 @@ def filters():
     # counts, and whichever risk levels actually appear. Districts (773) and
     # agencies (776) are intentionally left out — see /api/districts, which
     # a district dropdown could filter client-side by state if one is added.
-    states = query(
-        "SELECT state, COUNT(*) AS count FROM projects GROUP BY state ORDER BY state"
-    )
-    risk_levels = query(
-        "SELECT DISTINCT risk_level FROM project_scores WHERE risk_level IS NOT NULL ORDER BY risk_level"
-    )
-    return {"states": states, "risk_levels": [r["risk_level"] for r in risk_levels]}
+    # Two scans that only change with the nightly load, and every queue page
+    # asks for them. Ten minutes in memory costs nothing and saved 2.3s.
+    def compute():
+        states = query(
+            "SELECT state, COUNT(*) AS count FROM projects GROUP BY state ORDER BY state"
+        )
+        risk_levels = query(
+            "SELECT DISTINCT risk_level FROM project_scores WHERE risk_level IS NOT NULL ORDER BY risk_level"
+        )
+        return {"states": states, "risk_levels": [r["risk_level"] for r in risk_levels]}
+
+    return _memoised(("filters",), 600, compute)
 
 
 @app.get("/api/projects/by-key")
@@ -405,8 +444,14 @@ def alerts(
     where, params = _alert_filters(
         q, state, district, sector, risk_level, ls_term, status, min_score, mp_id
     )
-    rows = query(
+    # work_mem for this statement only: the sort over the joined view spilled
+    # ~220 MB to disk at the default 4MB (EXPLAIN: temp written=27,892
+    # blocks) and ran 1.37s; at 32MB it stays in memory and runs 1.13s.
+    # SET LOCAL lasts until the statement's transaction ends.
+    rows_f = _queries.submit(
+        query,
         f"""
+        SET LOCAL work_mem = '32MB';
         SELECT {_ALERT_COLUMNS}
         FROM projects_scored p
         LEFT JOIN work_reviews r ON r.work_key = p.work_key
@@ -416,17 +461,23 @@ def alerts(
         """,
         params + [limit, offset],
     )
-    total = query(
-        f"""
-        SELECT COUNT(*) AS total
-        FROM projects_scored p
-        LEFT JOIN work_reviews r ON r.work_key = p.work_key
-        {where}
-        """,
-        params,
-        one=True,
-    )
-    return {"total": total["total"], "limit": limit, "offset": offset, "alerts": rows}
+
+    # The total does not change from one page of a filter to the next, so a
+    # reader paging through the queue pays for it once.
+    def count():
+        return query(
+            f"""
+            SELECT COUNT(*) AS total
+            FROM projects_scored p
+            LEFT JOIN work_reviews r ON r.work_key = p.work_key
+            {where}
+            """,
+            params,
+            one=True,
+        )["total"]
+
+    total_f = _queries.submit(_memoised, ("alert-count", where, tuple(params)), 300, count)
+    return {"total": total_f.result(), "limit": limit, "offset": offset, "alerts": rows_f.result()}
 
 
 @app.get("/api/alerts/export")
@@ -596,7 +647,7 @@ def set_review(body: ReviewIn, x_review_token: Optional[str] = Header(default=No
     # One statement, so the trail and the current verdict cannot diverge. A
     # second call in the same transaction would do, but this needs no new
     # database helper and is atomic by construction.
-    return execute(
+    saved = execute(
         """
         WITH recorded AS (
             INSERT INTO work_review_events (work_key, status, note, reviewer)
@@ -615,6 +666,11 @@ def set_review(body: ReviewIn, x_review_token: Optional[str] = Header(default=No
         [body.work_key, body.status, body.note, body.reviewer],
         returning=True,
     )
+    # A decision moves every count that filters on review status, and the
+    # queue remembers its totals for five minutes: drop them all rather than
+    # show a reviewer a stale "Awaiting review" after their own click.
+    _forget("alert-count")
+    return saved
 
 
 @app.get("/api/alerts/history")
