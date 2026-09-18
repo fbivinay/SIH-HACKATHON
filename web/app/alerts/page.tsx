@@ -134,16 +134,11 @@ export default async function AlertsPage({
 
   return (
     <main>
-      <section className="shell page-head">
-        <h1 className="display">What to verify next</h1>
-        <p className="lede">
-          Works scoring above the review threshold, highest first, each carrying the record
-          that flagged it. A decision here says what a reviewer concluded. It never moves
-          the score.
-        </p>
-      </section>
+      {/* No visible heading: the owner wanted the queue to start at the top of
+          the page. The h1 stays for screen readers and the document outline. */}
+      <h1 className="sr-only">What to verify next</h1>
 
-      <section className="shell">
+      <section className="shell pt-8">
 
       {scoringPending && (
         <div className="notice mb-5" role="status">
