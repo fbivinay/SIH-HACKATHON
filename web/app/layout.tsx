@@ -152,7 +152,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 ministry.
               </span>
             </div>
-            {/* Who built it and how to reach him, laid out the way his own
+            {/* Who built it and how to reach them, laid out the way his own
                 portfolio lays it out: labelled rows for the contact details,
                 the profiles as marks beneath the name. Every value here is one
                 he already publishes at rvinaykumar-my-portfolio.vercel.app;
@@ -161,7 +161,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 be the one hue on this site that does not mean risk. */}
             <div className="footer__contact">
               <div className="footer__who">
-                <span className="footer__byname">Built by R Vinay Kumar</span>
+                <span className="footer__byname">Built by R Vinay Kumar and team</span>
                 <nav className="footer__social" aria-label="Profiles">
                   <a
                     href="https://www.linkedin.com/in/r-vinay-kumar-139938215"
@@ -204,12 +204,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <dt>Email</dt>
                   <dd>
                     <a href="mailto:rvinaykumar6924@gmail.com">rvinaykumar6924@gmail.com</a>
-                  </dd>
-                </div>
-                <div>
-                  <dt>Phone</dt>
-                  <dd>
-                    <a href="tel:***REMOVED***">***REMOVED***</a>
                   </dd>
                 </div>
                 <div>
