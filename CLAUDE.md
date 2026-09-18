@@ -285,10 +285,10 @@ title offsets and identical foot offsets across every card in a row. The
 limits are — four limits of seven points each, every point either a rule in
 `data/scoring.py` or an entry in `COMPLIANCE_BLIND_SPOTS`, showing three and
 keeping the rest behind a `<details>` "Read more" so the row skims at three
-lines and still reads in full without JavaScript; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs under
-the masthead on every page except the overview, where it runs along the bottom
-of the viewport (`OnHome` in `app/layout.tsx`); it carries only the works —
-no label, no "all high risk" link. "AI powered" must be visible on every page
+lines and still reads in full without JavaScript; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs on the
+overview only, along the bottom of the viewport (`OnHome` in
+`app/layout.tsx`); no other page has one (owner's call, 2026-09-18). It
+carries only the works — no label, no "all high risk" link. "AI powered" must be visible on every page
 (masthead) and in front of "Why was this flagged?" on the work page — the
 brief asks for an AI-powered system and a visitor could not previously tell.
 
