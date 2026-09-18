@@ -2575,49 +2575,34 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
 
 /* ------------------------------------------------------------- cursor -- */
 /*
- * The dot-and-ring pointer (components/Cursor). The native arrow is hidden
- * only once the component has confirmed a fine pointer and mounted - a
- * `cursor: none` rule that fires on a device where the script never runs
- * leaves the reader with no pointer at all. Text fields keep the caret.
+ * The red dot-and-ring pointer, drawn by the operating system.
+ *
+ * It used to be two elements moved by JavaScript (components/Cursor.tsx,
+ * deleted 2026-09-18) with the native arrow hidden. A pointer painted by the
+ * page can only move after the browser has delivered the mouse event, run the
+ * handler and painted a frame - one to three frames behind the hand, on every
+ * page, all the time - and the ring was built to trail further on purpose.
+ * The OS draws its cursor on its own layer at the hardware's rate, so a cursor
+ * image here has no lag at all, needs no script, and keeps the owner's red.
+ *
+ * Two images: the pair at rest, and an opened ring with a smaller dot over
+ * anything clickable. Text fields keep the caret. Only for a fine pointer that
+ * hovers; touch never sees any of it. `auto` / `pointer` are the fallbacks if
+ * an image fails to load.
  */
-.has-cursor, .has-cursor * { cursor: none; }
-.has-cursor input,
-.has-cursor textarea,
-.has-cursor [contenteditable="true"] { cursor: auto; }
-
-.cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10000;
-  pointer-events: none;
-  border-radius: 50%;
-  opacity: 0;
-  will-change: translate;
+@media (hover: hover) and (pointer: fine) {
+  html {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12.5' fill='none' stroke='%23a82e22' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23a82e22'/%3E%3C/svg%3E") 16 16, auto;
+  }
+  /* html :is(...) is (0,1,1): component rules such as .review-btn and .btn
+     set `cursor: pointer` at (0,1,0), and a bare `button` lost to them. */
+  html :is(a, button, [role="button"], summary, label, select) {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='19' fill='none' stroke='%23a82e22' stroke-opacity='0.7' stroke-width='1.5'/%3E%3Ccircle cx='24' cy='24' r='2' fill='%23a82e22'/%3E%3C/svg%3E") 24 24, pointer;
+  }
+  html :is(input, textarea, [contenteditable="true"]) {
+    cursor: text;
+  }
 }
-.cursor--dot {
-  width: 7px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
-  background: var(--risk-high);
-  transition: opacity 200ms var(--ease), scale 220ms var(--ease);
-}
-.cursor--ring {
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  border: 1.5px solid var(--risk-high);
-  transition: opacity 200ms var(--ease), scale 260ms var(--ease), border-color 260ms var(--ease);
-}
-.cursor-shown .cursor { opacity: 1; }
-/* Over a link the ring opens and the dot shrinks to a point. */
-.cursor-hover .cursor--ring { scale: 1.55; border-color: color-mix(in srgb, var(--risk-high) 70%, transparent); }
-.cursor-hover .cursor--dot { scale: 0.5; }
-/* Pressed: the ring closes on the dot. */
-.cursor-down .cursor--ring { scale: 0.7; }
-.cursor-down .cursor--dot { scale: 1.4; }
-/* Over a text field the native caret takes over. */
-.cursor-typing .cursor { opacity: 0; }
 
 /* ----------------------------------------------------------- pageload -- */
 /*

@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789739357.4107988,
-    "seen": 1789739690.9289017,
-    "ast_hash": "b2512bff009459b8efd15d87141b91a9",
+    "mtime": 1789750943.533088,
+    "seen": 1789752293.9208393,
+    "ast_hash": "c86b1d50157c3c79be1b239031bac555",
     "semantic_hash": ""
   },
   "web/app/map/page.tsx": {
@@ -420,9 +420,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789739461.2105408,
-    "seen": 1789739690.9315472,
-    "ast_hash": "1c8c8bea9627c4a85beccf071187d9c3",
+    "mtime": 1789751966.618596,
+    "seen": 1789752293.9237711,
+    "ast_hash": "2d5569211ce72cd9f23a942bd1edf4dc",
     "semantic_hash": ""
   },
   "README.md": {
@@ -519,12 +519,6 @@
     "mtime": 1789161510.8221664,
     "seen": 1789161608.596693,
     "ast_hash": "a6038c6fe3da415136a83c5c191424af",
-    "semantic_hash": ""
-  },
-  "web/components/Cursor.tsx": {
-    "mtime": 1789162167.2836742,
-    "seen": 1789162252.5289063,
-    "ast_hash": "92d424c2125d8d0ffd8a3a9f0fa0f3c8",
     "semantic_hash": ""
   },
   ".impeccable/config.json": {

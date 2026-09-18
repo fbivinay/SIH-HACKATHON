@@ -1,16 +1,16 @@
 # Graph Report - SIH HACKATHON  (2026-09-18)
 
 ## Corpus Check
-- 100 files · ~870,930 words
+- 99 files · ~870,327 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1009 nodes · 1585 edges · 88 communities (52 shown, 33 thin omitted)
+- 1007 nodes · 1581 edges · 89 communities (53 shown, 33 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `374e6260`
+- Built from commit: `269c4681`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -90,6 +90,7 @@
 - build.py
 - Hyperframes Composition Brief: Kasauti
 - Kasauti — AI-powered MPLADS verification
+- states/page.tsx
 - fetch_expenditures
 - projects/[id]/page.tsx
 - preview_deck.py
@@ -128,7 +129,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (88 total, 33 thin omitted)
+## Communities (89 total, 33 thin omitted)
 
 ### Community 0 - "classify_sector"
 Cohesion: 0.05
@@ -167,8 +168,8 @@ Cohesion: 0.13
 Nodes (21): caption(), crore(), figures(), hotspot(), indian(), link_row(), main(), place() (+13 more)
 
 ### Community 10 - "api.ts"
-Cohesion: 0.08
-Nodes (25): band(), BAR_TONE, SortKey, SORTS, StatesPage(), AgencyStat, Alert, AlertPage (+17 more)
+Cohesion: 0.09
+Nodes (21): AgencyStat, Alert, AlertPage, alertsExportUrl(), AlertSummary, ComplianceBook, ComplianceRule, DeskFinding (+13 more)
 
 ### Community 11 - "[state]/page.tsx"
 Cohesion: 0.32
@@ -183,8 +184,8 @@ Cohesion: 0.15
 Nodes (17): react-leaflet, GeoJSON, MapContainer, MapPage(), TileLayer, RiskBar(), RiskComponents, STEPS (+9 more)
 
 ### Community 14 - "layout.tsx"
-Cohesion: 0.10
-Nodes (21): freshnessLine(), metadata, mono, navLinks, RootLayout(), sans, viewport, Cursor() (+13 more)
+Cohesion: 0.11
+Nodes (21): react, freshnessLine(), metadata, mono, navLinks, RootLayout(), sans, viewport (+13 more)
 
 ### Community 15 - "MPLADS Risk Monitor — Design Spec (SIH26102)"
 Cohesion: 0.09
@@ -199,8 +200,8 @@ Cohesion: 0.23
 Nodes (11): aggregator(), main(), official(), ours(), post(), Persist the comparison so the interface can show it without calling the portal…, Reconcile our figures against the official MoSPI MPLADS dashboard. The problem…, �83,33,66,73,298.01' -> 83336673298.01 (+3 more)
 
 ### Community 18 - "formatCount"
-Cohesion: 0.19
-Nodes (21): AlertsPage(), STATUS_LABELS, AnalysisPage(), DistrictDeskPage(), MpPage(), ProjectsPage(), Pager(), ProjectFilters() (+13 more)
+Cohesion: 0.23
+Nodes (18): AlertsPage(), STATUS_LABELS, AnalysisPage(), DistrictDeskPage(), MpPage(), ProjectsPage(), Pager(), ProjectFilters() (+10 more)
 
 ### Community 19 - "What You Must Do When Invoked"
 Cohesion: 0.08
@@ -304,7 +305,7 @@ Nodes (18): Addendum — follow-up tasks from the 2026-08-31 data (Track: data),
 
 ### Community 69 - "app/page.tsx"
 Cohesion: 0.18
-Nodes (13): react, figures(), OverviewPage(), FiguresBoard(), Scope, Stat, HeroField(), COMPONENTS (+5 more)
+Nodes (12): figures(), OverviewPage(), FiguresBoard(), Scope, Stat, HeroField(), COMPONENTS, LIMITS (+4 more)
 
 ### Community 72 - "build_rows"
 Cohesion: 0.33
@@ -321,6 +322,10 @@ Nodes (9): Audio, Creative Direction, Hyperframes Composition Brief: Kasauti, Hy
 ### Community 77 - "Kasauti — AI-powered MPLADS verification"
 Cohesion: 0.20
 Nodes (9): Kasauti — AI-powered MPLADS verification, Repository, Running it, The API, The deck, The interface, The nightly refresh, What it does (+1 more)
+
+### Community 78 - "states/page.tsx"
+Cohesion: 0.25
+Nodes (7): band(), BAR_TONE, SortKey, SORTS, StatesPage(), get(), StateSummary
 
 ### Community 80 - "projects/[id]/page.tsx"
 Cohesion: 0.18
@@ -347,8 +352,8 @@ Nodes (5): next, Params, Search, DistrictDesk, nextConfig
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `normalize()` connect `classify_sector` to `mp_key`, `add_base_features`, `scoring.py`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
-- **Why does `react` connect `app/page.tsx` to `web/package.json`, `format.ts`, `layout.tsx`, `CountUp.tsx`, `formatCount`, `ReviewActions.tsx`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `react` connect `layout.tsx` to `app/page.tsx`, `web/package.json`, `format.ts`, `CountUp.tsx`, `formatCount`, `ReviewActions.tsx`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **What connects `$schema`, `builds`, `routes` to the rest of the system?**
   _255 weakly-connected nodes found - possible documentation gaps or missing edges._
