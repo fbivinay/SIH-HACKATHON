@@ -1174,34 +1174,6 @@ body::before {
   }
 }
 
-/* -------------------------------------------------------------- reviewer -- */
-
-.reviewer-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.reviewer-bar__label {
-  font-size: 0.85rem;
-  color: var(--ink-2);
-}
-
-.reviewer-bar__input {
-  width: auto;
-  min-width: 13rem;
-  flex: 0 1 17rem;
-  border-color: var(--line);
-  background: var(--surface);
-  border-radius: var(--radius-pill);
-}
-
-.reviewer-bar__hint {
-  font-size: 0.78rem;
-  color: var(--ink-3);
-}
-
 /* --------------------------------------------------------------- actions -- */
 
 /* Three decisions on one line. They were wrapping 2 + 1, which reads as a
