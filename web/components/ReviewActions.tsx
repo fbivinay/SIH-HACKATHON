@@ -2,7 +2,6 @@
 
 import { useActionState } from "react";
 import { submitReview, type ReviewResult } from "@/app/alerts/actions";
-import { REVIEWER_STORAGE_KEY } from "@/components/ReviewerName";
 import type { ReviewStatus } from "@/lib/api";
 
 const DECISIONS: Array<{
@@ -49,21 +48,8 @@ export default function ReviewActions({
     <form
       action={formAction}
       className="review-actions"
-      onSubmit={(e) => {
-        // Read the name at submit time rather than holding it in state: the
-        // field lives in a different component and may change between renders.
-        let reviewer = "";
-        try {
-          reviewer = window.localStorage.getItem(REVIEWER_STORAGE_KEY) ?? "";
-        } catch {
-          /* unnamed reviewer */
-        }
-        const input = e.currentTarget.elements.namedItem("reviewer");
-        if (input instanceof HTMLInputElement) input.value = reviewer;
-      }}
     >
       <input type="hidden" name="work_key" value={workKey} />
-      <input type="hidden" name="reviewer" defaultValue="" />
       {DECISIONS.map((d) => (
         <button
           key={d.status}

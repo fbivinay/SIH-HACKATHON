@@ -168,9 +168,9 @@
     "semantic_hash": ""
   },
   "web/app/alerts/page.tsx": {
-    "mtime": 1789713955.118001,
-    "seen": 1789714270.565317,
-    "ast_hash": "79ac984d6c2877ac797133b8a84e8932",
+    "mtime": 1789149333.5697036,
+    "seen": 1789156880.490425,
+    "ast_hash": "83b1679983bee96dec1a08e547f810f9",
     "semantic_hash": ""
   },
   "web/app/analysis/page.tsx": {
@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789665362.9782932,
-    "seen": 1789714270.5653925,
-    "ast_hash": "80305ec0b738ebafe35a9c9ad90ea5cd",
+    "mtime": 1789628723.5140903,
+    "seen": 1789628989.4375231,
+    "ast_hash": "21748553ad3c369521e02a095261a9f0",
     "semantic_hash": ""
   },
   "web/app/map/page.tsx": {
@@ -258,16 +258,22 @@
     "semantic_hash": "246ebbecf313159c08dc7ff63b848646"
   },
   "web/components/ReviewActions.tsx": {
-    "mtime": 1789713921.6695492,
-    "seen": 1789714270.5659318,
-    "ast_hash": "8933cea34a6a069cdd500f8b22fe628c",
-    "semantic_hash": ""
+    "mtime": 1788765289.7851517,
+    "seen": 1789109427.3865921,
+    "ast_hash": "f6e98323670583aefed8d1a5575f1b01",
+    "semantic_hash": "f6e98323670583aefed8d1a5575f1b01"
   },
   "web/components/ReviewTrail.tsx": {
     "mtime": 1788929584.2645078,
     "seen": 1789109427.3865933,
     "ast_hash": "583dcebf57200d1fd29a56cee47531fb",
     "semantic_hash": "583dcebf57200d1fd29a56cee47531fb"
+  },
+  "web/components/ReviewerName.tsx": {
+    "mtime": 1788765289.7851517,
+    "seen": 1789109427.386594,
+    "ast_hash": "ac386c197a0d14cfb3c55c6fab2c0e99",
+    "semantic_hash": "ac386c197a0d14cfb3c55c6fab2c0e99"
   },
   "web/components/RiskBar.tsx": {
     "mtime": 1788765773.589808,
@@ -420,9 +426,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789663478.162211,
-    "seen": 1789714270.5669706,
-    "ast_hash": "9daf87c6f4079d15882bf9e47a0769bd",
+    "mtime": 1789657621.5893862,
+    "seen": 1789657623.8371117,
+    "ast_hash": "6252f220432469b7edb9e42855cb9560",
     "semantic_hash": ""
   },
   "README.md": {
@@ -852,9 +858,9 @@
     "semantic_hash": ""
   },
   "web/components/FiguresBoard.tsx": {
-    "mtime": 1789663970.2547882,
-    "seen": 1789714270.565735,
-    "ast_hash": "58102831818321ea89e4e1f54a162d7e",
+    "mtime": 1789641211.3823776,
+    "seen": 1789641741.3501382,
+    "ast_hash": "76bcb5d6d8f1d81197e13edae1735dbe",
     "semantic_hash": ""
   }
 }

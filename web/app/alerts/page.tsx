@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { api, alertsExportUrl } from "@/lib/api";
-import type { Alert } from "@/lib/api";
 import Pager from "@/components/Pager";
 import ProjectFilters from "@/components/ProjectFilters";
 import ReviewActions from "@/components/ReviewActions";
-import ReviewerName from "@/components/ReviewerName";
 import RiskBar from "@/components/RiskBar";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
 import CountUp from "@/components/CountUp";
@@ -23,19 +21,6 @@ const STATUS_LABELS: Record<string, string> = {
   verified: "Verified",
   dismissed: "Dismissed",
 };
-
-function reviewedLine(a: Alert): string | null {
-  if (a.review_status === "pending") return null;
-  const who = a.review_reviewer?.trim() || "an unnamed reviewer";
-  const when = a.review_updated_at
-    ? new Date(a.review_updated_at).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-    : null;
-  return `${STATUS_LABELS[a.review_status]} by ${who}${when ? ` on ${when}` : ""}`;
-}
 
 export default async function AlertsPage({
   searchParams,
@@ -168,10 +153,6 @@ export default async function AlertsPage({
         <ProjectFilters filterOptions={filterOptions} statuses={Object.keys(STATUS_LABELS)} />
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <ReviewerName />
-      </div>
-
       <p className="mt-4 text-xs" style={{ fontFamily: "var(--font-data)", color: "var(--ink-3)" }}>
         {page.total === 0
           ? "No works match these filters."
@@ -226,7 +207,6 @@ export default async function AlertsPage({
               </tr>
             )}
             {page.alerts.map((a, i) => {
-              const reviewed = reviewedLine(a);
               return (
                 <tr key={a.id} className={a.review_status !== "pending" ? "is-reviewed" : undefined}>
                   <td className="rank">{formatCount(offset + i + 1)}</td>
@@ -278,7 +258,6 @@ export default async function AlertsPage({
                   </td>
                   <td className="min-w-[15rem]">
                     <ReviewActions workKey={a.work_key} current={a.review_status} />
-                    {reviewed && <div className="cell-sub">{reviewed}</div>}
                   </td>
                 </tr>
               );
