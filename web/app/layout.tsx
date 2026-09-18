@@ -6,7 +6,6 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import Logo from "@/components/Logo";
-import Cursor from "@/components/Cursor";
 import NavLinks from "@/components/NavLinks";
 import OnHome from "@/components/OnHome";
 import RiskTicker from "@/components/RiskTicker";
@@ -104,8 +103,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <WordLift />
         {/* Measures the overview's first screen; see --fold-h. */}
         <FoldHeight />
-        {/* The dot-and-ring pointer; renders nothing on touch devices. */}
-        <Cursor />
         {/* See .viewport-column. On every page but the overview, main is a
             block child and takes its own height. */}
         <div className="viewport-column">

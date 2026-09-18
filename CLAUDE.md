@@ -419,7 +419,20 @@ the `translate` property (applied outermost) when `scale` is also in play.
 **Sticky and stacking.** `.data-table thead th { top: 0 }` — the wrap owns the
 scroll, so a topbar offset parks the header across row 1. `.topbar` is
 `z-index: 1100` because Leaflet stacks 200–1000 and painted over the nav at
-40. The pointer is 10000, above the cover at 9999.
+40.
+
+**The pointer is the operating system's, in the owner's red.** It was a dot
+and a trailing ring moved by JavaScript over a hidden native arrow
+(`components/Cursor.tsx`, deleted 2026-09-18). A pointer the page paints can
+only move after the event is delivered, the handler runs and a frame is
+painted — always one to three frames behind the hand, on every page — and
+the ring was built to trail further; the owner read it as the whole site
+being laggy. It is now two SVG cursor images in CSS (at rest, and an opened
+ring over anything clickable), drawn by the OS at hardware rate with no
+script. The clickable rule is `html :is(a, button, …)` at (0,1,1), because
+component rules like `.review-btn { cursor: pointer }` beat a bare `button`.
+Main-thread cost was never the problem: measured on `/alerts` with a
+synthetic pointer sweep and a scroll, zero long animation frames.
 
 **The term switcher is not a navigation at all.** The overview renders *every*
 scope's figures on the server (three cached `api.overview` reads) and hands
