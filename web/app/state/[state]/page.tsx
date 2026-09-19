@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { api } from "@/lib/api";
 import type { StateDesk } from "@/lib/api";
-import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
+import { formatCount, formatINR, riskLevelClass, riskLevelLabel, paidRateTone } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 
 type Params = { state: string };
@@ -24,7 +24,7 @@ export async function generateMetadata({
 }
 
 /** A percentage that reads as a bar. Same idiom as /states. */
-function Rate({ label, value }: { label: string; value: number | null }) {
+function Rate({ label, value, tone }: { label: string; value: number | null; tone?: string }) {
   const pct = Math.max(0, Math.min(100, value ?? 0));
   return (
     <div>
@@ -34,13 +34,18 @@ function Rate({ label, value }: { label: string; value: number | null }) {
         </span>
         <span
           className="text-[0.82rem] tabular-nums"
-          style={{ fontFamily: "var(--font-data)" }}
+          style={{ fontFamily: "var(--font-data)", color: tone ?? "var(--ink)" }}
         >
           {value === null ? "—" : `${value.toFixed(1)}%`}
         </span>
       </div>
+      {/* The fill had a width and no colour, so every bar on this page read
+          as empty whatever the percentage. */}
       <div className="statebar">
-        <span className="statebar__fill" style={{ width: `${pct}%` }} />
+        <span
+          className="statebar__fill"
+          style={{ width: `${pct}%`, background: tone ?? "var(--ink)" }}
+        />
       </div>
     </div>
   );
@@ -86,14 +91,7 @@ export default async function StateDeskPage({
   return (
     <main>
       <section className="shell page-head">
-        <div className="eyebrow">State Nodal Authority · {ls_term}th Lok Sabha</div>
         <h1 className="display">{state}</h1>
-        <p className="lede">
-          What the state was allocated, what its districts have actually built, and which
-          of its {formatCount(works.works)} works are waiting on someone to look at them.
-          Money is the portal&rsquo;s own per-member aggregate; everything below the fold
-          is counted from the works themselves.
-        </p>
         <nav className="mt-6 flex flex-wrap justify-center gap-2" aria-label="Lok Sabha term">
           {["18", "17"].map((t) => (
             <Link
@@ -149,7 +147,7 @@ export default async function StateDeskPage({
 
         <div className="mt-3 card">
           <div className="grid gap-4 sm:grid-cols-3">
-            <Rate label="Paid out" value={paidRate} />
+            <Rate label="Paid out" value={paidRate} tone={paidRateTone(paidRate)} />
             <Rate label="Committed to works" value={committedRate} />
             <Rate label="Works completed" value={completionRate} />
           </div>

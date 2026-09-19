@@ -1,12 +1,8 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { StateSummary } from "@/lib/api";
-import { formatCount, formatINR } from "@/lib/format";
+import { formatCount, formatINR, paidRateTone } from "@/lib/format";
 import StateMap from "@/components/StateMap";
-
-// The source's own bands, so a state falls in the same bucket on both sites.
-const HIGH = 80;
-const AVERAGE = 50;
 
 const SORTS = {
   paid: { label: "Paid out", get: (s: StateSummary) => s.paid_rate ?? -1 },
@@ -17,19 +13,6 @@ const SORTS = {
 } as const;
 
 type SortKey = keyof typeof SORTS;
-
-function band(rate: number | null): "high" | "average" | "low" {
-  if (rate === null) return "low";
-  if (rate >= HIGH) return "high";
-  if (rate >= AVERAGE) return "average";
-  return "low";
-}
-
-const BAR_TONE: Record<string, string> = {
-  high: "var(--risk-low)",
-  average: "var(--risk-medium)",
-  low: "var(--risk-high)",
-};
 
 function Rate({ label, value, tone }: { label: string; value: number | null; tone?: string }) {
   const pct = Math.max(0, Math.min(100, value ?? 0));
@@ -115,14 +98,17 @@ export default async function StatesPage({
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {ranked.map((s, i) => {
-            const tone = BAR_TONE[band(s.paid_rate)];
+            const tone = paidRateTone(s.paid_rate);
             return (
               <article key={s.state} className="card statecard">
                 <header className="flex items-baseline justify-between gap-2">
                   <h2 className="text-[0.98rem] font-medium leading-tight">
+                    {/* The name's link stretches over the whole card (see
+                        .statecard__open), so a click anywhere on it opens the
+                        desk; "to verify" sits above it and keeps its own. */}
                     <Link
                       href={`/state/${encodeURIComponent(s.state)}?ls_term=${term}`}
-                      className="link-quiet"
+                      className="link-quiet statecard__open"
                     >
                       {s.state}
                     </Link>
@@ -160,7 +146,10 @@ export default async function StatesPage({
                     {s.completion_rate !== null ? ` · ${s.completion_rate.toFixed(1)}%` : ""}
                   </span>
                   {s.in_queue > 0 ? (
-                    <Link href={`/alerts?state=${encodeURIComponent(s.state)}`} className="link-quiet">
+                    <Link
+                      href={`/alerts?state=${encodeURIComponent(s.state)}`}
+                      className="link-quiet statecard__above"
+                    >
                       {formatCount(s.in_queue)} to verify
                     </Link>
                   ) : (
