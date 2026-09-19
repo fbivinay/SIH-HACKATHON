@@ -1532,6 +1532,29 @@ body::before {
   display: block;
   height: 100%;
   border-radius: var(--radius-pill);
+  /* A default, so a bar given only a width still shows. */
+  background: var(--ink);
+}
+
+/* The whole state card is the link: the name's anchor draws an invisible layer
+   over the card, so a click anywhere opens the state's desk. One real link per
+   card, so a screen reader hears the state once. The "to verify" link sits
+   above the layer and keeps going to the queue. */
+.statecard__open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Above the card's own text: every word on the page is a positioned span
+     (WordLift), and without a z-index those painted over the layer, so a click
+     on "Allocated" or a figure landed on the word and opened nothing. The card
+     still lifts as a whole under the pointer. */
+  z-index: 1;
+}
+.statecard { cursor: pointer; }
+.statecard__above {
+  position: relative;
+  z-index: 2;
 }
 
 .statecard__foot {

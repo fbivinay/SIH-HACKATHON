@@ -180,3 +180,15 @@ export const MIN_PEERS_FOR_COST = 8;
 export function hasPeers(peerCount: number | null | undefined): boolean {
   return peerCount !== null && peerCount !== undefined && peerCount >= MIN_PEERS_FOR_COST;
 }
+
+/**
+ * The colour of a state's "paid out" bar, on the source's own bands - 80% and
+ * above spending well, 50-79% slowly, under 50% barely - so a state reads the
+ * same here as on empoweredindian.in. The one bar that takes a risk colour: the
+ * others are plain ink.
+ */
+export function paidRateTone(rate: number | null): string {
+  if (rate === null || rate < 50) return "var(--risk-high)";
+  if (rate < 80) return "var(--risk-medium)";
+  return "var(--risk-low)";
+}
