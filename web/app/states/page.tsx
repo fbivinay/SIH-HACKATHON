@@ -2,7 +2,6 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import type { StateSummary } from "@/lib/api";
 import { formatCount, formatINR } from "@/lib/format";
-import CountUp from "@/components/CountUp";
 import StateMap from "@/components/StateMap";
 
 // The source's own bands, so a state falls in the same bucket on both sites.
@@ -76,16 +75,6 @@ export default async function StatesPage({
   ]);
   const ranked = [...states].sort((a, b) => SORTS[sort].get(b) - SORTS[sort].get(a));
 
-  const sum = (get: (s: StateSummary) => number | null) =>
-    states.reduce((t, s) => t + (get(s) ?? 0), 0);
-  const allocated = sum((s) => s.allocated);
-  const expenditure = sum((s) => s.expenditure);
-  const buckets = {
-    high: states.filter((s) => band(s.paid_rate) === "high").length,
-    average: states.filter((s) => band(s.paid_rate) === "average").length,
-    low: states.filter((s) => band(s.paid_rate) === "low").length,
-  };
-
   const href = (next: Record<string, string>) => {
     const params = new URLSearchParams({ ls_term: term, sort, ...next });
     return `/states?${params}`;
@@ -99,91 +88,15 @@ export default async function StatesPage({
         <StateMap stats={mapStats} />
       </section>
 
-      <section className="shell page-head">
-        <h1 className="display">Where the money went, state by state</h1>
-        <p className="lede">
-          Allocation, spending and completion for all {formatCount(states.length)} states and
-          union territories, alongside how many of their works are waiting to be verified.
-          Every money figure is the portal&rsquo;s own published aggregate, so any row here can
-          be checked against the same row on empoweredindian.in.
-        </p>
-        <nav className="mt-6 flex flex-wrap justify-center gap-2" aria-label="Lok Sabha term">
-          {[
-            { value: "18", label: "18th Lok Sabha" },
-            { value: "17", label: "17th Lok Sabha" },
-          ].map((t) => (
-            <Link
-              key={t.value}
-              href={href({ ls_term: t.value })}
-              className="review-btn"
-              aria-current={term === t.value ? "true" : undefined}
-              style={term === t.value ? { color: "var(--ink)", borderColor: "var(--ink)" } : undefined}
-            >
-              {t.label}
-            </Link>
-          ))}
-        </nav>
-      </section>
+      {/* The heading, the term switch, the four totals, the three spending
+          bands and the note on how "paid out" is averaged all went on the
+          owner's call (2026-09-19): the map above says where, and the ranked
+          states below say how much. The h1 stays for screen readers. The term
+          is still read from ?ls_term, defaulting to the 18th. */}
+      <h1 className="sr-only">Where the money went, state by state</h1>
 
-      <section className="shell">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: "States and UTs", value: formatCount(states.length), note: "Every one on record" },
-            { label: "Allocated", value: formatINR(allocated), note: `Across ${formatCount(sum((s) => s.mp_count))} members` },
-            { label: "Paid to vendors", value: formatINR(expenditure), note: "Recorded expenditure" },
-            {
-              label: "Paid out",
-              value: allocated > 0 ? `${((expenditure / allocated) * 100).toFixed(1)}%` : "—",
-              note: "Share of allocation actually spent",
-            },
-          ].map((c) => (
-            <div key={c.label} className="stat-card">
-              <div className="stat-card__label">{c.label}</div>
-              <div className="stat-card__value">
-                <CountUp text={String(c.value)} />
-              </div>
-              <div className="stat-card__note">{c.note}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[
-            { key: "high", label: "Spending well", note: `80% or more of allocation paid out`, n: buckets.high },
-            { key: "average", label: "Spending slowly", note: "50% to 79% paid out", n: buckets.average },
-            { key: "low", label: "Barely spending", note: "Under 50% paid out", n: buckets.low },
-          ].map((b) => (
-            <div key={b.key} className="card flex items-baseline justify-between gap-3">
-              <div>
-                <div className="text-[0.92rem] font-medium">{b.label}</div>
-                <div className="cell-sub">{b.note}</div>
-              </div>
-              <div
-                className="text-[1.5rem] tabular-nums font-semibold"
-                style={{ color: BAR_TONE[b.key] }}
-              >
-                {b.n}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <p className="mt-3 text-[0.78rem]" style={{ color: "var(--ink-3)" }}>
-          &ldquo;Paid out&rdquo; above divides total expenditure by total allocation, which
-          is the figure the source&rsquo;s own overview page reports. Its state page shows a
-          lower number because it averages the {formatCount(states.length)} state
-          percentages instead, counting Lakshadweep&rsquo;s two members equally with Uttar
-          Pradesh&rsquo;s hundred and eleven &mdash; on this term that average is{" "}
-          {states.length
-            ? (
-                states.reduce((sum, s) => sum + (s.paid_rate ?? 0), 0) / states.length
-              ).toFixed(1)
-            : "—"}
-          % against the {allocated > 0 ? ((expenditure / allocated) * 100).toFixed(1) : "—"}%
-          shown above. Per-state values are identical on both sites.
-        </p>
-
-        <div className="mt-6 flex flex-wrap items-center gap-2">
+      <section className="shell pt-8">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-[0.8rem]" style={{ color: "var(--ink-2)" }}>
             Rank by
           </span>
