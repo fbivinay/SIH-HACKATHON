@@ -106,10 +106,9 @@ Seven pages in the nav, in this order:
 | Page | Route | What it holds |
 |---|---|---|
 | Overview | `/` | The headline figures with a term switcher, the risk split, **where the AI is** (the three models, each with what it decides and what it does not), what the score is made of, what it will not tell you |
-| Alerts | `/alerts` | The review queue: every work ≥ 40, filterable by search, state, district, sector, band, term, status, minimum score and member; CSV export; a decision trail per work, written with a review token |
+| Alerts | `/alerts` | The review queue (every work ≥ 40) and, with **All works** chosen, the whole record — filterable by search, state, district, sector, band, term, status, minimum score and member; CSV export; a decision trail per work, written with a review token. Replaces the old Works page; `/projects` redirects here |
 | States | `/states` | Every state ranked, with paid rate (expenditure / allocated) and committed rate (recommended / allocated) shown apart, because the source publishes one number under both names |
 | Map | `/map` | Leaflet choropleth of risk by state |
-| Works | `/projects` | The full record, filterable, with a range pager ("1–25 of 48,296") |
 | Agencies | `/analysis` | Implementing agencies ranked by average risk with vendor share; the "gone quiet" list (no payment in 180 days); members ranked by idle allocation |
 | Sources | `/provenance` | The reconciliation chain, the official interface (nine endpoints, which are open and which OTP-gated), rejects, and the blind spots — fields MPLADS does not publish (progress %, beneficiaries, geo-tags, bill values) and which the site therefore never invents |
 

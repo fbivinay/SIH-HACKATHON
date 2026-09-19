@@ -127,13 +127,6 @@ export type MpStat = {
   high_risk_works: number;
 };
 
-export type ProjectPage = {
-  total: number;
-  limit: number;
-  offset: number;
-  projects: ProjectSummary[];
-};
-
 export type ReviewStatus = "pending" | "verified" | "dismissed" | "escalated";
 
 // One row of the verification queue. Everything a reviewer needs to decide
@@ -572,8 +565,6 @@ export function alertsExportUrl(params: Record<string, string>): string {
 export const api = {
   overview: (params: Record<string, string> = {}) =>
     get<Overview>(`/api/overview?${new URLSearchParams(params)}`),
-  projects: (params: Record<string, string> = {}) =>
-    get<ProjectPage>(`/api/projects?${new URLSearchParams(params)}`),
   project: (id: number) => get<ProjectDetail>(`/api/projects/${id}`),
   // By the identifier that survives a refresh. `id` is reassigned nightly, so
   // a bookmarked /projects/123 points at a different work tomorrow.

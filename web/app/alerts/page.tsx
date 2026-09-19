@@ -32,7 +32,13 @@ export default async function AlertsPage({
   for (const [k, v] of Object.entries(sp)) {
     if (typeof v === "string" && v !== "") filters[k] = v;
   }
-  filters.min_score ??= DEFAULT_MIN_SCORE;
+  // One page for the whole record now that Works is gone, so the band control
+  // is also the scope: nothing chosen is the review queue (score 40 and above),
+  // "ALL" is every work, and a named band is that band whatever its score - a
+  // LOW work sits below 40, so the queue's floor would otherwise hide it.
+  const allWorks = filters.risk_level === "ALL";
+  if (allWorks) delete filters.risk_level;
+  else if (!filters.risk_level) filters.min_score ??= DEFAULT_MIN_SCORE;
   filters.limit = String(PAGE_SIZE);
 
   const offset = Number.parseInt(filters.offset ?? "0", 10) || 0;
@@ -44,11 +50,15 @@ export default async function AlertsPage({
     // The same filters the table uses, minus paging - the tiles describe the
     // queue below them, not the whole country.
     api
-      .alertSummary(
-        Object.fromEntries(
+      .alertSummary({
+        ...Object.fromEntries(
           Object.entries(filters).filter(([k]) => k !== "limit" && k !== "offset")
-        )
-      )
+        ),
+        // The summary endpoint defaults its floor to 40, so outside the queue
+        // the tiles would still count only the queue: "All works" read
+        // 48,296 in scope and "Low" read 0. Say 0 explicitly there.
+        min_score: filters.min_score ?? "0",
+      })
       .catch(() => null),
   ]);
 
@@ -92,9 +102,15 @@ export default async function AlertsPage({
         {
           label: "In scope",
           value: formatCount(summary.in_scope),
-          note: `Score ${filters.min_score} and above — ${formatCount(
-            summary.high
-          )} high, ${formatCount(summary.medium)} medium`,
+          note: filters.min_score
+            ? `Score ${filters.min_score} and above — ${formatCount(summary.high)} high, ${formatCount(
+                summary.medium
+              )} medium`
+            : allWorks
+              ? `Every work — ${formatCount(summary.high)} high, ${formatCount(
+                  summary.medium
+                )} medium, ${formatCount(summary.in_scope - summary.high - summary.medium)} low`
+              : `Every ${riskLevelLabel(filters.risk_level ?? "").toLowerCase()} work`,
           tone: "accent" as const,
         },
       ]

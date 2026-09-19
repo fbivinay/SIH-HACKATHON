@@ -120,7 +120,10 @@ export default function ProjectFilters({
           onChange={(e) => updateParams({ risk_level: e.target.value })}
           className="filter-select"
         >
-          <option value="">Any risk level</option>
+          {/* Also the page's scope, since Alerts now carries the whole record
+              (the Works page was folded into it). */}
+          <option value="">Needs review (score 40+)</option>
+          <option value="ALL">All works</option>
           {filterOptions.risk_levels.map((r) => (
             <option key={r} value={r}>
               {riskLevelLabel(r)}
