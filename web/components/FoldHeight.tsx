@@ -23,7 +23,9 @@ export default function FoldHeight() {
   useEffect(() => {
     const root = document.documentElement;
     const set = () => {
-      if (!document.querySelector(".home-fold")) {
+      // Any page with a screen-filling first section: the overview's fold and
+      // the States page's map.
+      if (!document.querySelector(".home-fold, .map-screen")) {
         root.style.removeProperty("--fold-h");
         return;
       }

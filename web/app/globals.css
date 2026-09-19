@@ -1603,6 +1603,47 @@ body::before {
 /* ---- Choropleth legend ---- */
 
 /* A sequential ramp without a key is an unlabelled gradient. */
+/* The States page opens on the map, filling the space under the masthead
+   (--fold-h, measured by components/FoldHeight.tsx; there is no ticker on
+   this page). Edge to edge like the overview's fold, with the legend laid over
+   the map rather than taking a strip of the screen for itself. */
+.map-screen {
+  height: var(--fold-h, calc(100dvh / var(--zoom, 1) - 94px));
+  padding: 0.75rem 2.25rem;
+}
+.statemap {
+  position: relative;
+  height: 100%;
+  border-radius: var(--radius-slab);
+  overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  box-shadow: var(--glass-edge), var(--glass-shadow-lift);
+  background: var(--surface-2);
+}
+.statemap__status {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--ink-3);
+  font-size: 0.9rem;
+}
+.statemap__legend {
+  position: absolute;
+  /* Top right: India is framed to fill the height, so its southern tip sits
+     at the bottom edge, and the lower left put the legend on Kerala. */
+  right: 1rem;
+  top: 1rem;
+  /* Above Leaflet's panes (200-700) and below its own controls and the topbar. */
+  z-index: 800;
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-control);
+  background: var(--glass-strong);
+  border: 1px solid var(--line);
+  box-shadow: var(--glass-shadow);
+}
+.statemap .leaflet-interactive { cursor: pointer; }
+
 .choro-legend {
   display: flex;
   flex-wrap: wrap;
