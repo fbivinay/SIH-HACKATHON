@@ -46,7 +46,7 @@
   "44": "PostCSS Config",
   "45": "_RecordingCursor",
   "46": "Kasauti — MPLADS verification",
-  "47": "provenance/page.tsx",
+  "47": "CountUp.tsx",
   "48": "test_scoring.py",
   "49": "graphify reference: extra exports and benchmark",
   "50": "add_base_features",
@@ -77,7 +77,7 @@
   "75": "Hyperframes Composition Brief: Kasauti",
   "76": "loading.tsx",
   "77": "Kasauti — AI-powered MPLADS verification",
-  "78": "formatINR",
+  "78": "states/page.tsx",
   "79": "fetch_expenditures",
   "80": "projects/[id]/page.tsx",
   "81": "preview_deck.py",
@@ -87,6 +87,5 @@
   "85": "fetch_mps",
   "86": "write_detector_findings",
   "87": "test_agency_risk_takes_the_worst_signal_not_a_blend",
-  "88": "[district]/page.tsx",
-  "89": "RiskBar.tsx"
+  "88": "[district]/page.tsx"
 }

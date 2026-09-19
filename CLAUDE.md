@@ -234,9 +234,17 @@ sideways — so nothing may be wider than the shell, including the hero canvas.
 Money is `formatINR` (₹ Cr / L), counts are `formatCount`, and timestamps
 render in IST with the label written literally.
 
-Seven nav pages in this order: Overview `/`, Alerts `/alerts`, States
-`/states`, Map `/map`, Works `/projects`, Agencies `/analysis`, Sources
-`/provenance`. Signals, Rules and Trends were deleted; what they carried lives
+Six nav pages in this order: Overview `/`, Alerts `/alerts`, States
+`/states`, Map `/map`, Agencies `/analysis`, Sources `/provenance`. **Works
+was folded into Alerts** (owner's call, 2026-09-19): it listed the same
+records with less on each row. The band select on Alerts is also the page's
+scope — nothing chosen is the review queue (score 40+), `risk_level=ALL` is
+every work, and a named band is that band whatever its score (LOW sits below
+40, so the queue's floor would otherwise hide it). The summary endpoint
+defaults its own floor to 40, so outside the queue the page passes
+`min_score=0` to it, or "All works" counted 48,296 and "Low" counted 0.
+`/projects` is a 308 in `next.config.ts` to `/alerts?risk_level=ALL` with its
+filters kept; `/projects/[id]`, the page for one work, is untouched. Signals, Rules and Trends were deleted; what they carried lives
 on `/provenance`. **The overview's first screen is the hero, the term switcher
 and the six figures, filling the viewport between the masthead and the ticker
 with no slack** (owner's call, 2026-09-16): the headline alone (the lede under

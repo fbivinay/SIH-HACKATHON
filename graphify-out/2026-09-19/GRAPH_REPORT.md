@@ -1,16 +1,16 @@
-# Graph Report - SIH HACKATHON  (2026-09-19)
+# Graph Report - SIH HACKATHON  (2026-09-18)
 
 ## Corpus Check
-- 98 files · ~870,158 words
+- 99 files · ~870,327 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1004 nodes · 1562 edges · 90 communities (54 shown, 33 thin omitted)
+- 1007 nodes · 1581 edges · 89 communities (53 shown, 33 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d6059c79`
+- Built from commit: `269c4681`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -61,7 +61,7 @@
 - PostCSS Config
 - _RecordingCursor
 - Kasauti — MPLADS verification
-- provenance/page.tsx
+- CountUp.tsx
 - test_scoring.py
 - graphify reference: extra exports and benchmark
 - add_base_features
@@ -90,7 +90,7 @@
 - build.py
 - Hyperframes Composition Brief: Kasauti
 - Kasauti — AI-powered MPLADS verification
-- formatINR
+- states/page.tsx
 - fetch_expenditures
 - projects/[id]/page.tsx
 - preview_deck.py
@@ -101,19 +101,18 @@
 - write_detector_findings
 - test_agency_risk_takes_the_worst_signal_not_a_blend
 - [district]/page.tsx
-- RiskBar.tsx
 
 ## God Nodes (most connected - your core abstractions)
 1. `query()` - 34 edges
-2. `formatCount()` - 27 edges
-3. `formatINR()` - 19 edges
-4. `classify_sector()` - 17 edges
-5. `riskLevelLabel()` - 16 edges
-6. `compilerOptions` - 16 edges
-7. `normalize()` - 15 edges
-8. `Brag Plan: Kasauti` - 15 edges
-9. `MPLADS Risk Monitor — Design Spec (SIH26102)` - 15 edges
-10. `idle_allocation()` - 14 edges
+2. `formatCount()` - 29 edges
+3. `formatINR()` - 21 edges
+4. `riskLevelLabel()` - 18 edges
+5. `classify_sector()` - 17 edges
+6. `riskLevelClass()` - 16 edges
+7. `compilerOptions` - 16 edges
+8. `normalize()` - 15 edges
+9. `api` - 15 edges
+10. `Brag Plan: Kasauti` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `set_review()` --references--> `post()`  [EXTRACTED]
@@ -130,7 +129,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (90 total, 33 thin omitted)
+## Communities (89 total, 33 thin omitted)
 
 ### Community 0 - "classify_sector"
 Cohesion: 0.05
@@ -169,20 +168,20 @@ Cohesion: 0.13
 Nodes (21): caption(), crore(), figures(), hotspot(), indian(), link_row(), main(), place() (+13 more)
 
 ### Community 10 - "api.ts"
-Cohesion: 0.11
-Nodes (17): AgencyStat, Alert, AlertPage, ComplianceBook, ComplianceRule, DeskFinding, DeskSector, Detector (+9 more)
+Cohesion: 0.09
+Nodes (21): AgencyStat, Alert, AlertPage, alertsExportUrl(), AlertSummary, ComplianceBook, ComplianceRule, DeskFinding (+13 more)
 
 ### Community 11 - "[state]/page.tsx"
-Cohesion: 0.22
-Nodes (7): next, Params, Search, StateDeskPage(), term(), StateDesk, nextConfig
+Cohesion: 0.32
+Nodes (5): Params, Search, StateDeskPage(), term(), StateDesk
 
 ### Community 12 - "TypeScript Config"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 13 - "format.ts"
-Cohesion: 0.23
-Nodes (12): react-leaflet, GeoJSON, MapContainer, MapPage(), TileLayer, CHOROPLETH_STEPS, choroplethFill(), DUPLICATE_SIMILARITY_THRESHOLD (+4 more)
+Cohesion: 0.15
+Nodes (17): react-leaflet, GeoJSON, MapContainer, MapPage(), TileLayer, RiskBar(), RiskComponents, STEPS (+9 more)
 
 ### Community 14 - "layout.tsx"
 Cohesion: 0.11
@@ -201,8 +200,8 @@ Cohesion: 0.23
 Nodes (11): aggregator(), main(), official(), ours(), post(), Persist the comparison so the interface can show it without calling the portal…, Reconcile our figures against the official MoSPI MPLADS dashboard. The problem…, �83,33,66,73,298.01' -> 83336673298.01 (+3 more)
 
 ### Community 18 - "formatCount"
-Cohesion: 0.18
-Nodes (18): AlertsPage(), STATUS_LABELS, AnalysisPage(), MpPage(), Pager(), ProjectFilters(), handleQChange(), updateParams() (+10 more)
+Cohesion: 0.23
+Nodes (18): AlertsPage(), STATUS_LABELS, AnalysisPage(), DistrictDeskPage(), MpPage(), ProjectsPage(), Pager(), ProjectFilters() (+10 more)
 
 ### Community 19 - "What You Must Do When Invoked"
 Cohesion: 0.08
@@ -252,9 +251,9 @@ Nodes (6): fetch_projects(), Captures the SQL fetch_projects actually runs, and 
 Cohesion: 0.14
 Nodes (13): 10. Interface, 11. Motion, measured, 1. Never claim more than the record supports, 2. `work_key` is the only identifier that survives a reload, 3. Source tables and derived tables are separate, and the swap is atomic, 4. Population statistics stay at population grain, 5. Thresholds are measured, not borrowed, 6. Money comes from the source's own aggregates (+5 more)
 
-### Community 47 - "provenance/page.tsx"
-Cohesion: 0.32
-Nodes (6): metadata, ProvenancePage(), MODELS, WhereTheAI(), Provenance, formatFreshnessTimestamp()
+### Community 47 - "CountUp.tsx"
+Cohesion: 0.25
+Nodes (8): metadata, ProvenancePage(), CountUp(), easeOut(), MODELS, WhereTheAI(), Provenance, formatFreshnessTimestamp()
 
 ### Community 48 - "test_scoring.py"
 Cohesion: 0.14
@@ -305,8 +304,8 @@ Cohesion: 0.11
 Nodes (18): Addendum — follow-up tasks from the 2026-08-31 data (Track: data), Global Constraints, MPLADS Risk Monitor Implementation Plan, Task 0: Postgres schema + repo scaffold + shared env contract, Task 10: Final integration / demo dry run (shared, last), Task 11: Derive a sector and fix the cost baseline — DONE, Task 12: Score vendor concentration at the agency grain — DONE, Task 13: Normalize MP identity — DONE (+10 more)
 
 ### Community 69 - "app/page.tsx"
-Cohesion: 0.16
-Nodes (14): figures(), OverviewPage(), CountUp(), easeOut(), FiguresBoard(), Scope, Stat, HeroField() (+6 more)
+Cohesion: 0.18
+Nodes (12): figures(), OverviewPage(), FiguresBoard(), Scope, Stat, HeroField(), COMPONENTS, LIMITS (+4 more)
 
 ### Community 72 - "build_rows"
 Cohesion: 0.33
@@ -324,13 +323,13 @@ Nodes (9): Audio, Creative Direction, Hyperframes Composition Brief: Kasauti, Hy
 Cohesion: 0.20
 Nodes (9): Kasauti — AI-powered MPLADS verification, Repository, Running it, The API, The deck, The interface, The nightly refresh, What it does (+1 more)
 
-### Community 78 - "formatINR"
-Cohesion: 0.21
-Nodes (9): band(), BAR_TONE, SortKey, SORTS, StatesPage(), RiskTicker(), get(), StateSummary (+1 more)
+### Community 78 - "states/page.tsx"
+Cohesion: 0.25
+Nodes (7): band(), BAR_TONE, SortKey, SORTS, StatesPage(), get(), StateSummary
 
 ### Community 80 - "projects/[id]/page.tsx"
-Cohesion: 0.23
-Nodes (10): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), api, ReviewHistory, hasPeers() (+2 more)
+Cohesion: 0.18
+Nodes (12): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), RiskTicker(), api, ReviewHistory (+4 more)
 
 ### Community 81 - "preview_deck.py"
 Cohesion: 0.48
@@ -341,16 +340,12 @@ Cohesion: 0.40
 Nodes (4): Assets, How it is built, Rebuilding, The two-minute explainer
 
 ### Community 88 - "[district]/page.tsx"
-Cohesion: 0.38
-Nodes (5): DistrictDeskPage(), Params, Search, DistrictDesk, workStatusLabel()
-
-### Community 89 - "RiskBar.tsx"
-Cohesion: 0.40
-Nodes (5): RiskBar(), RiskComponents, STEPS, WEIGHTS, riskScoreColorHex()
+Cohesion: 0.25
+Nodes (5): next, Params, Search, DistrictDesk, nextConfig
 
 ## Knowledge Gaps
-- **254 isolated node(s):** `$schema`, `builds`, `routes`, `agency_vendor_profile`, `rejected_rows` (+249 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 527 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **255 isolated node(s):** `$schema`, `builds`, `routes`, `agency_vendor_profile`, `rejected_rows` (+250 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 528 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
@@ -358,15 +353,15 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `normalize()` connect `classify_sector` to `mp_key`, `add_base_features`, `scoring.py`?**
   _High betweenness centrality (0.035) - this node is a cross-community bridge._
-- **Why does `next` connect `[state]/page.tsx` to `[district]/page.tsx`, `web/package.json`, `layout.tsx`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Are the 3 inferred relationships involving `classify_sector()` (e.g. with `add_base_features()` and `main()`) actually correct?**
-  _`classify_sector()` has 3 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `react` connect `layout.tsx` to `app/page.tsx`, `web/package.json`, `format.ts`, `CountUp.tsx`, `formatCount`, `ReviewActions.tsx`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **What connects `$schema`, `builds`, `routes` to the rest of the system?**
-  _254 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _255 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `classify_sector` be split into smaller, more focused modules?**
   _Cohesion score 0.050921861281826165 - nodes in this community are weakly interconnected._
 - **Should `query` be split into smaller, more focused modules?**
   _Cohesion score 0.05970149253731343 - nodes in this community are weakly interconnected._
 - **Should `test_detectors.py` be split into smaller, more focused modules?**
   _Cohesion score 0.06345848757271286 - nodes in this community are weakly interconnected._
+- **Should `load_real_data.py` be split into smaller, more focused modules?**
+  _Cohesion score 0.11578947368421053 - nodes in this community are weakly interconnected._

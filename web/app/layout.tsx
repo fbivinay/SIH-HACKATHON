@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 // The palette itself has no dark variant (globals.css).
 export const viewport: Viewport = { colorScheme: "light" };
 
-// Seven, in the order an official actually works: what is happening, what needs
+// Six, in the order an official actually works: what is happening, what needs
 // me, where, and then the supporting evidence.
 //
 // /signals, /compliance and /trends were deleted, not just de-navigated - the
@@ -56,7 +56,6 @@ export const navLinks = [
   { href: "/alerts", label: "Alerts" },
   { href: "/states", label: "States" },
   { href: "/map", label: "Map" },
-  { href: "/projects", label: "Works" },
   { href: "/analysis", label: "Agencies" },
   { href: "/provenance", label: "Sources" },
 ];
