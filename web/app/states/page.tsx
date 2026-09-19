@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import type { StateSummary } from "@/lib/api";
 import { formatCount, formatINR } from "@/lib/format";
 import CountUp from "@/components/CountUp";
+import StateMap from "@/components/StateMap";
 
 // The source's own bands, so a state falls in the same bucket on both sites.
 const HIGH = 80;
@@ -67,7 +68,12 @@ export default async function StatesPage({
   const rawSort = typeof sp.sort === "string" ? sp.sort : "paid";
   const sort: SortKey = rawSort in SORTS ? (rawSort as SortKey) : "paid";
 
-  const states = await api.states({ ls_term: term });
+  // The map's figures are not term-scoped and change nightly; one cached read,
+  // fetched beside the list rather than after it.
+  const [states, mapStats] = await Promise.all([
+    api.states({ ls_term: term }),
+    api.mapStates().catch(() => []),
+  ]);
   const ranked = [...states].sort((a, b) => SORTS[sort].get(b) - SORTS[sort].get(a));
 
   const sum = (get: (s: StateSummary) => number | null) =>
@@ -87,6 +93,12 @@ export default async function StatesPage({
 
   return (
     <main>
+      {/* The first screen is the map and nothing else (owner's call,
+          2026-09-19); the /map page it came from is gone. */}
+      <section className="map-screen" aria-label="Risk by state, on the map">
+        <StateMap stats={mapStats} />
+      </section>
+
       <section className="shell page-head">
         <h1 className="display">Where the money went, state by state</h1>
         <p className="lede">

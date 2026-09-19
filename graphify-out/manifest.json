@@ -186,15 +186,9 @@
     "semantic_hash": ""
   },
   "web/app/layout.tsx": {
-    "mtime": 1789804058.1504478,
-    "seen": 1789805114.8188627,
-    "ast_hash": "cb29b9226fbd017872ab8a363b3502b0",
-    "semantic_hash": ""
-  },
-  "web/app/map/page.tsx": {
-    "mtime": 1789139378.8275855,
-    "seen": 1789156880.4904327,
-    "ast_hash": "5551032fda0aeebdf4ab9600a2dce146",
+    "mtime": 1789810244.2445,
+    "seen": 1789810795.8782818,
+    "ast_hash": "16d74d37808ecb9669b9eb599a4f7fa9",
     "semantic_hash": ""
   },
   "web/app/mp/[id]/page.tsx": {
@@ -228,9 +222,9 @@
     "semantic_hash": ""
   },
   "web/app/states/page.tsx": {
-    "mtime": 1789141404.6413965,
-    "seen": 1789156880.4904454,
-    "ast_hash": "c363fc88639c331dd179e1489d314a09",
+    "mtime": 1789810244.2073555,
+    "seen": 1789810795.8784835,
+    "ast_hash": "551336cdf101ac65ec267fa90ec8e2f8",
     "semantic_hash": ""
   },
   "web/components/Logo.tsx": {
@@ -288,9 +282,9 @@
     "semantic_hash": ""
   },
   "web/next.config.ts": {
-    "mtime": 1789804250.2814171,
-    "seen": 1789805114.8198059,
-    "ast_hash": "58080233080440b8ef12285e2fbf525c",
+    "mtime": 1789810244.2455473,
+    "seen": 1789810795.8791199,
+    "ast_hash": "ca40e2b38c45c66621e60db748284825",
     "semantic_hash": ""
   },
   "web/package.json": {
@@ -414,15 +408,15 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1789804436.528983,
-    "seen": 1789805114.8202803,
-    "ast_hash": "1a88a6cc1c138d262480dfef861785d9",
+    "mtime": 1789810541.8368573,
+    "seen": 1789810795.8795657,
+    "ast_hash": "c110ca837c39fbdb71593b15da771576",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1789804436.5302808,
-    "seen": 1789805114.8202825,
-    "ast_hash": "a0604fe27059f0f15030301d2c43b940",
+    "mtime": 1789810541.8387718,
+    "seen": 1789810795.8795671,
+    "ast_hash": "db8f13b7f5231f6e73ced22e565b4636",
     "semantic_hash": ""
   },
   "api/requirements.txt": {
@@ -828,9 +822,9 @@
     "semantic_hash": ""
   },
   "web/components/FoldHeight.tsx": {
-    "mtime": 1789628930.964581,
-    "seen": 1789628989.437943,
-    "ast_hash": "ca39bb1a53826d56aa5284a6eaaad1bd",
+    "mtime": 1789810244.2085104,
+    "seen": 1789810795.8785446,
+    "ast_hash": "8172112c7dda4f3b7aaa5801e08eb9c0",
     "semantic_hash": ""
   },
   "web/lib/terms.ts": {
@@ -843,6 +837,12 @@
     "mtime": 1789663970.2547882,
     "seen": 1789714270.565735,
     "ast_hash": "58102831818321ea89e4e1f54a162d7e",
+    "semantic_hash": ""
+  },
+  "web/components/StateMap.tsx": {
+    "mtime": 1789810244.186004,
+    "seen": 1789810795.8789496,
+    "ast_hash": "3f190fde42bc155f3153a5bdcd9b82a4",
     "semantic_hash": ""
   }
 }

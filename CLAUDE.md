@@ -234,8 +234,14 @@ sideways — so nothing may be wider than the shell, including the hero canvas.
 Money is `formatINR` (₹ Cr / L), counts are `formatCount`, and timestamps
 render in IST with the label written literally.
 
-Six nav pages in this order: Overview `/`, Alerts `/alerts`, States
-`/states`, Map `/map`, Agencies `/analysis`, Sources `/provenance`. **Works
+Five nav pages in this order: Overview `/`, Alerts `/alerts`, States
+`/states`, Agencies `/analysis`, Sources `/provenance`. **The map is the
+first screen of States** (owner's call, 2026-09-19; `/map` is a 308 to
+`/states`): `components/StateMap.tsx` in `.map-screen`, sized by the same
+measured `--fold-h` as the overview's fold (FoldHeight now sets it for
+either), framed on India's own extent with `fitBounds` and `zoomSnap: 0.1`
+so the country fills 88–95% of the height at 1366×768–1920×1080 rather than
+sitting small at a fixed zoom. Clicking a state opens its desk. **Works
 was folded into Alerts** (owner's call, 2026-09-19): it listed the same
 records with less on each row. The band select on Alerts is also the page's
 scope — nothing chosen is the review queue (score 40+), `risk_level=ALL` is

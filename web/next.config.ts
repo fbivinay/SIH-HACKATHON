@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       { source: "/projects", destination: "/alerts", permanent: true },
+      // The map moved to the top of States (2026-09-19).
+      { source: "/map", destination: "/states", permanent: true },
     ];
   },
 };
