@@ -346,7 +346,7 @@ export default async function DistrictDeskPage({
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
-            href={`/alerts?state=${encodeURIComponent(state)}&district=${encodeURIComponent(
+            href={`/projects?state=${encodeURIComponent(state)}&district=${encodeURIComponent(
               district
             )}`}
             className="btn btn--solid"

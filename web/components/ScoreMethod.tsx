@@ -149,7 +149,7 @@ export default function ScoreMethod() {
                 Above 70 is high, and goes to the top of the list.
               </p>
             </div>
-            <Link href="/alerts" className="btn btn--solid mt-4 self-start">
+            <Link href="/projects" className="btn btn--solid mt-4 self-start">
               See what is flagged
             </Link>
           </div>

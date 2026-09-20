@@ -40,7 +40,7 @@ type Hit = { kind: string; label: string; sub?: string; href: string };
 
 const PAGES: Hit[] = [
   { kind: "Page", label: "Overview", sub: "The headline figures", href: "/" },
-  { kind: "Page", label: "Alerts", sub: "The review queue and every work", href: "/alerts" },
+  { kind: "Page", label: "Projects", sub: "The review queue and every work", href: "/projects" },
   { kind: "Page", label: "States", sub: "The map and every state", href: "/states" },
   { kind: "Page", label: "Agencies", sub: "Implementing agencies and members", href: "/analysis" },
   { kind: "Page", label: "Sources", sub: "Where the numbers come from", href: "/provenance" },
@@ -95,7 +95,7 @@ function localHits(index: Index | null, q: string): Hit[] {
   }
   for (const a of index?.agencies ?? []) {
     add(
-      { kind: "Agency", label: a, sub: "Its works", href: `/alerts?q=${encodeURIComponent(a)}&risk_level=ALL` },
+      { kind: "Agency", label: a, sub: "Its works", href: `/projects?q=${encodeURIComponent(a)}&risk_level=ALL` },
       a,
       0.4
     );

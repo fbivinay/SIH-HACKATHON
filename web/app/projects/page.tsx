@@ -127,14 +127,14 @@ export default async function AlertsPage({
     if (o > 0) params.set("offset", String(o));
     else params.delete("offset");
     const qs = params.toString();
-    return qs ? `/alerts?${qs}` : "/alerts";
+    return qs ? `/projects?${qs}` : "/projects";
   };
 
   return (
     <main>
       {/* No visible heading: the owner wanted the queue to start at the top of
           the page. The h1 stays for screen readers and the document outline. */}
-      <h1 className="sr-only">What to verify next</h1>
+      <h1 className="sr-only">Projects — what to verify next</h1>
 
       <section className="shell pt-8">
 
@@ -178,7 +178,7 @@ export default async function AlertsPage({
       {scope.length > 0 && (
         <p className="mt-4 text-[0.82rem]" style={{ color: "var(--ink-2)" }}>
           Showing works {scope.join(", ")}.{" "}
-          <Link href="/alerts" className="link-quiet">
+          <Link href="/projects" className="link-quiet">
             Clear and see the whole queue
           </Link>
         </p>
@@ -228,12 +228,34 @@ export default async function AlertsPage({
                       {a.sector ? `${a.sector} — ` : ""}
                       {a.implementing_agency}
                     </div>
+                    {/* Three reasons, then the rest behind "Read more", so a
+                        row stays the height of a row and still says everything
+                        it has to say. A <details>, like the limits below the
+                        overview: it opens with no JavaScript, the browser's own
+                        search finds what is inside it, and it prints. */}
                     {a.flagged_reasons.length > 0 && (
-                      <ul className="reason-list">
-                        {a.flagged_reasons.map((r) => (
-                          <li key={r}>{r}</li>
-                        ))}
-                      </ul>
+                      <>
+                        <ul className="reason-list">
+                          {a.flagged_reasons.slice(0, 3).map((r) => (
+                            <li key={r}>{r}</li>
+                          ))}
+                        </ul>
+                        {a.flagged_reasons.length > 3 && (
+                          <details className="reason-more">
+                            <summary>
+                              <span className="reason-more__open">
+                                Read more ({a.flagged_reasons.length - 3} more)
+                              </span>
+                              <span className="reason-more__close">Show less</span>
+                            </summary>
+                            <ul className="reason-list">
+                              {a.flagged_reasons.slice(3).map((r) => (
+                                <li key={r}>{r}</li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
+                      </>
                     )}
                   </td>
                   <td className="whitespace-nowrap">

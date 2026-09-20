@@ -391,7 +391,7 @@ export default async function StateDeskPage({
           </table>
         </div>
         <div className="mt-4">
-          <Link href={`/alerts?state=${encodeURIComponent(state)}`} className="btn btn--solid">
+          <Link href={`/projects?state=${encodeURIComponent(state)}`} className="btn btn--solid">
             Open {state} in the queue
           </Link>
         </div>

@@ -50,6 +50,6 @@ export async function submitReview(
   // five minutes. updateTag rather than revalidateTag so the reviewer's next
   // request reads the new decision instead of the stale copy.
   updateTag("api");
-  revalidatePath("/alerts");
+  revalidatePath("/projects");
   return { ok: true };
 }

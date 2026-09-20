@@ -672,6 +672,26 @@ html { overflow-anchor: none; }
   background: var(--ink);
 }
 
+/* The rest of a work's reasons. Same control as the limits' "Read more", a
+   size down: it sits inside a table row. */
+.reason-more > summary {
+  margin-top: 0.3rem;
+  display: inline-flex;
+  font-size: 0.74rem;
+  color: var(--ink-3);
+  cursor: pointer;
+  list-style: none;
+  width: fit-content;
+  border-bottom: 1px solid var(--line-strong);
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.reason-more > summary::-webkit-details-marker { display: none; }
+.reason-more > summary:hover { color: var(--ink); border-color: var(--ink); }
+.reason-more .reason-list { margin-top: 0.35rem; }
+.reason-more__close { display: none; }
+.reason-more[open] .reason-more__open { display: none; }
+.reason-more[open] .reason-more__close { display: inline; }
+
 /* ----------------------------------------------------------------- search - */
 /* In the masthead, where "Open the queue" was. The panel is fixed-width and
    hangs from the input's right edge, so it never pushes the bar wider. */
