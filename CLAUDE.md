@@ -256,7 +256,7 @@ at `/alerts` until 2026-09-20, when the owner renamed it; `/alerts` is a 308
 to `/projects`, and `/projects/[id]`, the page for one work, sits under it.
 The API keeps its own names (`/api/alerts`, `/api/alerts/summary`): they are
 the queue's endpoints and nothing outside the site reads the label. Each row
-shows three of its flagged reasons and keeps the rest behind a `<details>`
+shows two of its flagged reasons and keeps the rest behind a `<details>`
 "Read more", the same control the limits use. **The map is the
 first screen of States** (owner's call, 2026-09-19; `/map` is a 308 to
 `/states`): `components/StateMap.tsx` in `.map-screen`, sized by the same
@@ -273,9 +273,11 @@ defaults its own floor to 40, so outside the queue the page passes
 `min_score=0` to it, or "All works" counted 48,296 and "Low" counted 0.
 `/projects` is the queue itself now, and `risk_level=ALL` is what the old
 Works links carried into it. A row reads as one object (owner's call,
-2026-09-20): the work cell is a single stretched link over the name, the
-agency line and the reasons, with the "Read more" disclosure and the decision
-buttons raised above it; the first two lines are bold and the reasons are not.
+2026-09-20): a single stretched link is anchored on the `<tr>` and covers the
+whole row - the work, the place, the money and the risk bar - with the
+district and state links, the "Read more" disclosure and the three decisions
+raised above it. The cell alone left most of the row dead, which is what the
+owner saw. The first two lines are bold and the reasons are not.
 The filter bar is a **grid**, not a wrapping flex row — flex sized each select
 to its own widest option, so five fields were five widths and wrapped
 raggedly. The pager prints no "Previous" on the first page and no noun after
