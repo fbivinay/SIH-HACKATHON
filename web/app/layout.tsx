@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import Logo from "@/components/Logo";
 import NavLinks from "@/components/NavLinks";
+import SiteSearch from "@/components/SiteSearch";
 import OnHome from "@/components/OnHome";
 import RiskTicker from "@/components/RiskTicker";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -115,9 +116,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </span>
             </Link>
             <NavLinks links={navLinks} />
-            <Link href="/alerts" className="btn btn--solid">
-              Open the queue
-            </Link>
+            {/* Where "Open the queue" was: the queue is one nav click away, and
+                a reader arrives looking for a place, an agency or a work. */}
+            <SiteSearch />
           </div>
         </header>
 

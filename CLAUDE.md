@@ -217,10 +217,20 @@ preference: `:root { color-scheme: light }`, `viewport.colorScheme` in
 palette was removed on 2026-09-15 at the owner's request; do not bring it back.
 
 The masthead is ~125px tall, mark 74px, name 2rem, on the owner's call; the
-nav links (0.95rem, 0.42rem side padding), the nav and masthead gaps and the
-action's padding were tightened
-so all seven fit at 1280 wide, and that is the ceiling without hiding the
-strapline.
+nav links are 0.95rem with 0.42rem of side padding and the gaps are tight, so
+the mark, the name, five links and the search field fit at 1280 wide, which is
+the ceiling without hiding the strapline. **Search replaced "Open the queue"**
+(owner's call, 2026-09-20): `components/SiteSearch.tsx`. It searches at two
+speeds, because the things searched are two sizes. Every state, district,
+agency and member — about 3,200 names, 270KB — comes from `/api/search/index`
+in one request on first use and is held in a module-level cache, so those
+matches are computed in the browser and land in the same frame (measured
+29–94ms). Works cannot travel that way, so `/api/search/works` is fetched,
+debounced 140ms, the previous request aborted, every answer cached (measured
+844–1141ms locally, 29ms on a repeat). That endpoint deliberately does **not**
+`ORDER BY` risk: sorting the whole matching set took 2.1s against 0.7s, so it
+takes the first 40 matches and ranks those by where the query sits in the
+name. `/` focuses the box from anywhere.
 Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at 700–1023px, none
 below. **Phones are refused outright** (owner's call, 2026-09-15): the inline
 script at the top of `<body>` sets `<html data-phone>` and `.phone-wall` shows
@@ -468,7 +478,10 @@ client reference, and `TERMS.find is not a function` is what that looks like.
 client does ~200ms of main-thread work on `/alerts`; `/api/alerts` took
 1.1–1.3s in production and ~3s from a laptop, because it is two statements
 (the rows and the total) each a round trip to Neon. They now run together
-on a thread pool; the total is remembered per filter set for five minutes
+on a thread pool — which doubled the connections one request holds and
+exhausted the pool of 8 during a build (seven pages prerendered at once),
+so `db.py` now pools 16 and queues for up to 5s rather than raising; the
+total is remembered per filter set for five minutes
 (cleared by every decision, which moves the status counts); `/api/filters`
 is remembered for ten; and the rows query sets `work_mem` to 32MB locally,
 which stops its sort spilling ~220MB to disk. Paging went from ~3s to ~1s

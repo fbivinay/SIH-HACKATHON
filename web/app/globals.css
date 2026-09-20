@@ -672,6 +672,87 @@ html { overflow-anchor: none; }
   background: var(--ink);
 }
 
+/* ----------------------------------------------------------------- search - */
+/* In the masthead, where "Open the queue" was. The panel is fixed-width and
+   hangs from the input's right edge, so it never pushes the bar wider. */
+.sitesearch {
+  position: relative;
+  flex: none;
+}
+.sitesearch__input {
+  width: 15rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 2px solid color-mix(in srgb, var(--ink) 45%, transparent);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.sitesearch__input::placeholder { color: var(--ink-3); }
+.sitesearch__input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+.sitesearch__panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 26rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0.35rem;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--glass-edge), var(--glass-shadow-lift);
+  /* Above Leaflet (200-1000) and the masthead's own stacking. */
+  z-index: 1200;
+}
+.sitesearch__hit {
+  display: grid;
+  grid-template-columns: 4.6rem 1fr;
+  gap: 0.15rem 0.6rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius-control);
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.sitesearch__hit.is-active { background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.sitesearch__kind {
+  grid-row: span 2;
+  align-self: center;
+  font-family: var(--font-data);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.sitesearch__label {
+  font-size: 0.88rem;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sitesearch__sub {
+  grid-column: 2;
+  font-size: 0.74rem;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sitesearch__empty {
+  padding: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+}
+
 /* ---------------------------------------------------------------- buttons - */
 
 .btn {

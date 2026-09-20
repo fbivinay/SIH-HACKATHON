@@ -1,16 +1,16 @@
-# Graph Report - SIH HACKATHON  (2026-09-19)
+# Graph Report - SIH HACKATHON  (2026-09-20)
 
 ## Corpus Check
-- 98 files · ~869,910 words
+- 99 files · ~872,082 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1005 nodes · 1565 edges · 89 communities (53 shown, 33 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.85)
+- 1028 nodes · 1599 edges · 92 communities (54 shown, 35 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 23 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5e5f0f6b`
+- Built from commit: `f5aec0ac`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -74,8 +74,8 @@
 - web/README.md
 - graphify reference: GitHub clone and cross-repo merge
 - graphify reference: transcribe video and audio
-- test_state_desk_totals_agree_with_its_own_district_table
-- test_the_state_desk_orders_members_by_the_column_it_claims
+- app/page.tsx
+- test_findings_carry_what_their_detector_does_not_claim
 - test_provenance_reject_counts_come_from_the_latest_extract
 - test_a_member_can_be_handed_their_own_queue
 - .claude/CLAUDE.md
@@ -101,9 +101,12 @@
 - write_detector_findings
 - test_agency_risk_takes_the_worst_signal_not_a_blend
 - RiskBar.tsx
+- test_search_index_carries_every_name_a_reader_can_search_for
+- test_search_puts_the_closest_work_first
+- test_search_refuses_a_query_too_short_to_mean_anything
 
 ## God Nodes (most connected - your core abstractions)
-1. `query()` - 34 edges
+1. `query()` - 36 edges
 2. `formatCount()` - 27 edges
 3. `formatINR()` - 19 edges
 4. `classify_sector()` - 17 edges
@@ -129,7 +132,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (89 total, 33 thin omitted)
+## Communities (92 total, 35 thin omitted)
 
 ### Community 0 - "classify_sector"
 Cohesion: 0.05
@@ -140,8 +143,8 @@ Cohesion: 0.40
 Nodes (5): compliance_risk_score(), Most completed works genuinely have no recommendation date on record (see…, 29% of completed works have Has Images = False in the source data - a real…, test_missing_dates_flagged_only_for_recommended_works(), test_missing_photo_documentation_flagged_only_for_completed_works()
 
 ### Community 2 - "query"
-Cohesion: 0.06
-Nodes (65): execute(), _get_pool(), query(), Borrow a connection, run one statement, and hand it back. psycopg2's pool never…, Run a statement that writes, and commit it. Separate from query() rather than a…, _run(), agencies(), _alert_filters() (+57 more)
+Cohesion: 0.05
+Nodes (71): _borrow(), execute(), _get_pool(), query(), Run a statement that writes, and commit it. Separate from query() rather than a…, Take a connection, waiting briefly rather than failing outright. psycopg2's…, Borrow a connection, run one statement, and hand it back. psycopg2's pool never…, _run() (+63 more)
 
 ### Community 3 - "test_detectors.py"
 Cohesion: 0.06
@@ -184,7 +187,7 @@ Cohesion: 0.20
 Nodes (14): react-leaflet, Bounds, boundsOf(), GeoJSON, MapContainer, StateMap(), TileLayer, CHOROPLETH_STEPS (+6 more)
 
 ### Community 14 - "layout.tsx"
-Cohesion: 0.07
+Cohesion: 0.08
 Nodes (30): react, freshnessLine(), metadata, mono, navLinks, RootLayout(), sans, viewport (+22 more)
 
 ### Community 15 - "MPLADS Risk Monitor — Design Spec (SIH26102)"
@@ -220,8 +223,8 @@ Cohesion: 0.18
 Nodes (17): add_duplicate_features(), agency_risk_score(), compute_delay_days(), cost_risk_score(), delay_risk_score(), duplicate_risk_score(), load_was_skipped(), Cost risk from deviation above the peer median, 0 when peers are thin.… (+9 more)
 
 ### Community 23 - "_a_state"
-Cohesion: 0.12
-Nodes (16): _a_state(), A state that actually has works, taken from the data rather than named., The state desk and /api/states must never disagree about one state., The two rates are not interchangeable, and the desk labels one of them "Paid…, GET /api/trends?state=X returned 500 in production for as long as the parameter…, The header tiles took only min_score, so filtering the table to one district…, A detector finding must never be shown without its own limits. D-02 renders…, Reduce manual monitoring efforts" means the filtered list has to leave the… (+8 more)
+Cohesion: 0.11
+Nodes (18): _a_state(), A state that actually has works, taken from the data rather than named., The scope guard. The rollup and the per-district rows are separate queries; if…, The state desk and /api/states must never disagree about one state., The two rates are not interchangeable, and the desk labels one of them "Paid…, The lede says "ordered by the share of allocation actually paid out, lowest…, GET /api/trends?state=X returned 500 in production for as long as the parameter…, The header tiles took only min_score, so filtering the table to one district… (+10 more)
 
 ### Community 24 - "Brag Plan: Kasauti"
 Cohesion: 0.09
@@ -295,6 +298,10 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
+### Community 60 - "app/page.tsx"
+Cohesion: 0.23
+Nodes (9): FiguresBoard(), Scope, Stat, HeroField(), COMPONENTS, LIMITS, ScoreMethod(), termHref() (+1 more)
+
 ### Community 66 - "mp_key"
 Cohesion: 0.19
 Nodes (17): mp_key(), normalize_mp_name(), Stable identity for a Member of Parliament. WHY THIS EXISTS --------------- `MP…, Strip term marker and honorifics; casefold; collapse whitespace. Single…, Short stable id for one MP. Raises if the name normalises to nothing., mp_key, or None for a name that carries no usable text. Used on the works rows:…, safe_mp_key(), A work with an unusable MP name is still a work worth loading; it just cannot… (+9 more)
@@ -344,24 +351,24 @@ Cohesion: 0.40
 Nodes (5): RiskBar(), RiskComponents, STEPS, WEIGHTS, riskScoreColorHex()
 
 ## Knowledge Gaps
-- **254 isolated node(s):** `$schema`, `builds`, `routes`, `agency_vendor_profile`, `rejected_rows` (+249 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 528 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **33 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **260 isolated node(s):** `$schema`, `builds`, `routes`, `agency_vendor_profile`, `rejected_rows` (+255 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 540 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **35 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `normalize()` connect `classify_sector` to `mp_key`, `add_base_features`, `scoring.py`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
-- **Why does `test_loaded_fingerprint_follows_what_was_written_not_what_succeeded()` connect `test_loaded_fingerprint_follows_what_was_written_not_what_succeeded` to `test_load_real_data.py`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `query()` connect `query` to `API Endpoint Tests`, `Durable Project Key Test`, `test_mp_dashboard_scopes_everything_to_one_member`?**
+  _High betweenness centrality (0.012) - this node is a cross-community bridge._
+- **Why does `test_current_refresh_run_id_ignores_an_abandoned_run()` connect `test_current_refresh_run_id_ignores_an_abandoned_run` to `test_scoring.py`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `classify_sector()` (e.g. with `add_base_features()` and `main()`) actually correct?**
   _`classify_sector()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `$schema`, `builds`, `routes` to the rest of the system?**
-  _254 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _260 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `classify_sector` be split into smaller, more focused modules?**
   _Cohesion score 0.050921861281826165 - nodes in this community are weakly interconnected._
 - **Should `query` be split into smaller, more focused modules?**
-  _Cohesion score 0.05970149253731343 - nodes in this community are weakly interconnected._
-- **Should `test_detectors.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.06345848757271286 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05405405405405406 - nodes in this community are weakly interconnected._

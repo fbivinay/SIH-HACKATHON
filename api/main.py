@@ -187,6 +187,75 @@ def filters():
     return _memoised(("filters",), 600, compute)
 
 
+# ------------------------------------------------------------------- search
+
+# What a reader can search for that is not a work: every state, district,
+# implementing agency and member on record. Around 3,200 rows, so the whole
+# thing is held in memory here and handed to the browser once, which is what
+# makes those matches instant - no round trip per keystroke. Refreshed every
+# ten minutes, which is more often than the nightly load changes it.
+@app.get("/api/search/index")
+def search_index():
+    def compute():
+        districts = query(
+            "SELECT DISTINCT state, district FROM projects "
+            "WHERE district IS NOT NULL AND state IS NOT NULL ORDER BY state, district"
+        )
+        agencies = query(
+            "SELECT DISTINCT implementing_agency AS agency FROM projects "
+            "WHERE implementing_agency IS NOT NULL ORDER BY implementing_agency"
+        )
+        members = query(
+            "SELECT DISTINCT mp_id, mp_name, state, constituency, ls_term FROM projects "
+            "WHERE mp_id IS NOT NULL AND mp_name IS NOT NULL ORDER BY mp_name"
+        )
+        states = query("SELECT DISTINCT state FROM projects WHERE state IS NOT NULL ORDER BY state")
+        return {
+            "states": [r["state"] for r in states],
+            "districts": districts,
+            "agencies": [r["agency"] for r in agencies],
+            "members": members,
+        }
+
+    return _memoised(("search-index",), 600, compute)
+
+
+@app.get("/api/search/works")
+def search_works(q: str = Query(min_length=2, max_length=120), limit: int = Query(6, le=20)):
+    """Works whose description, agency or member matches - for the site search.
+
+    Deliberately not ordered by risk in SQL: ORDER BY over the whole matching
+    set is a sort of everything it matched (measured, 2.1s against 0.7s), and a
+    search box has to answer while the reader is still typing. It takes the
+    first 40 matches the scan finds and ranks those here instead - the ranking
+    a reader expects from a search box is "where my words are", not "riskiest",
+    and the work page is one click away either way.
+    """
+    like = f"%{q}%"
+    rows = query(
+        f"""
+        SELECT id, work_key, work_name, state, district, sector, implementing_agency,
+               mp_name, sanctioned_amount, overall_risk_score, risk_level
+        FROM projects_scored
+        WHERE work_name ILIKE %s OR implementing_agency ILIKE %s OR mp_name ILIKE %s
+        LIMIT 40
+        """,
+        [like, like, like],
+    )
+    needle = q.lower()
+
+    def rank(row):
+        name = (row["work_name"] or "").lower()
+        at = name.find(needle)
+        # A hit at the start beats one at a word's start, which beats one in the
+        # middle of a word; risk only breaks ties.
+        where = 0 if at == 0 else 1 if at > 0 and name[at - 1] == " " else 2 if at > 0 else 3
+        return (where, at if at >= 0 else 9999, -(row["overall_risk_score"] or 0))
+
+    rows.sort(key=rank)
+    return {"works": rows[:limit]}
+
+
 @app.get("/api/projects/by-key")
 def project_by_key(work_key: str = Query(min_length=1, max_length=400)):
     """Look a work up by the identifier that survives a refresh.

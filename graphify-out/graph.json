@@ -381,30 +381,56 @@
       "source_location": "L23"
     },
     {
-      "id": "web_components_figuresboard_scope",
-      "label": "Scope",
+      "id": "web_components_sitesearch_hit",
+      "label": "Hit",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 14,
       "community_name": "layout.tsx",
       "file_type": "code",
-      "norm_label": "scope",
-      "source_file": "web/components/FiguresBoard.tsx",
-      "source_location": "L28"
+      "norm_label": "hit",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L39"
     },
     {
-      "id": "web_components_figuresboard_stat",
-      "label": "Stat",
+      "id": "web_components_sitesearch_index",
+      "label": "Index",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 14,
       "community_name": "layout.tsx",
       "file_type": "code",
-      "norm_label": "stat",
-      "source_file": "web/components/FiguresBoard.tsx",
-      "source_location": "L27"
+      "norm_label": "index",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L33"
+    },
+    {
+      "id": "web_components_sitesearch_member",
+      "label": "Member",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "member",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L23"
+    },
+    {
+      "id": "web_components_sitesearch_work",
+      "label": "Work",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "work",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L24"
     },
     {
       "id": "web_lib_api_datafreshness",
@@ -443,7 +469,7 @@
       "file_type": "code",
       "norm_label": "reviewin",
       "source_file": "api/main.py",
-      "source_location": "L613"
+      "source_location": "L682"
     },
     {
       "id": "web_lib_api_trends",
@@ -496,6 +522,32 @@
       "norm_label": "provenance",
       "source_file": "web/lib/api.ts",
       "source_location": "L257"
+    },
+    {
+      "id": "web_components_figuresboard_scope",
+      "label": "Scope",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "scope",
+      "source_file": "web/components/FiguresBoard.tsx",
+      "source_location": "L28"
+    },
+    {
+      "id": "web_components_figuresboard_stat",
+      "label": "Stat",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "stat",
+      "source_file": "web/components/FiguresBoard.tsx",
+      "source_location": "L27"
     },
     {
       "id": "web_app_district_state_district_page_params",
@@ -1294,7 +1346,7 @@
       "file_type": "code",
       "norm_label": "freshnessline()",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L64"
+      "source_location": "L65"
     },
     {
       "id": "web_app_layout_rootlayout",
@@ -1306,19 +1358,7 @@
       "file_type": "code",
       "norm_label": "rootlayout()",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L75"
-    },
-    {
-      "id": "web_components_figuresboard_figuresboard",
-      "label": "FiguresBoard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "figuresboard()",
-      "source_file": "web/components/FiguresBoard.tsx",
-      "source_location": "L30"
+      "source_location": "L76"
     },
     {
       "id": "web_components_foldheight_foldheight",
@@ -1331,18 +1371,6 @@
       "norm_label": "foldheight()",
       "source_file": "web/components/FoldHeight.tsx",
       "source_location": "L22"
-    },
-    {
-      "id": "web_components_herofield_herofield",
-      "label": "HeroField()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "herofield()",
-      "source_file": "web/components/HeroField.tsx",
-      "source_location": "L23"
     },
     {
       "id": "web_components_logo_logo",
@@ -1381,18 +1409,6 @@
       "source_location": "L12"
     },
     {
-      "id": "web_components_scoremethod_scoremethod",
-      "label": "ScoreMethod()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "scoremethod()",
-      "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L107"
-    },
-    {
       "id": "web_components_scrollreveal_scrollreveal",
       "label": "ScrollReveal()",
       "_callable": true,
@@ -1403,6 +1419,42 @@
       "norm_label": "scrollreveal()",
       "source_file": "web/components/ScrollReveal.tsx",
       "source_location": "L34"
+    },
+    {
+      "id": "web_components_sitesearch_localhits",
+      "label": "localHits()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "localhits()",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L61"
+    },
+    {
+      "id": "web_components_sitesearch_score",
+      "label": "score()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "score()",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L54"
+    },
+    {
+      "id": "web_components_sitesearch_sitesearch",
+      "label": "SiteSearch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "sitesearch()",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L107"
     },
     {
       "id": "web_components_splash_splash",
@@ -1463,18 +1515,6 @@
       "norm_label": "wordlift()",
       "source_file": "web/components/WordLift.tsx",
       "source_location": "L89"
-    },
-    {
-      "id": "web_lib_terms_termhref",
-      "label": "termHref()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "termhref()",
-      "source_file": "web/lib/terms.ts",
-      "source_location": "L16"
     },
     {
       "id": "data_load_real_data_work_key",
@@ -1681,6 +1721,18 @@
       "source_location": "L50"
     },
     {
+      "id": "api_db_borrow",
+      "label": "_borrow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "code",
+      "norm_label": "_borrow()",
+      "source_file": "api/db.py",
+      "source_location": "L50"
+    },
+    {
       "id": "api_db_execute",
       "label": "execute()",
       "_callable": true,
@@ -1690,7 +1742,7 @@
       "file_type": "code",
       "norm_label": "execute()",
       "source_file": "api/db.py",
-      "source_location": "L93"
+      "source_location": "L117"
     },
     {
       "id": "api_db_get_pool",
@@ -1702,7 +1754,7 @@
       "file_type": "code",
       "norm_label": "_get_pool()",
       "source_file": "api/db.py",
-      "source_location": "L22"
+      "source_location": "L23"
     },
     {
       "id": "api_db_query",
@@ -1714,7 +1766,7 @@
       "file_type": "code",
       "norm_label": "query()",
       "source_file": "api/db.py",
-      "source_location": "L89"
+      "source_location": "L113"
     },
     {
       "id": "api_db_run",
@@ -1726,7 +1778,7 @@
       "file_type": "code",
       "norm_label": "_run()",
       "source_file": "api/db.py",
-      "source_location": "L45"
+      "source_location": "L69"
     },
     {
       "id": "api_main_agencies",
@@ -1738,7 +1790,7 @@
       "file_type": "code",
       "norm_label": "agencies()",
       "source_file": "api/main.py",
-      "source_location": "L244"
+      "source_location": "L313"
     },
     {
       "id": "api_main_alert_filters",
@@ -1750,7 +1802,7 @@
       "file_type": "code",
       "norm_label": "_alert_filters()",
       "source_file": "api/main.py",
-      "source_location": "L391"
+      "source_location": "L460"
     },
     {
       "id": "api_main_alerts",
@@ -1762,7 +1814,7 @@
       "file_type": "code",
       "norm_label": "alerts()",
       "source_file": "api/main.py",
-      "source_location": "L429"
+      "source_location": "L498"
     },
     {
       "id": "api_main_alerts_count",
@@ -1774,7 +1826,7 @@
       "file_type": "code",
       "norm_label": "count()",
       "source_file": "api/main.py",
-      "source_location": "L467"
+      "source_location": "L536"
     },
     {
       "id": "api_main_alerts_export",
@@ -1786,7 +1838,7 @@
       "file_type": "code",
       "norm_label": "alerts_export()",
       "source_file": "api/main.py",
-      "source_location": "L484"
+      "source_location": "L553"
     },
     {
       "id": "api_main_alerts_export_flat",
@@ -1798,7 +1850,7 @@
       "file_type": "code",
       "norm_label": "flat()",
       "source_file": "api/main.py",
-      "source_location": "L526"
+      "source_location": "L595"
     },
     {
       "id": "api_main_alerts_summary",
@@ -1810,7 +1862,7 @@
       "file_type": "code",
       "norm_label": "alerts_summary()",
       "source_file": "api/main.py",
-      "source_location": "L568"
+      "source_location": "L637"
     },
     {
       "id": "api_main_compliance",
@@ -1822,7 +1874,7 @@
       "file_type": "code",
       "norm_label": "compliance()",
       "source_file": "api/main.py",
-      "source_location": "L958"
+      "source_location": "L1027"
     },
     {
       "id": "api_main_data_freshness",
@@ -1834,7 +1886,7 @@
       "file_type": "code",
       "norm_label": "data_freshness()",
       "source_file": "api/main.py",
-      "source_location": "L335"
+      "source_location": "L404"
     },
     {
       "id": "api_main_detector_findings",
@@ -1846,7 +1898,7 @@
       "file_type": "code",
       "norm_label": "detector_findings()",
       "source_file": "api/main.py",
-      "source_location": "L776"
+      "source_location": "L845"
     },
     {
       "id": "api_main_detectors_catalogue",
@@ -1858,7 +1910,7 @@
       "file_type": "code",
       "norm_label": "detectors_catalogue()",
       "source_file": "api/main.py",
-      "source_location": "L752"
+      "source_location": "L821"
     },
     {
       "id": "api_main_district_detail",
@@ -1870,7 +1922,7 @@
       "file_type": "code",
       "norm_label": "district_detail()",
       "source_file": "api/main.py",
-      "source_location": "L1460"
+      "source_location": "L1529"
     },
     {
       "id": "api_main_districts",
@@ -1882,7 +1934,7 @@
       "file_type": "code",
       "norm_label": "districts()",
       "source_file": "api/main.py",
-      "source_location": "L352"
+      "source_location": "L421"
     },
     {
       "id": "api_main_filters",
@@ -1942,7 +1994,7 @@
       "file_type": "code",
       "norm_label": "map_states()",
       "source_file": "api/main.py",
-      "source_location": "L213"
+      "source_location": "L282"
     },
     {
       "id": "api_main_memoised",
@@ -1966,7 +2018,7 @@
       "file_type": "code",
       "norm_label": "mp_detail()",
       "source_file": "api/main.py",
-      "source_location": "L1221"
+      "source_location": "L1290"
     },
     {
       "id": "api_main_mps",
@@ -1978,7 +2030,7 @@
       "file_type": "code",
       "norm_label": "mps()",
       "source_file": "api/main.py",
-      "source_location": "L291"
+      "source_location": "L360"
     },
     {
       "id": "api_main_overview",
@@ -2002,7 +2054,7 @@
       "file_type": "code",
       "norm_label": "project_by_key()",
       "source_file": "api/main.py",
-      "source_location": "L191"
+      "source_location": "L260"
     },
     {
       "id": "api_main_project_detail",
@@ -2014,7 +2066,7 @@
       "file_type": "code",
       "norm_label": "project_detail()",
       "source_file": "api/main.py",
-      "source_location": "L205"
+      "source_location": "L274"
     },
     {
       "id": "api_main_provenance",
@@ -2026,7 +2078,7 @@
       "file_type": "code",
       "norm_label": "provenance()",
       "source_file": "api/main.py",
-      "source_location": "L1039"
+      "source_location": "L1108"
     },
     {
       "id": "api_main_review_history",
@@ -2038,7 +2090,7 @@
       "file_type": "code",
       "norm_label": "review_history()",
       "source_file": "api/main.py",
-      "source_location": "L677"
+      "source_location": "L746"
     },
     {
       "id": "api_main_risk_rollup",
@@ -2050,7 +2102,55 @@
       "file_type": "code",
       "norm_label": "_risk_rollup()",
       "source_file": "api/main.py",
-      "source_location": "L1313"
+      "source_location": "L1382"
+    },
+    {
+      "id": "api_main_search_index",
+      "label": "search_index()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "code",
+      "norm_label": "search_index()",
+      "source_file": "api/main.py",
+      "source_location": "L198"
+    },
+    {
+      "id": "api_main_search_index_compute",
+      "label": "compute()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "code",
+      "norm_label": "compute()",
+      "source_file": "api/main.py",
+      "source_location": "L199"
+    },
+    {
+      "id": "api_main_search_works",
+      "label": "search_works()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "code",
+      "norm_label": "search_works()",
+      "source_file": "api/main.py",
+      "source_location": "L224"
+    },
+    {
+      "id": "api_main_search_works_rank",
+      "label": "rank()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "code",
+      "norm_label": "rank()",
+      "source_file": "api/main.py",
+      "source_location": "L247"
     },
     {
       "id": "api_main_set_review",
@@ -2062,7 +2162,7 @@
       "file_type": "code",
       "norm_label": "set_review()",
       "source_file": "api/main.py",
-      "source_location": "L621"
+      "source_location": "L690"
     },
     {
       "id": "api_main_state_detail",
@@ -2074,7 +2174,7 @@
       "file_type": "code",
       "norm_label": "state_detail()",
       "source_file": "api/main.py",
-      "source_location": "L1338"
+      "source_location": "L1407"
     },
     {
       "id": "api_main_states",
@@ -2086,7 +2186,7 @@
       "file_type": "code",
       "norm_label": "states()",
       "source_file": "api/main.py",
-      "source_location": "L823"
+      "source_location": "L892"
     },
     {
       "id": "api_main_trends",
@@ -2098,7 +2198,7 @@
       "file_type": "code",
       "norm_label": "trends()",
       "source_file": "api/main.py",
-      "source_location": "L1131"
+      "source_location": "L1200"
     },
     {
       "id": "api_main_with_limits",
@@ -2110,7 +2210,7 @@
       "file_type": "code",
       "norm_label": "_with_limits()",
       "source_file": "api/main.py",
-      "source_location": "L732"
+      "source_location": "L801"
     },
     {
       "id": "api_test_api_test_review_history_records_every_decision_not_just_the_last",
@@ -2497,18 +2597,6 @@
       "source_location": "L423"
     },
     {
-      "id": "api_test_api_test_findings_carry_what_their_detector_does_not_claim",
-      "label": "test_findings_carry_what_their_detector_does_not_claim()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "_a_state",
-      "file_type": "code",
-      "norm_label": "test_findings_carry_what_their_detector_does_not_claim()",
-      "source_file": "api/test_api.py",
-      "source_location": "L524"
-    },
-    {
       "id": "api_test_api_test_queue_tiles_count_the_queue_beneath_them",
       "label": "test_queue_tiles_count_the_queue_beneath_them()",
       "_callable": true,
@@ -2533,6 +2621,18 @@
       "source_location": "L407"
     },
     {
+      "id": "api_test_api_test_state_desk_totals_agree_with_its_own_district_table",
+      "label": "test_state_desk_totals_agree_with_its_own_district_table()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "_a_state",
+      "file_type": "code",
+      "norm_label": "test_state_desk_totals_agree_with_its_own_district_table()",
+      "source_file": "api/test_api.py",
+      "source_location": "L395"
+    },
+    {
       "id": "api_test_api_test_the_queue_exports_exactly_what_it_shows",
       "label": "test_the_queue_exports_exactly_what_it_shows()",
       "_callable": true,
@@ -2543,6 +2643,18 @@
       "norm_label": "test_the_queue_exports_exactly_what_it_shows()",
       "source_file": "api/test_api.py",
       "source_location": "L543"
+    },
+    {
+      "id": "api_test_api_test_the_state_desk_orders_members_by_the_column_it_claims",
+      "label": "test_the_state_desk_orders_members_by_the_column_it_claims()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "_a_state",
+      "file_type": "code",
+      "norm_label": "test_the_state_desk_orders_members_by_the_column_it_claims()",
+      "source_file": "api/test_api.py",
+      "source_location": "L463"
     },
     {
       "id": "api_test_api_test_the_state_desk_paid_rate_is_paid_not_committed",
@@ -4177,28 +4289,64 @@
       "source_location": "L60"
     },
     {
-      "id": "api_test_api_test_state_desk_totals_agree_with_its_own_district_table",
-      "label": "test_state_desk_totals_agree_with_its_own_district_table()",
+      "id": "web_components_figuresboard_figuresboard",
+      "label": "FiguresBoard()",
       "_callable": true,
       "_origin": "ast",
       "community": 60,
-      "community_name": "test_state_desk_totals_agree_with_its_own_district_table",
+      "community_name": "app/page.tsx",
       "file_type": "code",
-      "norm_label": "test_state_desk_totals_agree_with_its_own_district_table()",
-      "source_file": "api/test_api.py",
-      "source_location": "L395"
+      "norm_label": "figuresboard()",
+      "source_file": "web/components/FiguresBoard.tsx",
+      "source_location": "L30"
     },
     {
-      "id": "api_test_api_test_the_state_desk_orders_members_by_the_column_it_claims",
-      "label": "test_the_state_desk_orders_members_by_the_column_it_claims()",
+      "id": "web_components_herofield_herofield",
+      "label": "HeroField()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "herofield()",
+      "source_file": "web/components/HeroField.tsx",
+      "source_location": "L23"
+    },
+    {
+      "id": "web_components_scoremethod_scoremethod",
+      "label": "ScoreMethod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "scoremethod()",
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L107"
+    },
+    {
+      "id": "web_lib_terms_termhref",
+      "label": "termHref()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "termhref()",
+      "source_file": "web/lib/terms.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "api_test_api_test_findings_carry_what_their_detector_does_not_claim",
+      "label": "test_findings_carry_what_their_detector_does_not_claim()",
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "test_the_state_desk_orders_members_by_the_column_it_claims",
+      "community_name": "test_findings_carry_what_their_detector_does_not_claim",
       "file_type": "code",
-      "norm_label": "test_the_state_desk_orders_members_by_the_column_it_claims()",
+      "norm_label": "test_findings_carry_what_their_detector_does_not_claim()",
       "source_file": "api/test_api.py",
-      "source_location": "L463"
+      "source_location": "L524"
     },
     {
       "id": "api_test_api_test_provenance_reject_counts_come_from_the_latest_extract",
@@ -5125,6 +5273,18 @@
       "source_location": "L63"
     },
     {
+      "id": "api_test_api_test_search_index_carries_every_name_a_reader_can_search_for",
+      "label": "test_search_index_carries_every_name_a_reader_can_search_for()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "test_search_index_carries_every_name_a_reader_can_search_for",
+      "file_type": "code",
+      "norm_label": "test_search_index_carries_every_name_a_reader_can_search_for()",
+      "source_file": "api/test_api.py",
+      "source_location": "L582"
+    },
+    {
       "id": "scripts_build_sih_deck_caption",
       "label": "caption()",
       "_callable": true,
@@ -5291,6 +5451,30 @@
       "norm_label": "verify()",
       "source_file": "scripts/build_sih_deck.py",
       "source_location": "L486"
+    },
+    {
+      "id": "api_test_api_test_search_puts_the_closest_work_first",
+      "label": "test_search_puts_the_closest_work_first()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 90,
+      "community_name": "test_search_puts_the_closest_work_first",
+      "file_type": "code",
+      "norm_label": "test_search_puts_the_closest_work_first()",
+      "source_file": "api/test_api.py",
+      "source_location": "L596"
+    },
+    {
+      "id": "api_test_api_test_search_refuses_a_query_too_short_to_mean_anything",
+      "label": "test_search_refuses_a_query_too_short_to_mean_anything()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 91,
+      "community_name": "test_search_refuses_a_query_too_short_to_mean_anything",
+      "file_type": "code",
+      "norm_label": "test_search_refuses_a_query_too_short_to_mean_anything()",
+      "source_file": "api/test_api.py",
+      "source_location": "L612"
     },
     {
       "id": "data_llm_sectors",
@@ -6005,7 +6189,7 @@
       "file_type": "code",
       "norm_label": "metadata",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L25"
+      "source_location": "L26"
     },
     {
       "id": "web_app_layout_mono",
@@ -6016,7 +6200,7 @@
       "file_type": "code",
       "norm_label": "mono",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "id": "web_app_layout_navlinks",
@@ -6027,7 +6211,7 @@
       "file_type": "code",
       "norm_label": "navlinks",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L54"
+      "source_location": "L55"
     },
     {
       "id": "web_app_layout_sans",
@@ -6038,7 +6222,7 @@
       "file_type": "code",
       "norm_label": "sans",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L17"
+      "source_location": "L18"
     },
     {
       "id": "web_app_layout_viewport",
@@ -6049,29 +6233,7 @@
       "file_type": "code",
       "norm_label": "viewport",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L40"
-    },
-    {
-      "id": "web_app_page",
-      "label": "app/page.tsx",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "app/page.tsx",
-      "source_file": "web/app/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_components_figuresboard",
-      "label": "FiguresBoard.tsx",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "figuresboard.tsx",
-      "source_file": "web/components/FiguresBoard.tsx",
-      "source_location": "L1"
+      "source_location": "L41"
     },
     {
       "id": "web_components_foldheight",
@@ -6082,17 +6244,6 @@
       "file_type": "code",
       "norm_label": "foldheight.tsx",
       "source_file": "web/components/FoldHeight.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_components_herofield",
-      "label": "HeroField.tsx",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "herofield.tsx",
-      "source_file": "web/components/HeroField.tsx",
       "source_location": "L1"
     },
     {
@@ -6129,39 +6280,6 @@
       "source_location": "L1"
     },
     {
-      "id": "web_components_scoremethod",
-      "label": "ScoreMethod.tsx",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "scoremethod.tsx",
-      "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_components_scoremethod_components",
-      "label": "COMPONENTS",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "components",
-      "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "web_components_scoremethod_limits",
-      "label": "LIMITS",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "limits",
-      "source_file": "web/components/ScoreMethod.tsx",
-      "source_location": "L56"
-    },
-    {
       "id": "web_components_scrollreveal",
       "label": "ScrollReveal.tsx",
       "_origin": "ast",
@@ -6182,6 +6300,39 @@
       "norm_label": "revealable",
       "source_file": "web/components/ScrollReveal.tsx",
       "source_location": "L21"
+    },
+    {
+      "id": "web_components_sitesearch",
+      "label": "SiteSearch.tsx",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "sitesearch.tsx",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_components_sitesearch_pages",
+      "label": "PAGES",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "pages",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L41"
+    },
+    {
+      "id": "web_components_sitesearch_workcache",
+      "label": "workCache",
+      "_origin": "ast",
+      "community": 14,
+      "community_name": "layout.tsx",
+      "file_type": "code",
+      "norm_label": "workcache",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L51"
     },
     {
       "id": "web_components_splash",
@@ -6215,28 +6366,6 @@
       "norm_label": "made",
       "source_file": "web/components/WordLift.tsx",
       "source_location": "L39"
-    },
-    {
-      "id": "web_lib_terms",
-      "label": "terms.ts",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "terms.ts",
-      "source_file": "web/lib/terms.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "web_lib_terms_terms",
-      "label": "TERMS",
-      "_origin": "ast",
-      "community": 14,
-      "community_name": "layout.tsx",
-      "file_type": "code",
-      "norm_label": "terms",
-      "source_file": "web/lib/terms.ts",
-      "source_location": "L10"
     },
     {
       "id": "ref_react",
@@ -7017,18 +7146,7 @@
       "source_location": ""
     },
     {
-      "id": "api_db_rationale_46",
-      "label": "Borrow a connection, run one statement, and hand it back. psycopg2's pool never\u2026",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "query",
-      "file_type": "rationale",
-      "norm_label": "borrow a connection, run one statement, and hand it back. psycopg2's pool never...",
-      "source_file": "api/db.py",
-      "source_location": "L46"
-    },
-    {
-      "id": "api_db_rationale_94",
+      "id": "api_db_rationale_118",
       "label": "Run a statement that writes, and commit it. Separate from query() rather than a\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7036,10 +7154,43 @@
       "file_type": "rationale",
       "norm_label": "run a statement that writes, and commit it. separate from query() rather than a...",
       "source_file": "api/db.py",
-      "source_location": "L94"
+      "source_location": "L118"
     },
     {
-      "id": "api_main_rationale_1040",
+      "id": "api_db_rationale_51",
+      "label": "Take a connection, waiting briefly rather than failing outright. psycopg2's\u2026",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "rationale",
+      "norm_label": "take a connection, waiting briefly rather than failing outright. psycopg2's...",
+      "source_file": "api/db.py",
+      "source_location": "L51"
+    },
+    {
+      "id": "api_db_rationale_70",
+      "label": "Borrow a connection, run one statement, and hand it back. psycopg2's pool never\u2026",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "rationale",
+      "norm_label": "borrow a connection, run one statement, and hand it back. psycopg2's pool never...",
+      "source_file": "api/db.py",
+      "source_location": "L70"
+    },
+    {
+      "id": "api_main_rationale_1028",
+      "label": "The rule book, with how many works each rule currently catches. A rule finding\u2026",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "rationale",
+      "norm_label": "the rule book, with how many works each rule currently catches. a rule finding...",
+      "source_file": "api/main.py",
+      "source_location": "L1028"
+    },
+    {
+      "id": "api_main_rationale_1109",
       "label": "How our figures compare with the official MoSPI dashboard. The problem\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7047,10 +7198,10 @@
       "file_type": "rationale",
       "norm_label": "how our figures compare with the official mospi dashboard. the problem...",
       "source_file": "api/main.py",
-      "source_location": "L1040"
+      "source_location": "L1109"
     },
     {
-      "id": "api_main_rationale_1132",
+      "id": "api_main_rationale_1201",
       "label": "Payments over time, by month and by fiscal year, plus what has gone quiet. The\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7058,10 +7209,10 @@
       "file_type": "rationale",
       "norm_label": "payments over time, by month and by fiscal year, plus what has gone quiet. the...",
       "source_file": "api/main.py",
-      "source_location": "L1132"
+      "source_location": "L1201"
     },
     {
-      "id": "api_main_rationale_1222",
+      "id": "api_main_rationale_1291",
       "label": "Everything on record for one Member of Parliament. The brief asks for decision-\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7069,10 +7220,10 @@
       "file_type": "rationale",
       "norm_label": "everything on record for one member of parliament. the brief asks for decision-...",
       "source_file": "api/main.py",
-      "source_location": "L1222"
+      "source_location": "L1291"
     },
     {
-      "id": "api_main_rationale_1314",
+      "id": "api_main_rationale_1383",
       "label": "Works-side totals for any scope. One query so scopes cannot drift.",
       "_origin": "ast",
       "community": 2,
@@ -7080,10 +7231,10 @@
       "file_type": "rationale",
       "norm_label": "works-side totals for any scope. one query so scopes cannot drift.",
       "source_file": "api/main.py",
-      "source_location": "L1314"
+      "source_location": "L1383"
     },
     {
-      "id": "api_main_rationale_1339",
+      "id": "api_main_rationale_1408",
       "label": "One state's desk: the State Nodal Authority's view. Money comes from the\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7091,10 +7242,10 @@
       "file_type": "rationale",
       "norm_label": "one state's desk: the state nodal authority's view. money comes from the...",
       "source_file": "api/main.py",
-      "source_location": "L1339"
+      "source_location": "L1408"
     },
     {
-      "id": "api_main_rationale_1461",
+      "id": "api_main_rationale_1530",
       "label": "One district's desk: the District Authority's view. A district officer\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7102,10 +7253,21 @@
       "file_type": "rationale",
       "norm_label": "one district's desk: the district authority's view. a district officer...",
       "source_file": "api/main.py",
-      "source_location": "L1461"
+      "source_location": "L1530"
     },
     {
-      "id": "api_main_rationale_192",
+      "id": "api_main_rationale_225",
+      "label": "Works whose description, agency or member matches - for the site search.\u2026",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "rationale",
+      "norm_label": "works whose description, agency or member matches - for the site search....",
+      "source_file": "api/main.py",
+      "source_location": "L225"
+    },
+    {
+      "id": "api_main_rationale_261",
       "label": "Look a work up by the identifier that survives a refresh. `id` is a serial the\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7113,10 +7275,10 @@
       "file_type": "rationale",
       "norm_label": "look a work up by the identifier that survives a refresh. `id` is a serial the...",
       "source_file": "api/main.py",
-      "source_location": "L192"
+      "source_location": "L261"
     },
     {
-      "id": "api_main_rationale_214",
+      "id": "api_main_rationale_283",
       "label": "Per-state figures for the choropleth. flagged_share is what the map colours by.\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7124,10 +7286,10 @@
       "file_type": "rationale",
       "norm_label": "per-state figures for the choropleth. flagged_share is what the map colours by....",
       "source_file": "api/main.py",
-      "source_location": "L214"
+      "source_location": "L283"
     },
     {
-      "id": "api_main_rationale_250",
+      "id": "api_main_rationale_319",
       "label": "One row per agency per Lok Sabha term, ranked by average risk. An agency's\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7135,10 +7297,10 @@
       "file_type": "rationale",
       "norm_label": "one row per agency per lok sabha term, ranked by average risk. an agency's...",
       "source_file": "api/main.py",
-      "source_location": "L250"
+      "source_location": "L319"
     },
     {
-      "id": "api_main_rationale_292",
+      "id": "api_main_rationale_361",
       "label": "MPs by the value of allocation they have never committed to a work. Every\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7146,10 +7308,10 @@
       "file_type": "rationale",
       "norm_label": "mps by the value of allocation they have never committed to a work. every...",
       "source_file": "api/main.py",
-      "source_location": "L292"
+      "source_location": "L361"
     },
     {
-      "id": "api_main_rationale_336",
+      "id": "api_main_rationale_405",
       "label": "Latest successful load+score run, for the UI's freshness indicator. See\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7157,10 +7319,10 @@
       "file_type": "rationale",
       "norm_label": "latest successful load+score run, for the ui's freshness indicator. see...",
       "source_file": "api/main.py",
-      "source_location": "L336"
+      "source_location": "L405"
     },
     {
-      "id": "api_main_rationale_393",
+      "id": "api_main_rationale_462",
       "label": "Shared WHERE builder so the list and its total count can never drift.",
       "_origin": "ast",
       "community": 2,
@@ -7168,10 +7330,10 @@
       "file_type": "rationale",
       "norm_label": "shared where builder so the list and its total count can never drift.",
       "source_file": "api/main.py",
-      "source_location": "L393"
+      "source_location": "L462"
     },
     {
-      "id": "api_main_rationale_442",
+      "id": "api_main_rationale_511",
       "label": "The triage queue: works ranked by risk, carrying their evidence and whatever a\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7179,18 +7341,7 @@
       "file_type": "rationale",
       "norm_label": "the triage queue: works ranked by risk, carrying their evidence and whatever a...",
       "source_file": "api/main.py",
-      "source_location": "L442"
-    },
-    {
-      "id": "api_main_rationale_496",
-      "label": "The current queue as CSV, under the same filters the page is showing. The brief\u2026",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "query",
-      "file_type": "rationale",
-      "norm_label": "the current queue as csv, under the same filters the page is showing. the brief...",
-      "source_file": "api/main.py",
-      "source_location": "L496"
+      "source_location": "L511"
     },
     {
       "id": "api_main_rationale_56",
@@ -7204,7 +7355,18 @@
       "source_location": "L56"
     },
     {
-      "id": "api_main_rationale_579",
+      "id": "api_main_rationale_565",
+      "label": "The current queue as CSV, under the same filters the page is showing. The brief\u2026",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "query",
+      "file_type": "rationale",
+      "norm_label": "the current queue as csv, under the same filters the page is showing. the brief...",
+      "source_file": "api/main.py",
+      "source_location": "L565"
+    },
+    {
+      "id": "api_main_rationale_648",
       "label": "Counts for the queue header. min_score defaults to 40 because that is where\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7212,10 +7374,10 @@
       "file_type": "rationale",
       "norm_label": "counts for the queue header. min_score defaults to 40 because that is where...",
       "source_file": "api/main.py",
-      "source_location": "L579"
+      "source_location": "L648"
     },
     {
-      "id": "api_main_rationale_622",
+      "id": "api_main_rationale_691",
       "label": "Record a reviewer's decision about one work. The only write endpoint in the\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7223,10 +7385,10 @@
       "file_type": "rationale",
       "norm_label": "record a reviewer's decision about one work. the only write endpoint in the...",
       "source_file": "api/main.py",
-      "source_location": "L622"
+      "source_location": "L691"
     },
     {
-      "id": "api_main_rationale_678",
+      "id": "api_main_rationale_747",
       "label": "Every decision ever recorded against one work, newest first. work_key carries\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7234,10 +7396,10 @@
       "file_type": "rationale",
       "norm_label": "every decision ever recorded against one work, newest first. work_key carries...",
       "source_file": "api/main.py",
-      "source_location": "L678"
+      "source_location": "L747"
     },
     {
-      "id": "api_main_rationale_733",
+      "id": "api_main_rationale_802",
       "label": "Attach each detector's stated limit to its findings. D-02 is the reason this\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7245,10 +7407,10 @@
       "file_type": "rationale",
       "norm_label": "attach each detector's stated limit to its findings. d-02 is the reason this...",
       "source_file": "api/main.py",
-      "source_location": "L733"
+      "source_location": "L802"
     },
     {
-      "id": "api_main_rationale_753",
+      "id": "api_main_rationale_822",
       "label": "What each detector measures and what it does not claim, with how many findings\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7256,10 +7418,10 @@
       "file_type": "rationale",
       "norm_label": "what each detector measures and what it does not claim, with how many findings...",
       "source_file": "api/main.py",
-      "source_location": "L753"
+      "source_location": "L822"
     },
     {
-      "id": "api_main_rationale_824",
+      "id": "api_main_rationale_893",
       "label": "Per-state totals, plus what our scoring adds on top. Every money figure comes\u2026",
       "_origin": "ast",
       "community": 2,
@@ -7267,18 +7429,7 @@
       "file_type": "rationale",
       "norm_label": "per-state totals, plus what our scoring adds on top. every money figure comes...",
       "source_file": "api/main.py",
-      "source_location": "L824"
-    },
-    {
-      "id": "api_main_rationale_959",
-      "label": "The rule book, with how many works each rule currently catches. A rule finding\u2026",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "query",
-      "file_type": "rationale",
-      "norm_label": "the rule book, with how many works each rule currently catches. a rule finding...",
-      "source_file": "api/main.py",
-      "source_location": "L959"
+      "source_location": "L893"
     },
     {
       "id": "api_test_api_rationale_157",
@@ -7457,6 +7608,17 @@
       "source_location": "L389"
     },
     {
+      "id": "api_test_api_rationale_396",
+      "label": "The scope guard. The rollup and the per-district rows are separate queries; if\u2026",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "_a_state",
+      "file_type": "rationale",
+      "norm_label": "the scope guard. the rollup and the per-district rows are separate queries; if...",
+      "source_file": "api/test_api.py",
+      "source_location": "L396"
+    },
+    {
       "id": "api_test_api_rationale_408",
       "label": "The state desk and /api/states must never disagree about one state.",
       "_origin": "ast",
@@ -7479,6 +7641,17 @@
       "source_location": "L443"
     },
     {
+      "id": "api_test_api_rationale_464",
+      "label": "The lede says \"ordered by the share of allocation actually paid out, lowest\u2026",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "_a_state",
+      "file_type": "rationale",
+      "norm_label": "the lede says \"ordered by the share of allocation actually paid out, lowest...",
+      "source_file": "api/test_api.py",
+      "source_location": "L464"
+    },
+    {
       "id": "api_test_api_rationale_490",
       "label": "GET /api/trends?state=X returned 500 in production for as long as the parameter\u2026",
       "_origin": "ast",
@@ -7499,17 +7672,6 @@
       "norm_label": "the header tiles took only min_score, so filtering the table to one district...",
       "source_file": "api/test_api.py",
       "source_location": "L511"
-    },
-    {
-      "id": "api_test_api_rationale_525",
-      "label": "A detector finding must never be shown without its own limits. D-02 renders\u2026",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "_a_state",
-      "file_type": "rationale",
-      "norm_label": "a detector finding must never be shown without its own limits. d-02 renders...",
-      "source_file": "api/test_api.py",
-      "source_location": "L525"
     },
     {
       "id": "api_test_api_rationale_544",
@@ -8689,7 +8851,7 @@
       "node_kind": "heading",
       "norm_label": "11. motion, measured",
       "source_file": "CLAUDE.md",
-      "source_location": "L332"
+      "source_location": "L342"
     },
     {
       "id": "claude_1_never_claim_more_than_the_record_supports",
@@ -8809,7 +8971,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "CLAUDE.md",
-      "source_location": "L502"
+      "source_location": "L515"
     },
     {
       "id": "claude_kasauti_mplads_verification",
@@ -10112,26 +10274,103 @@
       "source_location": "L92"
     },
     {
-      "id": "api_test_api_rationale_396",
-      "label": "The scope guard. The rollup and the per-district rows are separate queries; if\u2026",
+      "id": "web_app_page",
+      "label": "app/page.tsx",
       "_origin": "ast",
       "community": 60,
-      "community_name": "test_state_desk_totals_agree_with_its_own_district_table",
-      "file_type": "rationale",
-      "norm_label": "the scope guard. the rollup and the per-district rows are separate queries; if...",
-      "source_file": "api/test_api.py",
-      "source_location": "L396"
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "app/page.tsx",
+      "source_file": "web/app/page.tsx",
+      "source_location": "L1"
     },
     {
-      "id": "api_test_api_rationale_464",
-      "label": "The lede says \"ordered by the share of allocation actually paid out, lowest\u2026",
+      "id": "web_components_figuresboard",
+      "label": "FiguresBoard.tsx",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "figuresboard.tsx",
+      "source_file": "web/components/FiguresBoard.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_components_herofield",
+      "label": "HeroField.tsx",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "herofield.tsx",
+      "source_file": "web/components/HeroField.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_components_scoremethod",
+      "label": "ScoreMethod.tsx",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "scoremethod.tsx",
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_components_scoremethod_components",
+      "label": "COMPONENTS",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "components",
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "web_components_scoremethod_limits",
+      "label": "LIMITS",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "limits",
+      "source_file": "web/components/ScoreMethod.tsx",
+      "source_location": "L56"
+    },
+    {
+      "id": "web_lib_terms",
+      "label": "terms.ts",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "terms.ts",
+      "source_file": "web/lib/terms.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_lib_terms_terms",
+      "label": "TERMS",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "app/page.tsx",
+      "file_type": "code",
+      "norm_label": "terms",
+      "source_file": "web/lib/terms.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "api_test_api_rationale_525",
+      "label": "A detector finding must never be shown without its own limits. D-02 renders\u2026",
       "_origin": "ast",
       "community": 61,
-      "community_name": "test_the_state_desk_orders_members_by_the_column_it_claims",
+      "community_name": "test_findings_carry_what_their_detector_does_not_claim",
       "file_type": "rationale",
-      "norm_label": "the lede says \"ordered by the share of allocation actually paid out, lowest...",
+      "norm_label": "a detector finding must never be shown without its own limits. d-02 renders...",
       "source_file": "api/test_api.py",
-      "source_location": "L464"
+      "source_location": "L525"
     },
     {
       "id": "api_test_api_rationale_473",
@@ -11215,7 +11454,7 @@
       "node_kind": "heading",
       "norm_label": "repository",
       "source_file": "README.md",
-      "source_location": "L175"
+      "source_location": "L177"
     },
     {
       "id": "readme_running_it",
@@ -11227,7 +11466,7 @@
       "node_kind": "heading",
       "norm_label": "running it",
       "source_file": "README.md",
-      "source_location": "L193"
+      "source_location": "L195"
     },
     {
       "id": "readme_the_api",
@@ -11251,7 +11490,7 @@
       "node_kind": "heading",
       "norm_label": "the deck",
       "source_file": "README.md",
-      "source_location": "L229"
+      "source_location": "L231"
     },
     {
       "id": "readme_the_interface",
@@ -11630,6 +11869,17 @@
       "source_location": "L6"
     },
     {
+      "id": "api_test_api_rationale_583",
+      "label": "The site search matches states, districts, agencies and members in the browser,\u2026",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "test_search_index_carries_every_name_a_reader_can_search_for",
+      "file_type": "rationale",
+      "norm_label": "the site search matches states, districts, agencies and members in the browser,...",
+      "source_file": "api/test_api.py",
+      "source_location": "L583"
+    },
+    {
       "id": "scripts_build_sih_deck",
       "label": "build_sih_deck.py",
       "_origin": "ast",
@@ -11727,6 +11977,28 @@
       "norm_label": "check the built file rather than trust that it built.",
       "source_file": "scripts/build_sih_deck.py",
       "source_location": "L487"
+    },
+    {
+      "id": "api_test_api_rationale_597",
+      "label": "A search box is judged on its first line: a name that starts with what was\u2026",
+      "_origin": "ast",
+      "community": 90,
+      "community_name": "test_search_puts_the_closest_work_first",
+      "file_type": "rationale",
+      "norm_label": "a search box is judged on its first line: a name that starts with what was...",
+      "source_file": "api/test_api.py",
+      "source_location": "L597"
+    },
+    {
+      "id": "api_test_api_rationale_613",
+      "label": "One letter matches a quarter of the record; the box does not ask.",
+      "_origin": "ast",
+      "community": 91,
+      "community_name": "test_search_refuses_a_query_too_short_to_mean_anything",
+      "file_type": "rationale",
+      "norm_label": "one letter matches a quarter of the record; the box does not ask.",
+      "source_file": "api/test_api.py",
+      "source_location": "L613"
     }
   ],
   "links": [
@@ -11739,7 +12011,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/db.py",
-      "source_location": "L99",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -11751,7 +12023,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/db.py",
-      "source_location": "L90",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -11763,7 +12035,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/db.py",
-      "source_location": "L58",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "api_db_run",
+      "target": "api_db_borrow",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "api/db.py",
+      "source_location": "L85",
       "weight": 1.0
     },
     {
@@ -11775,7 +12059,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L260",
+      "source_location": "L329",
       "weight": 1.0
     },
     {
@@ -11787,7 +12071,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L444",
+      "source_location": "L513",
       "weight": 1.0
     },
     {
@@ -11799,7 +12083,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L468",
+      "source_location": "L537",
       "weight": 1.0
     },
     {
@@ -11811,7 +12095,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L506",
+      "source_location": "L575",
       "weight": 1.0
     },
     {
@@ -11823,7 +12107,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L509",
+      "source_location": "L578",
       "weight": 1.0
     },
     {
@@ -11835,7 +12119,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L589",
+      "source_location": "L658",
       "weight": 1.0
     },
     {
@@ -11847,7 +12131,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L592",
+      "source_location": "L661",
       "weight": 1.0
     },
     {
@@ -11859,7 +12143,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L967",
+      "source_location": "L1036",
       "weight": 1.0
     },
     {
@@ -11871,7 +12155,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L338",
+      "source_location": "L407",
       "weight": 1.0
     },
     {
@@ -11883,7 +12167,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L799",
+      "source_location": "L868",
       "weight": 1.0
     },
     {
@@ -11895,7 +12179,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L757",
+      "source_location": "L826",
       "weight": 1.0
     },
     {
@@ -11907,7 +12191,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1471",
+      "source_location": "L1540",
       "weight": 1.0
     },
     {
@@ -11919,7 +12203,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1475",
+      "source_location": "L1544",
       "weight": 1.0
     },
     {
@@ -11931,7 +12215,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1550",
+      "source_location": "L1619",
       "weight": 1.0
     },
     {
@@ -11943,7 +12227,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L353",
+      "source_location": "L422",
       "weight": 1.0
     },
     {
@@ -11991,7 +12275,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L223",
+      "source_location": "L292",
       "weight": 1.0
     },
     {
@@ -12015,7 +12299,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1230",
+      "source_location": "L1299",
       "weight": 1.0
     },
     {
@@ -12027,7 +12311,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1293",
+      "source_location": "L1362",
       "weight": 1.0
     },
     {
@@ -12039,7 +12323,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L309",
+      "source_location": "L378",
       "weight": 1.0
     },
     {
@@ -12063,7 +12347,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L198",
+      "source_location": "L267",
       "weight": 1.0
     },
     {
@@ -12075,7 +12359,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L206",
+      "source_location": "L275",
       "weight": 1.0
     },
     {
@@ -12087,7 +12371,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1047",
+      "source_location": "L1116",
       "weight": 1.0
     },
     {
@@ -12099,7 +12383,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L685",
+      "source_location": "L754",
       "weight": 1.0
     },
     {
@@ -12111,7 +12395,43 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1315",
+      "source_location": "L1384",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_search_index",
+      "target": "api_main_memoised",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "api/main.py",
+      "source_location": "L220",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_search_index_compute",
+      "target": "api_db_query",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "api/main.py",
+      "source_location": "L200",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_search_works",
+      "target": "api_db_query",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "api/main.py",
+      "source_location": "L235",
       "weight": 1.0
     },
     {
@@ -12123,7 +12443,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L642",
+      "source_location": "L711",
       "weight": 1.0
     },
     {
@@ -12135,7 +12455,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L650",
+      "source_location": "L719",
       "weight": 1.0
     },
     {
@@ -12147,7 +12467,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L672",
+      "source_location": "L741",
       "weight": 1.0
     },
     {
@@ -12159,7 +12479,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1345",
+      "source_location": "L1414",
       "weight": 1.0
     },
     {
@@ -12171,7 +12491,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1358",
+      "source_location": "L1427",
       "weight": 1.0
     },
     {
@@ -12183,7 +12503,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1455",
+      "source_location": "L1524",
       "weight": 1.0
     },
     {
@@ -12195,7 +12515,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L843",
+      "source_location": "L912",
       "weight": 1.0
     },
     {
@@ -12207,7 +12527,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L1140",
+      "source_location": "L1209",
       "weight": 1.0
     },
     {
@@ -15351,7 +15671,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L66",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -15363,7 +15683,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L68",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -15375,7 +15695,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -15387,7 +15707,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "web/app/layout.tsx",
-      "source_location": "L76",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -15859,6 +16179,30 @@
       "weight": 1.0
     },
     {
+      "source": "web_components_sitesearch_localhits",
+      "target": "web_components_sitesearch_score",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L65",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch_sitesearch",
+      "target": "web_components_sitesearch_localhits",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L174",
+      "weight": 1.0
+    },
+    {
       "source": "web_components_statemap_statemap",
       "target": "web_lib_format_choroplethfill",
       "relation": "calls",
@@ -15987,7 +16331,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "api/main.py",
-      "source_location": "L526",
+      "source_location": "L595",
       "weight": 1.0
     },
     {
@@ -16083,7 +16427,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L243",
+      "source_location": "L312",
       "weight": 1.0
     },
     {
@@ -16095,7 +16439,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L428",
+      "source_location": "L497",
       "weight": 1.0
     },
     {
@@ -16107,7 +16451,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L483",
+      "source_location": "L552",
       "weight": 1.0
     },
     {
@@ -16119,7 +16463,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L567",
+      "source_location": "L636",
       "weight": 1.0
     },
     {
@@ -16131,7 +16475,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L957",
+      "source_location": "L1026",
       "weight": 1.0
     },
     {
@@ -16143,7 +16487,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L334",
+      "source_location": "L403",
       "weight": 1.0
     },
     {
@@ -16155,7 +16499,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L775",
+      "source_location": "L844",
       "weight": 1.0
     },
     {
@@ -16167,7 +16511,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L751",
+      "source_location": "L820",
       "weight": 1.0
     },
     {
@@ -16179,7 +16523,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L1459",
+      "source_location": "L1528",
       "weight": 1.0
     },
     {
@@ -16191,7 +16535,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L351",
+      "source_location": "L420",
       "weight": 1.0
     },
     {
@@ -16227,7 +16571,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L212",
+      "source_location": "L281",
       "weight": 1.0
     },
     {
@@ -16239,7 +16583,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L1220",
+      "source_location": "L1289",
       "weight": 1.0
     },
     {
@@ -16251,7 +16595,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L290",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -16275,7 +16619,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L190",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -16287,7 +16631,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L204",
+      "source_location": "L273",
       "weight": 1.0
     },
     {
@@ -16299,7 +16643,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L1038",
+      "source_location": "L1107",
       "weight": 1.0
     },
     {
@@ -16311,7 +16655,31 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L676",
+      "source_location": "L745",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_search_index",
+      "target": "get",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "decorator",
+      "source_file": "api/main.py",
+      "source_location": "L197",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_search_works",
+      "target": "get",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "decorator",
+      "source_file": "api/main.py",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -16323,7 +16691,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L620",
+      "source_location": "L689",
       "weight": 1.0
     },
     {
@@ -16335,7 +16703,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L1337",
+      "source_location": "L1406",
       "weight": 1.0
     },
     {
@@ -16347,7 +16715,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L822",
+      "source_location": "L891",
       "weight": 1.0
     },
     {
@@ -16359,7 +16727,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "api/main.py",
-      "source_location": "L1130",
+      "source_location": "L1199",
       "weight": 1.0
     },
     {
@@ -17255,7 +17623,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_onhome_onhome",
+      "target": "web_components_sitesearch_sitesearch",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17267,7 +17635,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_riskticker_riskticker",
+      "target": "web_components_onhome_onhome",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17279,7 +17647,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_scrollreveal_scrollreveal",
+      "target": "web_components_riskticker_riskticker",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17291,7 +17659,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_wordlift_wordlift",
+      "target": "web_components_scrollreveal_scrollreveal",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17303,7 +17671,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_foldheight_foldheight",
+      "target": "web_components_wordlift_wordlift",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17315,7 +17683,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_splash_splash",
+      "target": "web_components_foldheight_foldheight",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17323,6 +17691,18 @@
       "context": "import",
       "source_file": "web/app/layout.tsx",
       "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "web_app_layout",
+      "target": "web_components_splash_splash",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "web/app/layout.tsx",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -18686,7 +19066,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_onhome",
+      "target": "web_components_sitesearch",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18698,7 +19078,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_riskticker",
+      "target": "web_components_onhome",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18710,7 +19090,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_scrollreveal",
+      "target": "web_components_riskticker",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18722,7 +19102,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_wordlift",
+      "target": "web_components_scrollreveal",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18734,7 +19114,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_foldheight",
+      "target": "web_components_wordlift",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18746,7 +19126,7 @@
     },
     {
       "source": "web_app_layout",
-      "target": "web_components_splash",
+      "target": "web_components_foldheight",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18754,6 +19134,18 @@
       "context": "import",
       "source_file": "web/app/layout.tsx",
       "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "web_app_layout",
+      "target": "web_components_splash",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "web/app/layout.tsx",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -19315,6 +19707,18 @@
       "weight": 1.0
     },
     {
+      "source": "web_components_sitesearch",
+      "target": "ref_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
       "source": "web_components_splash",
       "target": "web_components_logo",
       "relation": "imports_from",
@@ -19397,29 +19801,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "api/main.py",
-      "source_location": "L621",
-      "weight": 1.0
-    },
-    {
-      "source": "api_db",
-      "target": "api_db_get_pool",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/db.py",
-      "source_location": "L22",
-      "weight": 1.0
-    },
-    {
-      "source": "api_db",
-      "target": "api_db_run",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/db.py",
-      "source_location": "L45",
+      "source_location": "L690",
       "weight": 1.0
     },
     {
@@ -19430,7 +19812,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/db.py",
-      "source_location": "L89",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -19441,7 +19823,51 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/db.py",
-      "source_location": "L93",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "api_db",
+      "target": "api_db_get_pool",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/db.py",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "api_db",
+      "target": "api_db_borrow",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/db.py",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "api_db",
+      "target": "api_db_run",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/db.py",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
+      "target": "api_main_compliance",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L1027",
       "weight": 1.0
     },
     {
@@ -19452,18 +19878,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1039",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main",
-      "target": "api_main_trends",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L1131",
+      "source_location": "L1108",
       "weight": 1.0
     },
     {
@@ -19479,13 +19894,24 @@
     },
     {
       "source": "api_main",
+      "target": "api_main_trends",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L1200",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
       "target": "api_main_mp_detail",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1221",
+      "source_location": "L1290",
       "weight": 1.0
     },
     {
@@ -19496,7 +19922,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1313",
+      "source_location": "L1382",
       "weight": 1.0
     },
     {
@@ -19507,7 +19933,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1338",
+      "source_location": "L1407",
       "weight": 1.0
     },
     {
@@ -19518,7 +19944,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1460",
+      "source_location": "L1529",
       "weight": 1.0
     },
     {
@@ -19534,13 +19960,35 @@
     },
     {
       "source": "api_main",
+      "target": "api_main_search_index",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L198",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
+      "target": "api_main_search_works",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L224",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
       "target": "api_main_project_by_key",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L191",
+      "source_location": "L260",
       "weight": 1.0
     },
     {
@@ -19551,29 +19999,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L205",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main",
-      "target": "api_main_map_states",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L213",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main",
-      "target": "api_main_agencies",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L244",
+      "source_location": "L274",
       "weight": 1.0
     },
     {
@@ -19589,46 +20015,35 @@
     },
     {
       "source": "api_main",
+      "target": "api_main_map_states",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L282",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
+      "target": "api_main_agencies",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L313",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
       "target": "api_main_mps",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L291",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main",
-      "target": "api_main_data_freshness",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L335",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main",
-      "target": "api_main_districts",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L352",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main",
-      "target": "api_main_alert_filters",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L391",
+      "source_location": "L360",
       "weight": 1.0
     },
     {
@@ -19644,24 +20059,46 @@
     },
     {
       "source": "api_main",
+      "target": "api_main_data_freshness",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L404",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
+      "target": "api_main_districts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L421",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
+      "target": "api_main_alert_filters",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L460",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
       "target": "api_main_alerts",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L429",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main",
-      "target": "api_main_alerts_export",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L484",
+      "source_location": "L498",
       "weight": 1.0
     },
     {
@@ -19677,13 +20114,24 @@
     },
     {
       "source": "api_main",
+      "target": "api_main_alerts_export",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L553",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main",
       "target": "api_main_alerts_summary",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L568",
+      "source_location": "L637",
       "weight": 1.0
     },
     {
@@ -19694,7 +20142,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L613",
+      "source_location": "L682",
       "weight": 1.0
     },
     {
@@ -19705,7 +20153,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L621",
+      "source_location": "L690",
       "weight": 1.0
     },
     {
@@ -19716,7 +20164,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L677",
+      "source_location": "L746",
       "weight": 1.0
     },
     {
@@ -19727,7 +20175,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L732",
+      "source_location": "L801",
       "weight": 1.0
     },
     {
@@ -19738,7 +20186,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L752",
+      "source_location": "L821",
       "weight": 1.0
     },
     {
@@ -19749,7 +20197,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L776",
+      "source_location": "L845",
       "weight": 1.0
     },
     {
@@ -19760,18 +20208,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L823",
+      "source_location": "L892",
       "weight": 1.0
     },
     {
-      "source": "api_main",
-      "target": "api_main_compliance",
+      "source": "api_main_search_index",
+      "target": "api_main_search_index_compute",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L958",
+      "source_location": "L199",
       "weight": 1.0
     },
     {
@@ -20278,6 +20726,39 @@
       "confidence_score": 1.0,
       "source_file": "api/test_api.py",
       "source_location": "L571",
+      "weight": 1.0
+    },
+    {
+      "source": "api_test_api",
+      "target": "api_test_api_test_search_index_carries_every_name_a_reader_can_search_for",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/test_api.py",
+      "source_location": "L582",
+      "weight": 1.0
+    },
+    {
+      "source": "api_test_api",
+      "target": "api_test_api_test_search_puts_the_closest_work_first",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/test_api.py",
+      "source_location": "L596",
+      "weight": 1.0
+    },
+    {
+      "source": "api_test_api",
+      "target": "api_test_api_test_search_refuses_a_query_too_short_to_mean_anything",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/test_api.py",
+      "source_location": "L612",
       "weight": 1.0
     },
     {
@@ -20816,7 +21297,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L332",
+      "source_location": "L342",
       "weight": 1.0
     },
     {
@@ -20838,7 +21319,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "CLAUDE.md",
-      "source_location": "L502",
+      "source_location": "L515",
       "weight": 1.0
     },
     {
@@ -24457,7 +24938,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L175",
+      "source_location": "L177",
       "weight": 1.0
     },
     {
@@ -24468,7 +24949,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L193",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
@@ -24479,7 +24960,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "README.md",
-      "source_location": "L229",
+      "source_location": "L231",
       "weight": 1.0
     },
     {
@@ -25117,7 +25598,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -25128,7 +25609,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -25139,7 +25620,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -25150,7 +25631,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L40",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -25161,7 +25642,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -25172,7 +25653,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L64",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -25183,7 +25664,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "web/app/layout.tsx",
-      "source_location": "L75",
+      "source_location": "L76",
       "weight": 1.0
     },
     {
@@ -25712,6 +26193,105 @@
       "confidence_score": 1.0,
       "source_file": "web/components/ScrollReveal.tsx",
       "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_sitesearch",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L107",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_member",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_work",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_index",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_hit",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_pages",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_workcache",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_score",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "web_components_sitesearch",
+      "target": "web_components_sitesearch_localhits",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "web/components/SiteSearch.tsx",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -27194,7 +27774,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L613",
+      "source_location": "L682",
       "weight": 1.0
     },
     {
@@ -27352,179 +27932,201 @@
       "weight": 1.0
     },
     {
-      "source": "api_db_rationale_46",
-      "target": "api_db_run",
-      "relation": "rationale_for",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/db.py",
-      "source_location": "L46",
-      "weight": 1.0
-    },
-    {
-      "source": "api_db_rationale_94",
+      "source": "api_db_rationale_118",
       "target": "api_db_execute",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/db.py",
-      "source_location": "L94",
+      "source_location": "L118",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_1040",
+      "source": "api_db_rationale_51",
+      "target": "api_db_borrow",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/db.py",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "api_db_rationale_70",
+      "target": "api_db_run",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/db.py",
+      "source_location": "L70",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_rationale_1028",
+      "target": "api_main_compliance",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L1028",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_rationale_1109",
       "target": "api_main_provenance",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1040",
+      "source_location": "L1109",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_1132",
+      "source": "api_main_rationale_1201",
       "target": "api_main_trends",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1132",
+      "source_location": "L1201",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_1222",
+      "source": "api_main_rationale_1291",
       "target": "api_main_mp_detail",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1222",
+      "source_location": "L1291",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_1314",
+      "source": "api_main_rationale_1383",
       "target": "api_main_risk_rollup",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1314",
+      "source_location": "L1383",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_1339",
+      "source": "api_main_rationale_1408",
       "target": "api_main_state_detail",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1339",
+      "source_location": "L1408",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_1461",
+      "source": "api_main_rationale_1530",
       "target": "api_main_district_detail",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L1461",
+      "source_location": "L1530",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_192",
+      "source": "api_main_rationale_225",
+      "target": "api_main_search_works",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L225",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_rationale_261",
       "target": "api_main_project_by_key",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L192",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_214",
+      "source": "api_main_rationale_283",
       "target": "api_main_map_states",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L214",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_250",
+      "source": "api_main_rationale_319",
       "target": "api_main_agencies",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L250",
+      "source_location": "L319",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_292",
+      "source": "api_main_rationale_361",
       "target": "api_main_mps",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L292",
+      "source_location": "L361",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_336",
+      "source": "api_main_rationale_405",
       "target": "api_main_data_freshness",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L336",
+      "source_location": "L405",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_393",
+      "source": "api_main_rationale_462",
       "target": "api_main_alert_filters",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L393",
+      "source_location": "L462",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_442",
+      "source": "api_main_rationale_511",
       "target": "api_main_alerts",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L442",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main_rationale_496",
-      "target": "api_main_alerts_export",
-      "relation": "rationale_for",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L496",
+      "source_location": "L511",
       "weight": 1.0
     },
     {
@@ -27539,80 +28141,80 @@
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_579",
+      "source": "api_main_rationale_565",
+      "target": "api_main_alerts_export",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/main.py",
+      "source_location": "L565",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_rationale_648",
       "target": "api_main_alerts_summary",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L579",
+      "source_location": "L648",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_622",
+      "source": "api_main_rationale_691",
       "target": "api_main_set_review",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L622",
+      "source_location": "L691",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_678",
+      "source": "api_main_rationale_747",
       "target": "api_main_review_history",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L678",
+      "source_location": "L747",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_733",
+      "source": "api_main_rationale_802",
       "target": "api_main_with_limits",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L733",
+      "source_location": "L802",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_753",
+      "source": "api_main_rationale_822",
       "target": "api_main_detectors_catalogue",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L753",
+      "source_location": "L822",
       "weight": 1.0
     },
     {
-      "source": "api_main_rationale_824",
+      "source": "api_main_rationale_893",
       "target": "api_main_states",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "api/main.py",
-      "source_location": "L824",
-      "weight": 1.0
-    },
-    {
-      "source": "api_main_rationale_959",
-      "target": "api_main_compliance",
-      "relation": "rationale_for",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "api/main.py",
-      "source_location": "L959",
+      "source_location": "L893",
       "weight": 1.0
     },
     {
@@ -27877,6 +28479,39 @@
       "confidence_score": 1.0,
       "source_file": "api/test_api.py",
       "source_location": "L572",
+      "weight": 1.0
+    },
+    {
+      "source": "api_test_api_rationale_583",
+      "target": "api_test_api_test_search_index_carries_every_name_a_reader_can_search_for",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/test_api.py",
+      "source_location": "L583",
+      "weight": 1.0
+    },
+    {
+      "source": "api_test_api_rationale_597",
+      "target": "api_test_api_test_search_puts_the_closest_work_first",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/test_api.py",
+      "source_location": "L597",
+      "weight": 1.0
+    },
+    {
+      "source": "api_test_api_rationale_613",
+      "target": "api_test_api_test_search_refuses_a_query_too_short_to_mean_anything",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "api/test_api.py",
+      "source_location": "L613",
       "weight": 1.0
     },
     {
@@ -29373,7 +30008,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "api/main.py",
-      "source_location": "L452",
+      "source_location": "L521",
       "weight": 1.0
     },
     {
@@ -29385,7 +30020,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "api/main.py",
-      "source_location": "L479",
+      "source_location": "L548",
       "weight": 1.0
     },
     {
@@ -29397,7 +30032,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "api/main.py",
-      "source_location": "L479",
+      "source_location": "L548",
       "weight": 1.0
     },
     {
@@ -29410,6 +30045,30 @@
       "context": "argument",
       "source_file": "api/main.py",
       "source_location": "L187",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_search_index",
+      "target": "api_main_filters_compute",
+      "relation": "indirect_call",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "source_file": "api/main.py",
+      "source_location": "L220",
+      "weight": 1.0
+    },
+    {
+      "source": "api_main_search_works",
+      "target": "api_main_search_works_rank",
+      "relation": "indirect_call",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "source_file": "api/main.py",
+      "source_location": "L255",
       "weight": 1.0
     },
     {
@@ -29618,5 +30277,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5e5f0f6b0c711337743227c39000ea80fc4f6ae8"
+  "built_at_commit": "f5aec0acc9405a9321d9b70bf9cf85602c2e30ad"
 }
