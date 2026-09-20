@@ -1157,6 +1157,32 @@ body::before {
   color: var(--ink-3);
 }
 
+/* The two lines that say what the work is and who is building it carry the
+   row; the reasons under them are the argument. */
+.cell-sub--strong {
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* The work cell opens the work from anywhere inside it: the name's anchor
+   draws an invisible sheet over the cell, so there is still one real link and
+   a screen reader hears the work once. The sheet has to sit above the word
+   spans WordLift leaves behind (`.w` takes z-index 1 on hover), hence 2; the
+   "Read more" control sits above the sheet at 3 and still opens in place. */
+.workcell { position: relative; cursor: pointer; }
+/* .link-quiet sets 500 further down the sheet, so this needs both classes. */
+.link-quiet.workcell__open { font-weight: 600; }
+.workcell__open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.workcell__above {
+  position: relative;
+  z-index: 3;
+}
+
 .reason-list {
   margin-top: 0.45rem;
   display: flex;
@@ -1199,9 +1225,13 @@ body::before {
 
 /* --------------------------------------------------------------- filters -- */
 
+/* A grid, not a wrapping flex row. Flex sized each select to its widest
+   option - "Needs review (score 40+)" against "Both terms" - so the five
+   fields were five different widths and wrapped raggedly at the end. The
+   columns give every select the same width and every row the same height. */
 .filter-bar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 1fr)) auto;
   align-items: center;
   gap: 0.5rem;
   background: var(--surface);
@@ -1210,8 +1240,10 @@ body::before {
   padding: 0.4rem 0.45rem 0.4rem 0.9rem;
 }
 
-.filter-field--grow {
-  flex: 1 1 15rem;
+/* No clear button until a filter is set, so the last column collapses to
+   nothing and the rest keep their places. */
+.filter-field {
+  min-width: 0;
 }
 
 .filter-input,
@@ -1227,11 +1259,12 @@ body::before {
 }
 
 .filter-select {
-  width: auto;
-  min-width: 9rem;
   border-color: var(--line);
   background: var(--surface-2);
   cursor: pointer;
+  /* The column decides the width; without this a long option name widens the
+     track and the grid stops being even. */
+  text-overflow: ellipsis;
 }
 
 .filter-input::placeholder {
@@ -1255,23 +1288,25 @@ body::before {
 /* The pill shape only works while everything fits one line. Narrow, the
    selects were running out past its rounded edge, so it becomes a plain
    panel with full-width fields instead. */
-@media (max-width: 720px) {
+@media (max-width: 1100px) {
   .filter-bar {
     border-radius: var(--radius-card);
     padding: 0.6rem;
     gap: 0.45rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .filter-field--grow {
-    flex-basis: 100%;
-  }
-  .filter-select {
-    flex: 1 1 9rem;
-    min-width: 0;
-    width: 100%;
+    grid-column: 1 / -1;
   }
   .filter-input {
     border-color: var(--line);
     background: var(--surface-2);
+  }
+}
+
+@media (max-width: 720px) {
+  .filter-bar {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1298,21 +1333,38 @@ body::before {
   flex-basis: 100%;
 }
 
+/* Raised, edged and set in the page's own ink: flat text in a hairline pill
+   did not read as something to press. */
 .review-btn {
   font-size: 0.78rem;
-  padding: 0.3rem 0.62rem;
+  font-weight: 600;
+  padding: 0.38rem 0.75rem;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink);
   cursor: pointer;
   white-space: nowrap;
-  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+  box-shadow: 0 1px 0 var(--line-strong), 0 1px 2px rgb(0 0 0 / 0.06);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s,
+    box-shadow 0.15s, translate 0.15s;
 }
 
 .review-btn:hover:not(:disabled) {
-  color: var(--ink);
-  border-color: var(--line-strong);
+  border-color: var(--ink-3);
+  background: var(--surface);
+  box-shadow: 0 2px 0 var(--line-strong), 0 2px 5px rgb(0 0 0 / 0.08);
+}
+
+/* Pressing it looks like pressing it, and a recorded decision sits flush
+   rather than raised - that is what says it is on. */
+.review-btn:active:not(:disabled) {
+  translate: 0 1px;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.1);
+}
+
+.review-btn.is-current {
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.08);
 }
 
 .review-btn:disabled {
@@ -2653,13 +2705,12 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   /* The wordmark grows from its left edge, so it never pushes into the nav. */
   .wordmark { transform-origin: left center; }
 
+  /* Rows do not zoom. A row is the only thing on the page whose hover
+     changed the page's own geometry, and at the foot of the queue - where
+     the last row is also the last thing above the pager - the owner saw the
+     page shake. The row still lights up on hover; nothing moves. */
   .data-table tbody tr {
-    transition: scale var(--t-lift) var(--ease-lift), background-color var(--t-fast) var(--ease);
-  }
-  .data-table tbody tr:hover {
-    position: relative;
-    z-index: 1;
-    scale: var(--lift-row);
+    transition: background-color var(--t-fast) var(--ease);
   }
 }
 

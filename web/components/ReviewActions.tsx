@@ -58,6 +58,7 @@ export default function ReviewActions({
       // optimistic value has to be set.
       action={(fd: FormData) => {
         setShown(String(fd.get("status")) as ReviewStatus);
+        // "pending" is a real value here: it is what a cleared work reads as.
         formAction(fd);
       }}
       className="review-actions"
@@ -68,8 +69,10 @@ export default function ReviewActions({
           key={d.status}
           type="submit"
           name="status"
-          value={d.status}
-          title={d.title}
+          // Pressing the decision a work already carries takes it back off:
+          // the button is a toggle, not a one-way switch.
+          value={shown === d.status ? "pending" : d.status}
+          title={shown === d.status ? `${d.label} — press again to clear` : d.title}
           // Not disabled while the write is in flight: next.js runs one
           // client's actions in order and the write is an upsert on
           // work_key, so a second click simply becomes the decision.

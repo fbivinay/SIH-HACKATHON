@@ -31,14 +31,15 @@ export async function submitReview(
   const reviewer = String(formData.get("reviewer") ?? "").trim();
 
   if (!workKey) return { ok: false, error: "This work has no stable key yet." };
-  if (!ALLOWED.includes(status as Exclude<ReviewStatus, "pending">)) {
+  // "pending" clears the decision; the API deletes the row.
+  if (status !== "pending" && !ALLOWED.includes(status as Exclude<ReviewStatus, "pending">)) {
     return { ok: false, error: `Unknown decision "${status}".` };
   }
 
   try {
     await postReview({
       work_key: workKey,
-      status: status as Exclude<ReviewStatus, "pending">,
+      status: status as ReviewStatus,
       note: note || undefined,
       reviewer: reviewer || undefined,
     });

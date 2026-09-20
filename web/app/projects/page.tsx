@@ -217,14 +217,19 @@ export default async function AlertsPage({
               return (
                 <tr key={a.id} className={a.review_status !== "pending" ? "is-reviewed" : undefined}>
                   <td className="rank">{formatCount(offset + i + 1)}</td>
-                  <td className="max-w-[30rem]">
+                  {/* The whole cell opens the work, not only its name - the
+                      reasons under it are what a reader is looking at when
+                      they decide to open it. Same layer trick as a state
+                      card: one real link, drawing an invisible sheet over
+                      the cell. */}
+                  <td className="max-w-[30rem] workcell">
                     <Link
                       href={`/projects/${encodeURIComponent(a.work_key ?? String(a.id))}`}
-                      className="link-quiet"
+                      className="link-quiet workcell__open"
                     >
                       {a.work_name}
                     </Link>
-                    <div className="cell-sub">
+                    <div className="cell-sub cell-sub--strong">
                       {a.sector ? `${a.sector} — ` : ""}
                       {a.implementing_agency}
                     </div>
@@ -241,7 +246,7 @@ export default async function AlertsPage({
                           ))}
                         </ul>
                         {a.flagged_reasons.length > 3 && (
-                          <details className="reason-more">
+                          <details className="reason-more workcell__above">
                             <summary>
                               <span className="reason-more__open">
                                 Read more ({a.flagged_reasons.length - 3} more)
@@ -303,7 +308,7 @@ export default async function AlertsPage({
           total={page.total}
           hrefFor={pageHref}
           label="Queue pages"
-          noun="flagged works"
+          noun=""
         />
       )}
       </section>
