@@ -1,16 +1,16 @@
 # Graph Report - SIH HACKATHON  (2026-09-20)
 
 ## Corpus Check
-- 99 files · ~872,082 words
+- 99 files · ~872,233 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1028 nodes · 1599 edges · 92 communities (54 shown, 35 thin omitted)
+- 1028 nodes · 1599 edges · 91 communities (53 shown, 35 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 23 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f5aec0ac`
+- Built from commit: `be5d8d31`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -32,7 +32,6 @@
 - MPLADS Risk Monitor — Design Spec (SIH26102)
 - test_load_real_data.py
 - MoSPI Figure Verification
-- ProjectFilters.tsx
 - What You Must Do When Invoked
 - MPLADS Data Fetcher
 - test_current_refresh_run_id_ignores_an_abandoned_run
@@ -132,7 +131,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (92 total, 35 thin omitted)
+## Communities (91 total, 35 thin omitted)
 
 ### Community 0 - "classify_sector"
 Cohesion: 0.05
@@ -171,8 +170,8 @@ Cohesion: 0.13
 Nodes (21): caption(), crore(), figures(), hotspot(), indian(), link_row(), main(), place() (+13 more)
 
 ### Community 10 - "api.ts"
-Cohesion: 0.09
-Nodes (21): figures(), OverviewPage(), AgencyStat, Alert, AlertPage, AlertSummary, ComplianceBook, ComplianceRule (+13 more)
+Cohesion: 0.11
+Nodes (17): AgencyStat, Alert, AlertPage, ComplianceBook, ComplianceRule, DeskFinding, DeskSector, Detector (+9 more)
 
 ### Community 11 - "formatINR"
 Cohesion: 0.16
@@ -202,10 +201,6 @@ Nodes (10): A work's identity is (Work ID, ls_term, IDA). The agency is part of 
 Cohesion: 0.23
 Nodes (11): aggregator(), main(), official(), ours(), post(), Persist the comparison so the interface can show it without calling the portal…, Reconcile our figures against the official MoSPI MPLADS dashboard. The problem…, �83,33,66,73,298.01' -> 83336673298.01 (+3 more)
 
-### Community 18 - "ProjectFilters.tsx"
-Cohesion: 0.33
-Nodes (5): ProjectFilters(), handleQChange(), updateParams(), STATUS_OPTION_LABELS, FilterOptions
-
 ### Community 19 - "What You Must Do When Invoked"
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
@@ -231,8 +226,8 @@ Cohesion: 0.09
 Nodes (21): Audio direction, Brag Plan: Kasauti, Duration: 24 seconds, Every figure in this video is real, Format: landscape — 1920x1080, Hook (first 2-3 seconds), Key moments (the middle), Outro / punchline (+13 more)
 
 ### Community 25 - "formatCount"
-Cohesion: 0.26
-Nodes (14): AlertsPage(), STATUS_LABELS, AnalysisPage(), MpPage(), CountUp(), easeOut(), Pager(), alertsExportUrl() (+6 more)
+Cohesion: 0.18
+Nodes (19): AnalysisPage(), MpPage(), AlertsPage(), STATUS_LABELS, Pager(), ProjectFilters(), handleQChange(), updateParams() (+11 more)
 
 ### Community 26 - "Synthetic Data Generator"
 Cohesion: 0.70
@@ -255,8 +250,8 @@ Cohesion: 0.14
 Nodes (13): 10. Interface, 11. Motion, measured, 1. Never claim more than the record supports, 2. `work_key` is the only identifier that survives a reload, 3. Source tables and derived tables are separate, and the swap is atomic, 4. Population statistics stay at population grain, 5. Thresholds are measured, not borrowed, 6. Money comes from the source's own aggregates (+5 more)
 
 ### Community 47 - "provenance/page.tsx"
-Cohesion: 0.32
-Nodes (6): metadata, ProvenancePage(), MODELS, WhereTheAI(), Provenance, formatFreshnessTimestamp()
+Cohesion: 0.25
+Nodes (8): metadata, ProvenancePage(), CountUp(), easeOut(), MODELS, WhereTheAI(), Provenance, formatFreshnessTimestamp()
 
 ### Community 48 - "test_scoring.py"
 Cohesion: 0.14
@@ -299,8 +294,8 @@ Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
 ### Community 60 - "app/page.tsx"
-Cohesion: 0.23
-Nodes (9): FiguresBoard(), Scope, Stat, HeroField(), COMPONENTS, LIMITS, ScoreMethod(), termHref() (+1 more)
+Cohesion: 0.18
+Nodes (12): figures(), OverviewPage(), FiguresBoard(), Scope, Stat, HeroField(), COMPONENTS, LIMITS (+4 more)
 
 ### Community 66 - "mp_key"
 Cohesion: 0.19
@@ -335,8 +330,8 @@ Cohesion: 0.36
 Nodes (7): ALLOWED, ReviewResult, submitReview(), DECISIONS, ReviewActions(), postReview(), ReviewStatus
 
 ### Community 80 - "projects/[id]/page.tsx"
-Cohesion: 0.23
-Nodes (10): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), api, ReviewHistory, hasPeers() (+2 more)
+Cohesion: 0.24
+Nodes (9): methodFor(), ProjectPage(), LABELS, ReviewTrail(), when(), ReviewHistory, hasPeers(), isNearDuplicate() (+1 more)
 
 ### Community 81 - "preview_deck.py"
 Cohesion: 0.48

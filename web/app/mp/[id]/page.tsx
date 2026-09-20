@@ -124,7 +124,7 @@ export default async function MpPage({
       {w.in_queue > 0 && (
         <div className="mt-4">
           <Link
-            href={`/alerts?mp_id=${encodeURIComponent(id)}`}
+            href={`/projects?mp_id=${encodeURIComponent(id)}`}
             className="btn btn--solid"
           >
             Open these {formatCount(w.in_queue)} works in the queue

@@ -54,7 +54,7 @@ export const viewport: Viewport = { colorScheme: "light" };
 // If any of that goes missing again, those are the pages to look at.
 export const navLinks = [
   { href: "/", label: "Overview" },
-  { href: "/alerts", label: "Alerts" },
+  { href: "/projects", label: "Projects" },
   { href: "/states", label: "States" },
   { href: "/analysis", label: "Agencies" },
   { href: "/provenance", label: "Sources" },

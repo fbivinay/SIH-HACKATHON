@@ -244,23 +244,29 @@ sideways — so nothing may be wider than the shell, including the hero canvas.
 Money is `formatINR` (₹ Cr / L), counts are `formatCount`, and timestamps
 render in IST with the label written literally.
 
-Five nav pages in this order: Overview `/`, Alerts `/alerts`, States
-`/states`, Agencies `/analysis`, Sources `/provenance`. **The map is the
+Five nav pages in this order: Overview `/`, Projects `/projects`, States
+`/states`, Agencies `/analysis`, Sources `/provenance`. The queue was Alerts
+at `/alerts` until 2026-09-20, when the owner renamed it; `/alerts` is a 308
+to `/projects`, and `/projects/[id]`, the page for one work, sits under it.
+The API keeps its own names (`/api/alerts`, `/api/alerts/summary`): they are
+the queue's endpoints and nothing outside the site reads the label. Each row
+shows three of its flagged reasons and keeps the rest behind a `<details>`
+"Read more", the same control the limits use. **The map is the
 first screen of States** (owner's call, 2026-09-19; `/map` is a 308 to
 `/states`): `components/StateMap.tsx` in `.map-screen`, sized by the same
 measured `--fold-h` as the overview's fold (FoldHeight now sets it for
 either), framed on India's own extent with `fitBounds` and `zoomSnap: 0.1`
 so the country fills 88–95% of the height at 1366×768–1920×1080 rather than
 sitting small at a fixed zoom. Clicking a state opens its desk. **Works
-was folded into Alerts** (owner's call, 2026-09-19): it listed the same
-records with less on each row. The band select on Alerts is also the page's
+was folded into the queue** (owner's call, 2026-09-19): it listed the same
+records with less on each row. The band select on the queue is also the page's
 scope — nothing chosen is the review queue (score 40+), `risk_level=ALL` is
 every work, and a named band is that band whatever its score (LOW sits below
 40, so the queue's floor would otherwise hide it). The summary endpoint
 defaults its own floor to 40, so outside the queue the page passes
 `min_score=0` to it, or "All works" counted 48,296 and "Low" counted 0.
-`/projects` is a 308 in `next.config.ts` to `/alerts?risk_level=ALL` with its
-filters kept; `/projects/[id]`, the page for one work, is untouched. Signals, Rules and Trends were deleted; what they carried lives
+`/projects` is the queue itself now, and `risk_level=ALL` is what the old
+Works links carried into it. Signals, Rules and Trends were deleted; what they carried lives
 on `/provenance`. **The overview's first screen is the hero, the term switcher
 and the six figures, filling the viewport between the masthead and the ticker
 with no slack** (owner's call, 2026-09-16): the headline alone (the lede under

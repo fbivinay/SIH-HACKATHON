@@ -147,7 +147,7 @@ export default async function StatesPage({
                   </span>
                   {s.in_queue > 0 ? (
                     <Link
-                      href={`/alerts?state=${encodeURIComponent(s.state)}`}
+                      href={`/projects?state=${encodeURIComponent(s.state)}`}
                       className="link-quiet statecard__above"
                     >
                       {formatCount(s.in_queue)} to verify

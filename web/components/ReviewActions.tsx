@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useOptimistic } from "react";
-import { submitReview, type ReviewResult } from "@/app/alerts/actions";
+import { submitReview, type ReviewResult } from "@/app/projects/actions";
 import type { ReviewStatus } from "@/lib/api";
 
 const DECISIONS: Array<{
