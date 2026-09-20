@@ -1,5 +1,6 @@
 import os
 import threading
+import time
 from pathlib import Path
 import psycopg2
 from psycopg2 import pool as pg_pool
@@ -28,8 +29,12 @@ def _get_pool():
                     minconn=1,
                     # Fluid Compute reuses one instance across concurrent
                     # requests, so a handful of connections covers it; Neon's
-                    # pooled endpoint caps well above this.
-                    maxconn=8,
+                    # pooled endpoint caps well above this. 16 rather than 8
+                    # since /api/alerts began running its rows and its total at
+                    # the same time: two per request, and a build prerenders
+                    # seven pages at once, which exhausted a pool of 8 and
+                    # failed the build with "connection pool exhausted".
+                    maxconn=16,
                     dsn=os.environ["DATABASE_URL"],
                     cursor_factory=RealDictCursor,
                 )
@@ -40,6 +45,25 @@ def _get_pool():
 # idle connections, and a long-running loader or a quiet night is enough to
 # leave every pooled connection unusable.
 _STALE = (psycopg2.OperationalError, psycopg2.InterfaceError)
+
+
+def _borrow(pool, wait=5.0):
+    """Take a connection, waiting briefly rather than failing outright.
+
+    psycopg2's pool raises the moment it is empty. A burst - a build
+    prerendering seven pages at once, each page several endpoints - then turns
+    into 500s even though the connections would free up milliseconds later.
+    Queueing for a few seconds is what a caller wants; failing after that is
+    still better than hanging forever.
+    """
+    deadline = time.monotonic() + wait
+    while True:
+        try:
+            return pool.getconn()
+        except pg_pool.PoolError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(0.02)
 
 
 def _run(sql, params, fetch, commit):
@@ -58,7 +82,7 @@ def _run(sql, params, fetch, commit):
     pool = _get_pool()
     last = None
     for attempt in (0, 1):
-        conn = pool.getconn()
+        conn = _borrow(pool)
         try:
             with conn.cursor() as cur:
                 cur.execute(sql, params or [])

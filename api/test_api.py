@@ -577,3 +577,38 @@ def test_a_member_can_be_handed_their_own_queue():
     scoped = client.get(f"/api/alerts?mp_id={with_works['mp_id']}&min_score=40&limit=1").json()
     whole = client.get("/api/alerts?min_score=40&limit=1").json()
     assert scoped["total"] < whole["total"], "mp_id did not filter the queue"
+
+
+def test_search_index_carries_every_name_a_reader_can_search_for():
+    """The site search matches states, districts, agencies and members in the
+    browser, which only works if all of them arrive in one payload."""
+    index = client.get("/api/search/index").json()
+    assert len(index["states"]) >= 30, index["states"][:5]
+    assert len(index["districts"]) > 500, len(index["districts"])
+    assert len(index["agencies"]) > 500, len(index["agencies"])
+    assert len(index["members"]) > 500, len(index["members"])
+    # Every district carries the state it belongs to: the search links to
+    # /district/<state>/<district> and cannot invent the first half.
+    assert all(d["state"] and d["district"] for d in index["districts"])
+    assert all(m["mp_id"] and m["mp_name"] for m in index["members"])
+
+
+def test_search_puts_the_closest_work_first():
+    """A search box is judged on its first line: a name that starts with what
+    was typed has to beat one that merely contains it somewhere."""
+    hits = client.get("/api/search/works?q=school&limit=6").json()["works"]
+    assert hits, "no works matched 'school'"
+    assert len(hits) <= 6
+    assert all("school" in (w["work_name"] or "").lower()
+               or "school" in (w["implementing_agency"] or "").lower()
+               or "school" in (w["mp_name"] or "").lower() for w in hits)
+    starts = [w for w in hits if (w["work_name"] or "").lower().startswith("school")]
+    if starts:
+        assert hits[0] in starts, "a match inside a word outranked one at the start"
+    # Every hit can be linked to: the work page is keyed on work_key.
+    assert all(w["work_key"] for w in hits)
+
+
+def test_search_refuses_a_query_too_short_to_mean_anything():
+    """One letter matches a quarter of the record; the box does not ask."""
+    assert client.get("/api/search/works?q=a").status_code == 422

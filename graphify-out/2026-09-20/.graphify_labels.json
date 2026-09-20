@@ -59,8 +59,8 @@
   "57": "web/README.md",
   "58": "graphify reference: GitHub clone and cross-repo merge",
   "59": "graphify reference: transcribe video and audio",
-  "60": "app/page.tsx",
-  "61": "test_findings_carry_what_their_detector_does_not_claim",
+  "60": "test_state_desk_totals_agree_with_its_own_district_table",
+  "61": "test_the_state_desk_orders_members_by_the_column_it_claims",
   "62": "test_provenance_reject_counts_come_from_the_latest_extract",
   "63": "test_a_member_can_be_handed_their_own_queue",
   "64": ".claude/CLAUDE.md",
@@ -87,8 +87,5 @@
   "85": "fetch_mps",
   "86": "write_detector_findings",
   "87": "test_agency_risk_takes_the_worst_signal_not_a_blend",
-  "88": "RiskBar.tsx",
-  "89": "test_search_index_carries_every_name_a_reader_can_search_for",
-  "90": "test_search_puts_the_closest_work_first",
-  "91": "test_search_refuses_a_query_too_short_to_mean_anything"
+  "88": "RiskBar.tsx"
 }

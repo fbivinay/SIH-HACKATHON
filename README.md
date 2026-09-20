@@ -147,6 +147,8 @@ FastAPI + psycopg2, on Vercel Python. Every read goes through the
 
 ```
 GET  /api/overview                 headline figures, ?ls_term=17|18
+GET  /api/search/index             every state, district, agency and member, for the site search
+GET  /api/search/works             works matching a query, ranked by where it sits in the name
 GET  /api/projects                 the record, filterable and paged
 GET  /api/projects/{id}            one work
 GET  /api/projects/by-key          one work by its stable work_key
