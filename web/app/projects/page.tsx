@@ -215,13 +215,16 @@ export default async function AlertsPage({
             )}
             {page.alerts.map((a, i) => {
               return (
-                <tr key={a.id} className={a.review_status !== "pending" ? "is-reviewed" : undefined}>
+                <tr
+                  key={a.id}
+                  className={`workrow${a.review_status !== "pending" ? " is-reviewed" : ""}`}
+                >
                   <td className="rank">{formatCount(offset + i + 1)}</td>
-                  {/* The whole cell opens the work, not only its name - the
-                      reasons under it are what a reader is looking at when
-                      they decide to open it. Same layer trick as a state
-                      card: one real link, drawing an invisible sheet over
-                      the cell. */}
+                  {/* The whole row opens the work, not only its name - the
+                      reasons, the place and the risk bar are all what a
+                      reader is looking at when they decide to open it. Same
+                      layer trick as a state card: one real link, drawing an
+                      invisible sheet over the row. */}
                   <td className="max-w-[30rem] workcell">
                     <Link
                       href={`/projects/${encodeURIComponent(a.work_key ?? String(a.id))}`}
@@ -233,7 +236,7 @@ export default async function AlertsPage({
                       {a.sector ? `${a.sector} — ` : ""}
                       {a.implementing_agency}
                     </div>
-                    {/* Three reasons, then the rest behind "Read more", so a
+                    {/* Two reasons, then the rest behind "Read more", so a
                         row stays the height of a row and still says everything
                         it has to say. A <details>, like the limits below the
                         overview: it opens with no JavaScript, the browser's own
@@ -241,20 +244,20 @@ export default async function AlertsPage({
                     {a.flagged_reasons.length > 0 && (
                       <>
                         <ul className="reason-list">
-                          {a.flagged_reasons.slice(0, 3).map((r) => (
+                          {a.flagged_reasons.slice(0, 2).map((r) => (
                             <li key={r}>{r}</li>
                           ))}
                         </ul>
-                        {a.flagged_reasons.length > 3 && (
+                        {a.flagged_reasons.length > 2 && (
                           <details className="reason-more workcell__above">
                             <summary>
                               <span className="reason-more__open">
-                                Read more ({a.flagged_reasons.length - 3} more)
+                                Read more ({a.flagged_reasons.length - 2} more)
                               </span>
                               <span className="reason-more__close">Show less</span>
                             </summary>
                             <ul className="reason-list">
-                              {a.flagged_reasons.slice(3).map((r) => (
+                              {a.flagged_reasons.slice(2).map((r) => (
                                 <li key={r}>{r}</li>
                               ))}
                             </ul>
@@ -268,12 +271,15 @@ export default async function AlertsPage({
                       href={`/district/${encodeURIComponent(a.state)}/${encodeURIComponent(
                         a.district
                       )}`}
-                      className="link-quiet"
+                      className="link-quiet workcell__above"
                     >
                       {a.district}
                     </Link>
                     <div className="cell-sub">
-                      <Link href={`/state/${encodeURIComponent(a.state)}`} className="link-quiet">
+                      <Link
+                        href={`/state/${encodeURIComponent(a.state)}`}
+                        className="link-quiet workcell__above"
+                      >
                         {a.state}
                       </Link>
                     </div>
@@ -290,7 +296,7 @@ export default async function AlertsPage({
                       <RiskBar p={a} />
                     </div>
                   </td>
-                  <td className="min-w-[15rem]">
+                  <td className="min-w-[15rem] workcell__above">
                     <ReviewActions workKey={a.work_key} current={a.review_status} />
                   </td>
                 </tr>

@@ -86,7 +86,7 @@ export default function ProjectFilters({
           type="search"
           value={qInput}
           onChange={(e) => handleQChange(e.target.value)}
-          placeholder="Search work, MP, district, state, agency…"
+          placeholder="Search for projects"
           className="filter-input"
         />
       </div>

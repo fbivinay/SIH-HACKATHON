@@ -1169,7 +1169,12 @@ body::before {
    a screen reader hears the work once. The sheet has to sit above the word
    spans WordLift leaves behind (`.w` takes z-index 1 on hover), hence 2; the
    "Read more" control sits above the sheet at 3 and still opens in place. */
-.workcell { position: relative; cursor: pointer; }
+/* The sheet spans the row, so the place, the money and the risk bar open the
+   work too - the cell alone left most of the row dead. A <tr> takes
+   `position: relative` in every browser this site supports, which is what
+   makes it the anchor. */
+.workrow { position: relative; cursor: pointer; }
+.workcell { position: static; }
 /* .link-quiet sets 500 further down the sheet, so this needs both classes. */
 .link-quiet.workcell__open { font-weight: 600; }
 .workcell__open::after {
@@ -1178,6 +1183,9 @@ body::before {
   inset: 0;
   z-index: 2;
 }
+/* The row's own controls - the district and state links, "Read more" and the
+   three decisions - sit above the sheet and keep doing their own job. */
+td.workcell__above { position: relative; z-index: 3; }
 .workcell__above {
   position: relative;
   z-index: 3;
