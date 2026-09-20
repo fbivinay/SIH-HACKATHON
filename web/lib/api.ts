@@ -612,7 +612,8 @@ export const api = {
  * from the server action in app/alerts/actions.ts. */
 export async function postReview(body: {
   work_key: string;
-  status: Exclude<ReviewStatus, "pending">;
+  // "pending" clears the decision: the API deletes the work_reviews row.
+  status: ReviewStatus;
   note?: string;
   reviewer?: string;
 }): Promise<void> {

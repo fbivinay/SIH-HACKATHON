@@ -704,15 +704,26 @@ def set_review(body: ReviewIn, x_review_token: Optional[str] = Header(default=No
         )
     if x_review_token != expected:
         raise HTTPException(status_code=401, detail="Invalid or missing X-Review-Token.")
-    if body.status not in REVIEW_STATUSES:
+    # "pending" is the absence of a decision, which is why it is not in
+    # REVIEW_STATUSES and not in the tables' CHECK: clearing deletes the
+    # current verdict. The trail in work_review_events keeps what was decided
+    # - the clearing itself is not an event, because the schema's CHECK allows
+    # only the three real decisions.
+    clearing = body.status == "pending"
+    if not clearing and body.status not in REVIEW_STATUSES:
         raise HTTPException(
-            status_code=422, detail=f"status must be one of {', '.join(REVIEW_STATUSES)}"
+            status_code=422,
+            detail=f"status must be one of {', '.join(REVIEW_STATUSES)} or pending to clear",
         )
     exists = query(
         "SELECT 1 FROM projects WHERE work_key = %s LIMIT 1", [body.work_key], one=True
     )
     if exists is None:
         raise HTTPException(status_code=404, detail="No work with that work_key.")
+    if clearing:
+        execute("DELETE FROM work_reviews WHERE work_key = %s", [body.work_key])
+        _forget("alert-count")
+        return {"work_key": body.work_key, "status": "pending"}
     # One statement, so the trail and the current verdict cannot diverge. A
     # second call in the same transaction would do, but this needs no new
     # database helper and is atomic by construction.

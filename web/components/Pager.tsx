@@ -19,6 +19,8 @@ export default function Pager({
   total,
   hrefFor,
   label,
+  // An empty noun prints the count alone, which is what the queue wants: the
+  // page is the projects, so "48,296 flagged works" restated the page.
   noun = "works",
 }: {
   offset: number;
@@ -37,12 +39,12 @@ export default function Pager({
 
   return (
     <nav className="pager" aria-label={label}>
-      {hasPrev ? (
+      {/* Nothing on the first page: a greyed-out "Previous" is a control that
+          says the reader could go back, and there is no back. */}
+      {hasPrev && (
         <Link href={hrefFor(Math.max(0, offset - pageSize))} className="pager__link">
           ← Previous
         </Link>
-      ) : (
-        <span className="pager__link is-disabled">← Previous</span>
       )}
 
       <span className="pager__range" aria-live="polite">
@@ -52,7 +54,8 @@ export default function Pager({
         {total !== null ? (
           <>
             {" of "}
-            {formatCount(total)} {noun}
+            {formatCount(total)}
+            {noun ? ` ${noun}` : ""}
           </>
         ) : (
           ` ${noun}`

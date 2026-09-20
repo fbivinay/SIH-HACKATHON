@@ -190,6 +190,12 @@ deterministic and free; keep it that way.
   many times over.
 - **Run the tests before committing:** `python3 -m pytest data api -q`. They hit
   the live database and take ~2.5 minutes.
+- **A decision is a toggle, and clearing is not an event.** Pressing the
+  decision a work already carries posts `status: "pending"`, which deletes its
+  `work_reviews` row. "pending" is the absence of a decision, so it is not in
+  `REVIEW_STATUSES` and not in either table's `CHECK`; the clearing itself
+  therefore leaves no row in `work_review_events`, which keeps what was
+  decided but not that it was taken back.
 - **Never press a decision in a browser test.** The local web talks to the live
   API and the live database, so a scripted click on Escalate / Verified /
   Dismiss writes a real decision onto a real work that the public site then
@@ -266,7 +272,14 @@ every work, and a named band is that band whatever its score (LOW sits below
 defaults its own floor to 40, so outside the queue the page passes
 `min_score=0` to it, or "All works" counted 48,296 and "Low" counted 0.
 `/projects` is the queue itself now, and `risk_level=ALL` is what the old
-Works links carried into it. Signals, Rules and Trends were deleted; what they carried lives
+Works links carried into it. A row reads as one object (owner's call,
+2026-09-20): the work cell is a single stretched link over the name, the
+agency line and the reasons, with the "Read more" disclosure and the decision
+buttons raised above it; the first two lines are bold and the reasons are not.
+The filter bar is a **grid**, not a wrapping flex row — flex sized each select
+to its own widest option, so five fields were five widths and wrapped
+raggedly. The pager prints no "Previous" on the first page and no noun after
+the total. Signals, Rules and Trends were deleted; what they carried lives
 on `/provenance`. **The overview's first screen is the hero, the term switcher
 and the six figures, filling the viewport between the masthead and the ticker
 with no slack** (owner's call, 2026-09-16): the headline alone (the lede under
@@ -423,8 +436,10 @@ other length: `100dvh` at 1.33 rendered 1436px tall in a 1080px window, so
 **Everything under the pointer zooms** (owner's call, 2026-09-17): surfaces by
 `--lift` (1.05, press 1.07), the single *word* under the pointer, buttons and
 links by `--lift-text` (1.08 — a word is small and needs twice a surface's growth
-to read as a zoom), table rows by `--lift-row` (1.015 — a row is
-1100px wide and the wrap clips its edges), on `--t-lift`/`--ease-lift`. Words
+to read as a zoom), on `--t-lift`/`--ease-lift`. **Table rows do not zoom**
+(2026-09-20): the row was the only hover on the page that changed the page's
+own geometry, and at the foot of the queue the owner saw it shake. Rows still
+tint on hover; `--lift-row` is unused. Words
 are wrapped in `.w` spans at runtime by `components/WordLift.tsx`, which must
 keep two promises: it never takes a text node away from React (the original
 stays in place, emptied, and the words are rebuilt from it when React writes
