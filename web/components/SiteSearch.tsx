@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { cleanPortalName } from "@/lib/names";
 
 /**
  * Search, in the masthead, for anything on the site.
@@ -85,7 +86,7 @@ function localHits(index: Index | null, q: string): Hit[] {
     add(
       {
         kind: "Member",
-        label: m.mp_name,
+        label: cleanPortalName(m.mp_name),
         sub: [m.constituency, m.state].filter(Boolean).join(" · "),
         href: `/mp/${encodeURIComponent(m.mp_id)}`,
       },

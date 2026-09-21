@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { api, notFoundOr } from "@/lib/api";
 import ReviewTrail from "@/components/ReviewTrail";
+import { cleanName, profileOf } from "@/lib/mpProfiles";
+import { cleanPortalName } from "@/lib/names";
 import {
   formatCount,
   formatINR,
@@ -142,10 +144,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             &middot;{" "}
             {p.mp_id ? (
               <Link href={`/mp/${encodeURIComponent(p.mp_id)}`} className="link-quiet">
-                {p.mp_name}
+                {cleanName(p.mp_name, profileOf(p.mp_id))}
               </Link>
             ) : (
-              p.mp_name
+              cleanPortalName(p.mp_name)
             )}
             {p.constituency ? ` (${p.constituency})` : ""}
           </>

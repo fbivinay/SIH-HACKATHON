@@ -664,6 +664,15 @@ is instant. So:
   same for districts and members), so every existing link keeps its address.
   Measured: repeat visits 5-14ms locally.
 - Only `/projects` (filters) and `/mps/compare` stay dynamic, by nature.
+- The 36 state desks are built with the site (`generateStaticParams` lists
+  them from the API; on an API failure it returns `[]` and they render on
+  first visit instead). All at once, that emptied the API's pool and failed
+  a build, so `next.config.ts` builds two pages per worker at a time and
+  retries a failed page three times, and `db._borrow` queues 15s, not 5.
+- Member names shown anywhere go through `cleanName` (Parliament's spelling)
+  or `cleanPortalName` (`lib/names.ts`, for the browser): the portal writes
+  "(17LS)", "(EX17LS)", "(17th Lok Sabha)" into names, and the state desk
+  printed them.
 - **A cached page must never cache a failure as "not found".** `lib/api.ts`
   throws `ApiError` with the status; pages call `notFoundOr(err)`, which
   shows the not-found page only for a real 404 and rethrows anything else,

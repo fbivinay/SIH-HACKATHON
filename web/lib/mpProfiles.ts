@@ -1,4 +1,5 @@
 import data from "@/data/mp_profiles.json";
+import { cleanPortalName } from "@/lib/names";
 
 /**
  * Who a member is, from Parliament's own records (sansad.in), matched to the
@@ -64,6 +65,5 @@ export function profileOf(mpId: string): MpProfile | null {
  * The portal writes the seat or its years into the name; the page says those
  * separately, so the heading does not need to repeat them. */
 export function cleanName(portalName: string, profile: MpProfile | null): string {
-  if (profile?.name) return profile.name;
-  return portalName.replace(/\s*\(.*?\)\s*\w*$/, "").trim() || portalName;
+  return profile?.name || cleanPortalName(portalName);
 }
