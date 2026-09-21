@@ -400,6 +400,93 @@ def mps(limit: int = Query(100, le=1000)):
     )
 
 
+# The one forecast the published record supports (CLAUDE.md §1: nothing it
+# does not publish). Completed works carry only a completion date - no
+# recommendation or due date - so an agency's past on-time record cannot be
+# measured. Open works do carry a due date, and an agency whose open works are
+# mostly already past theirs is the best evidence the record holds about its
+# works due next. So: works due in the next 90 days, at agencies in the worst
+# quarter by that overdue share. The cut is the day's own 75th percentile,
+# not a constant (§5) - measured 2026-09-21 over 667 agencies with 20+ open
+# works: median 48% overdue, 75th percentile 65%. Never part of any score (§4):
+# it describes an agency's backlog, applied to its next works.
+_FORECAST_WINDOW_DAYS = 90
+_FORECAST_MIN_OPEN = 20
+
+
+@app.get("/api/forecast/late")
+def forecast_late():
+    """Works likely to miss their completion date, going by their agency's record."""
+
+    def compute():
+        base = f"""
+            WITH ag AS (
+                SELECT implementing_agency AS agency,
+                       COUNT(*) AS open_n,
+                       COUNT(*) FILTER (WHERE expected_completion < current_date) AS overdue_n
+                FROM projects_scored
+                WHERE work_status = 'recommended' AND expected_completion IS NOT NULL
+                GROUP BY 1
+            ),
+            rated AS (
+                SELECT agency, open_n, overdue_n, overdue_n::numeric / open_n AS share
+                FROM ag WHERE open_n >= {_FORECAST_MIN_OPEN}
+            ),
+            cut AS (SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY share) AS c FROM rated),
+            due AS (
+                SELECT p.id, p.work_key, p.work_name, p.district, p.state,
+                       p.implementing_agency, p.expected_completion, p.sanctioned_amount,
+                       r.share, r.open_n, r.overdue_n
+                FROM projects_scored p
+                JOIN rated r ON r.agency = p.implementing_agency
+                CROSS JOIN cut
+                WHERE p.work_status = 'recommended'
+                  AND p.expected_completion BETWEEN current_date
+                      AND current_date + {_FORECAST_WINDOW_DAYS}
+                  AND r.share >= cut.c
+            )
+        """
+        summary = query(
+            base + f"""
+            SELECT (SELECT c FROM cut) AS cutoff_share,
+                   (SELECT COUNT(*) FROM rated) AS agencies_rated,
+                   (SELECT COUNT(*) FROM projects_scored
+                     WHERE work_status = 'recommended'
+                       AND expected_completion BETWEEN current_date
+                           AND current_date + {_FORECAST_WINDOW_DAYS}) AS due_in_window,
+                   COUNT(*) AS likely_late,
+                   COUNT(DISTINCT implementing_agency) AS agencies,
+                   COALESCE(SUM(sanctioned_amount), 0) AS sanctioned
+            FROM due
+            """,
+            one=True,
+        )
+        # By agency rather than by work: the worst agencies each have dozens of
+        # works due, and a list of works was one agency eight times over.
+        agencies = query(
+            base + """
+            SELECT implementing_agency, MIN(state) AS state,
+                   round(MAX(share) * 100, 1) AS overdue_pct,
+                   MAX(open_n) AS open_works, MAX(overdue_n) AS overdue_works,
+                   COUNT(*) AS due_works, COALESCE(SUM(sanctioned_amount), 0) AS due_sanctioned,
+                   MIN(expected_completion) AS next_due
+            FROM due
+            GROUP BY implementing_agency
+            ORDER BY MAX(share) DESC, COUNT(*) DESC
+            LIMIT 6
+            """
+        )
+        return {
+            "window_days": _FORECAST_WINDOW_DAYS,
+            "min_open_works": _FORECAST_MIN_OPEN,
+            **summary,
+            "cutoff_pct": round(float(summary["cutoff_share"] or 0) * 100, 1),
+            "agencies_worst": agencies,
+        }
+
+    return _memoised(("forecast-late",), 1800, compute)
+
+
 @app.get("/api/mp-directory")
 def mp_directory(ls_term: int = Query(18, ge=17, le=18)):
     """Every member for one Lok Sabha term, for the MPs page and its comparison.
@@ -508,9 +595,13 @@ _ALERT_COLUMNS = """
 
 
 def _alert_filters(q, state, district, sector, risk_level, ls_term, status, min_score,
-                   mp_id=None):
+                   mp_id=None, compliance=None):
     """Shared WHERE builder so the list and its total count can never drift."""
     filters, params = [], []
+    if compliance == "breach":
+        # The same test /api/compliance counts with, so the overview's "37,284
+        # works breach a rule" opens exactly those 37,284 in the queue.
+        filters.append("p.compliance_risk > 0")
     if q:
         filters.append(
             "(p.work_name ILIKE %s OR p.description ILIKE %s OR p.mp_name ILIKE %s "
@@ -555,13 +646,14 @@ def alerts(
     status: Optional[str] = Query(None, pattern="^(pending|verified|dismissed|escalated)$"),
     min_score: Optional[float] = Query(None, ge=0, le=100),
     mp_id: Optional[str] = None,
+    compliance: Optional[str] = Query(None, pattern="^breach$"),
     limit: int = Query(50, le=200),
     offset: int = 0,
 ):
     """The triage queue: works ranked by risk, carrying their evidence and
     whatever a reviewer has already concluded about them."""
     where, params = _alert_filters(
-        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id
+        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id, compliance
     )
     # work_mem for this statement only: the sort over the joined view spilled
     # ~220 MB to disk at the default 4MB (EXPLAIN: temp written=27,892
@@ -614,6 +706,7 @@ def alerts_export(
     status: Optional[str] = None,
     min_score: float = Query(40, ge=0, le=100),
     mp_id: Optional[str] = None,
+    compliance: Optional[str] = Query(None, pattern="^breach$"),
     limit: int = Query(5000, le=20000),
 ):
     """The current queue as CSV, under the same filters the page is showing.
@@ -627,7 +720,7 @@ def alerts_export(
     disagree with what was on screen when it was requested.
     """
     where, params = _alert_filters(
-        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id
+        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id, compliance
     )
     rows = query(
         f"""
@@ -698,6 +791,7 @@ def alerts_summary(
     status: Optional[str] = None,
     min_score: float = Query(40, ge=0, le=100),
     mp_id: Optional[str] = None,
+    compliance: Optional[str] = Query(None, pattern="^breach$"),
 ):
     """Counts for the queue header. min_score defaults to 40 because that is
     where risk_level leaves LOW (see RISK_LEVEL_THRESHOLDS in data/scoring.py) -
@@ -710,7 +804,7 @@ def alerts_summary(
     Kozhikode".
     """
     where, params = _alert_filters(
-        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id
+        q, state, district, sector, risk_level, ls_term, status, min_score, mp_id, compliance
     )
     return query(
         f"""

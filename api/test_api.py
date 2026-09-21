@@ -626,3 +626,21 @@ def test_mp_directory_lists_every_member_of_one_term():
         if r["allocated_amount"] is not None and r["amount_recommended"] is not None:
             assert abs(r["idle_amount"] - (r["allocated_amount"] - r["amount_recommended"])) < 0.01
     assert client.get("/api/mp-directory?ls_term=16").status_code == 422
+
+
+def test_late_forecast_describes_agencies_and_never_exceeds_whats_due():
+    d = client.get("/api/forecast/late").json()
+    assert d["window_days"] == 90 and d["min_open_works"] == 20
+    # A subset of the works due in the window, at the worst quarter of agencies.
+    assert 0 <= d["likely_late"] <= d["due_in_window"]
+    assert 0 < d["cutoff_pct"] <= 100
+    for a in d["agencies_worst"]:
+        assert a["overdue_pct"] >= d["cutoff_pct"] - 0.1
+        assert a["open_works"] >= 20 and a["due_works"] >= 1
+
+
+def test_compliance_filter_opens_exactly_the_works_the_rule_book_counts():
+    book = client.get("/api/compliance").json()
+    page = client.get("/api/alerts?limit=1&min_score=0&compliance=breach").json()
+    assert page["total"] == book["works_breaching"]
+    assert client.get("/api/alerts?compliance=yes").status_code == 422

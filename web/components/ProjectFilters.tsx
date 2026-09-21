@@ -81,7 +81,9 @@ export default function ProjectFilters({
     startTransition(() => router.replace(pathname, { scroll: false }));
   }
 
-  const hasFilters = Boolean(q || state || riskLevel || lsTerm || status);
+  const hasFilters = Boolean(
+    q || state || riskLevel || lsTerm || status || searchParams.get("compliance")
+  );
 
   return (
     <div className="filter-bar" aria-busy={isPending || undefined}>

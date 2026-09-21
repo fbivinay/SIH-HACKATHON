@@ -385,6 +385,22 @@ rather than the zoomed ones — an 864px laptop sat outside an 820px tier while
 having less room than an 810px one inside it. Measured on five viewports: section = fold
 height, 10–16px of air above and below the slab, no card overflowing.
 
+**"Trends and early warnings" is the fourth screen** (`components/WatchScreen.tsx`,
+2026-09-21), and it is where the brief's "trend analysis", "early warning",
+"predictive insights" and "automated compliance monitoring" are visible - the
+alignment check found all four had been removed from the site or denied by
+it. Four cards, all read at build (the overview is static), none folded into
+any score (§4): money paid by month with March in full ink (`/api/trends`);
+**works likely to run late** (`/api/forecast/late`: works due in the next 90
+days at agencies whose open works are in the worst quarter by overdue share -
+the day's own 75th percentile, 64.7% when built; completed works carry no due
+date, so an agency's past on-time record cannot be measured, and its current
+backlog is the best evidence the record holds); agencies gone quiet; and the
+compliance rules with their breach counts, linking to `/projects?compliance=
+breach`, which uses the same `compliance_risk > 0` test as the count. The
+limits card "It reports, it does not forecast" became "It forecasts only from
+the record" to match.
+
 **"What it will not tell you" is the third screen** (`.limits-screen`), on a
 `min-height` rather than a definite height; three `max-height` tiers (980,
 820, 740) fit the four cards down to 1280×720.
