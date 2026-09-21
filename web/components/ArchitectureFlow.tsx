@@ -87,19 +87,17 @@ function Tile({ icon: I, size = "md" }: { icon: Icon; size?: "md" | "sm" }) {
 export default function ArchitectureFlow({
   works,
   payments,
-  refused,
   inQueue,
 }: {
   works: number;
   payments: number;
-  refused: number;
   inQueue: number;
 }) {
   const ingest: Array<{ icon: Icon; label: string }> = [
     { icon: CloudDownload, label: "Fetch the extract" },
     { icon: FileCheck2, label: "Validate every file first" },
     { icon: Wand2, label: "Clean and normalise" },
-    { icon: FileX2, label: `Refuse bad rows (${formatCount(refused)})` },
+    { icon: FileX2, label: "Refuse bad rows" },
     { icon: Scale, label: "Reconcile with MoSPI" },
     { icon: Database, label: "Store in PostgreSQL" },
   ];
@@ -169,15 +167,15 @@ export default function ArchitectureFlow({
             <div className="archdata__item">
               <Tile icon={Database} size="sm" />
               <div>
-                <b><CountUp text={formatCount(works)} /></b>
-                <span>works</span>
+                <b className="archdata__num"><CountUp text={formatCount(works)} /></b>
+                <span className="archdata__label">works</span>
               </div>
             </div>
             <div className="archdata__item">
               <Tile icon={Database} size="sm" />
               <div>
-                <b><CountUp text={formatCount(payments)} /></b>
-                <span>payments</span>
+                <b className="archdata__num"><CountUp text={formatCount(payments)} /></b>
+                <span className="archdata__label">payments</span>
               </div>
             </div>
           </div>
@@ -205,9 +203,14 @@ export default function ArchitectureFlow({
         </article>
       </div>
 
-      <span className="archflow__down" aria-hidden="true"><i className="archpacket" /></span>
+      {/* 2 turns down into 3, which sits under the right end of 2. */}
+      <div className="archflow__turn archflow__turn--1" aria-hidden="true">
+        <span className="archflow__down"><i className="archpacket" /></span>
+      </div>
 
-      {/* 3 -> 4: every work gets a peer group, then five scores. */}
+      {/* 3 -> 4, read right to left: the diagram snakes, so every arrow
+          joins two consecutive steps. DOM order stays 3, arrow, 4 for anyone
+          reading it without the layout; the grid places them. */}
       <div className="archflow__row archflow__row--engine">
         <article className="archstep">
           <header className="archstep__head">
@@ -261,7 +264,10 @@ export default function ArchitectureFlow({
         </article>
       </div>
 
-      <span className="archflow__down" aria-hidden="true"><i className="archpacket" /></span>
+      {/* 4 turns down into 5, which sits under the left end of 4. */}
+      <div className="archflow__turn archflow__turn--2" aria-hidden="true">
+        <span className="archflow__down"><i className="archpacket" /></span>
+      </div>
 
       {/* 5 -> 6 -> 7: a number, its reasons, and the people who act on it. */}
       <div className="archflow__row archflow__row--out">
