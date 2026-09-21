@@ -505,12 +505,6 @@ html { overflow-anchor: none; }
     display: flex;
     flex-direction: column;
   }
-  /* The control sits at the foot of every card, so the four read as one row
-     with one row of controls under it. */
-  .limits-grid .limit-more {
-    margin-top: auto;
-    padding-top: 0.4rem;
-  }
   @media (max-height: 980px) {
     .limits-screen .section-head { font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
     .limits-screen .lede { margin-top: 0.35rem; font-size: 0.92rem; }
@@ -524,7 +518,6 @@ html { overflow-anchor: none; }
     .limits-grid > .card { padding: 0.75rem 0.85rem; }
     .limits-grid > .card h3 { font-size: 0.9rem; }
     .limit-points { margin-top: 0.5rem; font-size: 0.74rem; gap: 0.3rem; line-height: 1.4; }
-    .limits-grid .limit-more > summary { margin-top: 0.5rem; font-size: 0.75rem; }
   }
   /* A 720px screen leaves 537 of these pixels for a heading and four cards of
      three points; the points go to two columns' worth of width per card only
@@ -537,7 +530,6 @@ html { overflow-anchor: none; }
     .limits-grid > .card h3 { font-size: 0.84rem; }
     .limit-points { margin-top: 0.35rem; font-size: 0.66rem; gap: 0.2rem; line-height: 1.3; }
     .limit-points li { padding-left: 0.7rem; }
-    .limits-grid .limit-more > summary { margin-top: 0.35rem; font-size: 0.7rem; }
   }
 }
 
@@ -567,28 +559,6 @@ html { overflow-anchor: none; }
   border-radius: 999px;
   background: var(--line-strong);
 }
-
-/* The rest of a limit. The summary is the only control on the page that is not
-   a button or a link, so it is styled as the quiet link it behaves like, and
-   the browser's own triangle goes - the label already says what it does. */
-.limit-more > summary {
-  margin-top: 0.7rem;
-  display: inline-flex;
-  font-size: 0.8rem;
-  color: var(--ink-3);
-  cursor: pointer;
-  list-style: none;
-  border-bottom: 1px solid var(--line-strong);
-  width: fit-content;
-  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
-}
-.limit-more > summary::-webkit-details-marker { display: none; }
-.limit-more > summary:hover { color: var(--ink); border-color: var(--ink); }
-.limit-more[open] > summary { margin-bottom: 0.1rem; }
-.limit-more .limit-points { margin-top: 0.55rem; }
-.limit-more__close { display: none; }
-.limit-more[open] .limit-more__open { display: none; }
-.limit-more[open] .limit-more__close { display: inline; }
 
 /* The same island, used inline rather than centred in a bar of its own, and a
    size down: it names a scope, it is not the site's navigation. */
@@ -2586,6 +2556,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
      under the reader, so it fades and lifts a little instead. */
   .data-table-wrap[data-reveal],
   .leaflet-container[data-reveal],
+  .section-intro[data-reveal],
   .section-head[data-reveal] {
     animation-name: reveal-fade, reveal-lift;
     animation-range: cover 0px cover 260px, cover 0px cover 520px;
@@ -2620,6 +2591,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   .statecard,
   .rulecard,
   .data-table-wrap,
+  .section-intro,
   .section-head,
   .data-table tbody tr {
     animation: none;

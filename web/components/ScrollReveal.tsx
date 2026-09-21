@@ -26,6 +26,7 @@ const REVEALABLE = [
   ".statecard",
   ".rulecard",
   ".data-table-wrap",
+  ".section-intro",
   ".section-head",
   ".chart",
   ".leaflet-container",

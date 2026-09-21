@@ -319,18 +319,21 @@ having less room than an 810px one inside it. Measured on five viewports: sectio
 height, 10–16px of air above and below the slab, no card overflowing.
 
 **"What it will not tell you" is the third screen** (`.limits-screen`), on a
-`min-height` rather than a definite height, because a card can be opened and
-the section has to grow under it rather than clip what was just asked for;
-three `max-height` tiers (980, 820, 740) fit the four cards down to 1280×720.
+`min-height` rather than a definite height; three `max-height` tiers (980,
+820, 740) fit the four cards down to 1280×720.
 **Cards in both screens align top and foot** — content starts at the top and
 the last line (or the action, or the "Read more") is pushed to the bottom with
 `margin-top: auto`. Centring them instead left every title at a different
 height, which is what made a row read as loose boxes. Measured: identical
 title offsets and identical foot offsets across every card in a row. The
-limits are — four limits of seven points each, every point either a rule in
-`data/scoring.py` or an entry in `COMPLIANCE_BLIND_SPOTS`, showing three and
-keeping the rest behind a `<details>` "Read more" so the row skims at three
-lines and still reads in full without JavaScript; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs on the
+limits are four limits of four points each, the four that matter most, with
+no "Read more" (owner's call, 2026-09-21) - every point either a rule in
+`data/scoring.py` or an entry in `COMPLIANCE_BLIND_SPOTS`, the rest of the
+blind spots on Sources. The heading and the lede above them are one
+revealable block (`.section-intro`), so they arrive together on the way down:
+measured, identical opacity at every scroll step and a constant 31–33px
+between them. Only the heading used to be marked, and it rose past a lede
+that sat still; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs on the
 overview only, along the bottom of the viewport (`OnHome` in
 `app/layout.tsx`); no other page has one (owner's call, 2026-09-18). It
 carries only the works — no label, no "all high risk" link. "AI powered" must be visible on every page
