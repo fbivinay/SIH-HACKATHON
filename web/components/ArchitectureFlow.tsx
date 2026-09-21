@@ -1,11 +1,78 @@
 import Link from "next/link";
+import type { ComponentType, SVGProps } from "react";
+import {
+  Building2,
+  CalendarClock,
+  CloudDownload,
+  Clock,
+  Copy,
+  Database,
+  Equal,
+  FileCheck2,
+  FileSearch,
+  FileX2,
+  Gauge,
+  Hash,
+  Landmark,
+  LayoutDashboard,
+  ListChecks,
+  ListOrdered,
+  Map as MapIcon,
+  Scale,
+  Search,
+  Sparkles,
+  Tags,
+  TrendingUp,
+  UserCheck,
+  Users,
+  Wallet,
+  Wand2,
+} from "lucide-react";
+import {
+  siFastapi,
+  siGithubactions,
+  siGooglegemini,
+  siHuggingface,
+  siNextdotjs,
+  siPandas,
+  siPostgresql,
+  siPython,
+  siScikitlearn,
+  siVercel,
+  type SimpleIcon,
+} from "simple-icons";
+import Logo from "@/components/Logo";
 import { formatCount } from "@/lib/format";
 
+type Icon = ComponentType<SVGProps<SVGSVGElement> & { size?: number; strokeWidth?: number }>;
+
+/** A product's own mark, drawn in ink like every other icon here. */
+function BrandMark({ icon, size = 22 }: { icon: SimpleIcon; size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true">
+      <path d={icon.path} />
+    </svg>
+  );
+}
+
+/** A step's icon in its round tile, the way the deck sets its pictograms. */
+function Tile({ icon: I, size = "md" }: { icon: Icon; size?: "md" | "sm" }) {
+  return (
+    <span className={`archicon archicon--${size}`} aria-hidden="true">
+      <I size={size === "md" ? 22 : 16} strokeWidth={1.75} />
+    </span>
+  );
+}
+
 /**
- * How the system works, end to end - the architecture slide of the deck
- * (docs: "SIH FINAL PPT", slides 2 and 3), drawn in the product's own
- * language rather than pasted as the slide's image: monochrome, with colour
- * only on the three risk bands, where colour means risk (CLAUDE.md §10).
+ * How the system works, end to end - the deck's architecture (slides 2 and
+ * 3), with its pictograms and the logos of what it is built on, in the
+ * product's own ink: the only colour in it is on the three risk bands, where
+ * colour means risk (CLAUDE.md §10).
+ *
+ * The deck's slide shows the State Emblem for the Ministry. It is not used
+ * here: the Emblem's use is restricted by law to official purposes, and a
+ * building stands in for "the government's record" just as well.
  *
  * Every count comes from the live record, passed in by the page, so it cannot
  * go stale the way a typed figure did twice in the deck.
@@ -21,69 +88,97 @@ export default function ArchitectureFlow({
   refused: number;
   inQueue: number;
 }) {
-  const ingest = [
-    "Fetch the extract",
-    "Validate every file before writing",
-    "Clean and normalise",
-    `Refuse bad rows, with a reason (${formatCount(refused)})`,
-    "Reconcile with MoSPI's dashboard",
-    "Store in PostgreSQL",
+  const ingest: Array<{ icon: Icon; label: string }> = [
+    { icon: CloudDownload, label: "Fetch the extract" },
+    { icon: FileCheck2, label: "Validate every file first" },
+    { icon: Wand2, label: "Clean and normalise" },
+    { icon: FileX2, label: `Refuse bad rows (${formatCount(refused)})` },
+    { icon: Scale, label: "Reconcile with MoSPI" },
+    { icon: Database, label: "Store in PostgreSQL" },
   ];
-  const components = [
-    { name: "Cost", weight: 25, how: "Against the district-and-sector median, with an Isolation Forest" },
-    { name: "Delay", weight: 25, how: "Days past the completion date the source publishes" },
-    { name: "Duplication", weight: 20, how: "Sentence-BERT similarity at the measured 0.94 cutoff" },
-    { name: "Agency", weight: 15, how: "The agency's delay rate, vendor concentration and oldest unpaid bill" },
-    { name: "Compliance", weight: 15, how: "Checkable MPLADS rules, each naming what it rests on" },
+  const components: Array<{ icon: Icon; name: string; weight: number; how: string }> = [
+    { icon: TrendingUp, name: "Cost", weight: 25, how: "District-and-sector median, with an Isolation Forest" },
+    { icon: Clock, name: "Delay", weight: 25, how: "Days past the completion date the source publishes" },
+    { icon: Copy, name: "Duplication", weight: 20, how: "Sentence-BERT similarity at the measured 0.94 cutoff" },
+    { icon: Building2, name: "Agency", weight: 15, how: "Delay rate, vendor concentration, oldest unpaid bill" },
+    { icon: ListChecks, name: "Compliance", weight: 15, how: "Checkable MPLADS rules, each naming what it rests on" },
   ];
-  const cohort = [
-    "Year-end payment burst",
-    "First-digit (Benford) anomaly",
-    "Idle allocation",
-    "Uniform sanction amounts",
+  const cohort: Array<{ icon: Icon; label: string }> = [
+    { icon: CalendarClock, label: "Year-end payment burst" },
+    { icon: Hash, label: "First-digit (Benford) anomaly" },
+    { icon: Wallet, label: "Idle allocation" },
+    { icon: Equal, label: "Uniform sanction amounts" },
   ];
-  const stack = [
-    "Next.js",
-    "FastAPI",
-    "PostgreSQL (Neon)",
-    "Gemini",
-    "Sentence-BERT",
-    "Isolation Forest",
-    "pandas",
-    "GitHub Actions, nightly",
-    "Vercel",
+  const stack: Array<{ group: string; items: Array<{ icon: SimpleIcon; name: string; note: string }> }> = [
+    { group: "Interface", items: [{ icon: siNextdotjs, name: "Next.js", note: "React, TypeScript" }, { icon: siVercel, name: "Vercel", note: "Hosting" }] },
+    { group: "API", items: [{ icon: siFastapi, name: "FastAPI", note: "Python" }] },
+    { group: "Data", items: [{ icon: siPostgresql, name: "PostgreSQL", note: "Neon" }, { icon: siPandas, name: "pandas", note: "Load and score" }] },
+    {
+      group: "AI and statistics",
+      items: [
+        { icon: siGooglegemini, name: "Gemini", note: "Sector labels" },
+        { icon: siHuggingface, name: "Sentence-BERT", note: "Near-duplicates" },
+        { icon: siScikitlearn, name: "scikit-learn", note: "Isolation Forest" },
+      ],
+    },
+    { group: "Automation", items: [{ icon: siGithubactions, name: "GitHub Actions", note: "Nightly refresh" }, { icon: siPython, name: "Python", note: "Pipeline" }] },
   ];
 
   return (
     <section className="archflow" aria-label="How Kasauti works">
-      <h1 className="display">How Kasauti works</h1>
+      <div className="archflow__head">
+        <Logo size={64} />
+        <div>
+          <h1 className="display">How Kasauti works</h1>
+          <p className="archflow__tag">From the published record to a ranked list of what to verify</p>
+        </div>
+      </div>
 
       {/* 1 -> 2: where the record comes from, and what happens to it first. */}
       <div className="archflow__row archflow__row--source">
         <article className="archstep">
-          <span className="archstep__n">1</span>
-          <h2 className="archstep__title">The published MPLADS record</h2>
-          <dl className="archstep__figs">
+          <header className="archstep__head">
+            <Tile icon={Landmark} />
             <div>
-              <dt>Works</dt>
-              <dd>{formatCount(works)}</dd>
+              <span className="archstep__n">1</span>
+              <h2 className="archstep__title">The published MPLADS record</h2>
             </div>
-            <div>
-              <dt>Payments</dt>
-              <dd>{formatCount(payments)}</dd>
+          </header>
+          <div className="archdata">
+            <div className="archdata__item">
+              <Tile icon={Database} size="sm" />
+              <div>
+                <b>{formatCount(works)}</b>
+                <span>works</span>
+              </div>
             </div>
-          </dl>
+            <div className="archdata__item">
+              <Tile icon={Database} size="sm" />
+              <div>
+                <b>{formatCount(payments)}</b>
+                <span>payments</span>
+              </div>
+            </div>
+          </div>
           <p className="archstep__note">
-            17th and 18th Lok Sabha. The Ministry&rsquo;s record, as Empowered Indian exports it.
+            17th and 18th Lok Sabha - the Ministry&rsquo;s record, as Empowered Indian exports it.
           </p>
         </article>
         <span className="archflow__arrow" aria-hidden="true" />
-        <article className="archstep archstep--wide">
-          <span className="archstep__n">2</span>
-          <h2 className="archstep__title">Ingest and validate, every night</h2>
-          <ol className="archchain">
+        <article className="archstep">
+          <header className="archstep__head">
+            <Tile icon={FileCheck2} />
+            <div>
+              <span className="archstep__n">2</span>
+              <h2 className="archstep__title">Ingest and validate, every night</h2>
+            </div>
+          </header>
+          <ol className="archpipe">
             {ingest.map((s) => (
-              <li key={s}>{s}</li>
+              <li key={s.label}>
+                <Tile icon={s.icon} />
+                <span>{s.label}</span>
+              </li>
             ))}
           </ol>
         </article>
@@ -94,26 +189,45 @@ export default function ArchitectureFlow({
       {/* 3 -> 4: every work gets a peer group, then five scores. */}
       <div className="archflow__row archflow__row--engine">
         <article className="archstep">
-          <span className="archstep__n">3</span>
-          <h2 className="archstep__title">Find each work&rsquo;s peers</h2>
-          <ol className="archchain archchain--stack">
-            <li><span>Keyword rules read the description</span></li>
+          <header className="archstep__head">
+            <Tile icon={Tags} />
+            <div>
+              <span className="archstep__n">3</span>
+              <h2 className="archstep__title">Find each work&rsquo;s peers</h2>
+            </div>
+          </header>
+          <ol className="architems">
             <li>
+              <Tile icon={Search} size="sm" />
+              <span>Keyword rules read the description</span>
+            </li>
+            <li>
+              <span className="archicon archicon--sm" aria-hidden="true">
+                <BrandMark icon={siGooglegemini} size={16} />
+              </span>
               <span>
-                <b>Gemini</b> only where the rules cannot decide - and it may answer
-                &ldquo;Other&rdquo;
+                <b>Gemini</b> decides only where the rules cannot - and may answer &ldquo;Other&rdquo;
               </span>
             </li>
-            <li><span>Sector, district and term make the peer group</span></li>
+            <li>
+              <Tile icon={Users} size="sm" />
+              <span>Sector, district and term make the peer group</span>
+            </li>
           </ol>
         </article>
         <span className="archflow__arrow" aria-hidden="true" />
-        <article className="archstep archstep--wide">
-          <span className="archstep__n">4</span>
-          <h2 className="archstep__title">Score the work against its peers</h2>
+        <article className="archstep">
+          <header className="archstep__head">
+            <Tile icon={Sparkles} />
+            <div>
+              <span className="archstep__n">4</span>
+              <h2 className="archstep__title">Score the work against its peers</h2>
+            </div>
+          </header>
           <ul className="archweights">
             {components.map((c) => (
               <li key={c.name}>
+                <Tile icon={c.icon} size="sm" />
                 <span className="archweights__pct">{c.weight}%</span>
                 <span className="archweights__name">{c.name}</span>
                 <span className="archweights__how">{c.how}</span>
@@ -128,8 +242,18 @@ export default function ArchitectureFlow({
       {/* 5 -> 6 -> 7: a number, its reasons, and the people who act on it. */}
       <div className="archflow__row archflow__row--out">
         <article className="archstep">
-          <span className="archstep__n">5</span>
-          <h2 className="archstep__title">Risk score, 0 to 100</h2>
+          <header className="archstep__head">
+            <Tile icon={Gauge} />
+            <div>
+              <span className="archstep__n">5</span>
+              <h2 className="archstep__title">Risk score, 0 to 100</h2>
+            </div>
+          </header>
+          <div className="archgauge" aria-hidden="true">
+            <span className="archgauge__low" />
+            <span className="archgauge__medium" />
+            <span className="archgauge__high" />
+          </div>
           <ul className="archbands">
             <li className="archbands__low">
               <i aria-hidden="true" />
@@ -150,48 +274,101 @@ export default function ArchitectureFlow({
         </article>
         <span className="archflow__arrow" aria-hidden="true" />
         <article className="archstep">
-          <span className="archstep__n">6</span>
-          <h2 className="archstep__title">Explain, then queue</h2>
-          <ul className="archlist">
-            <li>Why each work was flagged, in the record&rsquo;s own figures</li>
-            <li>{formatCount(inQueue)} works at 40 and above, ranked</li>
-            <li>Escalate, verify or dismiss, with an audit trail</li>
+          <header className="archstep__head">
+            <Tile icon={FileSearch} />
+            <div>
+              <span className="archstep__n">6</span>
+              <h2 className="archstep__title">Explain, then queue</h2>
+            </div>
+          </header>
+          <ul className="architems">
+            <li>
+              <Tile icon={FileSearch} size="sm" />
+              <span>Why each work was flagged, in the record&rsquo;s own figures</span>
+            </li>
+            <li>
+              <Tile icon={ListOrdered} size="sm" />
+              <span>{formatCount(inQueue)} works at 40 and above, ranked</span>
+            </li>
+            <li>
+              <Tile icon={UserCheck} size="sm" />
+              <span>Escalate, verify or dismiss, with an audit trail</span>
+            </li>
           </ul>
         </article>
         <span className="archflow__arrow" aria-hidden="true" />
         <article className="archstep">
-          <span className="archstep__n">7</span>
-          <h2 className="archstep__title">Read it at every level</h2>
-          <ul className="archlinks">
-            <li><Link href="/" className="link-quiet">Overview</Link> - the country</li>
-            <li><Link href="/states" className="link-quiet">States</Link> - map and state desks</li>
-            <li><Link href="/mps" className="link-quiet">MPs</Link> - every member, compared</li>
-            <li><Link href="/projects" className="link-quiet">Projects</Link> - one work at a time</li>
+          <header className="archstep__head">
+            <Tile icon={LayoutDashboard} />
+            <div>
+              <span className="archstep__n">7</span>
+              <h2 className="archstep__title">Read it at every level</h2>
+            </div>
+          </header>
+          <ul className="architems">
+            <li>
+              <Tile icon={LayoutDashboard} size="sm" />
+              <span><Link href="/" className="link-quiet">Overview</Link> - the country</span>
+            </li>
+            <li>
+              <Tile icon={MapIcon} size="sm" />
+              <span><Link href="/states" className="link-quiet">States</Link> - map and desks</span>
+            </li>
+            <li>
+              <Tile icon={Users} size="sm" />
+              <span><Link href="/mps" className="link-quiet">MPs</Link> - every member, compared</span>
+            </li>
+            <li>
+              <Tile icon={ListChecks} size="sm" />
+              <span><Link href="/projects" className="link-quiet">Projects</Link> - one work at a time</span>
+            </li>
           </ul>
         </article>
       </div>
 
       {/* The second level, kept apart on purpose (CLAUDE.md §4). */}
       <aside className="archcohort">
-        <div>
-          <h2 className="archstep__title">Beside the score, never inside it</h2>
-          <p className="archstep__note">
-            Four tests describe an agency or a member rather than a work. What they find is
-            reported at that grain, and never added to any single work&rsquo;s score.
-          </p>
+        <div className="archcohort__lead">
+          <Tile icon={Building2} />
+          <div>
+            <h2 className="archstep__title">Beside the score, never inside it</h2>
+            <p className="archstep__note">
+              Four tests describe an agency or a member rather than a work. What they find is
+              reported at that grain, and never added to any single work&rsquo;s score.
+            </p>
+          </div>
         </div>
         <ul className="archcohort__tests">
           {cohort.map((c) => (
-            <li key={c}>{c}</li>
+            <li key={c.label}>
+              <Tile icon={c.icon} size="sm" />
+              <span>{c.label}</span>
+            </li>
           ))}
         </ul>
       </aside>
 
-      <ul className="archstack" aria-label="Built with">
-        {stack.map((s) => (
-          <li key={s}>{s}</li>
-        ))}
-      </ul>
+      <div className="archstack" aria-label="Built with">
+        <h2 className="archstack__title">Built with</h2>
+        <div className="archstack__groups">
+          {stack.map((g) => (
+            <div key={g.group} className="archstack__group">
+              <span className="archstack__label">{g.group}</span>
+              <ul>
+                {g.items.map((t) => (
+                  <li key={t.name}>
+                    <BrandMark icon={t.icon} />
+                    <span>
+                      <b>{t.name}</b>
+                      <small>{t.note}</small>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

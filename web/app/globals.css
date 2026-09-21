@@ -3477,83 +3477,166 @@ html[data-phone] .phone-wall {
 .compare__list span { color: var(--ink-3); font-weight: 400; }
 
 /* ---------------------------------------------------------- architecture -- */
-/* The top of Sources (owner's call, 2026-09-21): the deck's architecture,
-   drawn in the product's language. Numbered steps in rows joined by arrows;
-   ink and hairlines throughout, and the risk colours only on the three risk
-   bands, where colour means risk. */
+/* The top of Sources (owner's call, 2026-09-21): the deck's architecture with
+   its pictograms and the logos of the stack, in the product's ink. Numbered
+   steps in rows joined by arrows; the only colour is on the risk bands, where
+   colour means risk. */
 .archflow { display: flex; flex-direction: column; }
-.archflow > .display { margin-bottom: 1.5rem; }
-.archflow__row {
-  display: grid;
-  align-items: stretch;
-  gap: 0;
+.archflow__head {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-bottom: 1.6rem;
 }
+.archflow__tag { margin-top: 0.35rem; font-size: 1rem; color: var(--ink-2); }
+.archflow__row { display: grid; align-items: stretch; }
 .archflow__row--source,
-.archflow__row--engine { grid-template-columns: minmax(0, 1fr) 2.4rem minmax(0, 2fr); }
-.archflow__row--out { grid-template-columns: minmax(0, 1fr) 2.4rem minmax(0, 1fr) 2.4rem minmax(0, 1fr); }
+.archflow__row--engine { grid-template-columns: minmax(0, 1fr) 2.6rem minmax(0, 1.9fr); }
+.archflow__row--out { grid-template-columns: minmax(0, 1fr) 2.6rem minmax(0, 1fr) 2.6rem minmax(0, 1fr); }
 
 .archstep {
   position: relative;
-  padding: 1.1rem 1.2rem 1.15rem;
+  padding: 1.15rem 1.25rem 1.2rem;
   background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-card);
   box-shadow: var(--glass-edge), var(--glass-shadow);
 }
+.archstep__head { display: flex; align-items: center; gap: 0.8rem; }
+.archstep__head > div { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
 .archstep__n {
+  flex: none;
   display: inline-grid;
   place-items: center;
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 999px;
   background: var(--ink);
   color: var(--surface);
   font-family: var(--font-data);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
-.archstep__title {
-  margin-top: 0.55rem;
-  font-size: 1.02rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+.archstep__title { font-size: 1.02rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); line-height: 1.25; }
+.archstep__note { margin-top: 0.65rem; font-size: 0.8rem; line-height: 1.45; color: var(--ink-2); }
+
+/* The pictogram tile: an ink icon in a pale round-cornered square. */
+.archicon {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
   color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 1px 0 var(--line), 0 2px 6px rgb(0 0 0 / 0.05);
 }
-.archstep__note {
-  margin-top: 0.55rem;
-  font-size: 0.8rem;
-  line-height: 1.45;
-  color: var(--ink-2);
-}
-.archstep__figs {
-  margin-top: 0.7rem;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
-}
-.archstep__figs dt {
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-.archstep__figs dd {
-  margin-top: 0.1rem;
+.archicon--md { width: 2.6rem; height: 2.6rem; border-radius: 12px; }
+.archicon--sm { width: 1.9rem; height: 1.9rem; border-radius: 9px; }
+
+/* Step 1's two figures. */
+.archdata { margin-top: 0.9rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
+.archdata__item { display: flex; align-items: center; gap: 0.6rem; }
+.archdata__item b {
+  display: block;
   font-family: var(--font-data);
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.archdata__item span { font-size: 0.74rem; color: var(--ink-3); }
+
+/* Step 2: six stations, icon over label, joined by arrows - the deck's strip. */
+.archpipe {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+.archpipe > li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.archpipe > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 1.3rem;
+  right: -0.55rem;
+  width: 0.7rem;
+  height: 2px;
+  background: var(--ink-3);
 }
 
-/* An arrow between steps: a rule with a head, drawn in CSS. */
-.archflow__arrow {
-  position: relative;
-  align-self: center;
-  height: 2px;
-  margin: 0 0.35rem;
-  background: var(--ink);
+/* Steps 3, 6, 7: an icon beside each line. */
+.architems { margin-top: 0.85rem; display: grid; gap: 0.55rem; }
+.architems > li {
+  display: grid;
+  grid-template-columns: 1.9rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.83rem;
+  line-height: 1.4;
+  color: var(--ink-2);
 }
+.architems b,
+.architems a { font-weight: 600; color: var(--ink); }
+
+/* Step 4: icon, weight, name, how. */
+.archweights { margin-top: 0.8rem; display: grid; gap: 0.4rem; }
+.archweights li {
+  display: grid;
+  grid-template-columns: 1.9rem 2.9rem 6.3rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--line);
+}
+.archweights li:last-child { border-bottom: 0; padding-bottom: 0; }
+.archweights__pct { font-family: var(--font-data); font-size: 1.05rem; font-weight: 700; color: var(--ink); }
+.archweights__name { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
+.archweights__how { font-size: 0.8rem; color: var(--ink-2); line-height: 1.35; }
+
+/* Step 5: the scale as a bar, then its three bands - the one place in this
+   diagram with colour, because it is the one place colour means risk. */
+.archgauge {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: 40fr 30fr 30fr;
+  gap: 3px;
+  height: 0.6rem;
+}
+.archgauge span:first-child { border-radius: 999px 0 0 999px; }
+.archgauge span:last-child { border-radius: 0 999px 999px 0; }
+.archgauge__low { background: var(--risk-low); }
+.archgauge__medium { background: var(--risk-medium); }
+.archgauge__high { background: var(--risk-high); }
+.archbands { margin-top: 0.8rem; display: grid; gap: 0.45rem; }
+.archbands li {
+  display: grid;
+  grid-template-columns: 0.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+}
+.archbands li b { font-weight: 600; color: var(--ink); }
+.archbands li span { font-size: 0.8rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.archbands i { width: 0.75rem; height: 0.75rem; border-radius: 999px; }
+.archbands__low i { background: var(--risk-low); }
+.archbands__medium i { background: var(--risk-medium); }
+.archbands__high i { background: var(--risk-high); }
+
+/* Arrows between steps: a rule with a head, drawn in CSS. */
+.archflow__arrow { position: relative; align-self: center; height: 2px; margin: 0 0.4rem; background: var(--ink); }
 .archflow__arrow::after {
   content: "";
   position: absolute;
@@ -3566,14 +3649,7 @@ html[data-phone] .phone-wall {
   translate: 0 -50%;
   rotate: 45deg;
 }
-.archflow__down {
-  position: relative;
-  align-self: center;
-  width: 2px;
-  height: 1.9rem;
-  margin: 0.3rem 0;
-  background: var(--ink);
-}
+.archflow__down { position: relative; align-self: center; width: 2px; height: 1.9rem; margin: 0.3rem 0; background: var(--ink); }
 .archflow__down::after {
   content: "";
   position: absolute;
@@ -3587,150 +3663,68 @@ html[data-phone] .phone-wall {
   rotate: 45deg;
 }
 
-/* Steps inside a step: pills joined by small arrows, wrapping as they must. */
-.archchain {
-  margin-top: 0.8rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.45rem 0.25rem;
-  counter-reset: chain;
-}
-.archchain > li {
-  counter-increment: chain;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--ink);
-}
-.archchain > li::before {
-  content: counter(chain);
-  display: inline-grid;
-  place-items: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  font-size: 0.66rem;
-  font-family: var(--font-data);
-  color: var(--ink-2);
-}
-.archchain > li:not(:last-child)::after {
-  content: "→";
-  margin-left: 0.3rem;
-  color: var(--ink-3);
-}
-.archchain--stack { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-/* Stacked, each line is a counter and one wrapping span - as inline-flex the
-   words were separate flex items that could not wrap, and ran out of the box. */
-.archchain--stack > li {
-  display: grid;
-  grid-template-columns: 1.15rem minmax(0, 1fr);
-  align-items: start;
-  gap: 0.4rem;
-  line-height: 1.4;
-}
-.archchain--stack > li:not(:last-child)::after { content: none; }
-
-/* The five weighted components: weight, name, how. */
-.archweights { margin-top: 0.75rem; display: grid; gap: 0.45rem; }
-.archweights li {
-  display: grid;
-  grid-template-columns: 3rem 6.5rem minmax(0, 1fr);
-  align-items: baseline;
-  gap: 0.6rem;
-  padding-bottom: 0.45rem;
-  border-bottom: 1px solid var(--line);
-}
-.archweights li:last-child { border-bottom: 0; padding-bottom: 0; }
-.archweights__pct {
-  font-family: var(--font-data);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--ink);
-}
-.archweights__name { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
-.archweights__how { font-size: 0.8rem; color: var(--ink-2); line-height: 1.4; }
-
-/* The three bands - the one place in this diagram with colour. */
-.archbands { margin-top: 0.8rem; display: grid; gap: 0.5rem; }
-.archbands li {
-  display: grid;
-  grid-template-columns: 0.8rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-}
-.archbands li b { font-weight: 600; color: var(--ink); }
-.archbands li span { font-size: 0.82rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.archbands i { width: 0.8rem; height: 0.8rem; border-radius: 999px; }
-.archbands__low i { background: var(--risk-low); }
-.archbands__medium i { background: var(--risk-medium); }
-.archbands__high i { background: var(--risk-high); }
-
-.archlist,
-.archlinks { margin-top: 0.75rem; display: grid; gap: 0.45rem; font-size: 0.84rem; line-height: 1.4; color: var(--ink-2); }
-.archlist li,
-.archlinks li { padding-left: 0.85rem; position: relative; }
-.archlist li::before,
-.archlinks li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.55em;
-  width: 4px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--ink-3);
-}
-.archlinks a { font-weight: 600; color: var(--ink); }
-
-/* Cohort tests: a separate band, dashed, because they are a separate level. */
+/* Cohort tests: their own dashed band, because they are their own level. */
 .archcohort {
-  margin-top: 1rem;
+  margin-top: 1.1rem;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   align-items: center;
   gap: 1.2rem;
-  padding: 1rem 1.2rem;
+  padding: 1.05rem 1.25rem;
   border: 1.5px dashed var(--line-strong);
   border-radius: var(--radius-card);
 }
-.archcohort .archstep__title { margin-top: 0; }
-.archcohort__tests {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.45rem;
-}
+.archcohort__lead { display: flex; align-items: flex-start; gap: 0.8rem; }
+.archcohort__lead .archstep__note { margin-top: 0.35rem; }
+.archcohort__tests { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
 .archcohort__tests li {
-  padding: 0.45rem 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.65rem;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--surface);
   font-size: 0.82rem;
   font-weight: 500;
   color: var(--ink);
 }
 
+/* The stack, as the deck sets it: groups of marks with a name and a role. */
 .archstack {
-  margin-top: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  margin-top: 1.1rem;
+  padding: 1.05rem 1.25rem 1.15rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
 }
-.archstack li {
-  padding: 0.3rem 0.75rem;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-pill);
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--ink-2);
-  background: var(--surface);
+.archstack__title {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
 }
+.archstack__groups {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+}
+.archstack__group { min-width: 0; }
+.archstack__label { font-size: 0.74rem; font-weight: 600; color: var(--ink-2); }
+.archstack__group ul { margin-top: 0.5rem; display: grid; gap: 0.55rem; }
+.archstack__group li { display: flex; align-items: center; gap: 0.6rem; color: var(--ink); }
+.archstack__group li svg { flex: none; }
+.archstack__group li b { display: block; font-size: 0.86rem; font-weight: 600; line-height: 1.2; }
+.archstack__group li small { display: block; font-size: 0.72rem; color: var(--ink-3); }
 
+@media (max-width: 1100px) {
+  .archstack__groups { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .archpipe { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 0.9rem; }
+  .archpipe > li:nth-child(3)::after { display: none; }
+}
 @media (max-width: 1000px) {
   .archflow__row--source,
   .archflow__row--engine,
