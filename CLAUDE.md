@@ -94,6 +94,24 @@ pipeline and that wall, and all three must stay:
   duplicated across 250,839 rows — 13 MB in the one table that is rewritten
   nightly, on a database 6 MB short. Never add a derived column to `projects`.
 
+**The refresh must not fight the site.** The nightly rewrites tables the
+live site is reading. A write that takes exclusive locks on two relations in
+turn deadlocks with one ordinary read that took them in the other order - a
+visitor's query on `projects_scored` holding the view and waiting for
+`projects`, while the write holds `projects` and waits for the view. That is
+what failed the 2026-09-20 nightly: the schema step re-applied all of
+`schema.sql` every night, and `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`
+takes an exclusive lock even when there is nothing to add. So:
+- `scripts/apply_schema.py` applies `schema.sql` only when its hash differs
+  from the one recorded in `schema_applied` (`SCHEMA_FORCE=1` overrides); a
+  normal night takes no schema locks at all.
+- Every nightly write - the schema, the loader's three, the scorer's three -
+  runs inside `data/pg_retry.py`'s `with_lock_retry`: `lock_timeout` 10s (a
+  queued exclusive lock stalls every reader behind it), and on a deadlock or a
+  lock timeout, roll back, wait, retry, up to six times. Each is a whole
+  transaction that replaces what it touches, so a retry is safe. Wrap any new
+  nightly write the same way.
+
 If the wall is hit again, the one-time way out is to compact in halves: move
 half of `projects` to a side table, `VACUUM FULL` the remainder, move them back.
 Peak extra is half the table, which fits when a whole one does not.
@@ -627,9 +645,9 @@ the first request, and one failed handshake failed that request - which is
 what broke the 2026-09-21 web deploy), then `minconn` is raised to 4 and
 `_warm` opens the other three in the background, where a failure costs
 nothing. Measured: three parallel statements in one round trip, four idle
-kept. The "idle in transaction" connections also deadlocked the 2026-09-20
-nightly: the schema step's exclusive lock waited on a reader's share lock
-that was never released.
+kept. (An earlier note here blamed the 2026-09-20 nightly's deadlock on those
+idle connections. It was wrong: see "The refresh must not fight the site" in
+§3.)
 
 The web's `get()` retries once on a 5xx or a dropped connection. Web and
 API deploy from the same push, and the web's build prerenders `/provenance`

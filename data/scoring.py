@@ -16,6 +16,7 @@ import vendors
 from sectors import classify_sector
 from sectors import normalize as sectors_normalize
 from sectors import verify as sectors_verify
+from pg_retry import with_lock_retry
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
@@ -646,8 +647,8 @@ if __name__ == "__main__":
     # sitting in memory. That was not theoretical - run_all raised KeyError on
     # the empty frames fetch_expenditures documents as supported.
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
-    write_agency_vendor_profile(conn, agency_profile)
-    write_scores(conn, scored)
+    with_lock_retry(conn, write_agency_vendor_profile, agency_profile, label="write vendor profile")
+    with_lock_retry(conn, write_scores, scored, label="write scores")
     finish_scoring_run(conn, run_id, "success", len(scored))
     print(f"Scored {len(scored)} projects.")
 
@@ -656,7 +657,7 @@ if __name__ == "__main__":
     findings, written = [], 0
     try:
         findings = detectors.run_all(df, expenditures, mp_rows)
-        written = write_detector_findings(conn, findings)
+        written = with_lock_retry(conn, write_detector_findings, findings, label="write findings")
     except Exception as err:  # noqa: BLE001 - the scores are already committed
         print(f"Detectors failed after the scores were written: "
               f"{type(err).__name__}: {err}")

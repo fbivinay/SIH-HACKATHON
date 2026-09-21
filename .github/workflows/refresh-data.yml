@@ -133,16 +133,10 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         # schema.sql is written to be re-runnable, and nothing was running it.
         # Every migration made since this workflow was written reached the
-        # database only because somebody applied it by hand.
-        run: |
-          python - <<'PYEOF'
-          import os, psycopg2
-          conn = psycopg2.connect(os.environ["DATABASE_URL"])
-          with conn, conn.cursor() as cur:
-              cur.execute(open("data/schema.sql").read())
-          conn.close()
-          print("schema applied")
-          PYEOF
+        # database only because somebody applied it by hand. It is applied only
+        # when it has changed, and retried if it deadlocks with a visitor's
+        # query - running it every night is what failed the 2026-09-20 refresh.
+        run: python scripts/apply_schema.py
 
       - name: Load data
         if: steps.config.outputs.configured == 'true'
