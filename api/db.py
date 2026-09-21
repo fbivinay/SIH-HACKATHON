@@ -26,7 +26,13 @@ def _get_pool():
         with _pool_lock:
             if _pool is None:
                 _pool = pg_pool.ThreadedConnectionPool(
-                    minconn=1,
+                    # Opened eagerly, because opening one is the expensive
+                    # part: a fresh TLS handshake to Neon measured 1.0-3.7s
+                    # from a laptop against 0.6s for a round trip on a
+                    # connection that already exists (2026-09-20). A page runs
+                    # two or three statements at once, so a pool that starts
+                    # at one made every one of them but the first pay that.
+                    minconn=4,
                     # Fluid Compute reuses one instance across concurrent
                     # requests, so a handful of connections covers it; Neon's
                     # pooled endpoint caps well above this. 16 rather than 8
@@ -37,6 +43,12 @@ def _get_pool():
                     maxconn=16,
                     dsn=os.environ["DATABASE_URL"],
                     cursor_factory=RealDictCursor,
+                    # Keep the link warm and notice a dead one quickly rather
+                    # than blocking on a statement that will never answer.
+                    keepalives=1,
+                    keepalives_idle=30,
+                    keepalives_interval=10,
+                    keepalives_count=3,
                 )
     return _pool
 
@@ -90,6 +102,13 @@ def _run(sql, params, fetch, commit):
                           cur.fetchall() if fetch == "all" else None)
             if commit:
                 conn.commit()
+            else:
+                # A read still opens a transaction, and psycopg2 leaves it
+                # open: the connection goes back to the pool "idle in
+                # transaction", holding a snapshot and inviting the server to
+                # cut it off, after which the next borrower pays for a new
+                # connection. End it here.
+                conn.rollback()
             pool.putconn(conn)
             return result
         except _STALE as err:

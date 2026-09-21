@@ -1238,6 +1238,7 @@ td.workcell__above { position: relative; z-index: 3; }
    fields were five different widths and wrapped raggedly at the end. The
    columns give every select the same width and every row the same height. */
 .filter-bar {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 1fr)) auto;
   align-items: center;
@@ -1277,6 +1278,72 @@ td.workcell__above { position: relative; z-index: 3; }
 
 .filter-input::placeholder {
   color: var(--ink-3);
+}
+
+/* Ghosts in the shape of what is coming, while the tiles and the rows are
+   still on the wire. A quiet pulse, not a shimmer sweep: the page already has
+   one thing moving while it waits (the bar above), and two read as noise. */
+.skel-card,
+.skel-row {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  animation: skel-pulse 1.4s ease-in-out infinite;
+}
+.skel-card { min-height: 5.5rem; }
+.skel-table { display: flex; flex-direction: column; gap: 0.5rem; }
+.skel-row { height: 5.25rem; }
+.skel-row:nth-child(even) { animation-delay: 0.2s; }
+
+@keyframes skel-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.95; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel-card, .skel-row { animation: none; opacity: 0.7; }
+}
+
+/* An indeterminate sweep along the top edge of the bar while a filter is
+   being applied. Indeterminate because the wait is a server round trip whose
+   length nothing here knows - a percentage would be a lie. */
+.filter-progress {
+  position: absolute;
+  inset: -1px 0 auto 0;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease);
+  pointer-events: none;
+}
+.filter-bar[aria-busy="true"] .filter-progress { opacity: 1; }
+.filter-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: var(--ink);
+  animation: filter-sweep 1.1s linear infinite;
+}
+
+@keyframes filter-sweep {
+  from { translate: -110% 0; }
+  to { translate: 320% 0; }
+}
+
+/* The result is stale for as long as that takes, so it reads as stale. The
+   rows stay where they are - a skeleton would throw away the queue the
+   reader is looking at to say something they can already see. */
+.queue-screen:has(.filter-bar[aria-busy="true"]) .data-table-wrap,
+.queue-screen:has(.filter-bar[aria-busy="true"]) .stat-card {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity var(--t-base) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter-progress::after { animation: none; width: 100%; opacity: 0.35; }
 }
 
 .filter-clear {
@@ -2158,17 +2225,41 @@ main.home {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  /* Fade both ends so items enter and leave rather than being chopped. */
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 3rem,
-    #000 calc(100% - 3rem), transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 3rem,
-    #000 calc(100% - 3rem), transparent);
+}
+
+/* The ends fade so items enter and leave rather than being chopped. Two
+   static gradients over the strip, not a `mask-image` on it: a mask over
+   content that moves every frame makes the whole masked layer repaint every
+   frame - measured 2026-09-20, the strip alone held the page at ~30fps, and
+   it is the same trap CLAUDE.md §11 records for a mask over the hero canvas.
+   These two are painted once and composited. */
+.ticker { position: relative; }
+.ticker::before,
+.ticker::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3rem;
+  z-index: 1;
+  pointer-events: none;
+}
+.ticker::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--surface), transparent);
+}
+.ticker::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--surface), transparent);
 }
 
 .ticker__track {
   display: flex;
   width: max-content;
   animation: ticker-scroll 90s linear infinite;
+  /* Its own compositor layer: without this the strip is repainted rather
+     than moved, and it is wide. */
+  will-change: transform;
 }
 .ticker__set {
   display: flex;
@@ -2238,12 +2329,12 @@ main.home {
    reduced motion the strip becomes an ordinary scrollable row: the same works,
    the same links, no movement. */
 @media (prefers-reduced-motion: reduce) {
-  .ticker__track { animation: none; }
+  .ticker__track { animation: none; will-change: auto; }
+  .ticker::before,
+  .ticker::after { display: none; }
   .ticker__viewport {
     overflow-x: auto;
     scrollbar-width: thin;
-    -webkit-mask-image: none;
-    mask-image: none;
   }
   /* One copy is enough when nothing loops; the duplicate is already hidden
      from assistive tech, so hide it from everyone. */

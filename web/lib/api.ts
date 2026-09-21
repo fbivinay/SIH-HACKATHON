@@ -541,7 +541,10 @@ const API_BYPASS = process.env.API_PROTECTION_BYPASS;
 // refreshes is a review, and submitting one expires the whole tag (see
 // app/alerts/actions.ts), so a reviewer always reads their own write.
 const CACHE_TAG = "api";
-const CACHE_SECONDS = 300;
+// The record is rewritten once a night, so half an hour of staleness costs
+// nothing and a filter a reader goes back to is instant. A review calls
+// updateTag(CACHE_TAG), so a reviewer always reads their own write.
+const CACHE_SECONDS = 1800;
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {

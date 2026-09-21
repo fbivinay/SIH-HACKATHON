@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { FilterOptions } from "@/lib/api";
 import { formatCount, riskLevelLabel } from "@/lib/format";
@@ -26,6 +26,12 @@ export default function ProjectFilters({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  // A filter is a round trip: the rows, the totals and the tiles are all
+  // recomputed on the server. Locally that is seconds, and until now the page
+  // sat looking finished the whole time, which is what "laggy" meant - the
+  // work was invisible. isPending is true from the click until the new rows
+  // are on screen, and the bar and the table say so.
+  const [isPending, startTransition] = useTransition();
 
   const q = searchParams.get("q") ?? "";
   const state = searchParams.get("state") ?? "";
@@ -58,7 +64,9 @@ export default function ProjectFilters({
     // is shorter than the offset.
     params.delete("offset");
     const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    startTransition(() => {
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    });
   }
 
   function handleQChange(value: string) {
@@ -70,13 +78,16 @@ export default function ProjectFilters({
   function clearAll() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setQInput("");
-    router.replace(pathname, { scroll: false });
+    startTransition(() => router.replace(pathname, { scroll: false }));
   }
 
   const hasFilters = Boolean(q || state || riskLevel || lsTerm || status);
 
   return (
-    <div className="filter-bar">
+    <div className="filter-bar" aria-busy={isPending || undefined}>
+      {/* The sweep is the only thing on the page that says a filter is being
+          applied; the rows below it go quiet at the same time. */}
+      <div className="filter-progress" aria-hidden="true" />
       <div className="filter-field filter-field--grow">
         <label htmlFor="project-search" className="sr-only">
           Search works by name, MP, district, state, or agency

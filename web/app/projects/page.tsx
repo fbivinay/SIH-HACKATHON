@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { api, alertsExportUrl } from "@/lib/api";
 import Pager from "@/components/Pager";
@@ -22,7 +23,17 @@ const STATUS_LABELS: Record<string, string> = {
   dismissed: "Dismissed",
 };
 
-export default async function AlertsPage({
+/**
+ * The queue.
+ *
+ * The shell - the filter bar and the download - is rendered from nothing but
+ * the URL, so it is on screen immediately; the tiles and the table each wait
+ * on their own request behind a <Suspense>. Before this the page awaited all
+ * three before a byte of HTML left the server, which on a fresh filter was
+ * two to six seconds of the previous page (measured locally 2026-09-20, where
+ * a round trip to Neon is ~220ms and a cold count ~500ms).
+ */
+export default async function ProjectsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -44,37 +55,92 @@ export default async function AlertsPage({
   const offset = Number.parseInt(filters.offset ?? "0", 10) || 0;
   filters.offset = String(offset);
 
-  const [page, filterOptions, summary] = await Promise.all([
-    api.alerts(filters),
-    api.filters().catch(() => ({ states: [], risk_levels: [] })),
-    // The same filters the table uses, minus paging - the tiles describe the
-    // queue below them, not the whole country.
-    api
-      .alertSummary({
-        ...Object.fromEntries(
-          Object.entries(filters).filter(([k]) => k !== "limit" && k !== "offset")
-        ),
-        // The summary endpoint defaults its floor to 40, so outside the queue
-        // the tiles would still count only the queue: "All works" read
-        // 48,296 in scope and "Low" read 0. Say 0 explicitly there.
-        min_score: filters.min_score ?? "0",
-      })
-      .catch(() => null),
-  ]);
+  // Memoised on the API for ten minutes and ~5ms warm, so the shell does not
+  // wait on anything that moves.
+  const filterOptions = await api.filters().catch(() => ({ states: [], risk_levels: [] }));
 
-  // Both desks send an officer here with the queue silently scoped to their
-  // place, and nothing on the page said so - now that the tiles count the
-  // filtered set, an unexplained 261 is more confusing, not less.
-  const scope: string[] = [];
-  if (filters.q) scope.push(`matching \u201c${filters.q}\u201d`);
-  if (filters.district) scope.push(`in ${filters.district}`);
-  if (filters.state) scope.push(`in ${filters.state}`);
-  if (filters.sector) scope.push(`in ${filters.sector}`);
-  if (filters.risk_level) scope.push(`at ${filters.risk_level} risk`);
-  if (filters.mp_id) scope.push("recommended by one member");
+  // Both Suspense boundaries are keyed on the filters: a new filter set is a
+  // new request, and without the key React would keep showing the old one
+  // rather than its skeleton on a hard load.
+  const key = new URLSearchParams(filters).toString();
 
-  const tiles = summary
-    ? [
+  return (
+    <main>
+      {/* No visible heading: the owner wanted the queue to start at the top of
+          the page. The h1 stays for screen readers and the document outline. */}
+      <h1 className="sr-only">Projects — what to verify next</h1>
+
+      <section className="shell pt-8 queue-screen">
+        <Suspense key={`t-${key}`} fallback={<TilesSkeleton />}>
+          <QueueTiles filters={filters} allWorks={allWorks} />
+        </Suspense>
+
+        <div className="mt-5">
+          <ProjectFilters filterOptions={filterOptions} statuses={Object.keys(STATUS_LABELS)} />
+        </div>
+
+        {/* The brief asks this platform to reduce manual monitoring effort. An
+            officer who narrows the queue to their district and finds work to
+            inspect needs to hand that list to whoever inspects it. */}
+        <div className="mt-4 flex justify-end">
+          <a href={alertsExportUrl(filters)} className="btn btn--solid" download>
+            Download this queue (CSV)
+          </a>
+        </div>
+
+        <Suspense key={`q-${key}`} fallback={<TableSkeleton />}>
+          <QueueTable filters={filters} offset={offset} />
+        </Suspense>
+      </section>
+    </main>
+  );
+}
+
+/** Five ghost tiles and a ghost table, in the shape of what is coming. */
+function TilesSkeleton() {
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3" aria-hidden="true">
+      {Array.from({ length: 5 }, (_, i) => (
+        <div key={i} className="stat-card skel-card" />
+      ))}
+    </div>
+  );
+}
+
+function TableSkeleton() {
+  return (
+    <div className="mt-2 skel-table" role="status" aria-label="Loading the queue">
+      {Array.from({ length: 6 }, (_, i) => (
+        <div key={i} className="skel-row" />
+      ))}
+    </div>
+  );
+}
+
+async function QueueTiles({
+  filters,
+  allWorks,
+}: {
+  filters: Record<string, string>;
+  allWorks: boolean;
+}) {
+  // The same filters the table uses, minus paging - the tiles describe the
+  // queue below them, not the whole country.
+  const summary = await api
+    .alertSummary({
+      ...Object.fromEntries(
+        Object.entries(filters).filter(([k]) => k !== "limit" && k !== "offset")
+      ),
+      // The summary endpoint defaults its floor to 40, so outside the queue
+      // the tiles would still count only the queue: "All works" read
+      // 48,296 in scope and "Low" read 0. Say 0 explicitly there.
+      min_score: filters.min_score ?? "0",
+    })
+    .catch(() => null);
+
+  if (!summary) return null;
+
+  const tiles = [
         {
           label: "Awaiting review",
           value: formatCount(summary.pending),
@@ -111,15 +177,58 @@ export default async function AlertsPage({
                   summary.medium
                 )} medium, ${formatCount(summary.in_scope - summary.high - summary.medium)} low`
               : `Every ${riskLevelLabel(filters.risk_level ?? "").toLowerCase()} work`,
-          tone: "accent" as const,
-        },
-      ]
-    : [];
+      tone: "accent" as const,
+    },
+  ];
 
-  // Scores are NULL until scoring.py has run over a fresh load, and the queue's
-  // min_score filter excludes NULLs - so an unscored database produces an empty
-  // page that looks broken. Say what is actually happening instead.
-  const scoringPending = summary !== null && summary.in_scope === 0 && page.total === 0;
+  return (
+    <>
+      {/* Scores are NULL until scoring.py has run over a fresh load, and the
+          queue's min_score filter excludes NULLs - so an unscored database
+          produces an empty page that looks broken. Say what is happening. */}
+      {summary.in_scope === 0 && (
+        <div className="notice mb-5" role="status">
+          <span aria-hidden="true">&#9679;</span>
+          <span>
+            No work has a risk score yet — the scoring pass has not finished since the
+            last data load. The queue fills in as soon as it does.
+          </span>
+        </div>
+      )}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {tiles.map((t) => (
+          <div key={t.label} className={`stat-card stat-card--${t.tone}`}>
+            <div className="stat-card__label">{t.label}</div>
+            <div className="stat-card__value">
+              <CountUp text={String(t.value)} />
+            </div>
+            <div className="stat-card__note">{t.note}</div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+async function QueueTable({
+  filters,
+  offset,
+}: {
+  filters: Record<string, string>;
+  offset: number;
+}) {
+  const page = await api.alerts(filters);
+
+  // Both desks send an officer here with the queue silently scoped to their
+  // place, and nothing on the page said so - now that the tiles count the
+  // filtered set, an unexplained 261 is more confusing, not less.
+  const scope: string[] = [];
+  if (filters.q) scope.push(`matching \u201c${filters.q}\u201d`);
+  if (filters.district) scope.push(`in ${filters.district}`);
+  if (filters.state) scope.push(`in ${filters.state}`);
+  if (filters.sector) scope.push(`in ${filters.sector}`);
+  if (filters.risk_level) scope.push(`at ${filters.risk_level} risk`);
+  if (filters.mp_id) scope.push("recommended by one member");
 
   const pageHref = (o: number) => {
     const params = new URLSearchParams(filters);
@@ -131,41 +240,7 @@ export default async function AlertsPage({
   };
 
   return (
-    <main>
-      {/* No visible heading: the owner wanted the queue to start at the top of
-          the page. The h1 stays for screen readers and the document outline. */}
-      <h1 className="sr-only">Projects — what to verify next</h1>
-
-      <section className="shell pt-8">
-
-      {scoringPending && (
-        <div className="notice mb-5" role="status">
-          <span aria-hidden="true">&#9679;</span>
-          <span>
-            No work has a risk score yet — the scoring pass has not finished since the
-            last data load. The queue fills in as soon as it does.
-          </span>
-        </div>
-      )}
-
-      {tiles.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          {tiles.map((t) => (
-            <div key={t.label} className={`stat-card stat-card--${t.tone}`}>
-              <div className="stat-card__label">{t.label}</div>
-              <div className="stat-card__value">
-                <CountUp text={String(t.value)} />
-              </div>
-              <div className="stat-card__note">{t.note}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-5">
-        <ProjectFilters filterOptions={filterOptions} statuses={Object.keys(STATUS_LABELS)} />
-      </div>
-
+    <>
       {/* The range line above the table went on the owner's call; the pager
           under it still says where the reader is. An empty result still has
           to say so, or a blank table reads as a broken one. */}
@@ -183,15 +258,6 @@ export default async function AlertsPage({
           </Link>
         </p>
       )}
-
-      {/* The brief asks this platform to reduce manual monitoring effort. An
-          officer who narrows the queue to their district and finds work to
-          inspect needs to hand that list to whoever inspects it. */}
-      <div className="mt-4 flex justify-end">
-        <a href={alertsExportUrl(filters)} className="btn btn--solid" download>
-          Download this queue (CSV)
-        </a>
-      </div>
 
       <div className="mt-2 data-table-wrap">
         <table className="data-table">
@@ -317,7 +383,6 @@ export default async function AlertsPage({
           noun=""
         />
       )}
-      </section>
-    </main>
+    </>
   );
 }
