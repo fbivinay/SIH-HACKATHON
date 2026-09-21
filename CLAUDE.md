@@ -281,7 +281,11 @@ owner saw. The first two lines are bold and the reasons are not.
 The filter bar is a **grid**, not a wrapping flex row — flex sized each select
 to its own widest option, so five fields were five widths and wrapped
 raggedly. The pager prints no "Previous" on the first page and no noun after
-the total. Signals, Rules and Trends were deleted; what they carried lives
+the total. The five tiles above the queue are the review-status filter
+(owner's call, 2026-09-21): each links to the same URL with `status` set,
+pressing the one that is on takes it off, and "In scope" is every status.
+Their counts are taken **without** the status filter - under it, pressing
+Escalated would have zeroed every other tile. Signals, Rules and Trends were deleted; what they carried lives
 on `/provenance`. **The overview's first screen is the hero, the term switcher
 and the six figures, filling the viewport between the masthead and the ticker
 with no slack** (owner's call, 2026-09-16): the headline alone (the lede under

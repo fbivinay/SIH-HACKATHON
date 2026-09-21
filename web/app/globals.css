@@ -906,6 +906,19 @@ html { overflow-anchor: none; }
               transform var(--t-base) var(--ease),
               border-color var(--t-base) var(--ease);
 }
+/* A tile that is also a filter. The one that is on carries a solid ink edge -
+   weight, not a hue, because colour here only ever means risk. */
+.stat-card--link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.stat-card--link[aria-current] {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--ink), var(--glass-shadow);
+}
+
 /* Hover and press live in the pointer-feel block at the end of this file,
    which supersedes the lift that used to be here: it applied only to cards
    that were links, so most of the interface did not respond at all. */
