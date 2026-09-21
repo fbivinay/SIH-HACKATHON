@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ComponentType, SVGProps } from "react";
 import {
@@ -70,9 +71,13 @@ function Tile({ icon: I, size = "md" }: { icon: Icon; size?: "md" | "sm" }) {
  * product's own ink: the only colour in it is on the three risk bands, where
  * colour means risk (CLAUDE.md §10).
  *
- * The deck's slide shows the State Emblem for the Ministry. It is not used
- * here: the Emblem's use is restricted by law to official purposes, and a
- * building stands in for "the government's record" just as well.
+ * Step 1 carries the State Emblem beside the Ministry's name, as the deck's
+ * slide does (owner's call, 2026-09-21), to say whose record this is. It
+ * attributes the data and claims nothing more: the footer says the site is
+ * not affiliated with any ministry, and that has to stay true beside it. The
+ * Emblem's use is restricted by the State Emblem of India (Prohibition of
+ * Improper Use) Act, 2005, which is why it appears nowhere else. The image is
+ * Wikimedia Commons' "Emblem of India.svg", rendered once to a 9KB WebP.
  *
  * Every count comes from the live record, passed in by the page, so it cannot
  * go stale the way a typed figure did twice in the deck.
@@ -144,6 +149,19 @@ export default function ArchitectureFlow({
               <h2 className="archstep__title">The published MPLADS record</h2>
             </div>
           </header>
+          <div className="archgov">
+            <Image
+              src="/emblem-of-india.webp"
+              alt="State Emblem of India"
+              width={50}
+              height={80}
+              unoptimized
+            />
+            <div>
+              <b className="archgov__name">Ministry of Statistics and Programme Implementation</b>
+              <span className="archgov__sub">Government of India</span>
+            </div>
+          </div>
           <div className="archdata">
             <div className="archdata__item">
               <Tile icon={Database} size="sm" />

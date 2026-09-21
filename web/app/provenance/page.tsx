@@ -5,6 +5,31 @@ import ArchitectureFlow from "@/components/ArchitectureFlow";
 
 export const metadata = { title: "Where the numbers come from" };
 
+// Two points per detector (owner's call, 2026-09-21): what it measures, and
+// what it does not claim. The second is the one that must survive any cut - a
+// statistic about a named agency or member without its limit is an
+// accusation. Kept here as short copy of the API's own text (data/detectors.py
+// via /api/detectors), which a detector without an entry falls back to. No
+// figure is repeated here that the data could move.
+const DETECTOR_POINTS: Record<string, [string, string]> = {
+  "D-01": [
+    "Share of an agency's yearly payments made in March, when unspent money can lapse.",
+    "A spending pattern, not a finding: an agency whose sanctions arrive late looks the same.",
+  ],
+  "D-02": [
+    "How far an agency's payment amounts stray from Benford's first-digit law.",
+    "Ranks agencies against each other - the weakest signal here, never evidence on its own.",
+  ],
+  "D-03": [
+    "Allocation a member has never committed to any work.",
+    "Not a suspicion: the money stays spendable after a term, so only members far above the typical share appear.",
+  ],
+  "D-04": [
+    "Share of an agency's works sanctioned at one identical amount.",
+    "Similar works can cost the same - it means the costing is worth a look, not that it is wrong.",
+  ],
+};
+
 export default async function ProvenancePage() {
   // The architecture, where the AI is, and the detector catalogue. The
   // compliance rule book and its blind spots were here until the owner removed
@@ -35,13 +60,6 @@ export default async function ProvenancePage() {
         {detectors.length > 0 && (
           <div className="mt-12">
             <h2 className="section-head">What each detector looks for</h2>
-            <p className="lede !mx-0 !max-w-3xl">
-              Four tests run across whole populations rather than single works. An agency or
-              a member can show a pattern that no individual work explains, so these are
-              reported at that grain and never folded into any work&rsquo;s score. Each one
-              is printed here with what it does <em>not</em> claim, because a statistic
-              without its limits is an accusation.
-            </p>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               {detectors.map((d) => (
                 <article key={d.code} className="card model-card">
@@ -54,13 +72,15 @@ export default async function ProvenancePage() {
                     {d.name}
                   </h3>
                   <p className="model-card__kind">
-                    Per {d.subject} · {formatCount(d.findings)} findings on record
+                    Per {d.subject === "mp" ? "member" : d.subject} ·{" "}
+                    {formatCount(d.findings)} findings on record
                   </p>
-                  <p className="model-card__does">{d.what}</p>
-                  <p className="model-card__decides">
-                    <span>Does not claim</span>
-                    {d.limit}
-                  </p>
+                  <ul className="model-card__points">
+                    <li>{DETECTOR_POINTS[d.code]?.[0] ?? d.what}</li>
+                    <li>
+                      <b>Does not claim.</b> {DETECTOR_POINTS[d.code]?.[1] ?? d.limit}
+                    </li>
+                  </ul>
                 </article>
               ))}
             </div>

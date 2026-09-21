@@ -3533,6 +3533,26 @@ html[data-phone] .phone-wall {
 .archicon--md { width: 2.6rem; height: 2.6rem; border-radius: 12px; }
 .archicon--sm { width: 1.9rem; height: 1.9rem; border-radius: 9px; }
 
+/* Whose record it is: the Emblem beside the Ministry's name (owner's call,
+   2026-09-21). It is the one image in the diagram not drawn in ink. */
+.archgov {
+  margin-top: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.archgov img { flex: none; width: 2.4rem; height: auto; }
+/* flex: 1, or the text box sat at its narrowest and set one word a line. */
+.archgov > div { flex: 1; min-width: 0; }
+/* Classes, not `b` and `span`: WordLift wraps every word in a span, and an
+   element selector made each word a block of its own. */
+.archgov__name { display: block; font-size: 0.86rem; font-weight: 600; line-height: 1.3; color: var(--ink); }
+.archgov__sub { display: block; margin-top: 0.1rem; font-size: 0.74rem; color: var(--ink-3); }
+
 /* Step 1's two figures. */
 .archdata { margin-top: 0.9rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
 .archdata__item { display: flex; align-items: center; gap: 0.6rem; }
@@ -3732,3 +3752,30 @@ html[data-phone] .phone-wall {
   .archflow__arrow { display: none; }
   .archcohort { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Model and detector cards as short points (owner's call, 2026-09-21): a small
+   ink mark per point rather than a paragraph. */
+.model-card__points {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.model-card__points li { position: relative; padding-left: 1rem; text-wrap: pretty; }
+.model-card__points li::before {
+  content: "";
+  position: absolute;
+  left: 0.1rem;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+.model-card__points b { font-weight: 600; color: var(--ink); }
+/* The card's name and its one-line kind. These had no rule at all, so the
+   kind printed as large as the name. */
+.model-card__name { font-size: 1.02rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.model-card__kind { margin-top: 0.2rem; font-size: 0.78rem; color: var(--ink-3); }
