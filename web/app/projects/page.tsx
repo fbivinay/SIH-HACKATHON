@@ -43,6 +43,10 @@ export default async function ProjectsPage({
   for (const [k, v] of Object.entries(sp)) {
     if (typeof v === "string" && v !== "") filters[k] = v;
   }
+  // The URL as the reader wrote it, before the scope rules below rewrite it -
+  // what a tile link keeps when it changes only the review status.
+  const asWritten = new URLSearchParams(filters);
+  asWritten.delete("offset");
   // One page for the whole record now that Works is gone, so the band control
   // is also the scope: nothing chosen is the review queue (score 40 and above),
   // "ALL" is every work, and a named band is that band whatever its score - a
@@ -72,7 +76,7 @@ export default async function ProjectsPage({
 
       <section className="shell pt-8 queue-screen">
         <Suspense key={`t-${key}`} fallback={<TilesSkeleton />}>
-          <QueueTiles filters={filters} allWorks={allWorks} />
+          <QueueTiles filters={filters} allWorks={allWorks} asWritten={asWritten.toString()} />
         </Suspense>
 
         <div className="mt-5">
@@ -120,16 +124,23 @@ function TableSkeleton() {
 async function QueueTiles({
   filters,
   allWorks,
+  asWritten,
 }: {
   filters: Record<string, string>;
   allWorks: boolean;
+  asWritten: string;
 }) {
   // The same filters the table uses, minus paging - the tiles describe the
   // queue below them, not the whole country.
   const summary = await api
     .alertSummary({
       ...Object.fromEntries(
-        Object.entries(filters).filter(([k]) => k !== "limit" && k !== "offset")
+        // Nor the review status: the tiles ARE the status filter, and
+        // counting under it would read "Escalated 3" beside "Verified 0"
+        // the moment Escalated was pressed.
+        Object.entries(filters).filter(
+          ([k]) => k !== "limit" && k !== "offset" && k !== "status"
+        )
       ),
       // The summary endpoint defaults its floor to 40, so outside the queue
       // the tiles would still count only the queue: "All works" read
@@ -143,30 +154,35 @@ async function QueueTiles({
   const tiles = [
         {
           label: "Awaiting review",
+          status: "pending",
           value: formatCount(summary.pending),
           note: `${formatINR(summary.pending_sanctioned_amount)} sanctioned`,
           tone: "high" as const,
         },
         {
           label: "Escalated",
+          status: "escalated",
           value: formatCount(summary.escalated),
           note: "Sent for physical verification",
           tone: "medium" as const,
         },
         {
           label: "Verified",
+          status: "verified",
           value: formatCount(summary.verified),
           note: "Checked, found in order",
           tone: "low" as const,
         },
         {
           label: "Dismissed",
+          status: "dismissed",
           value: formatCount(summary.dismissed),
           note: "Flag did not hold",
           tone: "neutral" as const,
         },
         {
           label: "In scope",
+          status: "",
           value: formatCount(summary.in_scope),
           note: filters.min_score
             ? `Score ${filters.min_score} and above — ${formatCount(summary.high)} high, ${formatCount(
@@ -195,17 +211,35 @@ async function QueueTiles({
           </span>
         </div>
       )}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        {tiles.map((t) => (
-          <div key={t.label} className={`stat-card stat-card--${t.tone}`}>
-            <div className="stat-card__label">{t.label}</div>
-            <div className="stat-card__value">
-              <CountUp text={String(t.value)} />
-            </div>
-            <div className="stat-card__note">{t.note}</div>
-          </div>
-        ))}
-      </div>
+      {/* Each tile is the filter it counts: press "Escalated" and the table
+          lists the escalated works, under every other filter already set, so
+          the number on the tile and the rows below it are the same set.
+          Pressing the tile that is already on takes it off, like a decision
+          button; "In scope" is every status. */}
+      <nav className="grid grid-cols-2 lg:grid-cols-5 gap-3" aria-label="Filter by review status">
+        {tiles.map((t) => {
+          const on = (filters.status ?? "") === t.status;
+          const next = new URLSearchParams(asWritten);
+          if (t.status && !on) next.set("status", t.status);
+          else next.delete("status");
+          const qs = next.toString();
+          return (
+            <Link
+              key={t.label}
+              href={qs ? `/projects?${qs}` : "/projects"}
+              scroll={false}
+              aria-current={on ? "true" : undefined}
+              className={`stat-card stat-card--${t.tone} stat-card--link`}
+            >
+              <div className="stat-card__label">{t.label}</div>
+              <div className="stat-card__value">
+                <CountUp text={String(t.value)} />
+              </div>
+              <div className="stat-card__note">{t.note}</div>
+            </Link>
+          );
+        })}
+      </nav>
     </>
   );
 }
