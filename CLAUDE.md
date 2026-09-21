@@ -150,8 +150,14 @@ Reporting one combined number invites reading all of it as our error, which it
 is not. It is no longer on the site (owner's call, 2026-09-21: the Sources page
 opens with the architecture instead - `components/ArchitectureFlow.tsx`, the
 deck's slides 2 and 3 with lucide pictograms and the stack's own marks from
-simple-icons, all in ink, colour only on the risk bands, and no State Emblem
-(its use is restricted by law); every count live), but
+simple-icons, all in ink, colour only on the risk bands; every count live).
+Its step 1 carries the State Emblem beside the Ministry's name, on the owner's
+call (2026-09-21) - attribution of whose record this is, nothing more, and
+the only place on the site it appears: its use is restricted by the State
+Emblem of India (Prohibition of Improper Use) Act, 2005, and the footer's
+"not affiliated with any ministry" has to stay true beside it. The models and
+detectors on that page are three and two short points each, with no file
+names (owner's call, same day). The reconciliation is gone from the page, but
 it still runs nightly and `/api/provenance` still serves both hops.
 
 ## 8. The language model labels, it does not judge
@@ -494,7 +500,10 @@ to read as a zoom), on `--t-lift`/`--ease-lift`. **Table rows do not zoom**
 (2026-09-20): the row was the only hover on the page that changed the page's
 own geometry, and at the foot of the queue the owner saw it shake. Rows still
 tint on hover; `--lift-row` is unused. Words
-are wrapped in `.w` spans at runtime by `components/WordLift.tsx`, which must
+are wrapped in `.w` spans at runtime by `components/WordLift.tsx` - **so never
+style running text with an element selector like `.box span`**: it matches
+every word, and `.archgov span { display: block }` set the Ministry's name one
+word to a line. Give the element a class. WordLift must
 keep two promises: it never takes a text node away from React (the original
 stays in place, emptied, and the words are rebuilt from it when React writes
 into it — that is what keeps a term switch updating the lede), and it never
