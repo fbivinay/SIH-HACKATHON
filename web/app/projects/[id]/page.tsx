@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, notFoundOr } from "@/lib/api";
 import ReviewTrail from "@/components/ReviewTrail";
 import {
   formatCount,
@@ -71,6 +70,26 @@ function methodFor(reason: string): string {
   return "Stated compliance rule";
 }
 
+// Rendered on a work's first visit and then served from the cache (ISR), for
+// all 250,839 of them - none at build. A decision expires it with the rest of
+// the "api" tag (app/projects/actions.ts), so a reviewer reads their own write.
+export async function generateStaticParams() {
+  return [];
+}
+
+// The work's own name in the tab. The same cached read as the page below, so
+// it costs nothing extra.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const decoded = decodeURIComponent(id);
+  try {
+    const w = /^\d+$/.test(decoded) ? await api.project(Number(decoded)) : await api.projectByKey(decoded);
+    return { title: w.work_name ?? "Work" };
+  } catch {
+    return { title: "Work" };
+  }
+}
+
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   // The segment is either a serial id or a work_key. Both resolve here, so a
@@ -82,8 +101,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   let p;
   try {
     p = isSerial ? await api.project(Number(decoded)) : await api.projectByKey(decoded);
-  } catch {
-    notFound();
+  } catch (err) {
+    notFoundOr(err);
   }
 
   const components = [

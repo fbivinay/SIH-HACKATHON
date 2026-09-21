@@ -3,7 +3,7 @@ import { formatCount } from "@/lib/format";
 import WhereTheAI from "@/components/WhereTheAI";
 import ArchitectureFlow from "@/components/ArchitectureFlow";
 
-export const metadata = { title: "Where the numbers come from" };
+export const metadata = { title: "Sources" };
 
 // Two points per detector (owner's call, 2026-09-21): what it measures, and
 // what it does not claim. The second is the one that must survive any cut - a

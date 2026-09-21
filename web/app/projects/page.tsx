@@ -8,6 +8,8 @@ import RiskBar from "@/components/RiskBar";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 
+export const metadata = { title: "Projects" };
+
 // Each row carries its full evidence, which is the point of the page and also
 // about 280px. Fifty of them was a 14,000px scroll.
 const PAGE_SIZE = 25;

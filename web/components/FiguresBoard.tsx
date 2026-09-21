@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CountUp from "@/components/CountUp";
 import { TERMS, termHref } from "@/lib/terms";
 
@@ -29,6 +29,14 @@ type Scope = { term: string; stats: Stat[]; pendingNote: string | null };
 
 export default function FiguresBoard({ scopes, initial }: { scopes: Scope[]; initial: string }) {
   const [term, setTerm] = useState(initial);
+  // The page is static, so the term a link asked for is read here, once,
+  // after hydration: the server's render and the first client render agree
+  // on the default, and a link to ?ls_term=17 switches right after.
+  useEffect(() => {
+    const asked = new URLSearchParams(window.location.search).get("ls_term");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the URL is only readable after hydration
+    if (asked !== null && scopes.some((s) => s.term === asked)) setTerm(asked);
+  }, [scopes]);
   const scope = scopes.find((s) => s.term === term) ?? scopes[0];
   const meta = TERMS.find((t) => t.value === term) ?? TERMS[0];
 

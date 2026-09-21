@@ -75,14 +75,19 @@ export default function ClickableSections() {
     // pointer is in it, by the same test the click uses, so the ring cursor
     // never promises a click that would do nothing. Marked on entry rather
     // than for every section up front - a page can hold a thousand rows.
+    // mouseover fires for every word span the pointer crosses, so the section
+    // is found first and the link search runs only when it changes.
     let marked: HTMLElement | null = null;
+    let lastSection: Element | null = null;
     const onOver = (e: MouseEvent) => {
       const t = e.target as Element | null;
-      const a = t ? targetFor(t) : null;
-      const section = a ? (t as Element).closest<HTMLElement>(SECTIONS) : null;
-      if (section === marked) return;
+      const section = t?.closest?.(SECTIONS) ?? null;
+      if (section === lastSection) return;
+      lastSection = section;
+      const next = t && section && targetFor(t) ? (section as HTMLElement) : null;
+      if (next === marked) return;
       marked?.removeAttribute("data-section-link");
-      marked = section;
+      marked = next;
       marked?.setAttribute("data-section-link", "");
     };
     document.addEventListener("click", onClick);

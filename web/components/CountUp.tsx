@@ -70,13 +70,13 @@ export default function CountUp({ text }: { text: string }) {
     const decimals = raw.includes(".") ? raw.split(".")[1].length : 0;
     const prefix = text.slice(0, match.index);
     const suffix = text.slice((match.index ?? 0) + raw.length);
-    const render = (n: number) =>
-      prefix +
-      n.toLocaleString("en-IN", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      }) +
-      suffix;
+    // One formatter per count, not one per frame: toLocaleString builds a new
+    // Intl formatter on every call.
+    const fmt = new Intl.NumberFormat("en-IN", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    const render = (n: number) => prefix + fmt.format(n) + suffix;
 
     let frame = 0;
     let start = 0;
@@ -122,6 +122,8 @@ export default function CountUp({ text }: { text: string }) {
   return (
     <span
       ref={ref}
+      // WordLift leaves this alone: its text changes every frame while counting.
+      data-count=""
       style={{
         fontVariantNumeric: "tabular-nums",
         opacity: dim ? 0 : 1,

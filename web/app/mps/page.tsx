@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { api } from "@/lib/api";
 import { cleanName, profileOf, unlistedMembers } from "@/lib/mpProfiles";
-import MpDirectory, { type MpCardRow } from "@/components/MpDirectory";
+import MpDirectory from "@/components/MpDirectory";
+import { packRow, type MpCardRow } from "@/lib/mpRows";
 
 export const metadata: Metadata = { title: "Members of Parliament" };
 
@@ -12,16 +13,13 @@ export const metadata: Metadata = { title: "Members of Parliament" };
  * Both terms are rendered on the server and handed over together, so the
  * term switch is a state change and not a round trip - the same reasoning as
  * the overview's switcher (CLAUDE.md §11).
+ *
+ * Static: nothing reads the request. The term and the members a link picks
+ * (?ls_term=, ?compare=) are read in the browser by MpDirectory. The 1,576
+ * rows travel as arrays rather than objects (packRow), which is most of the
+ * page's weight: field names repeated 1,576 times were a third of it.
  */
-export default async function MpsPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const sp = await searchParams;
-  const initialTerm = sp.ls_term === "17" ? "17" : "18";
-  const initialPicked =
-    typeof sp.compare === "string" ? sp.compare.split(",").filter(Boolean).slice(0, 4) : [];
+export default async function MpsPage() {
   const [t18, t17] = await Promise.all([api.mpDirectory("18"), api.mpDirectory("17")]);
 
   const toCards = (rows: typeof t18): MpCardRow[] =>
@@ -93,9 +91,10 @@ export default async function MpsPage({
     <main className="shell py-8">
       <h1 className="display">Members of Parliament</h1>
       <MpDirectory
-        byTerm={{ "18": [...toCards(t18), ...unlisted], "17": toCards(t17) }}
-        initialTerm={initialTerm}
-        initialPicked={initialPicked}
+        packed={{
+          "18": [...toCards(t18), ...unlisted].map(packRow),
+          "17": toCards(t17).map(packRow),
+        }}
       />
     </main>
   );
