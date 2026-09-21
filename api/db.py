@@ -85,14 +85,16 @@ def _warm(pool, n):
 _STALE = (psycopg2.OperationalError, psycopg2.InterfaceError)
 
 
-def _borrow(pool, wait=5.0):
+def _borrow(pool, wait=15.0):
     """Take a connection, waiting briefly rather than failing outright.
 
     psycopg2's pool raises the moment it is empty. A burst - a build
     prerendering seven pages at once, each page several endpoints - then turns
     into 500s even though the connections would free up milliseconds later.
-    Queueing for a few seconds is what a caller wants; failing after that is
-    still better than hanging forever.
+    Queueing is what a caller wants; failing after that is still better than
+    hanging forever. 15s rather than 5: a site build prerenders every static
+    page and all 36 state desks at once, and at 5s the queue gave up and one
+    500 failed the build (2026-09-21).
     """
     deadline = time.monotonic() + wait
     while True:

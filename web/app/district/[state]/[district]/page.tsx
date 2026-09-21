@@ -10,6 +10,7 @@ import {
   workStatusLabel,
 } from "@/lib/format";
 import CountUp from "@/components/CountUp";
+import { cleanName, profileOf } from "@/lib/mpProfiles";
 
 // `term` comes from the path: ?ls_term= is rewritten to /t/<term> in
 // next.config.ts, so the desk is cached on first visit instead of rendered on
@@ -204,7 +205,7 @@ export default async function DistrictDeskPage({ params }: { params: Promise<Par
                   <tr key={m.mp_id}>
                     <td>
                       <Link href={`/mp/${encodeURIComponent(m.mp_id)}`} className="link-quiet">
-                        {m.mp_name}
+                        {cleanName(m.mp_name, profileOf(m.mp_id))}
                       </Link>
                       {m.constituency ? <div className="cell-sub">{m.constituency}</div> : null}
                     </td>

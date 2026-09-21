@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The build prerenders every static page and all 36 state desks against the
+  // live API. All at once, that emptied the API's connection pool and one 500
+  // failed the whole build (2026-09-21). Fewer pages in flight per worker, and
+  // a failed page is retried before the build is failed.
+  experimental: {
+    staticGenerationMaxConcurrency: 2,
+    staticGenerationRetryCount: 3,
+  },
   // Old addresses. The queue lives at /projects (renamed from /alerts on
   // 2026-09-20, after the Works list was folded into it on 2026-09-19), the
   // map at the top of /states. Query values pass through on their own. Exact

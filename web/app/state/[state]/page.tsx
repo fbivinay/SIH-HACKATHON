@@ -4,6 +4,7 @@ import { api, notFoundOr } from "@/lib/api";
 import type { StateDesk } from "@/lib/api";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel, paidRateTone } from "@/lib/format";
 import CountUp from "@/components/CountUp";
+import { cleanName, profileOf } from "@/lib/mpProfiles";
 
 // `term` comes from the path, never the query string: /state/Kerala?ls_term=17
 // is rewritten to /state/Kerala/t/17 in next.config.ts, which renders this
@@ -243,7 +244,7 @@ export default async function StateDeskPage({ params }: { params: Promise<Params
                 <tr key={m.mp_id}>
                   <td>
                     <Link href={`/mp/${encodeURIComponent(m.mp_id)}`} className="link-quiet">
-                      {m.mp_name}
+                      {cleanName(m.mp_name, profileOf(m.mp_id))}
                     </Link>
                     <div className="cell-sub">
                       {m.constituency ?? m.house ?? "—"}
