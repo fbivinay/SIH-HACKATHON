@@ -3475,3 +3475,266 @@ html[data-phone] .phone-wall {
 .compare__risk .compare__bar > span { background: var(--risk-high); }
 .compare__list { display: grid; gap: 0.15rem; font-weight: 500; }
 .compare__list span { color: var(--ink-3); font-weight: 400; }
+
+/* ---------------------------------------------------------- architecture -- */
+/* The top of Sources (owner's call, 2026-09-21): the deck's architecture,
+   drawn in the product's language. Numbered steps in rows joined by arrows;
+   ink and hairlines throughout, and the risk colours only on the three risk
+   bands, where colour means risk. */
+.archflow { display: flex; flex-direction: column; }
+.archflow > .display { margin-bottom: 1.5rem; }
+.archflow__row {
+  display: grid;
+  align-items: stretch;
+  gap: 0;
+}
+.archflow__row--source,
+.archflow__row--engine { grid-template-columns: minmax(0, 1fr) 2.4rem minmax(0, 2fr); }
+.archflow__row--out { grid-template-columns: minmax(0, 1fr) 2.4rem minmax(0, 1fr) 2.4rem minmax(0, 1fr); }
+
+.archstep {
+  position: relative;
+  padding: 1.1rem 1.2rem 1.15rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-edge), var(--glass-shadow);
+}
+.archstep__n {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--font-data);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.archstep__title {
+  margin-top: 0.55rem;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.archstep__note {
+  margin-top: 0.55rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.archstep__figs {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+.archstep__figs dt {
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.archstep__figs dd {
+  margin-top: 0.1rem;
+  font-family: var(--font-data);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* An arrow between steps: a rule with a head, drawn in CSS. */
+.archflow__arrow {
+  position: relative;
+  align-self: center;
+  height: 2px;
+  margin: 0 0.35rem;
+  background: var(--ink);
+}
+.archflow__arrow::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+  translate: 0 -50%;
+  rotate: 45deg;
+}
+.archflow__down {
+  position: relative;
+  align-self: center;
+  width: 2px;
+  height: 1.9rem;
+  margin: 0.3rem 0;
+  background: var(--ink);
+}
+.archflow__down::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  translate: -50% 0;
+  rotate: 45deg;
+}
+
+/* Steps inside a step: pills joined by small arrows, wrapping as they must. */
+.archchain {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.25rem;
+  counter-reset: chain;
+}
+.archchain > li {
+  counter-increment: chain;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.archchain > li::before {
+  content: counter(chain);
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-family: var(--font-data);
+  color: var(--ink-2);
+}
+.archchain > li:not(:last-child)::after {
+  content: "→";
+  margin-left: 0.3rem;
+  color: var(--ink-3);
+}
+.archchain--stack { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+/* Stacked, each line is a counter and one wrapping span - as inline-flex the
+   words were separate flex items that could not wrap, and ran out of the box. */
+.archchain--stack > li {
+  display: grid;
+  grid-template-columns: 1.15rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.4rem;
+  line-height: 1.4;
+}
+.archchain--stack > li:not(:last-child)::after { content: none; }
+
+/* The five weighted components: weight, name, how. */
+.archweights { margin-top: 0.75rem; display: grid; gap: 0.45rem; }
+.archweights li {
+  display: grid;
+  grid-template-columns: 3rem 6.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.6rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--line);
+}
+.archweights li:last-child { border-bottom: 0; padding-bottom: 0; }
+.archweights__pct {
+  font-family: var(--font-data);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.archweights__name { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
+.archweights__how { font-size: 0.8rem; color: var(--ink-2); line-height: 1.4; }
+
+/* The three bands - the one place in this diagram with colour. */
+.archbands { margin-top: 0.8rem; display: grid; gap: 0.5rem; }
+.archbands li {
+  display: grid;
+  grid-template-columns: 0.8rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+.archbands li b { font-weight: 600; color: var(--ink); }
+.archbands li span { font-size: 0.82rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.archbands i { width: 0.8rem; height: 0.8rem; border-radius: 999px; }
+.archbands__low i { background: var(--risk-low); }
+.archbands__medium i { background: var(--risk-medium); }
+.archbands__high i { background: var(--risk-high); }
+
+.archlist,
+.archlinks { margin-top: 0.75rem; display: grid; gap: 0.45rem; font-size: 0.84rem; line-height: 1.4; color: var(--ink-2); }
+.archlist li,
+.archlinks li { padding-left: 0.85rem; position: relative; }
+.archlist li::before,
+.archlinks li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ink-3);
+}
+.archlinks a { font-weight: 600; color: var(--ink); }
+
+/* Cohort tests: a separate band, dashed, because they are a separate level. */
+.archcohort {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius-card);
+}
+.archcohort .archstep__title { margin-top: 0; }
+.archcohort__tests {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+.archcohort__tests li {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.archstack {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.archstack li {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: var(--surface);
+}
+
+@media (max-width: 1000px) {
+  .archflow__row--source,
+  .archflow__row--engine,
+  .archflow__row--out { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
+  .archflow__arrow { display: none; }
+  .archcohort { grid-template-columns: minmax(0, 1fr); }
+}

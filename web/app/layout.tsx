@@ -49,8 +49,8 @@ export const viewport: Viewport = { colorScheme: "light" };
 // three capabilities, their content moved rather than left:
 //
 //   cohort detectors + compliance rule book + blind spots -> /provenance
-//   trend analysis + the quiet-agency early warning       -> /provenance
-//     (they were on /analysis until the Agencies page became MPs, 2026-09-21)
+//   trend analysis + the quiet-agency early warning       -> removed from the
+//     interface on the owner's call, 2026-09-21; /api/trends still serves both
 //
 // If any of that goes missing again, those are the pages to look at.
 export const navLinks = [
