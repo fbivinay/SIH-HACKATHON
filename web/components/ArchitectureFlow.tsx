@@ -43,6 +43,8 @@ import {
   type SimpleIcon,
 } from "simple-icons";
 import Logo from "@/components/Logo";
+import CountUp from "@/components/CountUp";
+import ArchLive from "@/components/ArchLive";
 import { formatCount } from "@/lib/format";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement> & { size?: number; strokeWidth?: number }>;
@@ -131,6 +133,7 @@ export default function ArchitectureFlow({
 
   return (
     <section className="archflow" aria-label="How Kasauti works">
+      <ArchLive />
       <div className="archflow__head">
         <Logo size={64} />
         <div>
@@ -145,7 +148,7 @@ export default function ArchitectureFlow({
           <header className="archstep__head">
             <Tile icon={Landmark} />
             <div>
-              <span className="archstep__n">1</span>
+              <span className="archstep__n" style={{ ["--step" as string]: 0 }}>1</span>
               <h2 className="archstep__title">The published MPLADS record</h2>
             </div>
           </header>
@@ -166,14 +169,14 @@ export default function ArchitectureFlow({
             <div className="archdata__item">
               <Tile icon={Database} size="sm" />
               <div>
-                <b>{formatCount(works)}</b>
+                <b><CountUp text={formatCount(works)} /></b>
                 <span>works</span>
               </div>
             </div>
             <div className="archdata__item">
               <Tile icon={Database} size="sm" />
               <div>
-                <b>{formatCount(payments)}</b>
+                <b><CountUp text={formatCount(payments)} /></b>
                 <span>payments</span>
               </div>
             </div>
@@ -182,18 +185,18 @@ export default function ArchitectureFlow({
             17th and 18th Lok Sabha - the Ministry&rsquo;s record, as Empowered Indian exports it.
           </p>
         </article>
-        <span className="archflow__arrow" aria-hidden="true" />
+        <span className="archflow__arrow" aria-hidden="true"><i className="archpacket" /></span>
         <article className="archstep">
           <header className="archstep__head">
             <Tile icon={FileCheck2} />
             <div>
-              <span className="archstep__n">2</span>
+              <span className="archstep__n" style={{ ["--step" as string]: 1 }}>2</span>
               <h2 className="archstep__title">Ingest and validate, every night</h2>
             </div>
           </header>
           <ol className="archpipe">
-            {ingest.map((s) => (
-              <li key={s.label}>
+            {ingest.map((s, i) => (
+              <li key={s.label} style={{ ["--station" as string]: i }}>
                 <Tile icon={s.icon} />
                 <span>{s.label}</span>
               </li>
@@ -202,7 +205,7 @@ export default function ArchitectureFlow({
         </article>
       </div>
 
-      <span className="archflow__down" aria-hidden="true" />
+      <span className="archflow__down" aria-hidden="true"><i className="archpacket" /></span>
 
       {/* 3 -> 4: every work gets a peer group, then five scores. */}
       <div className="archflow__row archflow__row--engine">
@@ -210,7 +213,7 @@ export default function ArchitectureFlow({
           <header className="archstep__head">
             <Tile icon={Tags} />
             <div>
-              <span className="archstep__n">3</span>
+              <span className="archstep__n" style={{ ["--step" as string]: 2 }}>3</span>
               <h2 className="archstep__title">Find each work&rsquo;s peers</h2>
             </div>
           </header>
@@ -233,12 +236,12 @@ export default function ArchitectureFlow({
             </li>
           </ol>
         </article>
-        <span className="archflow__arrow" aria-hidden="true" />
+        <span className="archflow__arrow" aria-hidden="true"><i className="archpacket" /></span>
         <article className="archstep">
           <header className="archstep__head">
             <Tile icon={Sparkles} />
             <div>
-              <span className="archstep__n">4</span>
+              <span className="archstep__n" style={{ ["--step" as string]: 3 }}>4</span>
               <h2 className="archstep__title">Score the work against its peers</h2>
             </div>
           </header>
@@ -249,13 +252,16 @@ export default function ArchitectureFlow({
                 <span className="archweights__pct">{c.weight}%</span>
                 <span className="archweights__name">{c.name}</span>
                 <span className="archweights__how">{c.how}</span>
+                <span className="archweights__bar" aria-hidden="true">
+                  <i style={{ ["--w" as string]: c.weight / 25 }} />
+                </span>
               </li>
             ))}
           </ul>
         </article>
       </div>
 
-      <span className="archflow__down" aria-hidden="true" />
+      <span className="archflow__down" aria-hidden="true"><i className="archpacket" /></span>
 
       {/* 5 -> 6 -> 7: a number, its reasons, and the people who act on it. */}
       <div className="archflow__row archflow__row--out">
@@ -263,7 +269,7 @@ export default function ArchitectureFlow({
           <header className="archstep__head">
             <Tile icon={Gauge} />
             <div>
-              <span className="archstep__n">5</span>
+              <span className="archstep__n" style={{ ["--step" as string]: 4 }}>5</span>
               <h2 className="archstep__title">Risk score, 0 to 100</h2>
             </div>
           </header>
@@ -271,6 +277,9 @@ export default function ArchitectureFlow({
             <span className="archgauge__low" />
             <span className="archgauge__medium" />
             <span className="archgauge__high" />
+            <span className="archgauge__sweep">
+              <i />
+            </span>
           </div>
           <ul className="archbands">
             <li className="archbands__low">
@@ -290,12 +299,12 @@ export default function ArchitectureFlow({
             </li>
           </ul>
         </article>
-        <span className="archflow__arrow" aria-hidden="true" />
+        <span className="archflow__arrow" aria-hidden="true"><i className="archpacket" /></span>
         <article className="archstep">
           <header className="archstep__head">
             <Tile icon={FileSearch} />
             <div>
-              <span className="archstep__n">6</span>
+              <span className="archstep__n" style={{ ["--step" as string]: 5 }}>6</span>
               <h2 className="archstep__title">Explain, then queue</h2>
             </div>
           </header>
@@ -314,12 +323,12 @@ export default function ArchitectureFlow({
             </li>
           </ul>
         </article>
-        <span className="archflow__arrow" aria-hidden="true" />
+        <span className="archflow__arrow" aria-hidden="true"><i className="archpacket" /></span>
         <article className="archstep">
           <header className="archstep__head">
             <Tile icon={LayoutDashboard} />
             <div>
-              <span className="archstep__n">7</span>
+              <span className="archstep__n" style={{ ["--step" as string]: 6 }}>7</span>
               <h2 className="archstep__title">Read it at every level</h2>
             </div>
           </header>
