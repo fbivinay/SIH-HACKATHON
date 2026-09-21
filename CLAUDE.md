@@ -257,10 +257,21 @@ call, 2026-09-21; `/analysis` is a 308 to `/mps`). Its two brief-named blocks
 analysis - moved to Sources as `components/MoneyMovement.tsx` rather than go
 with it. `/mps` lists every member of one term (`/api/mp-directory`, both
 terms rendered on the server so the switch is state, not a round trip),
-sixty cards at a time, filtered and sorted in the browser; up to four are
-picked into a bar pinned to the window's foot and set side by side on
+sixty cards at a time, filtered and sorted in the browser. **Compare is the
+first thing on the page** (owner's call, 2026-09-21): four slots, a search
+that fills them, and the cards' "+ Compare" filling the same slots; then
 `/mps/compare?ls_term=&ids=`, one term only, because a member's two terms are
-two allocations. **Who a member is comes from Parliament, not MPLADS**:
+two allocations. **The 18th lists 788**: the 774 members the MPLADS record
+holds plus every sitting member it does not list yet (13 Rajya Sabha members
+seated in 2026 and one Lok Sabha member, on 2026-09-21), keyed `ls-<id>` /
+`rs-<id>` and shown with Parliament's profile and the words "No MPLADS fund
+record published for them yet" - never a zero - on their card, their page
+and their compare column. A record whose seat has since ended says "Seat
+ended". Profiles refresh **nightly**: the refresh workflow runs
+`fetch_mp_profiles.py` after the load and commits any change, which
+redeploys; the script writes nothing unless nine in ten members match, and
+leaves the file untouched when nothing changed, so a quiet night makes no
+commit. **Who a member is comes from Parliament, not MPLADS**:
 `scripts/fetch_mp_profiles.py` reads sansad.in's Lok Sabha (17th, 18th) and
 Rajya Sabha rosters, matches all 1,110 members, and writes
 `web/data/mp_profiles.json` (party, age, education, profession, terms) and

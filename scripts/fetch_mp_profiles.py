@@ -8,6 +8,11 @@ reads both, matches them to the members in our `mps` table, and writes
   web/data/mp_profiles.json    one entry per matched mp_id, committed
   web/public/mps/<mp_id>.webp  the photograph, 120x150, committed
 
+and, for sitting members MPLADS does not list yet, the same under "unlisted",
+keyed ls-<sansad id> / rs-<sansad id>. It runs nightly in the refresh
+workflow, after the MPLADS load, so a member the portal adds is matched the
+next morning.
+
 Committed for the same reason data/sector_cache.json is: a clone renders every
 profile with no network call, and the site never depends on sansad.in being up.
 The photographs cannot be linked instead - sansad.in sends
@@ -297,6 +302,36 @@ def fetch_photo(mp_id: str, url: str | None) -> bool:
     return False
 
 
+def unlisted(matched: dict, term18_ids: set, ls18: list[dict], rs: list[dict], our_states: set) -> dict:
+    """Sitting members with no row in the MPLADS record at all.
+
+    The portal lists a member once their fund account exists, so a member
+    seated weeks ago - thirteen Rajya Sabha members elected in 2026, and one
+    Lok Sabha member - is in Parliament and not yet in MPLADS. They are still
+    members, and a page of "every member" that leaves them out is wrong. They
+    are listed with Parliament's profile and no money at all: nothing is
+    shown for a figure the source does not publish (CLAUDE.md §1).
+    """
+    used = {(p["source"], p["sansad_id"]) for k, p in matched.items() if k in term18_ids}
+    # Our spelling of each state, so the page's state filter finds them.
+    canon = {norm_state(x): x for x in our_states}
+    out = {}
+    for m in ls18:
+        if m.get("status") == "Sitting" and ("Lok Sabha", m["mpsno"]) not in used:
+            p = ls_profile(m)
+            p.update(house="Lok Sabha", seat=(m.get("constName") or "").strip() or None,
+                     state=canon.get(norm_state(m.get("stateName")), (m.get("stateName") or "").strip()))
+            out[f"ls-{m['mpsno']}"] = p
+    for m in rs:
+        if (m.get("status") or "").strip() == "Sitting" and ("Rajya Sabha", m["mpsno"]) not in used:
+            p = rs_profile(m)
+            st = norm_state(m.get("state"))
+            p.update(house="Rajya Sabha", seat="Nominated" if st == "nominated" else None,
+                     state=None if st == "nominated" else canon.get(st, (m.get("state") or "").strip()))
+            out[f"rs-{m['mpsno']}"] = p
+    return out
+
+
 def main():
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     cur = conn.cursor()
@@ -315,28 +350,49 @@ def main():
     ls = {17: fetch_lok_sabha(17), 18: fetch_lok_sabha(18)}
     rs = fetch_rajya_sabha()
     matched, missed = match(ours, ls, rs)
-
-    OUT_PHOTOS.mkdir(parents=True, exist_ok=True)
-    with ThreadPoolExecutor(4) as ex:  # gentle: four at a time
-        got = dict(zip(matched, ex.map(lambda k: fetch_photo(k, matched[k]["image"]), matched)))
-    for k, p in matched.items():
-        p["photo"] = f"/mps/{k}.webp" if got[k] else None
-        p.pop("image", None)
-
-    OUT_JSON.write_text(json.dumps(
-        {"fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-         "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
-         "profiles": dict(sorted(matched.items()))},
-        ensure_ascii=False, indent=1) + "\n")
-
-    photos = sum(got.values())
-    print(f"\nMatched {len(matched)} of {len(ours)}; photos {photos}; "
-          f"unmatched {len(missed)} (shown with initials, no party)")
     for o, s, cand in sorted(missed, key=lambda x: (x[0]["house"], x[0]["state"])):
         print(f"  MISS {o['house']:<11} {o['ls_term']} {o['state']:<18} "
               f"{o['mp_name']!r:<45} best={s:.2f} {cand!r}")
+    # Checked BEFORE anything is written. This runs nightly and its output is
+    # committed; a sansad.in outage or a changed response shape must leave
+    # yesterday's file in place, not replace it with a half-matched one.
     if len(matched) < 0.9 * len(ours):
-        sys.exit("Fewer than 90% matched - check the matching before committing.")
+        sys.exit(f"Only {len(matched)} of {len(ours)} matched - nothing written.")
+
+    extra = unlisted(matched, {r["mp_id"] for r in rows if r["ls_term"] == 18}, ls[18], rs,
+                     {r["state"] for r in rows if r["state"]})
+
+    OUT_PHOTOS.mkdir(parents=True, exist_ok=True)
+    everyone = {**matched, **extra}
+    with ThreadPoolExecutor(4) as ex:  # gentle: four at a time
+        got = dict(zip(everyone, ex.map(lambda k: fetch_photo(k, everyone[k]["image"]), everyone)))
+    for k, p in everyone.items():
+        p["photo"] = f"/mps/{k}.webp" if got[k] else None
+        p.pop("image", None)
+
+    body = {"source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
+            "profiles": dict(sorted(matched.items())),
+            "unlisted": dict(sorted(extra.items()))}
+    # Rewritten only when something in it changed, so a quiet night makes no
+    # commit and no redeploy: fetched_at alone would differ every run.
+    try:
+        old = json.loads(OUT_JSON.read_text())
+        old.pop("fetched_at", None)
+    except Exception:
+        old = None
+    if old == body:
+        print("\nProfiles unchanged - file left as it was.")
+    else:
+        OUT_JSON.write_text(json.dumps(
+            {"fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), **body},
+            ensure_ascii=False, indent=1) + "\n")
+        print("\nProfiles written.")
+
+    print(f"Matched {len(matched)} of {len(ours)}; sitting but not in MPLADS {len(extra)}; "
+          f"photos {sum(got.values())} of {len(everyone)}; unmatched {len(missed)}")
+    # A producer that silently produced nothing looks like a clean run (§9).
+    if sum(got.values()) < 0.9 * len(everyone):
+        print("WARNING: fewer than 90% of photographs were fetched.")
 
 
 if __name__ == "__main__":
