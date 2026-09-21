@@ -527,8 +527,22 @@ pages 3–7s. The rest was **opening connections**: the pool started at one, a
 page runs two or three statements at once, and each extra one paid a fresh
 TLS handshake of 1.0–3.7s; and reads never ended their transaction, so
 connections went back "idle in transaction" and were cut off and reopened.
-`db.py` now opens four eagerly, sets TCP keepalives, and rolls back after
-every read. Endpoints went to one round trip (0.64s locally) and a cold
+`db.py` now keeps four, sets TCP keepalives, and rolls back after every
+read. **psycopg2 keeps at most `minconn` connections idle and closes any
+other on `putconn`** - so at `minconn=1` every statement run beside another
+opened and threw away a connection, every time; that was the real cost. The
+pool is built at one (the constructor opens `minconn` up front, in front of
+the first request, and one failed handshake failed that request - which is
+what broke the 2026-09-21 web deploy), then `minconn` is raised to 4 and
+`_warm` opens the other three in the background, where a failure costs
+nothing. Measured: three parallel statements in one round trip, four idle
+kept. The "idle in transaction" connections also deadlocked the 2026-09-20
+nightly: the schema step's exclusive lock waited on a reader's share lock
+that was never released.
+
+The web's `get()` retries once on a 5xx or a dropped connection. Web and
+API deploy from the same push, and the web's build prerenders `/provenance`
+against an API that may be cold-starting that second. Endpoints went to one round trip (0.64s locally) and a cold
 filtered page to 0.67–1.03s. Anything slower locally is the link to Neon, not
 the code - check with `SELECT 1` before optimising a query.
 
