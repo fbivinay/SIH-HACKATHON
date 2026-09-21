@@ -58,6 +58,7 @@ from dotenv import load_dotenv
 from psycopg2.extras import Json, execute_values
 
 from mps import safe_mp_key
+from pg_retry import with_lock_retry
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
@@ -681,18 +682,20 @@ if __name__ == "__main__":
             sys.exit(0)
 
         check_headroom(conn, ["projects", "expenditures", "mps"])
-        inserted, rejected = load(conn, df, rejects)
+        inserted, rejected = with_lock_retry(conn, load, df, rejects, label="load works")
         if mp_df is None:
             print("No mplads_mp_summary_*.csv in the snapshot - skipping MP aggregates.")
         else:
-            print(f"Inserted {load_mps(conn, mp_df)} MP-terms "
+            n_mps = with_lock_retry(conn, load_mps, mp_df, label="load members")
+            print(f"Inserted {n_mps} MP-terms "
                   f"({mp_collapsed} duplicate name(s) collapsed onto one mp_id, "
                   f"{mp_dropped} dropped for an unusable name).")
         if exp_df is None:
             print("No mplads_expenditures_*.csv in the snapshot - skipping vendor data. "
                   "Agency risk will score concentration as 0.")
         else:
-            print(f"Inserted {load_expenditures(conn, exp_df)} expenditure transactions "
+            n_exp = with_lock_retry(conn, load_expenditures, exp_df, label="load payments")
+            print(f"Inserted {n_exp} expenditure transactions "
                   f"({exp_dropped} dropped for missing vendor, agency or amount).")
     except SystemExit:
         raise

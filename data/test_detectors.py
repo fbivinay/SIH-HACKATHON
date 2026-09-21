@@ -228,7 +228,8 @@ def test_scores_are_written_before_the_detectors_run():
 
     body = inspect.getsource(scoring)
     main = body[body.index('if __name__ == "__main__":'):]
-    assert main.index("write_scores(conn, scored)") < main.index("detectors.run_all"), (
+    # Called through with_lock_retry (data/pg_retry.py) since 2026-09-21.
+    assert main.index("write_scores, scored") < main.index("detectors.run_all"), (
         "scores must be committed before the detectors are given a chance to fail"
     )
     after = main[main.index("detectors.run_all"):]
