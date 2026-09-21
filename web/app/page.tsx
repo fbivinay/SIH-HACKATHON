@@ -6,16 +6,12 @@ import { TERMS } from "@/lib/terms";
 import ScoreMethod from "@/components/ScoreMethod";
 
 
-export default async function OverviewPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const sp = await searchParams;
-  // Defaults to the 18th, because the source's own dashboard does. Pooling
-  // both terms made our figures look wrong beside it while being right.
-  const rawTerm = typeof sp.ls_term === "string" ? sp.ls_term : "18";
-  const term = ["17", "18", ""].includes(rawTerm) ? rawTerm : "18";
+// Built once and served from the edge, not rendered per request: nothing here
+// reads the request. The term a link asks for (?ls_term=) is picked up in the
+// browser by FiguresBoard - every scope is already on the page - which is what
+// lets this page be static, prefetched in full by every link to it, and open
+// instantly. Measured before: 0.35s to first byte, rendered on every visit.
+export default async function OverviewPage() {
 
   // Every scope, not just the one asked for. Three cached reads cost nothing
   // a warm page can feel, and they are what lets the switcher change the
@@ -43,7 +39,10 @@ export default async function OverviewPage({
         </h1>
       </section>
 
-      <FiguresBoard scopes={scopes} initial={term} />
+      {/* Defaults to the 18th, because the source's own dashboard does:
+          pooling both terms made our figures look wrong beside it while being
+          right. */}
+      <FiguresBoard scopes={scopes} initial="18" />
       </div>
 
       <ScoreMethod />

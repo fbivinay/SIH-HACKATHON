@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { api } from "@/lib/api";
+import { api, notFoundOr } from "@/lib/api";
 import type { DistrictDesk } from "@/lib/api";
 import {
   formatCount,
@@ -12,8 +11,14 @@ import {
 } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 
-type Params = { state: string; district: string };
-type Search = Record<string, string | string[] | undefined>;
+// `term` comes from the path: ?ls_term= is rewritten to /t/<term> in
+// next.config.ts, so the desk is cached on first visit instead of rendered on
+// every request (see the state desk).
+type Params = { state: string; district: string; term?: string };
+
+export async function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({
   params,
@@ -21,27 +26,24 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { district } = await params;
-  return { title: `${decodeURIComponent(district)} — district desk` };
+  // The portal writes district names in capitals; the tab need not shout.
+  const name = decodeURIComponent(district)
+    .toLowerCase()
+    .replace(/(^|[\s(-])([a-z])/g, (_, a: string, b: string) => a + b.toUpperCase());
+  return { title: `${name} — district desk` };
 }
 
-export default async function DistrictDeskPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<Params>;
-  searchParams: Promise<Search>;
-}) {
+export default async function DistrictDeskPage({ params }: { params: Promise<Params> }) {
   const raw = await params;
   const state = decodeURIComponent(raw.state);
   const district = decodeURIComponent(raw.district);
-  const sp = await searchParams;
-  const ls_term = (typeof sp.ls_term === "string" ? sp.ls_term : "18") === "17" ? "17" : "18";
+  const ls_term = raw.term === "17" ? "17" : "18";
 
   let desk: DistrictDesk;
   try {
     desk = await api.districtDesk(state, district, { ls_term });
-  } catch {
-    notFound();
+  } catch (err) {
+    notFoundOr(err);
   }
 
   const { works } = desk;

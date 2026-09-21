@@ -1,33 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MpPhoto from "@/components/MpPhoto";
+import { unpack, type MpCardRow, type Packed } from "@/lib/mpRows";
 import { formatCount, formatINR } from "@/lib/format";
-
-export type MpCardRow = {
-  id: string;
-  term: number;
-  name: string;
-  photo: string | null;
-  party: string | null;
-  partyShort: string | null;
-  house: string | null;
-  seat: string | null;
-  state: string | null;
-  allocated: number | null;
-  committed: number | null;
-  paid: number | null;
-  idle: number | null;
-  committedRate: number | null;
-  paidRate: number | null;
-  works: number;
-  inQueue: number;
-  highRisk: number;
-  status: string | null;
-  // Sitting, but not in the MPLADS record yet: no money, no works.
-  unlisted: boolean;
-};
 
 const TERMS = [
   { value: "18", label: "18th Lok Sabha" },
@@ -54,20 +31,25 @@ const titleCase = (s: string) =>
 
 const pct = (v: number | null) => (v === null ? "—" : `${v.toFixed(0)}%`);
 
-export default function MpDirectory({
-  byTerm,
-  initialTerm,
-  initialPicked,
-}: {
-  byTerm: Record<string, MpCardRow[]>;
-  initialTerm: string;
-  initialPicked: string[];
-}) {
-  // From the URL, read on the server, so a link back from the compare page
-  // lands on the same term with the same members still picked - and the
-  // first render is the same on both sides.
-  const [term, setTerm] = useState(initialTerm);
-  const [picked, setPicked] = useState<string[]>(initialPicked);
+export default function MpDirectory({ packed }: { packed: Record<string, Packed[]> }) {
+  const byTerm = useMemo(
+    () => Object.fromEntries(Object.entries(packed).map(([t, rows]) => [t, rows.map(unpack)])),
+    [packed]
+  ) as Record<string, MpCardRow[]>;
+  const [term, setTerm] = useState("18");
+  const [picked, setPicked] = useState<string[]>([]);
+  // The page is static, so a link back from the compare page (?ls_term=,
+  // ?compare=) is read here after hydration: the server's render and the
+  // first client render agree on the default, then the URL's choice lands.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const t = q.get("ls_term");
+    const ids = (q.get("compare") ?? "").split(",").filter(Boolean).slice(0, MAX_COMPARE);
+    /* eslint-disable react-hooks/set-state-in-effect -- the URL is only readable after hydration */
+    if (t === "17" || t === "18") setTerm(t);
+    if (ids.length) setPicked(ids);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
   const [q, setQ] = useState("");
   const [house, setHouse] = useState("");
   const [state, setState] = useState("");

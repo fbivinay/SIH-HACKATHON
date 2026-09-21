@@ -465,9 +465,15 @@ the reader, so anchoring guards against nothing.
 **The loading cover** (`components/Splash.tsx`) is CSS-only — no state, no
 effect, no `"use client"`. The first version hid itself from a `useEffect`
 timer and sat at 0% for three seconds on a slow hydration with no way to
-leave. It runs 3.3s: fill 2.5s on a symmetric curve, fade 2.7 → 3.3s,
-`pointer-events: none` from the first fade frame, `visibility: hidden` at the
-end. `ScrollReveal`'s last pass and `data-entered` are timed off it.
+leave. It runs 1.7s (was 3.3s, and played on every full load, which put the
+largest paint of six pages at ~5.2s): fill 1.2s on a symmetric curve, fade
+1.3 → 1.7s, `pointer-events: none` from the first fade frame, `visibility:
+hidden` at the end. **It plays once every six hours**: the inline script at
+the top of `<body>` keeps a timestamp in localStorage and, on a repeat visit,
+sets `<html data-no-cover data-entered>` before first paint, so the page is
+simply there (owner, 2026-09-21: "fast as hell"). `--enter-at` is 1400ms,
+`data-entered` lands at 2900ms (1400 + 390 stagger + 960), `ScrollReveal`'s
+last pass at 1900ms - all timed off the cover; move them together.
 
 **Performance budget, measured on `/alerts`:** 2 backdrop-filters on the
 whole page (masthead, ticker), 0 `background-attachment: fixed`, and the only
@@ -639,6 +645,46 @@ change is a `router.replace` inside `useTransition`: while it is pending the
 bar carries `aria-busy`, a thin indeterminate sweep runs along its top edge
 and the tiles and table drop to 45% (`.queue-screen:has(...)`, no state
 outside the bar) - measured, on screen 156ms after the change.
+
+**Pages are built once and cached, not rendered per visit** (2026-09-21). A
+page that reads `searchParams` is rendered on every request (0.3-0.4s to first
+byte in production); a page whose inputs are all in its path is served from
+the cache (0.09s) and **prefetched in full by every link to it**, so the click
+is instant. So:
+- `/`, `/states`, `/mps`, `/provenance` are static (revalidated with the
+  30-minute data cache). None reads the request: FiguresBoard,
+  StateRanking and MpDirectory read `?ls_term=`, `?sort=`, `?compare=` in the
+  browser after hydration (server and first client render agree on the
+  default, then the URL's choice lands). "Rank by" on States is a state
+  change now, not a server round trip per click.
+- The desks and the work page are ISR: `generateStaticParams` returns `[]`,
+  so each path is rendered on its first visit and cached. The desks' term
+  moved from the query into the path **invisibly**: `beforeFiles` rewrites in
+  `next.config.ts` serve `/state/X?ls_term=17` from `/state/X/t/17` (and the
+  same for districts and members), so every existing link keeps its address.
+  Measured: repeat visits 5-14ms locally.
+- Only `/projects` (filters) and `/mps/compare` stay dynamic, by nature.
+- **A cached page must never cache a failure as "not found".** `lib/api.ts`
+  throws `ApiError` with the status; pages call `notFoundOr(err)`, which
+  shows the not-found page only for a real 404 and rethrows anything else,
+  so a transient API error is a retryable `app/error.tsx`, not a missing
+  work frozen into the cache. Found when a real work page was being served
+  as missing after one failed first render. `app/not-found.tsx` and
+  `app/error.tsx` are ours now, not Next's bare defaults. Status stays 200 on
+  a streamed not-found (the root `loading.tsx` starts the stream first) but
+  the page carries `noindex`.
+- Never read the request in these pages again without meaning to make them
+  dynamic. Check the route table after `next build`: `○` or `●`, not `ƒ`.
+
+**Two global helpers were costing every page.** `WordLift`'s fiber check
+used `for...in` over each DOM node - hundreds of inherited properties per
+text node, every 250ms for ten seconds; it is `Object.keys` now, the cheap
+tests run first, and the sweep stops once three pass empty after load.
+`FoldHeight` had a MutationObserver on the whole body that measured, forcing
+a layout, after every DOM change anywhere (44ms in one "Rank by" click); it
+watches the masthead and ticker with a ResizeObserver and re-runs per
+navigation. `CountUp` spans carry `data-count`, which WordLift skips - it was
+rebuilding a counter's word spans on every frame of its count.
 
 **Navigation.** `app/loading.tsx` answers a click in ~150ms; `lib/api.ts`
 caches every GET for 1800s under the tag `api` (the record changes nightly),

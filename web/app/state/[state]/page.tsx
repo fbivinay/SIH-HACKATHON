@@ -1,17 +1,22 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { api } from "@/lib/api";
+import { api, notFoundOr } from "@/lib/api";
 import type { StateDesk } from "@/lib/api";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel, paidRateTone } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 
-type Params = { state: string };
-type Search = Record<string, string | string[] | undefined>;
+// `term` comes from the path, never the query string: /state/Kerala?ls_term=17
+// is rewritten to /state/Kerala/t/17 in next.config.ts, which renders this
+// same page. Reading searchParams made every desk render on every request;
+// from the path, each desk is cached on its first visit and prefetched whole.
+type Params = { state: string; term?: string };
 
-function term(sp: Search): "17" | "18" {
-  const raw = typeof sp.ls_term === "string" ? sp.ls_term : "18";
-  return raw === "17" ? "17" : "18";
+const termOf = (t: string | undefined): "17" | "18" => (t === "17" ? "17" : "18");
+
+// Rendered on first visit and then served from the cache (ISR), for every
+// state - no list is needed at build.
+export async function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({
@@ -51,23 +56,16 @@ function Rate({ label, value, tone }: { label: string; value: number | null; ton
   );
 }
 
-export default async function StateDeskPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<Params>;
-  searchParams: Promise<Search>;
-}) {
-  const { state: raw } = await params;
+export default async function StateDeskPage({ params }: { params: Promise<Params> }) {
+  const { state: raw, term } = await params;
   const state = decodeURIComponent(raw);
-  const sp = await searchParams;
-  const ls_term = term(sp);
+  const ls_term = termOf(term);
 
   let desk: StateDesk;
   try {
     desk = await api.stateDesk(state, { ls_term });
-  } catch {
-    notFound();
+  } catch (err) {
+    notFoundOr(err);
   }
 
   const { money, works } = desk;

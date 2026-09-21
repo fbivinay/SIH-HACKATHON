@@ -44,14 +44,16 @@ export default function ScrollReveal() {
   // changes --enter-at, which is the animation-delay of every entrance still
   // running, and a running CSS animation whose delay drops by three seconds
   // is retimed on the spot: measured, every card snapped from 47px to 0 in
-  // one frame at the moment this landed. The last entrance ends at 3000ms +
-  // 390ms stagger + 960ms, so this waits past that. A navigation before then
+  // one frame at the moment this landed. The last entrance ends at 1400ms
+  // (--enter-at) + 390ms stagger + 960ms = 2750ms, so this waits past that.
+  // (When the cover is skipped, layout.tsx's inline script has already set
+  // the attribute before first paint, so nothing is running to retime.) A navigation before then
   // sets it early (below) - the old page's elements are gone by the time the
   // new ones animate, so nothing is retimed under the reader.
   useEffect(() => {
     const t = window.setTimeout(
       () => document.documentElement.setAttribute("data-entered", ""),
-      4500
+      2900
     );
     return () => window.clearTimeout(t);
   }, []);
@@ -112,7 +114,7 @@ export default function ScrollReveal() {
     // a few dozen elements and removes the whole class of mistake.
     const frame = requestAnimationFrame(mark);
     document.fonts?.ready.then(mark);
-    const afterSplash = window.setTimeout(mark, 3600);
+    const afterSplash = window.setTimeout(mark, 1900);
 
     return () => {
       cancelAnimationFrame(frame);

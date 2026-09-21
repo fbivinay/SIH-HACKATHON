@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 export type Overview = {
@@ -572,6 +573,28 @@ const CACHE_TAG = "api";
 // updateTag(CACHE_TAG), so a reviewer always reads their own write.
 const CACHE_SECONDS = 1800;
 
+/** An API answer that was not 2xx, carrying its status - so a page can tell
+ * "this does not exist" (404) from "the API is having a bad second" (5xx,
+ * timeout). Only the first may become a not-found page: pages are cached now
+ * (ISR), and a not-found rendered from a transient failure was cached with
+ * them - measured 2026-09-21, a real work page served as missing. */
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    path: string
+  ) {
+    super(`API error ${status} on ${path}`);
+  }
+}
+
+/** In a page's catch: a 404 becomes the not-found page, anything else is
+ * thrown on, so the render fails, nothing is cached, and the next visit tries
+ * again. */
+export function notFoundOr(err: unknown): never {
+  if (err instanceof ApiError && err.status === 404) notFound();
+  throw err;
+}
+
 async function get<T>(path: string): Promise<T> {
   const once = () =>
     fetch(`${API_BASE}${path}`, {
@@ -588,7 +611,7 @@ async function get<T>(path: string): Promise<T> {
     await new Promise((r) => setTimeout(r, 1500));
     res = await once();
   }
-  if (!res.ok) throw new Error(`API error ${res.status} on ${path}`);
+  if (!res.ok) throw new ApiError(res.status, path);
   return res.json();
 }
 

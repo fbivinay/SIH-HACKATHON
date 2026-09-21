@@ -78,7 +78,9 @@ async function freshnessLine(): Promise<string> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const freshness = await freshnessLine();
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+    // suppressHydrationWarning: the inline script below sets data-phone,
+    // data-no-cover and data-entered on <html> before React hydrates it.
+    <html lang="en" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <body>
         {/* Phones are refused (see .phone-wall in globals.css). Inline and
             first in <body> so the flag lands before the first paint; a
@@ -88,7 +90,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html:
               '(function(){var s=screen,r=Math.min(s.width,s.height)/Math.max(s.width,s.height),' +
               'c=matchMedia("(pointer: coarse)").matches;' +
-              'if(/iPhone|Mobi/i.test(navigator.userAgent)||(c&&r<=0.6))document.documentElement.dataset.phone="1"})()',
+              'if(/iPhone|Mobi/i.test(navigator.userAgent)||(c&&r<=0.6))document.documentElement.dataset.phone="1";' +
+              // The loading cover plays once, then not again for six hours:
+              // on a repeat visit, a reload or a link opened in a new tab the
+              // page is simply there (owner, 2026-09-21: "fast as hell").
+              // data-entered also drops the entrance delay (see --enter-at).
+              // Storage can throw (private mode, blocked): then the cover
+              // plays, which is the safe way to fail.
+              'try{var k="kasauti-cover",n=Date.now(),t=+localStorage.getItem(k)||0,h=document.documentElement;' +
+              'if(n-t<216e5){h.setAttribute("data-no-cover","");h.setAttribute("data-entered","")}' +
+              'else localStorage.setItem(k,String(n))}catch(e){}})()',
           }}
         />
         <div className="phone-wall">

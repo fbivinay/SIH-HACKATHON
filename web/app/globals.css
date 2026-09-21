@@ -2436,13 +2436,17 @@ button,
  * anything having to coordinate them.
  */
 :root {
-  --enter-at: 3000ms;
+  /* Half-way through the cover's fade (1300ms + 400ms). Was 3000ms against
+     a 3.3s cover. */
+  --enter-at: 1400ms;
   --rise-y: 74px;  --rise-s: 0.95;
   --card-y: 104px; --card-s: 0.86;
 }
 
 /*
- * After the cover has gone (ScrollReveal sets this at 3.4s), an entrance is a
+ * After the cover has gone (ScrollReveal sets this at 2.9s, or the inline
+ * script in layout.tsx before first paint when the cover is skipped), an
+ * entrance is a
  * page arriving after a nav click. That gets no delay - with the delay in
  * place every page after the first sat blank for three seconds, which was
  * most of what "changing sections is laggy" was - and a lighter travel, so
@@ -2961,8 +2965,11 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
  * on React, which is what the first version got wrong: it hid itself from a
  * useEffect timer, so on a slow hydration it sat at 0% and would not leave.
  *
- * Timings: the bar fills over 2.5s, holds until 2.7s, then the cover fades over
- * 0.6s and is taken out of the page with `visibility: hidden` - gone at 3.3s.
+ * Timings: the bar fills over 1.2s, holds until 1.3s, then the cover fades over
+ * 0.4s and is taken out of the page with `visibility: hidden` - gone at 1.7s.
+ * It was 3.3s, and it played on every full load; the owner asked for the site
+ * to be fast above all (2026-09-21), so it is half that, and it plays once
+ * every six hours (html[data-no-cover]).
  *
  * It is deliberately unhurried. A bar that finishes in 1.6s and then waits is
  * read as a stutter, and the two easings had the fill rushing to four fifths in
@@ -2990,8 +2997,10 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   display: grid;
   place-items: center;
   background: var(--ground);
-  animation: splash-out 600ms var(--ease) 2700ms forwards;
+  animation: splash-out 400ms var(--ease) 1300ms forwards;
 }
+/* Seen within six hours: no cover at all (the inline script in layout.tsx). */
+html[data-no-cover] .splash { display: none; }
 
 @keyframes splash-out {
   /* pointer-events goes at the first frame of the fade, not the last: without
@@ -3010,7 +3019,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   align-items: center;
   gap: 0.55rem;
   transform: translateY(-6%);
-  animation: splash-in 900ms var(--ease-out) both;
+  animation: splash-in 500ms var(--ease-out) both;
 }
 @keyframes splash-in {
   from { opacity: 0; transform: translateY(-2%) scale(0.96); }
@@ -3038,7 +3047,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-3);
-  animation: splash-in 900ms var(--ease-out) 260ms both;
+  animation: splash-in 500ms var(--ease-out) 120ms both;
 }
 
 .splash__track {
@@ -3056,7 +3065,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   height: 100%;
   border-radius: 999px;
   background: var(--ink);
-  animation: splash-fill 2500ms cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
+  animation: splash-fill 1200ms cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
 }
 @keyframes splash-fill {
   from { width: 0%; }
@@ -3069,7 +3078,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   font-variant-numeric: tabular-nums;
   color: var(--ink-2);
   counter-reset: splash-pct var(--splash-pct);
-  animation: splash-count 2500ms cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
+  animation: splash-count 1200ms cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
 }
 .splash__pct::after { content: counter(splash-pct) "%"; }
 @keyframes splash-count {
@@ -3984,4 +3993,19 @@ html[data-phone] .phone-wall {
   .archpacket,
   .archgauge__sweep { display: none; }
   .archweights__bar > i { scale: var(--w, 1) 1; }
+}
+
+/* A key to press, in running text (the not-found page's "/"). */
+.kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5em;
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--surface);
+  font-family: var(--font-data);
+  font-size: 0.85em;
+  color: var(--ink);
 }

@@ -29,18 +29,26 @@ import { useEffect } from "react";
  * non-breaking space is in a figure precisely so it does not.
  */
 
-// Text inside these stays as it is.
+// Text inside these stays as it is. [data-count] is every CountUp: its text is
+// rewritten every frame while it counts, and wrapping it meant rebuilding its
+// word spans every frame too.
 const SKIP =
-  "script,style,svg,code,pre,input,textarea,select,option,button,.btn,.review-btn,.nav,.ticker,.wordmark,.figure__value,.stat-card__value,.w,[data-no-wordlift]";
+  "script,style,svg,code,pre,input,textarea,select,option,button,.btn,.review-btn,.nav,.ticker,.wordmark,.figure__value,.stat-card__value,.w,[data-no-wordlift],[data-count]";
 
 const SPLIT = /([ \t\n\r]+)/;
 
 // Original text node -> the spans and spaces made from it.
 const made = new WeakMap<Text, Node[]>();
 
+// Object.keys, not `for...in`: React's marker is an own property of the node,
+// and for...in also walks every enumerable property the DOM puts on the
+// prototype chain - a few hundred per node, for every text node on the page,
+// every sweep. Measured 2026-09-21 as most of the unattributed long frames in
+// the first ten seconds of every page.
 function hasFiber(n: Node | null): boolean {
   if (!n) return false;
-  for (const k in n) if (k.startsWith("__reactFiber$")) return true;
+  const keys = Object.keys(n);
+  for (let i = 0; i < keys.length; i++) if (keys[i].startsWith("__reactFiber$")) return true;
   return false;
 }
 
@@ -96,23 +104,34 @@ export default function WordLift() {
 
     const wrapUnder = (node: Node) => {
       const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
+        // Cheapest test first: most text nodes on a settled page are either
+        // already done or empty, and closest() on a long selector list is
+        // the expensive one.
         acceptNode: (n) => {
-          const p = n.parentElement;
-          if (!p || p.closest(SKIP) || made.has(n as Text) || ours.has(n)) return NodeFilter.FILTER_REJECT;
+          if (made.has(n as Text) || ours.has(n)) return NodeFilter.FILTER_REJECT;
           if (!(n.nodeValue ?? "").trim()) return NodeFilter.FILTER_REJECT;
+          const p = n.parentElement;
+          if (!p || p.closest(SKIP)) return NodeFilter.FILTER_REJECT;
           return hydrated(n) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
         },
       });
       const found: Text[] = [];
       for (let n = walker.nextNode(); n; n = walker.nextNode()) found.push(n as Text);
       for (const t of found) render(t, mark);
+      return found.length;
     };
 
     // Now, and again every 250ms for the ten seconds in which late Suspense
     // boundaries can still be hydrating. Each pass only touches nodes that
     // are hydrated and not yet wrapped, so repeating it is cheap.
+    // It stops as soon as the page has loaded and three sweeps in a row found
+    // nothing - on most pages that is about a second, not ten.
     wrapUnder(root);
-    const sweep = window.setInterval(() => wrapUnder(root), 250);
+    let quiet = 0;
+    const sweep = window.setInterval(() => {
+      quiet = wrapUnder(root) === 0 ? quiet + 1 : 0;
+      if (quiet >= 3 && document.readyState === "complete") window.clearInterval(sweep);
+    }, 250);
     const stop = window.setTimeout(() => window.clearInterval(sweep), 10000);
 
     const mo = new MutationObserver((records) => {

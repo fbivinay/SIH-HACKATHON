@@ -1,21 +1,37 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, notFoundOr } from "@/lib/api";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 import MpPhoto from "@/components/MpPhoto";
+import type { Metadata } from "next";
 import { cleanName, isUnlistedId, profileOf, unlistedMember } from "@/lib/mpProfiles";
 
-export default async function MpPage({
+// The member's name in the tab, from Parliament's profile - no extra request.
+export async function generateMetadata({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+}): Promise<Metadata> {
   const { id } = await params;
-  const sp = await searchParams;
-  const wantedTerm = typeof sp.ls_term === "string" ? sp.ls_term : undefined;
+  const key = decodeURIComponent(id);
+  const name = (isUnlistedId(key) ? unlistedMember(key)?.name : profileOf(key)?.name) ?? "Member";
+  return { title: `${name} — member` };
+}
+
+// Rendered on first visit, then served from the cache (ISR).
+export async function generateStaticParams() {
+  return [];
+}
+
+// `term` comes from the path: ?ls_term= is rewritten to /t/<term> in
+// next.config.ts. Without one, the member's latest term.
+export default async function MpPage({
+  params,
+}: {
+  params: Promise<{ id: string; term?: string }>;
+}) {
+  const { id, term: wantedTerm } = await params;
 
   // A sitting member the MPLADS portal does not list yet: Parliament's
   // profile, and a plain statement that there is no fund record - no figure
@@ -82,8 +98,8 @@ export default async function MpPage({
         mp.terms.find((t) => String(t.ls_term) === wantedTerm) ?? mp.terms[0];
       mp = await api.mp(decodeURIComponent(id), { ls_term: String(chosen.ls_term) });
     }
-  } catch {
-    notFound();
+  } catch (err) {
+    notFoundOr(err);
   }
 
   const current = mp.terms.find((t) => String(t.ls_term) === wantedTerm) ?? mp.terms[0];
