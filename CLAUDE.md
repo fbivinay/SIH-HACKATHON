@@ -18,9 +18,10 @@ number destroys that, and nobody downstream can tell which number it was.
 - **Never invent a field the source does not publish.** MPLADS publishes no
   progress percentage, beneficiary count, geo-tag, or bill value. If a screen
   seems to want one, the answer is to say it is not published. The blind-spot
-  list lives in `COMPLIANCE_BLIND_SPOTS` in `api/main.py`, is served by
-  `/api/compliance`, and is rendered on `/provenance` (the Compliance page that
-  used to hold it was deleted). Add new limits there.
+  list lives in `COMPLIANCE_BLIND_SPOTS` in `api/main.py` and is served by
+  `/api/compliance`. Its points are quoted in the overview's "What it will not
+  tell you"; the rule book and the full list were on `/provenance` until the
+  owner removed them (2026-09-21). Add new limits there.
 - **Never invent a guideline clause number.** The MPLADS guidelines are not in
   this repository. `basis` on each compliance rule says what the rule rests on
   in words; "clause 3.12.1" would look authoritative and be fiction.
@@ -148,7 +149,9 @@ apart.** Ours-to-source is our responsibility; source-to-MoSPI is upstream lag.
 Reporting one combined number invites reading all of it as our error, which it
 is not. It is no longer on the site (owner's call, 2026-09-21: the Sources page
 opens with the architecture instead - `components/ArchitectureFlow.tsx`, the
-deck's slides 2 and 3 drawn in the product's language, every count live), but
+deck's slides 2 and 3 with lucide pictograms and the stack's own marks from
+simple-icons, all in ink, colour only on the risk bands, and no State Emblem
+(its use is restricted by law); every count live), but
 it still runs nightly and `/api/provenance` still serves both hops.
 
 ## 8. The language model labels, it does not judge
