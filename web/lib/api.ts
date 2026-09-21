@@ -346,6 +346,29 @@ export type Trends = {
   state: string | null;
 };
 
+// Works likely to miss their completion date, going by their agency's record
+// (/api/forecast/late). Never part of any score.
+export type LateForecast = {
+  window_days: number;
+  min_open_works: number;
+  cutoff_pct: number;
+  agencies_rated: number;
+  due_in_window: number;
+  likely_late: number;
+  agencies: number;
+  sanctioned: number;
+  agencies_worst: Array<{
+    implementing_agency: string;
+    state: string;
+    overdue_pct: number;
+    open_works: number;
+    overdue_works: number;
+    due_works: number;
+    due_sanctioned: number;
+    next_due: string;
+  }>;
+};
+
 // One Member of Parliament: what they recommended, what got built, what is
 // still waiting, and which of it is flagged.
 export type MpDetail = {
@@ -655,6 +678,7 @@ export const api = {
   // named in the problem statement, so they moved to /provenance and /analysis
   // rather than leaving with the navigation entries.
   compliance: () => get<ComplianceBook>("/api/compliance"),
+  lateForecast: () => get<LateForecast>("/api/forecast/late"),
   detectors: () => get<Detector[]>("/api/detectors"),
   trends: (params: Record<string, string> = {}) =>
     get<Trends>(`/api/trends?${new URLSearchParams(params)}`),

@@ -4,6 +4,7 @@ import HeroField from "@/components/HeroField";
 import FiguresBoard from "@/components/FiguresBoard";
 import { TERMS } from "@/lib/terms";
 import ScoreMethod from "@/components/ScoreMethod";
+import WatchScreen from "@/components/WatchScreen";
 
 
 // Built once and served from the edge, not rendered per request: nothing here
@@ -16,9 +17,14 @@ export default async function OverviewPage() {
   // Every scope, not just the one asked for. Three cached reads cost nothing
   // a warm page can feel, and they are what lets the switcher change the
   // figures with no network in the way at all - see components/FiguresBoard.
-  const all = await Promise.all(
-    TERMS.map((t) => api.overview(t.value ? { ls_term: t.value } : {}))
-  );
+  // The fourth screen's three reads alongside: none may take the overview
+  // down, so each falls back to nothing and its card is simply left out.
+  const [all, trends, forecast, compliance] = await Promise.all([
+    Promise.all(TERMS.map((t) => api.overview(t.value ? { ls_term: t.value } : {}))),
+    api.trends().catch(() => null),
+    api.lateForecast().catch(() => null),
+    api.compliance().catch(() => null),
+  ]);
   const scopes = TERMS.map((t, i) => ({ term: t.value, ...figures(all[i]) }));
 
   // The first screen is the hero, the term switcher and the six figures, sized
@@ -46,6 +52,10 @@ export default async function OverviewPage() {
       </div>
 
       <ScoreMethod />
+
+      {/* The fourth screen: trends, the one forecast, early warnings and the
+          compliance rules - the parts of the brief that are about time. */}
+      <WatchScreen trends={trends} forecast={forecast} compliance={compliance} />
     </main>
   );
 }

@@ -49,8 +49,9 @@ const COMPONENTS = [
 // Four limits, four points each (owner's call, 2026-09-21: the four that
 // matter most, and no "Read more"). A limit stated in one line reads as a
 // disclaimer, and a limit itself has to be checkable. Every point here is
-// either a rule in data/scoring.py or an entry in COMPLIANCE_BLIND_SPOTS in
-// api/main.py - none of it is written fresh for this page. The rest of the
+// either a rule in data/scoring.py, an entry in COMPLIANCE_BLIND_SPOTS in
+// api/main.py, or the forecast's rule (/api/forecast/late) - none of it is
+// written fresh for this page. The rest of the
 // blind spots are on Sources, which the lede above the cards says.
 const LIMITS = [
   {
@@ -72,12 +73,12 @@ const LIMITS = [
     ],
   },
   {
-    title: "It reports, it does not forecast",
+    title: "It forecasts only from the record",
     points: [
-      "Every figure describes the record as it already stands, not where it is heading.",
-      "Delay is days past the completion date the source itself publishes.",
-      "A work with no recorded schedule scores zero on delay, not high - an absent date is not a late one.",
-      "No progress milestones are published, so there is nothing to project a completion date from.",
+      "The one forecast - works likely to run late - is each agency's own overdue share, applied to its works due next.",
+      "It never enters a work's score: it describes an agency's backlog, not anything wrong with a work.",
+      "Delay is days past the completion date the source itself publishes; a work with no schedule scores zero, not high.",
+      "No progress milestones are published, so nothing here projects a completion date for any single work.",
     ],
   },
   {

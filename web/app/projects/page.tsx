@@ -265,6 +265,7 @@ async function QueueTable({
   if (filters.sector) scope.push(`in ${filters.sector}`);
   if (filters.risk_level) scope.push(`at ${filters.risk_level} risk`);
   if (filters.mp_id) scope.push("recommended by one member");
+  if (filters.compliance === "breach") scope.push("that breach a compliance rule");
 
   const pageHref = (o: number) => {
     const params = new URLSearchParams(filters);
