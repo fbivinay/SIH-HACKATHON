@@ -718,6 +718,13 @@ is instant. So:
   the page carries `noindex`.
 - Never read the request in these pages again without meaning to make them
   dynamic. Check the route table after `next build`: `○` or `●`, not `ƒ`.
+- **A page that uses a new API endpoint is built against the old API.** Web
+  and API deploy from the same push, at the same moment, so a static page
+  prerenders against whatever API was live - on 2026-09-21 the overview's
+  forecast card was built while `/api/forecast/late` did not exist yet, and
+  its `.catch(() => null)` left the card out. It heals at the next 30-minute
+  revalidation; to heal it at once, redeploy the web project alone
+  (`npx vercel redeploy <latest web deployment url> --target production`).
 
 **Two global helpers were costing every page.** `WordLift`'s fiber check
 used `for...in` over each DOM node - hundreds of inherited properties per
