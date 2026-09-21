@@ -547,10 +547,21 @@ const CACHE_TAG = "api";
 const CACHE_SECONDS = 1800;
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    next: { revalidate: CACHE_SECONDS, tags: [CACHE_TAG] },
-    headers: API_BYPASS ? { "x-vercel-protection-bypass": API_BYPASS } : undefined,
-  });
+  const once = () =>
+    fetch(`${API_BASE}${path}`, {
+      next: { revalidate: CACHE_SECONDS, tags: [CACHE_TAG] },
+      headers: API_BYPASS ? { "x-vercel-protection-bypass": API_BYPASS } : undefined,
+    });
+  // One retry on a server error or a dropped connection. The web and the API
+  // deploy from the same push, so the web's build prerenders /provenance
+  // against an API that may be cold-starting that second: on 2026-09-21 one
+  // 500 from a function that answered 200 a second later failed the whole
+  // deploy. A 4xx is an answer, not a hiccup, and is not retried.
+  let res = await once().catch(() => null);
+  if (!res || res.status >= 500) {
+    await new Promise((r) => setTimeout(r, 1500));
+    res = await once();
+  }
   if (!res.ok) throw new Error(`API error ${res.status} on ${path}`);
   return res.json();
 }

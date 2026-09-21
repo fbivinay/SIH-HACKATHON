@@ -26,13 +26,9 @@ def _get_pool():
         with _pool_lock:
             if _pool is None:
                 _pool = pg_pool.ThreadedConnectionPool(
-                    # Opened eagerly, because opening one is the expensive
-                    # part: a fresh TLS handshake to Neon measured 1.0-3.7s
-                    # from a laptop against 0.6s for a round trip on a
-                    # connection that already exists (2026-09-20). A page runs
-                    # two or three statements at once, so a pool that starts
-                    # at one made every one of them but the first pay that.
-                    minconn=4,
+                    # One, opened by the request that builds the pool; three
+                    # more are opened behind it by _warm (below).
+                    minconn=1,
                     # Fluid Compute reuses one instance across concurrent
                     # requests, so a handful of connections covers it; Neon's
                     # pooled endpoint caps well above this. 16 rather than 8
@@ -50,7 +46,37 @@ def _get_pool():
                     keepalives_interval=10,
                     keepalives_count=3,
                 )
+                # psycopg2 keeps at most `minconn` connections idle and CLOSES
+                # any other on putconn - so at minconn=1 every statement run
+                # beside another opened a fresh connection, every time. Raised
+                # after construction because the constructor opens minconn
+                # connections up front, in front of the first request.
+                _pool.minconn = 4
+                threading.Thread(target=_warm, args=(_pool, 3), daemon=True).start()
     return _pool
+
+
+def _warm(pool, n):
+    """Open n more connections in the background and put them in the pool.
+
+    Opening one is the expensive part (and only minconn of them are kept, so
+    minconn is raised to match - see _get_pool): a fresh TLS handshake to Neon measured
+    1.0-3.7s from a laptop against 0.6s for a round trip on a connection that
+    already exists (2026-09-20), and a page runs two or three statements at
+    once, so a pool of one made every statement but the first pay it. They
+    were opened in the pool's constructor at first, which put all four
+    handshakes - against a database that may be waking up - in front of the
+    first request, and a failure among them failed that request. Here a
+    failure costs nothing: the connection is simply opened later, on demand.
+    """
+    held = []
+    try:
+        for _ in range(n):
+            held.append(pool.getconn())
+    except Exception:
+        pass
+    for conn in held:
+        pool.putconn(conn)
 
 
 # A connection that died in the pool, rather than a bad statement. Neon closes
