@@ -3779,3 +3779,178 @@ html[data-phone] .phone-wall {
    kind printed as large as the name. */
 .model-card__name { font-size: 1.02rem; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
 .model-card__kind { margin-top: 0.2rem; font-size: 0.78rem; color: var(--ink-3); }
+
+/* ------------------------------------------------ architecture, in motion -- */
+/* The diagram runs (owner's call, 2026-09-21): packets travel every arrow,
+   the nightly stations light in turn, the step numbers pulse 1 to 7, the
+   weights fill, and a needle sweeps the risk bar. Transform and opacity only,
+   so it is composited, not repainted; paused while the diagram is off screen
+   (ArchLive sets [data-live]) and absent under reduced motion. */
+.archflow:not([data-live]) *,
+.archflow:not([data-live]) *::before,
+.archflow:not([data-live]) *::after {
+  animation-play-state: paused !important;
+}
+
+/* A packet: a wrapper the size of its arrow, carried the arrow's length, with
+   the dot at its leading edge. Translating by 100% of itself is exactly the
+   arrow's length, whatever the arrow's size. */
+.archpacket {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: arch-travel-x 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.archpacket::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ink);
+  box-shadow: 0 0 0 3px var(--surface);
+  translate: 0 -50%;
+}
+.archflow__down .archpacket { animation-name: arch-travel-y; }
+.archflow__down .archpacket::before { left: 50%; top: -3px; translate: -50% 0; }
+@keyframes arch-travel-x {
+  0% { translate: 0 0; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { translate: 100% 0; opacity: 0; }
+}
+@keyframes arch-travel-y {
+  0% { translate: 0 0; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { translate: 0 100%; opacity: 0; }
+}
+/* The second row's arrows start half a beat later, so the page reads as one
+   flow moving down rather than every arrow firing at once. */
+/* (nth-of-type counts spans: ArchLive's hidden span is the first, so the
+   second down-arrow is the third span; in the last row the arrows are the
+   only spans.) */
+.archflow__row--engine .archpacket,
+.archflow__down:nth-of-type(3) .archpacket { animation-delay: 0.6s; }
+.archflow__row--out .archflow__arrow:nth-of-type(2) .archpacket { animation-delay: 0.9s; }
+
+/* The nightly stations: each tile lights in turn, and a packet crosses to
+   the next - six stations, 0.6s apart, one full pass every 3.6s. */
+.archpipe .archicon { position: relative; }
+.archpipe .archicon::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 2px solid var(--ink);
+  border-radius: 15px;
+  opacity: 0;
+  animation: arch-station 3.6s ease-out infinite;
+  animation-delay: calc(var(--station, 0) * 0.6s);
+}
+@keyframes arch-station {
+  0% { opacity: 0; scale: 0.88; }
+  8% { opacity: 0.85; scale: 1; }
+  22% { opacity: 0; scale: 1.12; }
+  100% { opacity: 0; scale: 1.12; }
+}
+.archpipe > li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(1.3rem - 3px);
+  right: -0.6rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ink);
+  opacity: 0;
+  z-index: 1;
+  animation: arch-hop 3.6s linear infinite;
+  animation-delay: calc(var(--station, 0) * 0.6s + 0.2s);
+}
+@keyframes arch-hop {
+  0% { opacity: 0; translate: -0.35rem 0; }
+  4% { opacity: 1; }
+  12% { opacity: 1; translate: 0.45rem 0; }
+  16% { opacity: 0; translate: 0.55rem 0; }
+  100% { opacity: 0; translate: 0.55rem 0; }
+}
+
+/* The step numbers pulse in order, 1 to 7: where the work is, now. */
+.archstep__n { position: relative; }
+.archstep__n::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  opacity: 0;
+  animation: arch-step 4.9s ease-out infinite;
+  animation-delay: calc(var(--step, 0) * 0.7s);
+}
+@keyframes arch-step {
+  0% { opacity: 0.9; scale: 1; }
+  14% { opacity: 0; scale: 1.7; }
+  100% { opacity: 0; scale: 1.7; }
+}
+
+/* The weights fill to their share once the diagram is seen - 25% is a full
+   bar - and a light passes along them now and then. */
+.archweights li { grid-template-rows: auto auto; row-gap: 0.3rem; }
+.archweights__bar {
+  grid-column: 2 / -1;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.archweights__bar > i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: var(--ink);
+  transform-origin: left center;
+  scale: 0 1;
+  animation: arch-fill 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+.archweights li:nth-child(2) .archweights__bar > i { animation-delay: 0.12s; }
+.archweights li:nth-child(3) .archweights__bar > i { animation-delay: 0.24s; }
+.archweights li:nth-child(4) .archweights__bar > i { animation-delay: 0.36s; }
+.archweights li:nth-child(5) .archweights__bar > i { animation-delay: 0.48s; }
+@keyframes arch-fill {
+  to { scale: var(--w, 1) 1; }
+}
+
+/* The needle sweeps the scale, low to high and back. */
+.archgauge { position: relative; }
+.archgauge__sweep {
+  position: absolute;
+  inset: -5px 0;
+  pointer-events: none;
+  animation: arch-sweep 6s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+.archgauge__sweep > i {
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+@keyframes arch-sweep {
+  from { translate: 0 0; }
+  to { translate: 100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archflow *,
+  .archflow *::before,
+  .archflow *::after { animation: none !important; }
+  .archpacket,
+  .archgauge__sweep { display: none; }
+  .archweights__bar > i { scale: var(--w, 1) 1; }
+}

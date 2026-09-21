@@ -520,6 +520,16 @@ breathing, paused under the pointer, and absent under reduced motion. On
 hover lift, and an animation's fill state beats a plain declaration, so a
 float there would silently eat it.
 
+**The architecture on Sources runs** (owner's call, 2026-09-21): packets
+travel every arrow, the six nightly stations light in turn (0.6s apart), the
+step numbers pulse 1 to 7, the weight bars fill to their share (25% = full)
+and a needle sweeps the risk bar. Transform, `translate`, `scale` and opacity
+only - measured 16.7ms median frames while it runs. A packet is a wrapper the
+size of its arrow translated by 100% of itself, which is the arrow's length at
+any size. Everything is paused unless `components/ArchLive.tsx` has set
+`[data-live]` (an IntersectionObserver on the diagram), and none of it exists
+under reduced motion, where the bars sit at their final width.
+
 **Independent transform properties.** `scale` wraps `transform`: a ring at
 `transform: translate(449px)` with `scale: 1.55` drew at 696px. Position with
 the `translate` property (applied outermost) when `scale` is also in play.
