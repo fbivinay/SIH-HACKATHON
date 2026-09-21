@@ -111,15 +111,24 @@ def _run(sql, params, fetch, commit):
     putconn would return a dead one for the next request to trip over - so a
     single expired connection becomes a rolling outage rather than one failed
     request. A stale connection is therefore closed instead of pooled, and the
-    call is retried once against a fresh one.
+    call is retried against the next one, until a live one answers.
 
-    The retry is safe for the one statement that writes: it is an upsert keyed
-    on work_key, so running it twice leaves the same row. Do not add a
+    The retry is safe for the two statements that write: a decision is an
+    upsert keyed on work_key and clearing one is a DELETE by work_key, so
+    running either twice leaves the same state. (A retry happens only when the
+    connection died, which is before the statement could commit.) Do not add a
     non-idempotent write without revisiting this.
     """
     pool = _get_pool()
     last = None
-    for attempt in (0, 1):
+    # One more try than the pool keeps idle. Neon closes idle connections
+    # together, so after a quiet spell every pooled one is dead at once; with a
+    # single retry the second dead one failed the request (measured
+    # 2026-09-21, "SSL connection has been closed unexpectedly" on the first
+    # request after idling). Each dead one is discarded, so this ends at a
+    # fresh connection.
+    attempts = pool.minconn + 1
+    for attempt in range(attempts):
         conn = _borrow(pool)
         try:
             with conn.cursor() as cur:
@@ -141,7 +150,7 @@ def _run(sql, params, fetch, commit):
             # Unusable, not merely errored: drop it rather than pool it.
             pool.putconn(conn, close=True)
             last = err
-            if attempt == 1:
+            if attempt == attempts - 1:
                 raise
         except Exception:
             # A real statement error. The connection is fine once the aborted

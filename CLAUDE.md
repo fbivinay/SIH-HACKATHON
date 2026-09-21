@@ -143,9 +143,13 @@ one member in one ward at a time. No bulk export exists. We load Empowered
 Indian's export of the same record, and `scripts/verify_mospi.py` reconciles
 against the official endpoints on every refresh.
 
-**Keep that reconciliation running and keep both hops visible.** Ours-to-source
-is our responsibility; source-to-MoSPI is upstream lag. Reporting one combined
-number invites reading all of it as our error, which it is not.
+**Keep that reconciliation running, and wherever it is reported, keep both hops
+apart.** Ours-to-source is our responsibility; source-to-MoSPI is upstream lag.
+Reporting one combined number invites reading all of it as our error, which it
+is not. It is no longer on the site (owner's call, 2026-09-21: the Sources page
+opens with the architecture instead - `components/ArchitectureFlow.tsx`, the
+deck's slides 2 and 3 drawn in the product's language, every count live), but
+it still runs nightly and `/api/provenance` still serves both hops.
 
 ## 8. The language model labels, it does not judge
 
@@ -252,10 +256,10 @@ render in IST with the label written literally.
 
 Five nav pages in this order: Overview `/`, Projects `/projects`, States
 `/states`, MPs `/mps`, Sources `/provenance`. **Agencies became MPs** (owner's
-call, 2026-09-21; `/analysis` is a 308 to `/mps`). Its two brief-named blocks
-- "Gone quiet", the early warning, and "When the money moves", the trend
-analysis - moved to Sources as `components/MoneyMovement.tsx` rather than go
-with it. `/mps` lists every member of one term (`/api/mp-directory`, both
+call, 2026-09-21; `/analysis` is a 308 to `/mps`). Its "Gone quiet" early
+warning and "When the money moves" trend table moved to Sources and were then
+removed from it on the owner's call the same day; `/api/trends` still serves
+both. `/mps` lists every member of one term (`/api/mp-directory`, both
 terms rendered on the server so the switch is state, not a round trip),
 sixty cards at a time, filtered and sorted in the browser. **Compare is the
 first thing on the page** (owner's call, 2026-09-21): four slots, a search
