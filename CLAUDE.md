@@ -251,7 +251,28 @@ Money is `formatINR` (₹ Cr / L), counts are `formatCount`, and timestamps
 render in IST with the label written literally.
 
 Five nav pages in this order: Overview `/`, Projects `/projects`, States
-`/states`, Agencies `/analysis`, Sources `/provenance`. The queue was Alerts
+`/states`, MPs `/mps`, Sources `/provenance`. **Agencies became MPs** (owner's
+call, 2026-09-21; `/analysis` is a 308 to `/mps`). Its two brief-named blocks
+- "Gone quiet", the early warning, and "When the money moves", the trend
+analysis - moved to Sources as `components/MoneyMovement.tsx` rather than go
+with it. `/mps` lists every member of one term (`/api/mp-directory`, both
+terms rendered on the server so the switch is state, not a round trip),
+sixty cards at a time, filtered and sorted in the browser; up to four are
+picked into a bar pinned to the window's foot and set side by side on
+`/mps/compare?ls_term=&ids=`, one term only, because a member's two terms are
+two allocations. **Who a member is comes from Parliament, not MPLADS**:
+`scripts/fetch_mp_profiles.py` reads sansad.in's Lok Sabha (17th, 18th) and
+Rajya Sabha rosters, matches all 1,110 members, and writes
+`web/data/mp_profiles.json` (party, age, education, profession, terms) and
+`web/public/mps/<mp_id>.webp` (120×150, 4.4MB for all), both committed, like
+the sector cache. Photos cannot be linked - sansad.in sends
+`Cross-Origin-Resource-Policy: same-site`. Personal phone numbers, e-mails,
+home addresses and family details in those records are never read. Matching
+lessons: the 17th roster lists members at their *current* seat, Rajya Sabha
+writes "Keralam", "National Capital Territory of Delhi" and "Nominated", and a
+seat with one member is not proof - Akhilesh Yadav won Azamgarh and moved,
+leaving Dinesh Lal Yadav alone on it - so no record may stand for two members
+in one term. A profile never feeds a figure, score or flag. The queue was Alerts
 at `/alerts` until 2026-09-20, when the owner renamed it; `/alerts` is a 308
 to `/projects`, and `/projects/[id]`, the page for one work, sits under it.
 The API keeps its own names (`/api/alerts`, `/api/alerts/summary`): they are

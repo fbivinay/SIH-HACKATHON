@@ -127,6 +127,32 @@ export type MpStat = {
   high_risk_works: number;
 };
 
+// One member in one term, as /api/mp-directory returns them: the source's own
+// money aggregates beside counts of the works we hold for the member.
+export type MpDirectoryRow = {
+  mp_id: string;
+  ls_term: number;
+  mp_name: string;
+  constituency: string | null;
+  state: string | null;
+  house: string | null;
+  allocated_amount: number | null;
+  amount_recommended: number | null;
+  total_expenditure: number | null;
+  unspent_amount: number | null;
+  idle_amount: number | null;
+  completion_rate_pct: number | null;
+  completed_works: number | null;
+  recommended_works: number | null;
+  transaction_count: number | null;
+  pending_payments: number | null;
+  total_projects: number;
+  completed_projects: number;
+  high_risk_works: number;
+  in_queue: number;
+  districts: number;
+};
+
 export type ReviewStatus = "pending" | "verified" | "dismissed" | "escalated";
 
 // One row of the verification queue. Everything a reviewer needs to decide
@@ -588,6 +614,8 @@ export const api = {
   agencies: (params: Record<string, string> = {}) =>
     get<AgencyStat[]>(`/api/agencies?${new URLSearchParams(params)}`),
   mps: () => get<MpStat[]>("/api/mps"),
+  mpDirectory: (lsTerm: string) =>
+    get<MpDirectoryRow[]>(`/api/mp-directory?${new URLSearchParams({ ls_term: lsTerm })}`),
   mp: (mpId: string, params: Record<string, string> = {}) =>
     get<MpDetail>(`/api/mps/${encodeURIComponent(mpId)}?${new URLSearchParams(params)}`),
   dataFreshness: () => get<DataFreshness>("/api/data-freshness"),

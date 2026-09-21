@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
 import CountUp from "@/components/CountUp";
+import MpPhoto from "@/components/MpPhoto";
+import { cleanName, profileOf } from "@/lib/mpProfiles";
 
 export default async function MpPage({
   params,
@@ -35,15 +37,35 @@ export default async function MpPage({
   const current = mp.terms.find((t) => String(t.ls_term) === wantedTerm) ?? mp.terms[0];
   const w = mp.works;
   const pct = (v: number | null) => (v === null ? "—" : `${Number(v).toFixed(0)}%`);
+  // Parliament's record of who the member is. Never feeds a figure below.
+  const profile = profileOf(current.mp_id);
+  const facts = [
+    profile?.party,
+    profile?.age ? `Age ${profile.age}` : null,
+    profile?.qualification,
+    profile?.terms_served
+      ? `${profile.terms_served} ${profile.terms_served === 1 ? "term" : "terms"}${
+          profile.lok_sabhas ? ` (Lok Sabha ${profile.lok_sabhas.replace(/,/g, ", ")})` : ""
+        }`
+      : null,
+  ].filter(Boolean);
 
   return (
     <main className="shell py-8">
-      <Link href="/analysis" className="text-xs link-quiet">
-        &larr; Back to members
+      <Link href={`/mps?ls_term=${current.ls_term}`} className="text-xs link-quiet">
+        &larr; Members of Parliament
       </Link>
 
-      <h1 className="display mt-4">{current.mp_name}</h1>
-      <p className="mt-2 text-[0.9rem]" style={{ color: "var(--ink-2)" }}>
+      <div className="mphead mt-4">
+        <MpPhoto src={profile?.photo} name={cleanName(current.mp_name, profile)} size={96} priority />
+        <div className="min-w-0">
+      <h1 className="display">{cleanName(current.mp_name, profile)}</h1>
+      {facts.length > 0 && (
+        <p className="mt-2 text-[0.9rem] font-medium" style={{ color: "var(--ink)" }}>
+          {facts.join(" · ")}
+        </p>
+      )}
+      <p className="mt-1 text-[0.9rem]" style={{ color: "var(--ink-2)" }}>
         {/* Rajya Sabha members carry "Sitting Rajya Sabha" as their
             constituency, which repeats the house verbatim. Dedupe rather than
             print the same words twice. */}
@@ -60,6 +82,14 @@ export default async function MpPage({
           .join(" · ")}
         {mp.terms.length > 1 && ` · ${mp.terms.length} terms on record`}
       </p>
+        </div>
+        <Link
+          href={`/mps?ls_term=${current.ls_term}&compare=${encodeURIComponent(current.mp_id)}`}
+          className="btn mphead__compare"
+        >
+          + Compare with another member
+        </Link>
+      </div>
 
       {mp.terms.length > 1 && (
         <nav className="mt-4 flex flex-wrap gap-2" aria-label="Lok Sabha term">

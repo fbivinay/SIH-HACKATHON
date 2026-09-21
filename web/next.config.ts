@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/alerts", destination: "/projects", permanent: true },
       { source: "/map", destination: "/states", permanent: true },
+      // The Agencies page became the MPs page (owner's call, 2026-09-21).
+      { source: "/analysis", destination: "/mps", permanent: true },
     ];
   },
 };

@@ -612,3 +612,17 @@ def test_search_puts_the_closest_work_first():
 def test_search_refuses_a_query_too_short_to_mean_anything():
     """One letter matches a quarter of the record; the box does not ask."""
     assert client.get("/api/search/works?q=a").status_code == 422
+
+
+def test_mp_directory_lists_every_member_of_one_term():
+    # Every member, one term: including the newly seated with nothing
+    # allocated, which /api/mps leaves out. Money is the source's own row.
+    rows = client.get("/api/mp-directory?ls_term=18").json()
+    assert len(rows) > 700
+    assert {r["ls_term"] for r in rows} == {18}
+    assert len({r["mp_id"] for r in rows}) == len(rows)
+    assert {"Lok Sabha", "Rajya Sabha"} <= {r["house"] for r in rows}
+    for r in rows:
+        if r["allocated_amount"] is not None and r["amount_recommended"] is not None:
+            assert abs(r["idle_amount"] - (r["allocated_amount"] - r["amount_recommended"])) < 0.01
+    assert client.get("/api/mp-directory?ls_term=16").status_code == 422

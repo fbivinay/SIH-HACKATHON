@@ -2,6 +2,7 @@ import { api } from "@/lib/api";
 import { formatCount, formatFreshnessTimestamp } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 import WhereTheAI from "@/components/WhereTheAI";
+import MoneyMovement from "@/components/MoneyMovement";
 
 export const metadata = { title: "Where the numbers come from" };
 
@@ -11,10 +12,11 @@ export default async function ProvenancePage() {
   // names both capabilities - "deviations from established norms", "automated
   // compliance monitoring" - so the evidence page is where they belong. Neither
   // failing takes the page down: provenance is the point, these are the detail.
-  const [p, detectors, rules] = await Promise.all([
+  const [p, detectors, rules, trends] = await Promise.all([
     api.provenance(),
     api.detectors().catch(() => []),
     api.compliance().catch(() => null),
+    api.trends().catch(() => null),
   ]);
   const worst = p.worst_gap_pct;
 
@@ -340,6 +342,8 @@ export default async function ProvenancePage() {
             {p.last_refresh.source ?? "the committed snapshot"}.
           </p>
         )}
+
+        <MoneyMovement trends={trends} />
       </section>
     </main>
   );
