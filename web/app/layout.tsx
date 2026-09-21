@@ -12,6 +12,7 @@ import OnHome from "@/components/OnHome";
 import RiskTicker from "@/components/RiskTicker";
 import ScrollReveal from "@/components/ScrollReveal";
 import WordLift from "@/components/WordLift";
+import ClickableSections from "@/components/ClickableSections";
 import FoldHeight from "@/components/FoldHeight";
 import Splash from "@/components/Splash";
 
@@ -101,6 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ScrollReveal />
         {/* Wraps words so only the one under the pointer zooms. */}
         <WordLift />
+        <ClickableSections />
         {/* Measures the overview's first screen; see --fold-h. */}
         <FoldHeight />
         {/* See .viewport-column. On every page but the overview, main is a

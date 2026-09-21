@@ -2896,7 +2896,7 @@ main > section:nth-of-type(n + 5) { animation-delay: calc(var(--enter-at) + 300m
   }
   /* html :is(...) is (0,1,1): component rules such as .review-btn and .btn
      set `cursor: pointer` at (0,1,0), and a bare `button` lost to them. */
-  html :is(a, button, [role="button"], summary, label, select) {
+  html :is(a, button, [role="button"], summary, label, select, [data-section-link], [data-section-link] *) {
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='19' fill='none' stroke='%23a82e22' stroke-opacity='0.7' stroke-width='1.5'/%3E%3Ccircle cx='24' cy='24' r='2' fill='%23a82e22'/%3E%3C/svg%3E") 24 24, pointer;
   }
   html :is(input, textarea, [contenteditable="true"]) {

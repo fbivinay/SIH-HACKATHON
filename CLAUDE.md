@@ -524,6 +524,20 @@ float there would silently eat it.
 `transform: translate(449px)` with `scale: 1.55` drew at 696px. Position with
 the `translate` property (applied outermost) when `scale` is also in play.
 
+**Every section with a link opens it from anywhere inside** (owner's call,
+2026-09-21). One delegated listener, `components/ClickableSections.tsx`,
+mounted in the layout, rather than a stretched link per component: a plain
+click on a table row opens the row's first link (always its subject - the
+district, member or work; later links are context), and on a card, list item
+or article opens its link if all its links go to one place. A section with
+several destinations is left alone rather than guessed. Clicks on links,
+buttons, form fields, `<summary>`, an open `<details>`, the decision buttons'
+gaps and the map keep their own behaviour; selecting text never navigates;
+ctrl/cmd/shift-click opens a tab. The pointer is marked by the same test on
+entry (`[data-section-link]` joins the ring cursor's rule), so the cursor
+never promises a click that does nothing. The real `<a>` elements are
+untouched, so keyboard and screen readers see no change.
+
 **Sticky and stacking.** `.data-table thead th { top: 0 }` — the wrap owns the
 scroll, so a topbar offset parks the header across row 1. `.topbar` is
 `z-index: 1100` because Leaflet stacks 200–1000 and painted over the nav at
