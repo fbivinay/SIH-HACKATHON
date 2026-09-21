@@ -3490,9 +3490,23 @@ html[data-phone] .phone-wall {
 }
 .archflow__tag { margin-top: 0.35rem; font-size: 1rem; color: var(--ink-2); }
 .archflow__row { display: grid; align-items: stretch; }
-.archflow__row--source,
-.archflow__row--engine { grid-template-columns: minmax(0, 1fr) 2.6rem minmax(0, 1.9fr); }
-.archflow__row--out { grid-template-columns: minmax(0, 1fr) 2.6rem minmax(0, 1fr) 2.6rem minmax(0, 1fr); }
+/* The flow snakes: 1 -> 2 left to right, down into 3 under the right end of
+   2, 3 -> 4 right to left, down into 5 under the left end of 4, then 5 -> 6
+   -> 7 left to right. Every arrow joins two consecutive steps. Each turn is a
+   grid shaped like the row below it, with its arrow in the column of the step
+   it drops into, so it lands on that step's centre at any width. */
+.archflow__row--source { grid-template-columns: minmax(0, 1fr) 2.6rem minmax(0, 1.9fr); }
+.archflow__row--engine,
+.archflow__turn--1 { grid-template-columns: minmax(0, 1.9fr) 2.6rem minmax(0, 1fr); }
+.archflow__row--out,
+.archflow__turn--2 { grid-template-columns: minmax(0, 1fr) 2.6rem minmax(0, 1fr) 2.6rem minmax(0, 1fr); }
+.archflow__row--engine > * { grid-row: 1; }
+.archflow__row--engine > :nth-child(1) { grid-column: 3; }  /* step 3 */
+.archflow__row--engine > :nth-child(2) { grid-column: 2; scale: -1 1; }  /* arrow, pointing left */
+.archflow__row--engine > :nth-child(3) { grid-column: 1; }  /* step 4 */
+.archflow__turn { display: grid; }
+.archflow__turn--1 > .archflow__down { grid-column: 3; justify-self: center; }
+.archflow__turn--2 > .archflow__down { grid-column: 1; justify-self: center; }
 
 .archstep {
   position: relative;
@@ -3556,16 +3570,27 @@ html[data-phone] .phone-wall {
 /* Step 1's two figures. */
 .archdata { margin-top: 0.9rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
 .archdata__item { display: flex; align-items: center; gap: 0.6rem; }
-.archdata__item b {
+/* Classes, not `b`/`span`: CountUp renders a span inside the figure, and
+   `.archdata__item span` was setting it small and grey - the figures read
+   dull because they were being styled as their own labels. */
+.archdata__num {
   display: block;
-  font-family: var(--font-data);
-  font-size: 1.3rem;
+  font-size: 1.75rem;
   font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  line-height: 1.05;
 }
-.archdata__item span { font-size: 0.74rem; color: var(--ink-3); }
+.archdata__label {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
 
 /* Step 2: six stations, icon over label, joined by arrows - the deck's strip. */
 .archpipe {
@@ -3748,7 +3773,11 @@ html[data-phone] .phone-wall {
 @media (max-width: 1000px) {
   .archflow__row--source,
   .archflow__row--engine,
-  .archflow__row--out { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
+  .archflow__row--out,
+  .archflow__turn--1,
+  .archflow__turn--2 { grid-template-columns: minmax(0, 1fr); gap: 0.6rem; }
+  .archflow__row--engine > * { grid-row: auto; grid-column: auto !important; }
+  .archflow__turn > .archflow__down { grid-column: 1; }
   .archflow__arrow { display: none; }
   .archcohort { grid-template-columns: minmax(0, 1fr); }
 }
@@ -3832,9 +3861,11 @@ html[data-phone] .phone-wall {
 /* (nth-of-type counts spans: ArchLive's hidden span is the first, so the
    second down-arrow is the third span; in the last row the arrows are the
    only spans.) */
-.archflow__row--engine .archpacket,
-.archflow__down:nth-of-type(3) .archpacket { animation-delay: 0.6s; }
-.archflow__row--out .archflow__arrow:nth-of-type(2) .archpacket { animation-delay: 0.9s; }
+.archflow__turn--1 .archpacket { animation-delay: 0.3s; }
+.archflow__row--engine .archpacket { animation-delay: 0.6s; }
+.archflow__turn--2 .archpacket { animation-delay: 0.9s; }
+.archflow__row--out .archflow__arrow:nth-of-type(1) .archpacket { animation-delay: 1.2s; }
+.archflow__row--out .archflow__arrow:nth-of-type(2) .archpacket { animation-delay: 1.5s; }
 
 /* The nightly stations: each tile lights in turn, and a packet crosses to
    the next - six stations, 0.6s apart, one full pass every 3.6s. */

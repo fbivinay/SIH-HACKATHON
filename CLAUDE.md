@@ -520,7 +520,16 @@ breathing, paused under the pointer, and absent under reduced motion. On
 hover lift, and an animation's fill state beats a plain declaration, so a
 float there would silently eat it.
 
-**The architecture on Sources runs** (owner's call, 2026-09-21): packets
+**The architecture on Sources snakes** (owner's call, 2026-09-21): 1 -> 2,
+down into 3 under the right end of 2, 3 -> 4 right to left, down into 5 under
+the left end of 4, 5 -> 6 -> 7. A centred down-arrow landed 2 on 4 and 4 on 6.
+Each turn is its own grid shaped like the row below it, arrow in the column of
+the step it enters, so it lands on that step at any width; the row-2 arrow is
+flipped with `scale: -1 1`, which reverses its packet too. Measured by
+geometry, not by eye: each down-arrow starts inside the step above and ends
+inside the one below, at 1440 and 1280.
+
+**It also runs** (owner's call, same day): packets
 travel every arrow, the six nightly stations light in turn (0.6s apart), the
 step numbers pulse 1 to 7, the weight bars fill to their share (25% = full)
 and a needle sweeps the risk bar. Transform, `translate`, `scale` and opacity

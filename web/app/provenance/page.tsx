@@ -35,8 +35,7 @@ export default async function ProvenancePage() {
   // compliance rule book and its blind spots were here until the owner removed
   // them (2026-09-21); /api/compliance still serves both, and compliance is
   // still 15% of every score.
-  const [p, detectors, overview] = await Promise.all([
-    api.provenance(),
+  const [detectors, overview] = await Promise.all([
     api.detectors().catch(() => []),
     api.overview(),
   ]);
@@ -51,7 +50,6 @@ export default async function ProvenancePage() {
         <ArchitectureFlow
           works={overview.total_projects}
           payments={overview.payment_count}
-          refused={p.rejects.reduce((t, r) => t + r.rows, 0)}
           inQueue={overview.anomaly_count}
         />
 
