@@ -1,0 +1,78 @@
+import type { Metadata } from "next";
+import { api } from "@/lib/api";
+import { cleanName, profileOf } from "@/lib/mpProfiles";
+import MpDirectory, { type MpCardRow } from "@/components/MpDirectory";
+
+export const metadata: Metadata = { title: "Members of Parliament" };
+
+/**
+ * Every Member of Parliament in the record, with who they are and what their
+ * allocation became, and a way to set up to four side by side.
+ *
+ * Both terms are rendered on the server and handed over together, so the
+ * term switch is a state change and not a round trip - the same reasoning as
+ * the overview's switcher (CLAUDE.md §11).
+ */
+export default async function MpsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const initialTerm = sp.ls_term === "17" ? "17" : "18";
+  const initialPicked =
+    typeof sp.compare === "string" ? sp.compare.split(",").filter(Boolean).slice(0, 4) : [];
+  const [t18, t17] = await Promise.all([api.mpDirectory("18"), api.mpDirectory("17")]);
+
+  const toCards = (rows: typeof t18): MpCardRow[] =>
+    rows.map((r) => {
+      const p = profileOf(r.mp_id);
+      const alloc = r.allocated_amount && r.allocated_amount > 0 ? r.allocated_amount : null;
+      return {
+        id: r.mp_id,
+        term: r.ls_term,
+        name: cleanName(r.mp_name, p),
+        photo: p?.photo ?? null,
+        party: p?.party ?? null,
+        partyShort: p?.party_short ?? null,
+        house: r.house,
+        // Rajya Sabha rows carry "Sitting Rajya Sabha" or "Nominated Rajya
+        // Sabha" as their constituency - the house again, not a place.
+        seat:
+          r.house === "Rajya Sabha"
+            ? /nominated/i.test(r.constituency ?? "")
+              ? "Nominated"
+              : null
+            : r.constituency,
+        state: r.state,
+        allocated: r.allocated_amount,
+        committed: r.amount_recommended,
+        paid: r.total_expenditure,
+        idle: r.idle_amount,
+        // Two rates, not one (CLAUDE.md §6): committed is recommended over
+        // allocated, paid is expenditure over allocated.
+        committedRate: alloc && r.amount_recommended !== null ? (r.amount_recommended / alloc) * 100 : null,
+        paidRate: alloc && r.total_expenditure !== null ? (r.total_expenditure / alloc) * 100 : null,
+        works: r.total_projects,
+        inQueue: r.in_queue,
+        highRisk: r.high_risk_works,
+      };
+    });
+
+  return (
+    <main className="shell py-8">
+      <h1 className="display">Members of Parliament</h1>
+      <p className="lede !mx-0 !max-w-3xl">
+        Every member in the record: who they are, what they were allocated, and what that
+        allocation became. Money is the MPLADS portal&rsquo;s own per-member figure; party, age,
+        education, terms and photographs are Parliament&rsquo;s own records. Pick up to four to
+        set side by side.
+      </p>
+      <MpDirectory
+        byTerm={{ "18": toCards(t18), "17": toCards(t17) }}
+        initialTerm={initialTerm}
+        initialPicked={initialPicked}
+      />
+    </main>
+  );
+}

@@ -49,14 +49,15 @@ export const viewport: Viewport = { colorScheme: "light" };
 // three capabilities, their content moved rather than left:
 //
 //   cohort detectors + compliance rule book + blind spots -> /provenance
-//   trend analysis + the quiet-agency early warning       -> /analysis
+//   trend analysis + the quiet-agency early warning       -> /provenance
+//     (they were on /analysis until the Agencies page became MPs, 2026-09-21)
 //
 // If any of that goes missing again, those are the pages to look at.
 export const navLinks = [
   { href: "/", label: "Overview" },
   { href: "/projects", label: "Projects" },
   { href: "/states", label: "States" },
-  { href: "/analysis", label: "Agencies" },
+  { href: "/mps", label: "MPs" },
   { href: "/provenance", label: "Sources" },
 ];
 

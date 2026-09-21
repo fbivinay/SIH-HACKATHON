@@ -400,6 +400,56 @@ def mps(limit: int = Query(100, le=1000)):
     )
 
 
+@app.get("/api/mp-directory")
+def mp_directory(ls_term: int = Query(18, ge=17, le=18)):
+    """Every member for one Lok Sabha term, for the MPs page and its comparison.
+
+    Unlike /api/mps this keeps members with nothing allocated yet - a
+    directory that leaves out the newly seated reads as if they were not
+    members - and it is one term at a time, because a member's two terms are
+    two different allocations and adding them would compare nothing.
+
+    Money is the source's own per-MP aggregate (CLAUDE.md §6); the works
+    columns count what we hold for the member. Remembered for thirty minutes:
+    the record changes once a night.
+    """
+
+    def compute():
+        return query(
+            """
+            WITH work_stats AS (
+                SELECT mp_id,
+                       COUNT(*) AS total_projects,
+                       COUNT(*) FILTER (WHERE work_status = 'completed') AS completed_projects,
+                       COUNT(*) FILTER (WHERE risk_level = 'HIGH') AS high_risk_works,
+                       COUNT(*) FILTER (WHERE overall_risk_score >= 40) AS in_queue,
+                       COUNT(DISTINCT district) AS districts
+                FROM projects_scored
+                WHERE mp_id IS NOT NULL AND ls_term = %s
+                GROUP BY mp_id
+            )
+            SELECT m.mp_id, m.ls_term, m.mp_name, m.constituency, m.state, m.house,
+                   m.allocated_amount, m.amount_recommended, m.total_expenditure,
+                   m.unspent_amount, m.completion_rate_pct,
+                   m.completed_works, m.recommended_works,
+                   m.transaction_count, m.pending_payments,
+                   m.allocated_amount - m.amount_recommended AS idle_amount,
+                   COALESCE(w.total_projects, 0) AS total_projects,
+                   COALESCE(w.completed_projects, 0) AS completed_projects,
+                   COALESCE(w.high_risk_works, 0) AS high_risk_works,
+                   COALESCE(w.in_queue, 0) AS in_queue,
+                   COALESCE(w.districts, 0) AS districts
+            FROM mps m
+            LEFT JOIN work_stats w USING (mp_id)
+            WHERE m.ls_term = %s
+            ORDER BY m.mp_name
+            """,
+            [ls_term, ls_term],
+        )
+
+    return _memoised(("mp-directory", ls_term), 1800, compute)
+
+
 @app.get("/api/data-freshness")
 def data_freshness():
     """Latest successful load+score run, for the UI's freshness indicator.

@@ -42,7 +42,7 @@ const PAGES: Hit[] = [
   { kind: "Page", label: "Overview", sub: "The headline figures", href: "/" },
   { kind: "Page", label: "Projects", sub: "The review queue and every work", href: "/projects" },
   { kind: "Page", label: "States", sub: "The map and every state", href: "/states" },
-  { kind: "Page", label: "Agencies", sub: "Implementing agencies and members", href: "/analysis" },
+  { kind: "Page", label: "MPs", sub: "Every member, with photographs and comparison", href: "/mps" },
   { kind: "Page", label: "Sources", sub: "Where the numbers come from", href: "/provenance" },
 ];
 
