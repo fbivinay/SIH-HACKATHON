@@ -122,10 +122,21 @@ export default function HeroField() {
       inkBoost = lum < 0.5 ? 1.9 : 1;
     };
 
+    // Half rate. The field drifts at 9px a second, so 30fps and 60fps look
+    // identical - and the canvas is the fold's full size times the root zoom,
+    // about 1.7 million pixels cleared and refilled per frame, which is the
+    // single most expensive thing the overview does while it sits still.
+    // Measured 2026-09-20: it alone held idle frames at ~30ms.
+    const MIN_FRAME_MS = 1000 / 30;
+    let painted = 0;
+
     const tick = (now: number) => {
       frame = 0;
       if (!onScreen || !tabShown) return;
-      draw(now);
+      if (now - painted >= MIN_FRAME_MS) {
+        painted = now;
+        draw(now);
+      }
       frame = requestAnimationFrame(tick);
     };
     const start = () => {

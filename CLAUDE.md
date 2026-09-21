@@ -418,13 +418,19 @@ leave. It runs 3.3s: fill 2.5s on a symmetric curve, fade 2.7 → 3.3s,
 end. `ScrollReveal`'s last pass and `data-entered` are timed off it.
 
 **Performance budget, measured on `/alerts`:** 2 backdrop-filters on the
-whole page (masthead, ticker), 0 `background-attachment: fixed`, 0 gradient
-pseudo-elements, 60fps. What broke it before: 17 backdrop-filters, a fixed
+whole page (masthead, ticker), 0 `background-attachment: fixed`, and the only
+gradient pseudo-elements are the ticker's two static end fades, 60fps. What broke it before: 17 backdrop-filters, a fixed
 body background repainting on every scroll frame, a CSS `mask-image` over a
 canvas that repaints every frame (33ms frames → 16.7ms without; the fade is
 done per point instead), and a canvas reaching under the masthead so its
-backdrop blur recomputed every frame. `body::before` is the one fixed wash
-layer. Anything that keeps drawing must stop when off-screen or the tab is
+backdrop blur recomputed every frame. The same mask trap was found again on
+2026-09-20 in the ticker: a `mask-image` fading the ends of a strip that moves
+every frame made the strip repaint every frame and held the overview near
+30fps once scrolled past the hero. The fades are now two static gradients over
+the strip, and the track has `will-change: transform`. `HeroField` draws at
+30fps - the field drifts at 9px a second, so 60 looks the same, and its
+backing store is ~1.7 million pixels cleared per frame. `body::before` is the
+one fixed wash layer. Anything that keeps drawing must stop when off-screen or the tab is
 hidden (`HeroField`, `Cursor` both do).
 
 **Zoom.** The root is zoomed, and it bites three times. `clientX/Y` are screen
@@ -504,15 +510,36 @@ client does ~200ms of main-thread work on `/alerts`; `/api/alerts` took
 on a thread pool — which doubled the connections one request holds and
 exhausted the pool of 8 during a build (seven pages prerendered at once),
 so `db.py` now pools 16 and queues for up to 5s rather than raising; the
-total is remembered per filter set for five minutes
+total is remembered per filter set for thirty minutes
 (cleared by every decision, which moves the status counts); `/api/filters`
 is remembered for ten; and the rows query sets `work_mem` to 32MB locally,
 which stops its sort spilling ~220MB to disk. Paging went from ~3s to ~1s
 locally. A decision flips its button at once (`useOptimistic`) instead of
 sitting disabled through the write and the re-render.
 
+**Then the connections, measured 2026-09-20.** A queue statement executes in
+under 1ms on Neon (EXPLAIN ANALYZE: 0.77ms); from a laptop its wall time was
+the round trip, 0.6s, and whole endpoints still took 1.9s and cold filtered
+pages 3–7s. The rest was **opening connections**: the pool started at one, a
+page runs two or three statements at once, and each extra one paid a fresh
+TLS handshake of 1.0–3.7s; and reads never ended their transaction, so
+connections went back "idle in transaction" and were cut off and reopened.
+`db.py` now opens four eagerly, sets TCP keepalives, and rolls back after
+every read. Endpoints went to one round trip (0.64s locally) and a cold
+filtered page to 0.67–1.03s. Anything slower locally is the link to Neon, not
+the code - check with `SELECT 1` before optimising a query.
+
+**The queue streams.** `app/projects/page.tsx` renders the filter bar and the
+download from the URL alone and puts the tiles and the table each behind a
+`<Suspense>` keyed on the filters, with ghost cards and rows as fallbacks, so
+the shell's first byte is 20–40ms whatever the database is doing. A filter
+change is a `router.replace` inside `useTransition`: while it is pending the
+bar carries `aria-busy`, a thin indeterminate sweep runs along its top edge
+and the tiles and table drop to 45% (`.queue-screen:has(...)`, no state
+outside the bar) - measured, on screen 156ms after the change.
+
 **Navigation.** `app/loading.tsx` answers a click in ~150ms; `lib/api.ts`
-caches every GET for 300s under the tag `api` (the record changes nightly),
+caches every GET for 1800s under the tag `api` (the record changes nightly),
 and `app/alerts/actions.ts` calls `updateTag("api")` after a review so the
 reviewer reads their own write. Measured: 130–550ms per click warm, against
 1.3–9.3s cold plus 3.5s blank before.

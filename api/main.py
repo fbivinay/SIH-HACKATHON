@@ -545,7 +545,11 @@ def alerts(
             one=True,
         )["total"]
 
-    total_f = _queries.submit(_memoised, ("alert-count", where, tuple(params)), 300, count)
+    # Half an hour rather than five minutes: the record changes once a night,
+    # a count over the filtered join is the slowest statement the queue runs
+    # (~500ms on the server, measured 2026-09-20), and a reader trying filters
+    # comes back to the same ones. Every decision drops the whole family.
+    total_f = _queries.submit(_memoised, ("alert-count", where, tuple(params)), 1800, count)
     return {"total": total_f.result(), "limit": limit, "offset": offset, "alerts": rows_f.result()}
 
 
