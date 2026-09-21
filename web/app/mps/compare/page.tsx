@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { api, type MpDetail } from "@/lib/api";
-import { cleanName, profileOf, type MpProfile } from "@/lib/mpProfiles";
+import { cleanName, isUnlistedId, profileOf, unlistedMember, type MpProfile } from "@/lib/mpProfiles";
 import MpPhoto from "@/components/MpPhoto";
 import { formatCount, formatINR } from "@/lib/format";
 
@@ -10,6 +10,9 @@ export const metadata: Metadata = { title: "Compare members" };
 
 type Col = {
   id: string;
+  // Sitting but not in the MPLADS record: profile only, every money and works
+  // cell reads "Not in MPLADS yet" rather than a zero it never published.
+  unlisted: boolean;
   name: string;
   profile: MpProfile | null;
   term: MpDetail["terms"][number];
@@ -42,15 +45,42 @@ export default async function ComparePage({
     .filter(Boolean)
     .slice(0, 4);
 
+  const EMPTY_WORKS: MpDetail["works"] = {
+    works: 0, completed: 0, pending: 0, high_risk: 0, in_queue: 0,
+    sanctioned: 0, flagged_value: 0, districts: 0, agencies: 0,
+  };
   const fetched = await Promise.all(
-    ids.map((id) => api.mp(id, { ls_term: term }).then((d) => ({ id, d })).catch(() => null))
+    ids.map((id) =>
+      isUnlistedId(id)
+        ? Promise.resolve(null)
+        : api.mp(id, { ls_term: term }).then((d) => ({ id, d })).catch(() => null)
+    )
   );
-  const cols: Col[] = fetched.flatMap((f) => {
-    if (!f) return [];
+  const cols: Col[] = fetched.flatMap((f, i): Col[] => {
+    if (!f) {
+      const m = term === "18" ? unlistedMember(ids[i]) : null;
+      if (!m) return [];
+      return [{
+        id: ids[i],
+        unlisted: true,
+        name: m.name,
+        profile: m,
+        term: {
+          mp_id: ids[i], ls_term: 18, mp_name: m.name,
+          constituency: m.seat ?? (m.house === "Rajya Sabha" ? "Sitting Rajya Sabha" : null),
+          state: m.state, house: m.house,
+          allocated_amount: null, amount_recommended: null, total_expenditure: null,
+          utilization_pct: null, completion_rate_pct: null, unspent_amount: null,
+          idle_amount: null, completed_works: null, recommended_works: null, pending_payments: null,
+        },
+        works: EMPTY_WORKS,
+        sectors: [],
+      }];
+    }
     const t = f.d.terms.find((x) => String(x.ls_term) === term);
     if (!t) return [];
     const profile = profileOf(f.id);
-    return [{ id: f.id, name: cleanName(t.mp_name, profile), profile, term: t, works: f.d.works, sectors: f.d.sectors }];
+    return [{ id: f.id, unlisted: false, name: cleanName(t.mp_name, profile), profile, term: t, works: f.d.works, sectors: f.d.sectors }];
   });
 
   const back = `/mps?ls_term=${term}${cols.length ? `&compare=${cols.map((c) => c.id).join(",")}` : ""}`;
@@ -106,7 +136,11 @@ export default async function ComparePage({
         label: "Terms served",
         cell: (c) =>
           c.profile?.terms_served
-            ? `${c.profile.terms_served}${c.profile.lok_sabhas ? ` (Lok Sabha ${c.profile.lok_sabhas.replace(/,/g, ", ")})` : c.profile.rs_term ? ` (current seat ${c.profile.rs_term})` : ""}`
+            ? // Rajya Sabha's count is of Rajya Sabha terms only; a member who
+              // sat in the Lok Sabha first would otherwise read as a newcomer.
+              c.profile.source === "Rajya Sabha"
+              ? `${c.profile.terms_served} in Rajya Sabha${c.profile.rs_term ? ` (seat ${c.profile.rs_term})` : ""}`
+              : `${c.profile.terms_served}${c.profile.lok_sabhas ? ` (Lok Sabha ${c.profile.lok_sabhas.replace(/,/g, ", ")})` : ""}`
             : "—",
       },
     ]),
@@ -208,7 +242,8 @@ export default async function ComparePage({
                 <th scope="rowgroup" colSpan={cols.length + 1}>{s.title}</th>
               </tr>
               {s.rows.map((r) => {
-                const vals = r.value ? cols.map((c) => r.value!(c) ?? 0) : [];
+                const record = s.title !== "Who they are";
+                const vals = r.value ? cols.map((c) => (c.unlisted && record ? 0 : r.value!(c) ?? 0)) : [];
                 const max = vals.length ? Math.max(...vals) : 0;
                 return (
                   <tr key={r.label}>
@@ -218,8 +253,12 @@ export default async function ComparePage({
                     </th>
                     {cols.map((c, i) => (
                       <td key={c.id} className={r.risk && vals[i] > 0 ? "compare__risk" : undefined}>
-                        {r.cell(c)}
-                        {r.value && max > 0 && (
+                        {c.unlisted && record ? (
+                          <span className="compare__none">Not in MPLADS yet</span>
+                        ) : (
+                          r.cell(c)
+                        )}
+                        {r.value && max > 0 && !(c.unlisted && record) && (
                           <span className="compare__bar" aria-hidden="true">
                             <span style={{ width: `${(vals[i] / max) * 100}%` }} />
                           </span>

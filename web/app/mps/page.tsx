@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { api } from "@/lib/api";
-import { cleanName, profileOf } from "@/lib/mpProfiles";
+import { cleanName, profileOf, unlistedMembers } from "@/lib/mpProfiles";
 import MpDirectory, { type MpCardRow } from "@/components/MpDirectory";
 
 export const metadata: Metadata = { title: "Members of Parliament" };
@@ -56,20 +56,44 @@ export default async function MpsPage({
         works: r.total_projects,
         inQueue: r.in_queue,
         highRisk: r.high_risk_works,
+        // Parliament's status for the seat this record belongs to: a Rajya
+        // Sabha member whose 2020-26 seat ended is "Retirement" here even if
+        // they were seated again - the new seat is a separate record.
+        status: p?.status ?? null,
+        unlisted: false,
       };
     });
+
+  // Sitting members the MPLADS portal does not list yet (lib/mpProfiles.ts).
+  // Only in the current term: the 17th is over, and its record is complete.
+  const unlisted: MpCardRow[] = unlistedMembers().map((m) => ({
+    id: m.id,
+    term: 18,
+    name: m.name,
+    photo: m.photo,
+    party: m.party,
+    partyShort: m.party_short,
+    house: m.house,
+    seat: m.seat,
+    state: m.state,
+    allocated: null,
+    committed: null,
+    paid: null,
+    idle: null,
+    committedRate: null,
+    paidRate: null,
+    works: 0,
+    inQueue: 0,
+    highRisk: 0,
+    status: m.status,
+    unlisted: true,
+  }));
 
   return (
     <main className="shell py-8">
       <h1 className="display">Members of Parliament</h1>
-      <p className="lede !mx-0 !max-w-3xl">
-        Every member in the record: who they are, what they were allocated, and what that
-        allocation became. Money is the MPLADS portal&rsquo;s own per-member figure; party, age,
-        education, terms and photographs are Parliament&rsquo;s own records. Pick up to four to
-        set side by side.
-      </p>
       <MpDirectory
-        byTerm={{ "18": toCards(t18), "17": toCards(t17) }}
+        byTerm={{ "18": [...toCards(t18), ...unlisted], "17": toCards(t17) }}
         initialTerm={initialTerm}
         initialPicked={initialPicked}
       />

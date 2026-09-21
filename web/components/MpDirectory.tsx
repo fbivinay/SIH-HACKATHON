@@ -24,6 +24,9 @@ export type MpCardRow = {
   works: number;
   inQueue: number;
   highRisk: number;
+  status: string | null;
+  // Sitting, but not in the MPLADS record yet: no money, no works.
+  unlisted: boolean;
 };
 
 const TERMS = [
@@ -71,6 +74,7 @@ export default function MpDirectory({
   const [party, setParty] = useState("");
   const [sort, setSort] = useState("name");
   const [shown, setShown] = useState(STEP);
+  const [find, setFind] = useState("");
 
   const rows = useMemo(() => byTerm[term] ?? [], [byTerm, term]);
   const byId = useMemo(() => new Map(rows.map((r) => [r.id, r])), [rows]);
@@ -113,6 +117,27 @@ export default function MpDirectory({
     });
   }, [rows, q, house, state, party, sort]);
 
+  // The compare panel's own search: up to six members not already picked.
+  const suggestions = useMemo(() => {
+    const n = find.trim().toLowerCase();
+    if (!n) return [];
+    return rows
+      .filter((r) => !picked.includes(r.id))
+      .filter(
+        (r) =>
+          r.name.toLowerCase().includes(n) ||
+          (r.seat ?? "").toLowerCase().includes(n) ||
+          (r.partyShort ?? "").toLowerCase() === n
+      )
+      .sort((a, b) => {
+        // Names that start with what was typed first.
+        const sa = a.name.toLowerCase().startsWith(n) ? 0 : 1;
+        const sb = b.name.toLowerCase().startsWith(n) ? 0 : 1;
+        return sa - sb || a.name.localeCompare(b.name);
+      })
+      .slice(0, 6);
+  }, [rows, find, picked]);
+
   const syncUrl = (t: string, ids: string[]) => {
     const u = new URL(window.location.href);
     u.searchParams.set("ls_term", t);
@@ -151,8 +176,110 @@ export default function MpDirectory({
   const filtered = Boolean(q || house || state || party);
   const chosen = picked.map((id) => byId.get(id)).filter((r): r is MpCardRow => !!r);
 
+  const compareHref = `/mps/compare?ls_term=${term}&ids=${chosen.map((r) => r.id).join(",")}`;
+  const add = (id: string) => {
+    toggle(id);
+    setFind("");
+  };
+
   return (
     <>
+      {/* Compare comes first (owner's call, 2026-09-21): four slots, a search
+          that fills them, and the cards below fill them too. */}
+      <section className="comparepanel mt-6" aria-label="Compare members">
+        <div className="comparepanel__head">
+          <h2 className="comparepanel__title">Compare MPs</h2>
+          <span className="comparepanel__hint">
+            {chosen.length === 0
+              ? `Pick up to ${MAX_COMPARE} members`
+              : chosen.length === 1
+                ? "Pick one more to compare"
+                : `${chosen.length} of ${MAX_COMPARE} picked`}
+          </span>
+        </div>
+        <div className="comparepanel__row">
+          <div className="comparepanel__slots">
+            {Array.from({ length: MAX_COMPARE }, (_, i) => {
+              const r = chosen[i];
+              return r ? (
+                <div key={r.id} className="compareslot">
+                  <MpPhoto src={r.photo} name={r.name} size={40} />
+                  <div className="compareslot__who">
+                    <span className="compareslot__name">{r.name}</span>
+                    <span className="compareslot__meta">
+                      {[r.partyShort, r.state ?? r.seat].filter(Boolean).join(" · ")}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="compareslot__remove"
+                    onClick={() => toggle(r.id)}
+                    aria-label={`Remove ${r.name}`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div key={`empty-${i}`} className="compareslot compareslot--empty">
+                  Member {i + 1}
+                </div>
+              );
+            })}
+          </div>
+          <div className="comparepanel__actions">
+            {chosen.length >= 2 ? (
+              <Link href={compareHref} className="btn btn--solid">
+                Compare {chosen.length}
+              </Link>
+            ) : (
+              <span className="btn btn--solid is-disabled" aria-disabled="true">
+                Compare
+              </span>
+            )}
+            {chosen.length > 0 && (
+              <button type="button" className="filter-clear" onClick={() => { setPicked([]); syncUrl(term, []); }}>
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+        {chosen.length < MAX_COMPARE && (
+          <div className="comparepanel__find">
+            <label htmlFor="mp-find" className="sr-only">Add a member to compare</label>
+            <input
+              id="mp-find"
+              type="search"
+              value={find}
+              onChange={(e) => setFind(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && suggestions[0]) {
+                  e.preventDefault();
+                  add(suggestions[0].id);
+                }
+              }}
+              placeholder="Add a member to compare — type a name or constituency"
+              className="filter-input"
+              autoComplete="off"
+            />
+            {suggestions.length > 0 && (
+              <ul className="comparepanel__suggest" role="listbox">
+                {suggestions.map((r) => (
+                  <li key={r.id}>
+                    <button type="button" onClick={() => add(r.id)}>
+                      <MpPhoto src={r.photo} name={r.name} size={28} />
+                      <span className="compareslot__name">{r.name}</span>
+                      <span className="compareslot__meta">
+                        {[r.partyShort, r.house, r.state ?? r.seat].filter(Boolean).join(" · ")}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </section>
+
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <nav className="nav nav--inline" aria-label="Lok Sabha term">
           {TERMS.map((t) => (
@@ -264,6 +391,14 @@ export default function MpDirectory({
                     .filter(Boolean)
                     .join(", ")}
                 </div>
+                {r.term === 18 && !r.unlisted && r.status && r.status !== "Sitting" && (
+                  <div className="mpcard__tag">Seat ended{r.status === "Retirement" ? " (term completed)" : ""}</div>
+                )}
+                {r.unlisted ? (
+                  <p className="mpcard__none">
+                    Sitting member. No MPLADS fund record published for them yet.
+                  </p>
+                ) : (
                 <dl className="mpcard__figs">
                   <div>
                     <dt>Allocated</dt>
@@ -284,6 +419,7 @@ export default function MpDirectory({
                     </dd>
                   </div>
                 </dl>
+                )}
               </div>
               <button
                 type="button"
@@ -309,45 +445,6 @@ export default function MpDirectory({
         </div>
       )}
 
-      {chosen.length > 0 && (
-        <div className="comparebar" role="region" aria-label="Members picked to compare">
-          <div className="comparebar__people">
-            {chosen.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                className="comparebar__person"
-                onClick={() => toggle(r.id)}
-                title={`Remove ${r.name}`}
-              >
-                <MpPhoto src={r.photo} name={r.name} size={28} />
-                <span>{r.name}</span>
-                <span aria-hidden="true">×</span>
-              </button>
-            ))}
-          </div>
-          <span className="comparebar__hint">
-            {chosen.length < 2
-              ? "Pick one more to compare"
-              : `${chosen.length} of ${MAX_COMPARE}`}
-          </span>
-          {chosen.length >= 2 ? (
-            <Link
-              href={`/mps/compare?ls_term=${term}&ids=${chosen.map((r) => r.id).join(",")}`}
-              className="btn btn--solid"
-            >
-              Compare {chosen.length}
-            </Link>
-          ) : (
-            <span className="btn btn--solid is-disabled" aria-disabled="true">
-              Compare
-            </span>
-          )}
-          <button type="button" className="filter-clear" onClick={() => { setPicked([]); syncUrl(term, []); }}>
-            Clear
-          </button>
-        </div>
-      )}
     </>
   );
 }

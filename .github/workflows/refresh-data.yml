@@ -238,6 +238,39 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python scripts/verify_mospi.py
 
+      # Who each member is - party, age, education, terms, photograph - from
+      # Parliament's own rosters at sansad.in, matched to tonight's MPLADS
+      # members, plus sitting members the portal does not list yet. After the
+      # load, so a member MPLADS adds tonight is matched tonight. Never fails
+      # the run: yesterday's committed profiles are still correct for everyone
+      # already matched, and the script writes nothing unless nine in ten
+      # members match. It only rewrites the file when something changed, so a
+      # quiet night makes no commit and no redeploy.
+      - name: Refresh member profiles
+        if: steps.config.outputs.configured == 'true'
+        continue-on-error: true
+        timeout-minutes: 20
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python scripts/fetch_mp_profiles.py
+
+      - name: Commit any profile changes
+        if: steps.config.outputs.configured == 'true'
+        continue-on-error: true
+        run: |
+          git add -A web/data/mp_profiles.json web/public/mps
+          if git diff --cached --quiet; then
+            echo "Member profiles unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Refresh member profiles from Parliament's records"
+          # Rebased first: the sector-label step above may already have pushed
+          # a commit from this same run.
+          git pull --rebase origin ${GITHUB_REF_NAME}
+          git push origin HEAD:${GITHUB_REF_NAME}
+
       - name: Report result
         if: steps.config.outputs.configured == 'true'
         env:

@@ -29,7 +29,30 @@ export type MpProfile = {
   photo: string | null;
 };
 
-const profiles = (data as unknown as { profiles: Record<string, MpProfile> }).profiles;
+// A sitting member MPLADS does not list yet: Parliament's profile and where
+// they sit, and nothing else - there is no fund record to show.
+export type UnlistedMember = MpProfile & {
+  house: "Lok Sabha" | "Rajya Sabha";
+  seat: string | null;
+  state: string | null;
+};
+
+const file = data as unknown as {
+  profiles: Record<string, MpProfile>;
+  unlisted: Record<string, UnlistedMember>;
+};
+const profiles = file.profiles;
+
+/** Keys are "ls-<sansad id>" / "rs-<sansad id>", never an MPLADS mp_id. */
+export const isUnlistedId = (id: string) => /^(ls|rs)-\d+$/.test(id);
+
+export function unlistedMember(id: string): UnlistedMember | null {
+  return file.unlisted[id] ?? null;
+}
+
+export function unlistedMembers(): Array<UnlistedMember & { id: string }> {
+  return Object.entries(file.unlisted).map(([id, m]) => ({ id, ...m }));
+}
 
 export const PROFILES_FETCHED_AT = (data as { fetched_at: string }).fetched_at;
 

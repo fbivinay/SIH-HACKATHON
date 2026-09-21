@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import { formatCount, formatINR, riskLevelClass, riskLevelLabel } from "@/lib/format";
 import CountUp from "@/components/CountUp";
 import MpPhoto from "@/components/MpPhoto";
-import { cleanName, profileOf } from "@/lib/mpProfiles";
+import { cleanName, isUnlistedId, profileOf, unlistedMember } from "@/lib/mpProfiles";
 
 export default async function MpPage({
   params,
@@ -16,6 +16,58 @@ export default async function MpPage({
   const { id } = await params;
   const sp = await searchParams;
   const wantedTerm = typeof sp.ls_term === "string" ? sp.ls_term : undefined;
+
+  // A sitting member the MPLADS portal does not list yet: Parliament's
+  // profile, and a plain statement that there is no fund record - no figure
+  // stands in for one (CLAUDE.md §1).
+  if (isUnlistedId(id)) {
+    const m = unlistedMember(id);
+    if (!m) notFound();
+    const facts = [
+      m.party,
+      m.age ? `Age ${m.age}` : null,
+      m.qualification,
+      m.terms_served
+        ? `${m.terms_served} ${m.terms_served === 1 ? "term" : "terms"}${m.house === "Rajya Sabha" ? " in Rajya Sabha" : ""}`
+        : null,
+    ].filter(Boolean);
+    return (
+      <main className="shell py-8">
+        <Link href="/mps?ls_term=18" className="text-xs link-quiet">
+          &larr; Members of Parliament
+        </Link>
+        <div className="mphead mt-4">
+          <MpPhoto src={m.photo} name={m.name} size={96} priority />
+          <div className="min-w-0">
+            <h1 className="display">{m.name}</h1>
+            {facts.length > 0 && (
+              <p className="mt-2 text-[0.9rem] font-medium" style={{ color: "var(--ink)" }}>
+                {facts.join(" · ")}
+              </p>
+            )}
+            <p className="mt-1 text-[0.9rem]" style={{ color: "var(--ink-2)" }}>
+              {[m.seat, m.state, m.house].filter(Boolean).join(" · ")}
+              {m.rs_term ? ` · seat ${m.rs_term}` : ""}
+            </p>
+          </div>
+          <Link href={`/mps?ls_term=18&compare=${encodeURIComponent(id)}`} className="btn mphead__compare">
+            + Compare with another member
+          </Link>
+        </div>
+        <div className="notice mt-6" role="status">
+          <span aria-hidden="true">&#9679;</span>
+          <span>
+            A sitting member of the {m.house}, not yet in the MPLADS record: the portal lists a
+            member once their fund account exists, so there is no allocation, spending or work
+            to show here. This page fills in on the first nightly refresh after it appears.
+          </span>
+        </div>
+        <p className="mt-4 text-[0.8rem]" style={{ color: "var(--ink-3)" }}>
+          Profile and photograph from Parliament&rsquo;s member records at sansad.in.
+        </p>
+      </main>
+    );
+  }
 
   let mp;
   try {
@@ -45,7 +97,11 @@ export default async function MpPage({
     profile?.qualification,
     profile?.terms_served
       ? `${profile.terms_served} ${profile.terms_served === 1 ? "term" : "terms"}${
-          profile.lok_sabhas ? ` (Lok Sabha ${profile.lok_sabhas.replace(/,/g, ", ")})` : ""
+          profile.source === "Rajya Sabha"
+            ? " in Rajya Sabha"
+            : profile.lok_sabhas
+              ? ` (Lok Sabha ${profile.lok_sabhas.replace(/,/g, ", ")})`
+              : ""
         }`
       : null,
   ].filter(Boolean);

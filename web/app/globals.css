@@ -3245,52 +3245,141 @@ html[data-phone] .phone-wall {
 /* Five fields and the clear button, the same grid as the queue's bar. */
 .mpfilter { grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 1fr)) auto; }
 
-/* What is picked, pinned to the foot of the window until it is compared or
-   cleared. Solid, not glass: the blur budget is spent (CLAUDE.md §11). */
-.comparebar {
-  position: fixed;
-  left: 50%;
-  bottom: 1.1rem;
-  translate: -50% 0;
-  z-index: 1050;
+/* Compare, at the top of the page (owner's call, 2026-09-21): four slots, a
+   search that fills them, and the Compare button. The cards below fill the
+   same slots. */
+.comparepanel {
+  position: relative;
+  padding: 1rem 1.1rem 1.05rem;
+  background: var(--surface);
+  border: 2px solid color-mix(in srgb, var(--ink) 45%, transparent);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-shadow);
+}
+.comparepanel__head { display: flex; align-items: baseline; gap: 0.9rem; flex-wrap: wrap; }
+.comparepanel__title { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; }
+.comparepanel__hint { font-size: 0.8rem; color: var(--ink-3); }
+.comparepanel__row {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: stretch;
+  gap: 0.9rem;
+}
+.comparepanel__slots {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+.comparepanel__actions { display: flex; align-items: center; gap: 0.4rem; flex: none; }
+.compareslot {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  max-width: calc(100vw / var(--zoom, 1) - 2rem);
-  padding: 0.5rem 0.6rem 0.5rem 0.75rem;
-  background: var(--surface);
-  border: 2px solid color-mix(in srgb, var(--ink) 55%, transparent);
-  border-radius: var(--radius-pill);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.14), 0 2px 6px rgb(0 0 0 / 0.08);
-  animation: comparebar-in 0.28s var(--ease) both;
-}
-@keyframes comparebar-in {
-  from { opacity: 0; translate: -50% 12px; }
-}
-.comparebar__people { display: flex; gap: 0.35rem; min-width: 0; overflow: hidden; }
-.comparebar__person {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  max-width: 12rem;
-  padding: 0.2rem 0.55rem 0.2rem 0.2rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  gap: 0.55rem;
+  min-width: 0;
+  min-height: 3.6rem;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
   background: var(--surface-2);
-  font-size: 0.76rem;
-  color: var(--ink);
-  cursor: pointer;
 }
-.comparebar__person > span:first-of-type {
+.compareslot--empty {
+  justify-content: center;
+  border-style: dashed;
+  background: transparent;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+.compareslot__who { min-width: 0; flex: 1; display: grid; }
+.compareslot__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.comparebar__person .mpphoto { border-radius: 999px; width: 22px; height: 22px; }
-.comparebar__person:hover { border-color: var(--ink); }
-.comparebar__hint { font-size: 0.76rem; color: var(--ink-3); white-space: nowrap; }
+.compareslot__meta {
+  font-size: 0.7rem;
+  color: var(--ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compareslot__remove {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.compareslot__remove:hover { border-color: var(--ink); color: var(--ink); }
+.comparepanel__find { position: relative; margin-top: 0.7rem; }
+.comparepanel__find .filter-input {
+  border: 1px solid var(--line-strong);
+  background: var(--surface-2);
+  padding: 0.55rem 0.9rem;
+}
+.comparepanel__suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.3rem);
+  z-index: 20;
+  padding: 0.3rem;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgb(0 0 0 / 0.14);
+}
+.comparepanel__suggest button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, max-content) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.comparepanel__suggest button:hover,
+.comparepanel__suggest button:focus-visible { background: var(--surface-2); }
+.comparepanel__suggest .mpphoto { border-radius: 999px; width: 28px; height: 28px; }
 .btn.is-disabled { opacity: 0.4; pointer-events: none; }
-@media (prefers-reduced-motion: reduce) { .comparebar { animation: none; } }
+@media (max-width: 1000px) {
+  .comparepanel__row { flex-direction: column; }
+  .comparepanel__slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* A seat in this record that has since ended, and a sitting member MPLADS
+   does not list yet: both said in words, not a colour. */
+.mpcard__tag {
+  margin-top: 0.35rem;
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  padding: 0.08rem 0.5rem;
+}
+.mpcard__none {
+  margin-top: 0.6rem;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.compare__none { font-weight: 400; color: var(--ink-3); font-size: 0.8rem; }
 
 /* One member's page: the photograph beside the name. */
 .mphead {
