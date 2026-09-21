@@ -13,10 +13,18 @@ type Params = { state: string; term?: string };
 
 const termOf = (t: string | undefined): "17" | "18" => (t === "17" ? "17" : "18");
 
-// Rendered on first visit and then served from the cache (ISR), for every
-// state - no list is needed at build.
+// All 36 state desks are built with the site, so the map's first click lands
+// on a page that is already there; anything else (a term in the path, a
+// state named differently) is rendered on its first visit and cached (ISR).
+// If the API cannot answer during the build, the list is empty and every desk
+// simply renders on first visit, as before - a build never fails over this.
 export async function generateStaticParams() {
-  return [];
+  try {
+    const states = await api.states({ ls_term: "18" });
+    return states.map((s) => ({ state: s.state }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
