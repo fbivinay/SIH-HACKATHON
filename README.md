@@ -16,8 +16,6 @@
 
 ## Demo video
 
-https://github.com/fbivinay/SIH-HACKATHON/raw/main/media/kasauti-demo.mp4
-
 <p align="center"><a href="media/kasauti-demo.mp4"><img src="media/kasauti-demo.jpg" width="820" alt="Kasauti demo video — 2 minutes 30 seconds, recorded on the live site"></a><br>
 <sub>2 min 30 s · recorded on the live site · voice-over and captions · <a href="media/kasauti-demo.mp4">open the video</a></sub></p>
 
