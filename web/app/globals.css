@@ -3272,7 +3272,12 @@ html[data-phone] .phone-wall { display: grid; }
    search that fills them, and the Compare button. The cards below fill the
    same slots. */
 .comparepanel {
+  /* Its own stacking context, above everything that follows it on the page:
+     the suggestion list drops over the term tabs, the filter bar and the
+     cards, and without this those later elements paint through it (owner,
+     2026-09-22). Below the masthead's 1100. */
   position: relative;
+  z-index: 40;
   padding: 1rem 1.1rem 1.05rem;
   background: var(--surface);
   border: 2px solid color-mix(in srgb, var(--ink) 45%, transparent);
@@ -3351,6 +3356,8 @@ html[data-phone] .phone-wall { display: grid; }
 }
 .comparepanel__suggest {
   position: absolute;
+  /* Opaque, so nothing shows through the gaps between rows. */
+  background-clip: padding-box;
   left: 0;
   right: 0;
   top: calc(100% + 0.3rem);
