@@ -275,6 +275,9 @@ Rajya Sabha rosters, matches all 1,110 members in `mps`, and writes
 - **Sitting members MPLADS does not list yet** are kept under `unlisted`, keyed
   `ls-<id>` / `rs-<id>`: 14 on 2026-09-21 (13 Rajya Sabha members seated in
   2026, one Lok Sabha member), which is why the 18th lists 788 = 774 + 14.
+  The overview's allocation card says "788 members · 774 with a fund record"
+  (both terms: 1,124 · 1,110): the 14 count as members, never as sharing the
+  money, which the portal spreads across the 774 it has a record for.
 - Matching lessons: the 17th roster lists members at their *current* seat;
   Rajya Sabha writes "Keralam", "National Capital Territory of Delhi" and
   "Nominated"; a seat with one member is not proof — Akhilesh Yadav won
