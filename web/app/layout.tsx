@@ -82,15 +82,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     // data-no-cover and data-entered on <html> before React hydrates it.
     <html lang="en" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <body>
-        {/* Phones are refused (see .phone-wall in globals.css). Inline and
-            first in <body> so the flag lands before the first paint; a
-            component would run after hydration and flash the site first. */}
+        {/* Phones and tablets are refused (see .phone-wall in globals.css).
+            Inline and first in <body> so the flag lands before the first
+            paint; a component would run after hydration and flash the site. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              '(function(){var s=screen,r=Math.min(s.width,s.height)/Math.max(s.width,s.height),' +
-              'c=matchMedia("(pointer: coarse)").matches;' +
-              'if(/iPhone|Mobi/i.test(navigator.userAgent)||(c&&r<=0.6))document.documentElement.dataset.phone="1";' +
+              '(function(){var n=navigator,u=n.userAgent;' +
+              'if(/iPhone|iPad|Android|Mobi|Tablet/i.test(u)||matchMedia("(pointer: coarse)").matches||' +
+              '(/Macintosh/.test(u)&&n.maxTouchPoints>1))document.documentElement.dataset.phone="1";' +
               // The loading cover plays once, then not again for six hours:
               // on a repeat visit, a reload or a link opened in a new tab the
               // page is simply there (owner, 2026-09-21: "fast as hell").

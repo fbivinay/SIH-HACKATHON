@@ -352,12 +352,14 @@ matter of weight and contrast. Icons (lucide) and the stack's logos
 `viewport.colorScheme` in `app/layout.tsx`, no `prefers-color-scheme: dark`
 block anywhere. Do not bring the dark palette back.
 
-**Phones are refused outright** (owner, 2026-09-15): the inline script at the
-top of `<body>` sets `<html data-phone>` and `.phone-wall` shows one sentence in
-place of the page. It must survive "Desktop site" on a phone, which rewrites the
-user agent, so the second test is hardware: a coarse pointer on a screen taller
-than 5:3. Do not replace it with a width query — the desktop-site viewport is
-980px wide.
+**Phones and tablets are refused outright** (owner: phones 2026-09-15,
+tablets 2026-09-22): the inline script at the top of `<body>` sets
+`<html data-phone>` and `.phone-wall` shows one sentence in place of the page.
+It must survive "Desktop site", which rewrites the user agent, so the second
+test is hardware: a coarse primary pointer (a touchscreen laptop's primary
+pointer is its trackpad, so laptops pass). iPadOS Safari calls itself
+"Macintosh", so a Mac with touch points is the third. Do not replace any of it
+with a width query — the desktop-site viewport is 980px wide.
 
 Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at 700–1023px, none
 below. Tables scroll inside their own container; the page body never scrolls
