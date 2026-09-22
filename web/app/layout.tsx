@@ -88,9 +88,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           dangerouslySetInnerHTML={{
             __html:
-              '(function(){var n=navigator,u=n.userAgent;' +
-              'if(/iPhone|iPad|Android|Mobi|Tablet/i.test(u)||matchMedia("(pointer: coarse)").matches||' +
-              '(/Macintosh/.test(u)&&n.maxTouchPoints>1))document.documentElement.dataset.phone="1";' +
+              // Three tests, because "Desktop site" can rewrite the first two
+              // at once (user agent, and on some Android builds the pointer
+              // and hover media queries). A real touch screen is the one
+              // thing it does not fake: maxTouchPoints stays above zero. The
+              // screen bound keeps touchscreen laptops out of it.
+              '(function(){var n=navigator,u=n.userAgent,s=screen,' +
+              'touch=n.maxTouchPoints>0&&Math.min(s.width,s.height)<=1024;' +
+              'if(/iPhone|iPad|Android|Mobi|Tablet|Silk|Kindle|PlayBook|BB10/i.test(u)||' +
+              'matchMedia("(pointer: coarse)").matches||touch)' +
+              'document.documentElement.dataset.phone="1";' +
               // The loading cover plays once, then not again for six hours:
               // on a repeat visit, a reload or a link opened in a new tab the
               // page is simply there (owner, 2026-09-21: "fast as hell").

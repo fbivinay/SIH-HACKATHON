@@ -3103,10 +3103,9 @@ html[data-no-cover] .splash { display: none; }
    primary pointer, which it cannot - a touchscreen laptop's primary pointer
    is its trackpad, so laptops still pass; and a "Macintosh" that has touch
    points, which is how iPadOS Safari describes itself. */
-.phone-wall { display: none; }
-html[data-phone] body > :not(.phone-wall) { display: none !important; }
-html[data-phone] .phone-wall {
-  display: grid;
+/* The wall itself: always styled, shown only by the two rules below. */
+.phone-wall {
+  display: none;
   place-items: center;
   align-content: center;
   gap: 0.9rem;
@@ -3115,6 +3114,21 @@ html[data-phone] .phone-wall {
   text-align: center;
   background: var(--ground);
 }
+/* 1. The flag the inline script sets before first paint. */
+html[data-phone] body > :not(.phone-wall) { display: none !important; }
+html[data-phone] .phone-wall { display: grid; }
+
+/* 2. The same wall with no JavaScript at all, because the script can fail to
+   run: a cached page, blocked scripts, an in-app browser. A phone or tablet
+   has a coarse primary pointer and cannot hover; a touchscreen laptop keeps
+   its trackpad as the primary pointer, so laptops are untouched. "Desktop
+   site" rewrites the user agent, never the hardware (owner: phones
+   2026-09-15, tablets and this fallback 2026-09-22). */
+@media (pointer: coarse) and (hover: none) {
+  body > :not(.phone-wall) { display: none !important; }
+  .phone-wall { display: grid; }
+}
+
 .phone-wall h1 {
   max-width: 22ch;
   font-size: 1.35rem;
