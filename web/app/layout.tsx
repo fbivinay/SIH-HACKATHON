@@ -211,6 +211,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
               <dl className="footer__details">
                 <div>
+                  <dt>Demo</dt>
+                  <dd>
+                    <a href="https://youtu.be/0_Fwr7USExc" target="_blank" rel="noopener noreferrer">
+                      Watch the 2½-minute demo on YouTube
+                    </a>
+                  </dd>
+                </div>
+                <div>
                   <dt>Email</dt>
                   <dd>
                     <a href="mailto:rvinaykumar6924@gmail.com">rvinaykumar6924@gmail.com</a>
