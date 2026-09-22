@@ -9,15 +9,15 @@
 
 <p align="center">
   <a href="https://mplads-risk-monitor-web.vercel.app"><b>Live prototype</b></a> ·
-  <a href="media/kasauti-demo.mp4"><b>Demo video</b></a> ·
+  <a href="https://youtu.be/0_Fwr7USExc"><b>Demo video</b></a> ·
   <a href="https://github.com/fbivinay/SIH-HACKATHON"><b>GitHub</b></a> ·
   <a href="https://mplads-risk-monitor.vercel.app/api/overview">API</a>
 </p>
 
 ## Demo video
 
-<p align="center"><a href="media/kasauti-demo.mp4"><img src="media/kasauti-demo.jpg" width="820" alt="Kasauti demo video — 2 minutes 30 seconds, recorded on the live site"></a><br>
-<sub>2 min 30 s · recorded on the live site · voice-over and captions · <a href="media/kasauti-demo.mp4">open the video</a></sub></p>
+<p align="center"><a href="https://youtu.be/0_Fwr7USExc"><img src="https://img.youtube.com/vi/0_Fwr7USExc/maxresdefault.jpg" width="820" alt="Watch the Kasauti demo on YouTube"></a><br>
+<sub>2 min 30 s · recorded on the live site · voice-over and captions · <a href="https://youtu.be/0_Fwr7USExc">watch on YouTube</a></sub></p>
 
 ---
 
@@ -231,7 +231,6 @@ scripts/    fetch_mplads.py · apply_schema.py · classify_sectors.py ·
 web/        Next.js app — app/ (pages), components/, lib/,
             data/mp_profiles.json and public/mps/ (member photographs)
 docs/deck/  the SIH idea deck and the architecture diagram
-media/      the demo video
 .github/workflows/refresh-data.yml   the nightly refresh
 CLAUDE.md   how the system works, and the rules it learned the hard way
 ```

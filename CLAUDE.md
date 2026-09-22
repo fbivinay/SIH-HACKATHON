@@ -50,8 +50,8 @@ desks' `?ls_term=` is rewritten into the path (`/state/X/t/17`), see §12.
   `mpProfiles.ts`, `mpRows.ts`, `names.ts`, `terms.ts`), `data/mp_profiles.json`
   and `public/mps/*.webp` (committed, §9).
 - `.github/workflows/refresh-data.yml` — the nightly refresh.
-- `media/kasauti-demo.mp4` — the demo video (2:30, recorded on the live site),
-  embedded in the README. `docs/deck/` — the SIH idea deck.
+- The demo video (2:30, recorded on the live site) is on YouTube, https://youtu.be/0_Fwr7USExc,
+  linked from the README; it is not committed. `docs/deck/` — the SIH idea deck.
 - Only what runs or ships is committed. Local tooling and scratch output
   (`.claude/`, `graphify-out/`, `videos/`, brag and explainer renders) are
   gitignored; keep it that way (owner, 2026-09-22).
