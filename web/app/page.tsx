@@ -5,6 +5,7 @@ import FiguresBoard from "@/components/FiguresBoard";
 import { TERMS } from "@/lib/terms";
 import ScoreMethod from "@/components/ScoreMethod";
 import WatchScreen from "@/components/WatchScreen";
+import { unlistedMembers } from "@/lib/mpProfiles";
 
 
 // Built once and served from the edge, not rendered per request: nothing here
@@ -60,6 +61,15 @@ export default async function OverviewPage() {
   );
 }
 
+// Sitting members MPLADS does not list yet (14 on 2026-09-22) are all in the
+// current term. They are counted as members but never as sharing the money:
+// the allocation is the portal's, across the members it has a record for.
+const UNLISTED = unlistedMembers().length;
+function membersNote(withRecord: number, term: number | null) {
+  if (term === 17 || UNLISTED === 0) return `Across ${formatCount(withRecord)} members`;
+  return `${formatCount(withRecord + UNLISTED)} members · ${formatCount(withRecord)} with a fund record`;
+}
+
 // One scope's six figures, formatted here so the client component is only a
 // switch and never a second place where money or counts are formatted.
 function figures(data: Awaited<ReturnType<typeof api.overview>>) {
@@ -83,7 +93,7 @@ function figures(data: Awaited<ReturnType<typeof api.overview>>) {
     {
       label: "Allocated to MPs",
       value: formatINR(data.allocated_total),
-      note: `Across ${formatCount(data.mp_count)} members`,
+      note: membersNote(data.mp_count, data.ls_term),
     },
     {
       label: "Completed works value",
