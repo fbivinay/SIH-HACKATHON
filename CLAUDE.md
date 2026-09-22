@@ -43,13 +43,18 @@ desks' `?ls_term=` is rewritten into the path (`/state/X/t/17`), see §12.
   `detectors.py` (D-01..D-04), `sectors.py` + `llm_sectors.py` (sector
   labels), `vendors.py`, `mps.py`, `pg_retry.py`, `sector_cache.json`
   (committed), `snapshot/`, tests.
-- `scripts/` — `fetch_mplads.py`, `apply_schema.py`, `classify_sectors.py`,
-  `verify_mospi.py`, `verify_states.py`, `fetch_mp_profiles.py`,
-  `build_sih_deck.py`, `preview_deck.py`, `screenshot.mjs`.
+- `scripts/` — the nightly refresh's steps: `fetch_mplads.py`,
+  `apply_schema.py`, `classify_sectors.py`, `verify_mospi.py`,
+  `fetch_mp_profiles.py`.
 - `web/` — `app/` (routes), `components/`, `lib/` (`api.ts`, `format.ts`,
   `mpProfiles.ts`, `mpRows.ts`, `names.ts`, `terms.ts`), `data/mp_profiles.json`
   and `public/mps/*.webp` (committed, §9).
 - `.github/workflows/refresh-data.yml` — the nightly refresh.
+- `media/kasauti-demo.mp4` — the demo video (2:30, recorded on the live site),
+  embedded in the README. `docs/deck/` — the SIH idea deck.
+- Only what runs or ships is committed. Local tooling and scratch output
+  (`.claude/`, `graphify-out/`, `videos/`, brag and explainer renders) are
+  gitignored; keep it that way (owner, 2026-09-22).
 
 **The nightly refresh** (19:30 UTC, GitHub Actions, one run at a time): fetch
 both terms from Empowered Indian → `apply_schema.py` (only if `schema.sql`
@@ -486,19 +491,6 @@ this flagged?" on the work page — the brief asks for an AI-powered system.
   points per model) and the detectors (two points each, what it measures and
   what it does not claim).
 
-### The deck
-
-`scripts/build_sih_deck.py` reads every figure from the database at build time
-and refuses to build on a null or zero — it shipped stale twice when the
-numbers were typed in. Its content is images (six diagram boards in
-`docs/deck/diagrams/boards.template.html` with `{{tokens}}` filled from the
-database, rendered by `render.mjs`, plus six screenshots). Exactly three links,
-everywhere: demo video, prototype, GitHub. Use `fileURLToPath`, not
-`new URL(import.meta.url).pathname` (the space in this repository's path was
-percent-encoded into a parallel directory). No LibreOffice here:
-`scripts/preview_deck.py` redraws the built `.pptx` as HTML — exact for
-geometry, approximate for text wrapping; look at it before trusting a layout.
-
 ## 12. Performance
 
 Measured on 2026-09-21 on the live site: every cached page answers in ~0.09s
@@ -673,15 +665,3 @@ the page's `innerHeight` is 715 (Windows Chrome's own chrome is 95px) while
 `--screenshot` renders 810 tall. Measure anything viewport-sized from a page
 that loads the site in an iframe of a stated size.
 
----
-
-## graphify
-
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
-
-Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
-- Rebuild with `--code-only` unless an LLM key is available; and keep `graphifyy[sql]` installed, or `data/schema.sql` contributes nothing and the graph omits every table definition.
