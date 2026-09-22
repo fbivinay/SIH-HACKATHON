@@ -1,14 +1,70 @@
 # Kasauti — MPLADS verification
 
-SIH26102, MoSPI. Reads the published MPLADS record, scores every work against
-comparable works, and hands officials a ranked list of what to verify.
+SIH26102, Ministry of Statistics and Programme Implementation. Reads the
+published MPLADS record, scores every work against comparable works, and hands
+officials a ranked list of what to verify.
 
 A *kasauti* is the touchstone a jeweller rubs gold against. It says which pieces
 are worth assaying, never which are false. That is the claim this system makes
 and the one it refuses, and most of the rules below are that sentence applied to
 something concrete.
 
+**Status: complete** (2026-09-21). Live at https://mplads-risk-monitor-web.vercel.app
+(API https://mplads-risk-monitor.vercel.app), code at
+https://github.com/fbivinay/SIH-HACKATHON, refreshed nightly. Built by
+R Vinay Kumar and team (Git Happens). Everything below is how it works and the
+rules that keep it working; each rule was learned from a real failure, which is
+why most carry the measurement that found it.
+
 ---
+
+## 0. The system at a glance
+
+**Pages** (web, Next.js 16 App Router, in `web/app/`):
+
+| Route | What it is | Rendering |
+|---|---|---|
+| `/` | Overview: hero + term switcher + six figures; the score's five parts; "What it will not tell you"; "Trends and early warnings" | static, 30-min revalidate |
+| `/projects` | The review queue (score 40+), or every work with `risk_level=ALL`; status tiles, filters, decisions, CSV | dynamic (filters) |
+| `/projects/[id]` | One work: score, reasons, peers, decision trail; `[id]` is a `work_key` or a serial | ISR, first visit |
+| `/states` | Map of India first, then 36 states ranked | static |
+| `/state/[state]`, `/district/[state]/[district]` | State and district desks | ISR (36 states prebuilt) |
+| `/mps` | Every member: compare panel first, then cards | static |
+| `/mp/[id]`, `/mps/compare` | Member desk; up to four members side by side | ISR; dynamic |
+| `/provenance` | Sources: the architecture (animated), where the AI is, the four detectors | static |
+
+Nav order: Overview, Projects, States, MPs, Sources. Old addresses redirect
+(308): `/alerts` → `/projects`, `/map` → `/states`, `/analysis` → `/mps`. The
+desks' `?ls_term=` is rewritten into the path (`/state/X/t/17`), see §12.
+
+**Code:**
+- `api/` — FastAPI on Vercel Python (`main.py`, `db.py`), tests in `api/test_api.py`.
+- `data/` — `schema.sql`, `load_real_data.py` (loader), `scoring.py` (scorer),
+  `detectors.py` (D-01..D-04), `sectors.py` + `llm_sectors.py` (sector
+  labels), `vendors.py`, `mps.py`, `pg_retry.py`, `sector_cache.json`
+  (committed), `snapshot/`, tests.
+- `scripts/` — `fetch_mplads.py`, `apply_schema.py`, `classify_sectors.py`,
+  `verify_mospi.py`, `verify_states.py`, `fetch_mp_profiles.py`,
+  `build_sih_deck.py`, `preview_deck.py`, `screenshot.mjs`.
+- `web/` — `app/` (routes), `components/`, `lib/` (`api.ts`, `format.ts`,
+  `mpProfiles.ts`, `mpRows.ts`, `names.ts`, `terms.ts`), `data/mp_profiles.json`
+  and `public/mps/*.webp` (committed, §9).
+- `.github/workflows/refresh-data.yml` — the nightly refresh.
+
+**The nightly refresh** (19:30 UTC, GitHub Actions, one run at a time): fetch
+both terms from Empowered Indian → `apply_schema.py` (only if `schema.sql`
+changed) → load (skipped if the extract is unchanged) → label new sectors with
+Gemini (only with the `GEMINI_API_KEY` secret) and commit the cache → score
+(skipped if the load was) → reconcile against MoSPI → refresh member profiles
+from sansad.in and commit any change. A commit redeploys the site.
+
+**Deploy:** two Vercel projects from one push to `main` — the web (root `web/`)
+and the API (root `api/`, `vercel.json`). The web's build prerenders the static
+pages and the 36 state desks against the live API.
+
+**Commands:** API `cd api && python3 -m uvicorn main:app --port 8000`; web
+`cd web && npm run build && npx next start -p 3100` (reads `web/.env.local`);
+tests `python3 -m pytest data api -q` (147, live database, 3–6 minutes).
 
 ## 1. Never claim more than the record supports
 
@@ -18,16 +74,17 @@ number destroys that, and nobody downstream can tell which number it was.
 - **Never invent a field the source does not publish.** MPLADS publishes no
   progress percentage, beneficiary count, geo-tag, or bill value. If a screen
   seems to want one, the answer is to say it is not published. The blind-spot
-  list lives in `COMPLIANCE_BLIND_SPOTS` in `api/main.py` and is served by
-  `/api/compliance`. Its points are quoted in the overview's "What it will not
-  tell you"; the rule book and the full list were on `/provenance` until the
-  owner removed them (2026-09-21). Add new limits there.
+  list lives in `COMPLIANCE_BLIND_SPOTS` in `api/main.py`, served by
+  `/api/compliance`, and its points are quoted in the overview's "What it will
+  not tell you". A member MPLADS does not list yet shows "No MPLADS fund record
+  published for them yet" — never a zero.
 - **Never invent a guideline clause number.** The MPLADS guidelines are not in
   this repository. `basis` on each compliance rule says what the rule rests on
   in words; "clause 3.12.1" would look authoritative and be fiction.
 - **A score is not an allegation.** It means a work does not resemble its peers.
   Every user-facing string about a score has to survive being read by the MP
-  whose work it flags.
+  whose work it flags. The same holds for the forecast (§4): it is worded as a
+  forecast from an agency's record, not a finding about any work.
 - **Check the strength of a claim before showing it.** `similar_work_key` holds
   each work's nearest neighbour whatever the distance — set on 249,907 of
   250,839 works. The page printed "Similar to work #N" on all of them until it
@@ -57,15 +114,17 @@ that outlives a load — a score, a review, a link target — is keyed on
 - `projects`, `expenditures`, `mps` — source facts, written once per load.
 - `project_scores`, `agency_vendor_profile`, `detector_findings` — derived,
   rebuilt every run, no history.
+- `work_reviews` (current decision per work) and `work_review_events` (every
+  decision ever recorded) — written by reviewers, never by the pipeline.
 - `projects_scored` is the view that joins them. **Read the view, never the
   tables**, except in `scoring.py`, which reads `projects` because it is about
   to replace its own previous output.
 
-`write_scores` does `TRUNCATE` + `INSERT` **in one transaction**. That is not an
-accident and it is what lets the loader leave `project_scores` alone: a reader
-sees the whole previous run or the whole new one, never an empty table. The
-loader used to truncate it, which blanked every screen for the ~25 minutes until
-scoring caught up. Do not reintroduce that, and do not split the commit.
+`write_scores` does `TRUNCATE` + `INSERT` **in one transaction**. That is what
+lets the loader leave `project_scores` alone: a reader sees the whole previous
+run or the whole new one, never an empty table. The loader used to truncate it,
+which blanked every screen for the ~25 minutes until scoring caught up. Do not
+reintroduce that, and do not split the commit.
 
 Never `UPDATE` all of `projects` in a scoring pass. Postgres writes a new row
 version per update; doing this once took the database from 300 MB to 457 MB
@@ -74,47 +133,47 @@ for a full copy at the moment there is none.
 
 **`TRUNCATE` inside a transaction holds the old file until COMMIT.** Measured on
 2026-09-12: a 35 MB table showed +35 MB mid-transaction, +0 after. So the atomic
-swap above costs headroom equal to the table being replaced — 355 MB at rest +
-150 MB for `projects` = 505 MB against 512, and the 2026-09-11 nightly died with
-`DiskFull` two thirds through the INSERT. Three things now stand between the
+swap costs headroom equal to the table being replaced — 355 MB at rest + 150 MB
+for `projects` = 505 MB against 512, and the 2026-09-11 nightly died with
+`DiskFull` two thirds through the INSERT. Three things stand between the
 pipeline and that wall, and all three must stay:
 
 - **The loader skips the rewrite when the extract is unchanged.** It
   fingerprints the prepared frames (`extract_fingerprint`) and compares against
   `data_refresh.extract_sha256` of the most recent run that *wrote* — any status,
   not just success. A run that wrote and then failed has still changed the
-  tables; comparing against an older success skipped a rewrite while the table
-  held a mutated row. `scoring.py` reads the same "unchanged:" note and does
-  nothing (`SCORE_FORCE=1` overrides, e.g. after changing the scorer).
+  tables. `scoring.py` reads the same "unchanged:" note and does nothing
+  (`SCORE_FORCE=1` overrides, e.g. after changing the scorer).
 - **Both writers check headroom first** (`check_headroom`, and the guard in
   `write_scores`) and refuse with the arithmetic printed rather than die
   mid-INSERT. Refusing leaves the previous run intact; dying leaves an aborted
   transaction that then eats the "failed" mark too.
 - **`work_name` is derived in the view, not stored.** It was `description[:60]`
-  duplicated across 250,839 rows — 13 MB in the one table that is rewritten
-  nightly, on a database 6 MB short. Never add a derived column to `projects`.
+  duplicated across 250,839 rows — 13 MB in the one table rewritten nightly, on
+  a database 6 MB short. Never add a derived column to `projects`.
 
-**The refresh must not fight the site.** The nightly rewrites tables the
-live site is reading. A write that takes exclusive locks on two relations in
-turn deadlocks with one ordinary read that took them in the other order - a
+If the wall is hit again, the one-time way out is to compact in halves: move
+half of `projects` to a side table, `VACUUM FULL` the remainder, move them back.
+Peak extra is half the table, which fits when a whole one does not.
+
+**The refresh must not fight the site.** The nightly rewrites tables the live
+site is reading. A write that takes exclusive locks on two relations in turn
+deadlocks with one ordinary read that took them in the other order — a
 visitor's query on `projects_scored` holding the view and waiting for
-`projects`, while the write holds `projects` and waits for the view. That is
-what failed the 2026-09-20 nightly: the schema step re-applied all of
-`schema.sql` every night, and `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`
-takes an exclusive lock even when there is nothing to add. So:
+`projects`, while the write holds `projects` and waits for the view. That
+failed the 2026-09-20 nightly: the schema step re-applied all of `schema.sql`
+every night, and `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` takes an exclusive
+lock even when there is nothing to add. So:
 - `scripts/apply_schema.py` applies `schema.sql` only when its hash differs
   from the one recorded in `schema_applied` (`SCHEMA_FORCE=1` overrides); a
-  normal night takes no schema locks at all.
-- Every nightly write - the schema, the loader's three, the scorer's three -
+  normal night takes no schema locks at all. Verified by a manual run on
+  2026-09-21: "schema unchanged — nothing applied, no locks taken".
+- Every nightly write — the schema, the loader's three, the scorer's three —
   runs inside `data/pg_retry.py`'s `with_lock_retry`: `lock_timeout` 10s (a
   queued exclusive lock stalls every reader behind it), and on a deadlock or a
   lock timeout, roll back, wait, retry, up to six times. Each is a whole
   transaction that replaces what it touches, so a retry is safe. Wrap any new
   nightly write the same way.
-
-If the wall is hit again, the one-time way out is to compact in halves: move
-half of `projects` to a side table, `VACUUM FULL` the remainder, move them back.
-Peak extra is half the table, which fits when a whole one does not.
 
 ## 4. Population statistics stay at population grain
 
@@ -122,7 +181,12 @@ Cohort detectors (`D-01`..`D-04` in `data/detectors.py`) describe an agency or a
 Member of Parliament, not a work. **Never fold a detector finding into a work's
 risk score.** An agency paying 99% of its invoices in March says nothing about
 any single one of those invoices, and attaching it to one would be exactly the
-kind of unfalsifiable accusation this project exists to avoid.
+kind of unfalsifiable accusation this project exists to avoid. They are shown
+on the state, district and member desks, and described on Sources.
+
+The same goes for the **forecast** (`/api/forecast/late`) and the "gone quiet"
+early warning (`/api/trends`): both describe agencies and are never part of a
+work's score.
 
 The five weighted components in `data/scoring.py` are about the work itself:
 cost 25%, delay 25%, duplicate 20%, agency 15%, compliance 15%. Bands: LOW < 40,
@@ -141,6 +205,14 @@ comment.
   flag everybody.
 - Idle allocation floor `35%`, minimum 17 recommended works — the floor was 1,
   which flagged a member seated weeks ago with a single work.
+- The forecast's cut is the day's own **75th percentile** of agencies' overdue
+  share (agencies with 20+ open works; 64.7% on 2026-09-21, median 48%), not a
+  constant. Completed works carry no due date, so an agency's past on-time
+  record cannot be measured; its current backlog is the best evidence the
+  record holds.
+- Member matching (`fetch_mp_profiles.py`): a name must score ≥ 0.62 unless it
+  is the only member on its seat that term, and no Parliament record may stand
+  for two members in one term (§9).
 
 ## 6. Money comes from the source's own aggregates
 
@@ -165,18 +237,9 @@ against the official endpoints on every refresh.
 **Keep that reconciliation running, and wherever it is reported, keep both hops
 apart.** Ours-to-source is our responsibility; source-to-MoSPI is upstream lag.
 Reporting one combined number invites reading all of it as our error, which it
-is not. It is no longer on the site (owner's call, 2026-09-21: the Sources page
-opens with the architecture instead - `components/ArchitectureFlow.tsx`, the
-deck's slides 2 and 3 with lucide pictograms and the stack's own marks from
-simple-icons, all in ink, colour only on the risk bands; every count live).
-Its step 1 carries the State Emblem beside the Ministry's name, on the owner's
-call (2026-09-21) - attribution of whose record this is, nothing more, and
-the only place on the site it appears: its use is restricted by the State
-Emblem of India (Prohibition of Improper Use) Act, 2005, and the footer's
-"not affiliated with any ministry" has to stay true beside it. The models and
-detectors on that page are three and two short points each, with no file
-names (owner's call, same day). The reconciliation is gone from the page, but
-it still runs nightly and `/api/provenance` still serves both hops.
+is not. It is not displayed on the site (owner's call, 2026-09-21 — Sources
+opens with the architecture instead), but it runs nightly and `/api/provenance`
+serves both hops.
 
 ## 8. The language model labels, it does not judge
 
@@ -187,15 +250,45 @@ It was chosen over embeddings because it can abstain — it answered "Other"
 5,167 times rather than guessing. MiniLM always returns a nearest sector, which
 is how "Muktidham" scored against water works.
 
-Labels are cached in `data/sector_cache.json`, which is **deliberately
+Labels are cached in `data/sector_cache.json` (41,691), which is **deliberately
 committed** so a clone gets them with no API key. Scoring is otherwise offline,
 deterministic and free; keep it that way.
 
-## 9. Operational rules
+## 9. Who a member is comes from Parliament, not MPLADS
+
+MPLADS publishes a member's money and works and nothing about the member.
+`scripts/fetch_mp_profiles.py` reads sansad.in's Lok Sabha (17th, 18th) and
+Rajya Sabha rosters, matches all 1,110 members in `mps`, and writes
+`web/data/mp_profiles.json` (party, age, education, profession, terms) and
+`web/public/mps/<mp_id>.webp` (120×150, ~4.4 MB for all), both committed.
+
+- **A profile never feeds a figure, score or flag.** Money stays the portal's.
+- **Personal data is never read**: the records carry personal phone numbers,
+  e-mails, home addresses and family details; none reaches the output.
+- Photos cannot be linked — sansad.in sends `Cross-Origin-Resource-Policy:
+  same-site` — so they are stored, cropped to 4:5.
+- **Sitting members MPLADS does not list yet** are kept under `unlisted`, keyed
+  `ls-<id>` / `rs-<id>`: 14 on 2026-09-21 (13 Rajya Sabha members seated in
+  2026, one Lok Sabha member), which is why the 18th lists 788 = 774 + 14.
+- Matching lessons: the 17th roster lists members at their *current* seat;
+  Rajya Sabha writes "Keralam", "National Capital Territory of Delhi" and
+  "Nominated"; a seat with one member is not proof — Akhilesh Yadav won
+  Azamgarh and moved, leaving Dinesh Lal Yadav alone on it.
+- It runs **nightly** after the load. It writes nothing unless nine in ten
+  members match, and leaves the file untouched when nothing changed, so a quiet
+  night makes no commit.
+- Member names shown anywhere go through `cleanName` (Parliament's spelling,
+  `lib/mpProfiles.ts`, server only — the file is ~430 KB) or `cleanPortalName`
+  (`lib/names.ts`, for the browser): the portal writes "(17LS)", "(EX17LS)",
+  "(17th Lok Sabha)" into names.
+
+## 10. Operational rules
 
 - **One DB actor at a time.** `load_real_data.py` and `scoring.py` rewrite whole
   tables. Never run two concurrently, and do not start one while the nightly
-  Action (19:30 UTC) may be running.
+  Action may be running (`gh run list`). A manual run is `gh workflow run
+  refresh-data.yml`; the workflow's concurrency group queues a scheduled run
+  behind it. GitHub often starts the 19:30 UTC schedule late.
 - **Scoring takes ~50 minutes locally** and holds ~2.5 GB. It is not hung.
 - **Parse every input frame before writing anything.** A `KeyError` on the
   fourth file once killed a load *after* it had committed 250,839 works.
@@ -206,557 +299,377 @@ deterministic and free; keep it that way.
   `REVIEW_TOKEN`. Never commit or print them. **Quote the values** —
   `DATABASE_URL` contains `&`, and unquoted, `. .env` backgrounds the line and
   silently leaves the variable unset.
-- **No Gemini key is needed to run anything that already works.** All 41,691
-  sector labels are cached in `data/sector_cache.json`, which is committed, so
-  a clone scores correctly with no key at all. Scoring and the API never read
-  one.
-- **A key belongs in the `GEMINI_API_KEY` GitHub secret, nowhere else.** The
-  nightly Action labels descriptions a new extract introduces, between load and
-  score, and commits the cache so the repository stays self-sufficient. Without
-  the secret that step prints why and skips; the refresh still succeeds and new
-  works land in "Other", which is a real peer group rather than a failure. Never
-  put a key in `.env` on a shared machine and never paste one into a chat: at
-  roughly 22% of new descriptions needing a label and a few hundred new works a
-  day, this costs about 3-9 requests a day, which one account's free tier covers
-  many times over.
-- **Run the tests before committing:** `python3 -m pytest data api -q`. They hit
-  the live database and take ~2.5 minutes.
+- **No Gemini key is needed to run anything that already works.** A key belongs
+  in the `GEMINI_API_KEY` GitHub secret, nowhere else; without it the labelling
+  step prints why and skips, and new works land in "Other", a real peer group.
+  Never put a key in `.env` on a shared machine or paste one into a chat. At
+  ~22% of new descriptions needing a label, it costs 3–9 requests a day.
+- **Run the tests before committing:** `python3 -m pytest data api -q` — 147,
+  against the live database, 3–6 minutes.
 - **A decision is a toggle, and clearing is not an event.** Pressing the
   decision a work already carries posts `status: "pending"`, which deletes its
   `work_reviews` row. "pending" is the absence of a decision, so it is not in
-  `REVIEW_STATUSES` and not in either table's `CHECK`; the clearing itself
-  therefore leaves no row in `work_review_events`, which keeps what was
-  decided but not that it was taken back.
+  `REVIEW_STATUSES` and not in either table's `CHECK`; the clearing leaves no
+  row in `work_review_events`. All review rows were cleared on the owner's
+  request on 2026-09-21 (backup kept outside the repository).
 - **Never press a decision in a browser test.** The local web talks to the live
   API and the live database, so a scripted click on Escalate / Verified /
-  Dismiss writes a real decision onto a real work that the public site then
-  shows. It happened once (2026-09-18, work `161088|17|Bara Banki…`) and was
-  reversed by deleting that one event and restoring the row to the decision
-  it replaced. Test the optimistic flip by reading `aria-pressed` without
-  submitting, or against a copy.
+  Dismiss writes a real decision onto a real work the public site then shows.
+  It happened once (2026-09-18) and had to be reversed by hand. Test the
+  optimistic flip by reading `aria-pressed` without submitting.
+- **A page that uses a new API endpoint is first built against the old API.**
+  Web and API deploy from the same push at the same moment, so a static page
+  prerenders against whatever API was live — the overview's forecast card was
+  built before `/api/forecast/late` existed, and its `.catch(() => null)` left
+  the card out. It heals at the next 30-minute revalidation; to heal it at
+  once, redeploy the web project alone (`npx vercel redeploy <latest web
+  deployment url> --target production`; `npx vercel ls mplads-risk-monitor-web`
+  lists them).
+- **Local verification.** `next start` serves the chunks it started with: after
+  every `next build`, kill the server **by PID** (`ps -eo pid,args | grep
+  next-server`) and start it again, or you will measure the previous build for
+  an hour. `pkill -f "next start"` matches the shell that runs it and kills
+  that instead. The API on :8000 and the web on :3100 are the local pair.
+  Measure in a browser (playwright-core against `next start`), not by looking.
 
-## 10. Interface
+## 11. Interface
 
-Monochrome. **Colour only ever means risk** — `--risk-low/medium/high`. Two
-deliberate exceptions, both on the owner's call: the two words "AI powered" are
-`--ai-red` wherever they appear (eyebrow, badges, masthead, loading cover) and
-the dot beside them is `--risk-low` green; the pointer is `--risk-high`. And
-the logo — `web/public/logo.png`, a tricolour K, rendered by `Logo` as an
-image, cut to `web/app/icon.png` for the favicon and shown in the README. It
-takes no CSS colour. Nothing else earns a hue: when the owner asked for a
-thick coloured ring on the two pill islands and the figures panel
-(2026-09-17), they got ink at 45% and 55% rather than a third exception —
-noticeable is a matter of weight and contrast, not of hue.
+**Colour only ever means risk** — `--risk-low/medium/high`. Monochrome
+otherwise. The deliberate exceptions, all on the owner's call: the words "AI
+powered" are `--ai-red` wherever they appear and the dot beside them is
+`--risk-low` green; the pointer is `--risk-high`; the logo
+(`web/public/logo.png`, a tricolour K, also `web/app/icon.png`) takes no CSS
+colour; and the State Emblem appears once, beside the Ministry's name in step 1
+of the architecture on Sources — attribution of whose record this is, nothing
+more. Its use is restricted by the State Emblem of India (Prohibition of
+Improper Use) Act, 2005, so it appears nowhere else, and the footer's "not
+affiliated with any ministry" must stay true beside it. Nothing else earns a
+hue: asked for a coloured ring, the owner got ink at 45–55% — noticeable is a
+matter of weight and contrast. Icons (lucide) and the stack's logos
+(simple-icons) are drawn in ink.
 
-**Light mode only.** The site ignores the OS and browser colour-scheme
-preference: `:root { color-scheme: light }`, `viewport.colorScheme` in
-`app/layout.tsx`, and no `prefers-color-scheme: dark` block anywhere. The dark
-palette was removed on 2026-09-15 at the owner's request; do not bring it back.
+**Light mode only** (owner, 2026-09-15): `:root { color-scheme: light }`,
+`viewport.colorScheme` in `app/layout.tsx`, no `prefers-color-scheme: dark`
+block anywhere. Do not bring the dark palette back.
 
-The masthead is ~125px tall, mark 74px, name 2rem, on the owner's call; the
-nav links are 0.95rem with 0.42rem of side padding and the gaps are tight, so
-the mark, the name, five links and the search field fit at 1280 wide, which is
-the ceiling without hiding the strapline. **Search replaced "Open the queue"**
-(owner's call, 2026-09-20): `components/SiteSearch.tsx`. It searches at two
-speeds, because the things searched are two sizes. Every state, district,
-agency and member — about 3,200 names, 270KB — comes from `/api/search/index`
-in one request on first use and is held in a module-level cache, so those
-matches are computed in the browser and land in the same frame (measured
-29–94ms). Works cannot travel that way, so `/api/search/works` is fetched,
-debounced 140ms, the previous request aborted, every answer cached (measured
-844–1141ms locally, 29ms on a repeat). That endpoint deliberately does **not**
-`ORDER BY` risk: sorting the whole matching set took 2.1s against 0.7s, so it
-takes the first 40 matches and ranks those by where the query sits in the
-name. `/` focuses the box from anywhere.
+**Phones are refused outright** (owner, 2026-09-15): the inline script at the
+top of `<body>` sets `<html data-phone>` and `.phone-wall` shows one sentence in
+place of the page. It must survive "Desktop site" on a phone, which rewrites the
+user agent, so the second test is hardware: a coarse pointer on a screen taller
+than 5:3. Do not replace it with a width query — the desktop-site viewport is
+980px wide.
+
 Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at 700–1023px, none
-below. **Phones are refused outright** (owner's call, 2026-09-15): the inline
-script at the top of `<body>` sets `<html data-phone>` and `.phone-wall` shows
-one sentence in place of the page. Tablets, laptops and desktops pass. It has
-to survive "Desktop site" on a phone, which rewrites the user agent, so the
-second test is hardware: a coarse pointer on a screen taller than 5:3. Do not
-replace it with a width query — the desktop-site viewport is 980px wide.
+below. Tables scroll inside their own container; the page body never scrolls
+sideways. Money is `formatINR` (₹ Cr / L), counts `formatCount`, timestamps in
+IST with the label written literally. Every page names itself in the tab
+(`metadata` / `generateMetadata`). `app/not-found.tsx` and `app/error.tsx` are
+ours, not Next's bare defaults.
 
-Tables scroll inside their own container; the page body never scrolls
-sideways — so nothing may be wider than the shell, including the hero canvas.
-Money is `formatINR` (₹ Cr / L), counts are `formatCount`, and timestamps
-render in IST with the label written literally.
+**Masthead**: ~125px, mark 74px, name 2rem; the nav links 0.95rem with 0.42rem
+side padding so the mark, the name, five links and the search field fit at
+1280 wide. **Site search** (`components/SiteSearch.tsx`) works at two speeds:
+every state, district, agency and member (~3,200 names, 270 KB) comes from
+`/api/search/index` once and is matched in the browser in the same frame
+(29–94ms); works come from `/api/search/works`, debounced 140ms, aborted and
+cached (0.8–1.1s locally, 29ms on a repeat). That endpoint deliberately does
+not `ORDER BY` risk — sorting the whole match set took 2.1s against 0.7s — it
+ranks its first 40 matches by where the query sits in the name. `/` focuses it.
 
-Five nav pages in this order: Overview `/`, Projects `/projects`, States
-`/states`, MPs `/mps`, Sources `/provenance`. **Agencies became MPs** (owner's
-call, 2026-09-21; `/analysis` is a 308 to `/mps`). Its "Gone quiet" early
-warning and "When the money moves" trend table moved to Sources and were then
-removed from it on the owner's call the same day; `/api/trends` still serves
-both. `/mps` lists every member of one term (`/api/mp-directory`, both
-terms rendered on the server so the switch is state, not a round trip),
-sixty cards at a time, filtered and sorted in the browser. **Compare is the
-first thing on the page** (owner's call, 2026-09-21): four slots, a search
-that fills them, and the cards' "+ Compare" filling the same slots; then
-`/mps/compare?ls_term=&ids=`, one term only, because a member's two terms are
-two allocations. **The 18th lists 788**: the 774 members the MPLADS record
-holds plus every sitting member it does not list yet (13 Rajya Sabha members
-seated in 2026 and one Lok Sabha member, on 2026-09-21), keyed `ls-<id>` /
-`rs-<id>` and shown with Parliament's profile and the words "No MPLADS fund
-record published for them yet" - never a zero - on their card, their page
-and their compare column. A record whose seat has since ended says "Seat
-ended". Profiles refresh **nightly**: the refresh workflow runs
-`fetch_mp_profiles.py` after the load and commits any change, which
-redeploys; the script writes nothing unless nine in ten members match, and
-leaves the file untouched when nothing changed, so a quiet night makes no
-commit. **Who a member is comes from Parliament, not MPLADS**:
-`scripts/fetch_mp_profiles.py` reads sansad.in's Lok Sabha (17th, 18th) and
-Rajya Sabha rosters, matches all 1,110 members, and writes
-`web/data/mp_profiles.json` (party, age, education, profession, terms) and
-`web/public/mps/<mp_id>.webp` (120×150, 4.4MB for all), both committed, like
-the sector cache. Photos cannot be linked - sansad.in sends
-`Cross-Origin-Resource-Policy: same-site`. Personal phone numbers, e-mails,
-home addresses and family details in those records are never read. Matching
-lessons: the 17th roster lists members at their *current* seat, Rajya Sabha
-writes "Keralam", "National Capital Territory of Delhi" and "Nominated", and a
-seat with one member is not proof - Akhilesh Yadav won Azamgarh and moved,
-leaving Dinesh Lal Yadav alone on it - so no record may stand for two members
-in one term. A profile never feeds a figure, score or flag. The queue was Alerts
-at `/alerts` until 2026-09-20, when the owner renamed it; `/alerts` is a 308
-to `/projects`, and `/projects/[id]`, the page for one work, sits under it.
-The API keeps its own names (`/api/alerts`, `/api/alerts/summary`): they are
-the queue's endpoints and nothing outside the site reads the label. Each row
-shows two of its flagged reasons and keeps the rest behind a `<details>`
-"Read more", the same control the limits use. **The map is the
-first screen of States** (owner's call, 2026-09-19; `/map` is a 308 to
-`/states`): `components/StateMap.tsx` in `.map-screen`, sized by the same
-measured `--fold-h` as the overview's fold (FoldHeight now sets it for
-either), framed on India's own extent with `fitBounds` and `zoomSnap: 0.1`
-so the country fills 88–95% of the height at 1366×768–1920×1080 rather than
-sitting small at a fixed zoom. Clicking a state opens its desk. **Works
-was folded into the queue** (owner's call, 2026-09-19): it listed the same
-records with less on each row. The band select on the queue is also the page's
-scope — nothing chosen is the review queue (score 40+), `risk_level=ALL` is
-every work, and a named band is that band whatever its score (LOW sits below
-40, so the queue's floor would otherwise hide it). The summary endpoint
-defaults its own floor to 40, so outside the queue the page passes
-`min_score=0` to it, or "All works" counted 48,296 and "Low" counted 0.
-`/projects` is the queue itself now, and `risk_level=ALL` is what the old
-Works links carried into it. A row reads as one object (owner's call,
-2026-09-20): a single stretched link is anchored on the `<tr>` and covers the
-whole row - the work, the place, the money and the risk bar - with the
-district and state links, the "Read more" disclosure and the three decisions
-raised above it. The cell alone left most of the row dead, which is what the
-owner saw. The first two lines are bold and the reasons are not.
-The filter bar is a **grid**, not a wrapping flex row — flex sized each select
-to its own widest option, so five fields were five widths and wrapped
-raggedly. The pager prints no "Previous" on the first page and no noun after
-the total. The five tiles above the queue are the review-status filter
-(owner's call, 2026-09-21): each links to the same URL with `status` set,
-pressing the one that is on takes it off, and "In scope" is every status.
-Their counts are taken **without** the status filter - under it, pressing
-Escalated would have zeroed every other tile. Signals, Rules and Trends were deleted; what they carried lives
-on `/provenance`. **The overview's first screen is the hero, the term switcher
-and the six figures, filling the viewport between the masthead and the ticker
-with no slack** (owner's call, 2026-09-16): the headline alone (the lede under
-it went, 2026-09-17), the term switcher and the six figures. `.home-fold`'s
-height is **measured, not computed** — `components/FoldHeight.tsx` sets
-`--fold-h` to `(innerHeight − masthead − ticker) / currentCSSZoom`, because
-what `100dvh` means under the root `zoom` was not consistent: the same
-expression left the panel 85px short at 1440×810 and 47px long at 1366×768.
-The CSS `calc` behind it is only the no-JavaScript fallback. The fold runs the
-window's width rather than the 1180px shell, and everything inside is set
-larger than elsewhere. The six figures are six cards on a 3×2 grid
-(`.figures`/`.figure`), each centred in its own card, on a light glass panel
-(`.figures-panel`) — the counterpart of the dark slab that carries the
-scoring method below the fold, going a few percent grey where the slab goes
-near-black. No backdrop blur on it: the budget is two per page and the
-masthead and ticker have them. The min-height is a floor, so two
-`max-height` queries (980px, 820px) shrink the type to keep the panel above
-the ticker; measured on six viewports from 1280×720 to 1920×1080, the gap
-is 34–51px. Re-measure after touching any size in that block or the
-masthead, and measure with reduced motion forced *and* the fold's sections
-and `.figures` in the reduced-motion list — an element still in its
-entrance delay reports its rect 104px low.
-The scoring method (`.score-screen` in `components/ScoreMethod.tsx`) is the
-**second** screen and fills it: `min-height: var(--fold-h)`, the slab inside
-at `flex: 1`, and the six cards on **auto rows left to the grid's default
-stretch**. Both alternatives were measured and both failed:
-`grid-auto-rows: 1fr` makes every row as tall as the tallest, so two rows
-want twice the tallest card — on a fixed height the second row hung 26–145px
-out of the slab, and on a floor it pushed the section 60–75px past the
-screen; `align-content: space-between` on auto rows left a hole between the
-rows. Type tiers by window height (900px, 740px) and by width (1450px) keep
-the content inside the screen, and those queries see the **window's** pixels
-rather than the zoomed ones — an 864px laptop sat outside an 820px tier while
-having less room than an 810px one inside it. Measured on five viewports: section = fold
-height, 10–16px of air above and below the slab, no card overflowing.
+**Every section with a link opens it from anywhere inside**
+(`components/ClickableSections.tsx`, one delegated listener): a table row opens
+its first link (its subject); a card, list item or article opens its link if
+all its links go to one place; a section with several destinations is left
+alone. Links, buttons, fields, `<summary>`, an open `<details>`, the decision
+buttons and the map keep their own behaviour; selecting text never navigates;
+ctrl/cmd/shift-click opens a tab; the pointer is marked by the same test.
 
-**"Trends and early warnings" is the fourth screen** (`components/WatchScreen.tsx`,
-2026-09-21), and it is where the brief's "trend analysis", "early warning",
-"predictive insights" and "automated compliance monitoring" are visible - the
-alignment check found all four had been removed from the site or denied by
-it. Four cards, all read at build (the overview is static), none folded into
-any score (§4): money paid by month with March in full ink (`/api/trends`);
-**works likely to run late** (`/api/forecast/late`: works due in the next 90
-days at agencies whose open works are in the worst quarter by overdue share -
-the day's own 75th percentile, 64.7% when built; completed works carry no due
-date, so an agency's past on-time record cannot be measured, and its current
-backlog is the best evidence the record holds); agencies gone quiet; and the
-compliance rules with their breach counts, linking to `/projects?compliance=
-breach`, which uses the same `compliance_risk > 0` test as the count. The
-limits card "It reports, it does not forecast" became "It forecasts only from
-the record" to match.
+**The pointer is the operating system's, in red** — two SVG cursor images in
+CSS, drawn at hardware rate. A JavaScript dot-and-ring was always one to three
+frames behind the hand and read as the whole site lagging (removed
+2026-09-18). The clickable rule is `html :is(a, button, …)` at (0,1,1), because
+component rules like `.review-btn { cursor: pointer }` beat a bare `button`.
 
-**"What it will not tell you" is the third screen** (`.limits-screen`), on a
-`min-height` rather than a definite height; three `max-height` tiers (980,
-820, 740) fit the four cards down to 1280×720.
-**Cards in both screens align top and foot** — content starts at the top and
-the last line (or the action, or the "Read more") is pushed to the bottom with
-`margin-top: auto`. Centring them instead left every title at a different
-height, which is what made a row read as loose boxes. Measured: identical
-title offsets and identical foot offsets across every card in a row. The
-limits are four limits of four points each, the four that matter most, with
-no "Read more" (owner's call, 2026-09-21) - every point either a rule in
-`data/scoring.py` or an entry in `COMPLIANCE_BLIND_SPOTS`, the rest of the
-blind spots on Sources. The heading and the lede above them are one
-revealable block (`.section-intro`), so they arrive together on the way down:
-measured, identical opacity at every scroll step and a constant 31–33px
-between them. Only the heading used to be marked, and it rose past a lede
-that sat still; the three models (`components/WhereTheAI.tsx`) are on `/provenance`. The risk ticker runs on the
-overview only, along the bottom of the viewport (`OnHome` in
-`app/layout.tsx`); no other page has one (owner's call, 2026-09-18). It
-carries only the works — no label, no "all high risk" link. "AI powered" must be visible on every page
-(masthead) and in front of "Why was this flagged?" on the work page — the
-brief asks for an AI-powered system and a visitor could not previously tell.
+### The overview — four screens
 
-The deck (`scripts/build_sih_deck.py`) reads every figure from the database at
-build time and refuses to build on a null or zero. It shipped stale twice when
-the numbers were typed in. Do not retype them.
+1. **Hero, term switcher and six figures**, filling the viewport between the
+   masthead and the ticker with no slack. `.home-fold`'s height is measured by
+   `components/FoldHeight.tsx`: `--fold-h` = `(innerHeight − masthead −
+   ticker) / currentCSSZoom`, because `100dvh` under the root zoom was
+   inconsistent (85px short at 1440×810, 47px long at 1366×768). The six
+   figures are cards on a 3×2 grid on a light glass panel; two `max-height`
+   queries (980px, 820px) keep the panel above the ticker (34–51px of air on
+   six viewports). The term switcher is **not a navigation**: every scope is
+   rendered on the server and handed to `components/FiguresBoard.tsx`, so a
+   switch is `useState` + `history.replaceState`, zero requests (a `<Link>` and
+   a `router.replace` both read as lag, because they were). `TERMS` lives in
+   `lib/terms.ts` — a plain value exported from a `"use client"` module reaches
+   the server as a client reference (`TERMS.find is not a function`).
+2. **What the score is made of** (`.score-screen`, `components/ScoreMethod.tsx`)
+   fills the second screen: `min-height: var(--fold-h)`, six cards on **auto
+   rows left to the grid's default stretch** — `grid-auto-rows: 1fr` hung the
+   second row 26–145px out of the slab, `align-content: space-between` left a
+   hole. Type tiers by window height (900, 740) and width (1450); those
+   queries see the window's pixels, not the zoomed ones.
+3. **What it will not tell you** (`.limits-screen`): four limits, four points
+   each, no "Read more" — every point a rule in `data/scoring.py`, an entry in
+   `COMPLIANCE_BLIND_SPOTS`, or the forecast's rule. "It forecasts only from the
+   record" replaced "It reports, it does not forecast" when the forecast went
+   in. The heading and lede are one revealable block (`.section-intro`) so they
+   arrive together.
+4. **Trends and early warnings** (`components/WatchScreen.tsx`): money paid by
+   month with March in full ink (`/api/trends`); **works likely to run late**
+   (`/api/forecast/late`, §5); agencies **gone quiet** (20+ open works, nothing
+   paid in 180 days); and the **compliance rules** with breach counts, linking
+   to `/projects?risk_level=ALL&compliance=breach` — the same `compliance_risk
+   > 0` test as the count. This screen is where the brief's "trend analysis",
+   "early warning", "predictive insights" and "automated compliance
+   monitoring" are visible; the alignment check on 2026-09-21 found all four
+   missing until it was added. Do not remove it without replacing them.
 
-Its content is **images**, because the template's own instruction slide says to
-use "points / diagrams / Infographics / pictures" rather than paragraphs. Six
-diagram boards live in `docs/deck/diagrams/boards.template.html`, authored with
-the product's tokens and fonts and rendered to PNG by `render.mjs`; six
-screenshots of the running system sit beside them. The figures inside those
-images are `{{tokens}}` the build fills from the database, so the no-retyping
-rule survives the move to pictures. Exactly three links, everywhere: demo
-video, prototype, GitHub.
+Cards in screens 2–4 align top and foot (`margin-top: auto` on the last line);
+centring left every title at a different height. The risk ticker runs on the
+overview only, along the bottom (`OnHome` in `app/layout.tsx`), carrying only
+the works. "AI powered" is visible on every page (masthead) and before "Why was
+this flagged?" on the work page — the brief asks for an AI-powered system.
 
-Two things that bite here. `new URL(import.meta.url).pathname` keeps this
-repository's space percent-encoded, so node wrote every PNG into a parallel
-`SIH%20HACKATHON` tree and the deck silently kept using stale images - use
-`fileURLToPath`. And there is no LibreOffice on this machine, so
-`scripts/preview_deck.py` redraws the built `.pptx` as HTML and screenshots it;
-it is exact for image and shape geometry and only approximate for text
-wrapping. Look at the preview before believing a layout - it has caught an
-image running a full inch off the slide, a title printing over the team badge,
-and clipped captions that `verify()` could not see.
+### Projects (the queue)
 
-## 11. Motion, measured
+- The band select is also the scope: nothing chosen is the review queue (score
+  40+), `risk_level=ALL` is every work, a named band is that band whatever its
+  score. The summary endpoint defaults its floor to 40, so outside the queue
+  the page passes `min_score=0`, or "All works" counted 48,296 and "Low" 0.
+- The five **status tiles** are the review-status filter; pressing the one that
+  is on takes it off; their counts are taken **without** the status filter, or
+  pressing Escalated zeroed every other tile.
+- **A row is one object**: a stretched link on the `<tr>` covers the work, the
+  place, the money and the risk bar; district and state links, "Read more" and
+  the decisions sit above it. First two lines bold; two reasons shown, the rest
+  behind `<details>`. Rows do not zoom on hover (it shook the page at the foot
+  of the queue); they tint.
+- The filter bar is a **grid** — flex sized each select to its widest option
+  and wrapped raggedly. The pager shows no "Previous" on page 1 and no noun.
+- **The queue streams**: the filter bar and download render from the URL; the
+  tiles and table stream behind `<Suspense>` keyed on the filters, with ghost
+  fallbacks (first byte 20–40ms). A filter change is `router.replace` in
+  `useTransition`: the bar carries `aria-busy`, a sweep runs along its edge,
+  and the tiles and table drop to 45% (`.queue-screen:has(...)`), on screen
+  156ms after the change.
+- Decisions flip at once (`useOptimistic`); `app/projects/actions.ts` posts
+  them server-side (the `REVIEW_TOKEN` never reaches the browser) and calls
+  `updateTag("api")` so a reviewer reads their own write.
+- The API keeps the queue's original names (`/api/alerts`,
+  `/api/alerts/summary`, `/api/alerts/export`, `/api/alerts/review`).
 
-Every rule here was found by measuring in a headless browser (playwright-core
-against a local `next start`), not by looking. Keep doing that: sample
+### States, MPs, Sources
+
+- **States** opens on the map (`components/StateMap.tsx` in `.map-screen`,
+  sized by `--fold-h`, framed with `fitBounds` and `zoomSnap: 0.1` so India
+  fills 88–95% of the height). Clicking a state opens its desk. Below, 36 state
+  cards ranked in the browser (`components/StateRanking.tsx`, `?sort=` read
+  after hydration). Paid rate and committed rate are shown apart (§6).
+- **MPs** (`components/MpDirectory.tsx`): compare panel first — four slots, a
+  search that fills them, the cards' "+ Compare" fills the same slots — then
+  cards sixty at a time, filtered and sorted in the browser. Both terms arrive
+  with the page, as packed arrays (`lib/mpRows.ts`: 836 KB of HTML became
+  428 KB). `/mps/compare` is one term only: a member's two terms are two
+  allocations. Rajya Sabha's term count says "in Rajya Sabha" — it counts only
+  those. A record whose seat has since ended says "Seat ended".
+- **Sources** (`/provenance`) opens on the architecture
+  (`components/ArchitectureFlow.tsx`, the deck's slides 2–3 in the product's
+  language, every count live). It **snakes** so each arrow joins consecutive
+  steps: 1 → 2, down into 3 under the right end of 2, 3 → 4 right to left, down
+  into 5 under the left end of 4, 5 → 6 → 7; each turn is a grid shaped like the
+  row below it. Then "Where the AI is" (`components/WhereTheAI.tsx`, three
+  points per model) and the detectors (two points each, what it measures and
+  what it does not claim).
+
+### The deck
+
+`scripts/build_sih_deck.py` reads every figure from the database at build time
+and refuses to build on a null or zero — it shipped stale twice when the
+numbers were typed in. Its content is images (six diagram boards in
+`docs/deck/diagrams/boards.template.html` with `{{tokens}}` filled from the
+database, rendered by `render.mjs`, plus six screenshots). Exactly three links,
+everywhere: demo video, prototype, GitHub. Use `fileURLToPath`, not
+`new URL(import.meta.url).pathname` (the space in this repository's path was
+percent-encoded into a parallel directory). No LibreOffice here:
+`scripts/preview_deck.py` redraws the built `.pptx` as HTML — exact for
+geometry, approximate for text wrapping; look at it before trusting a layout.
+
+## 12. Performance
+
+Measured on 2026-09-21 on the live site: every cached page answers in ~0.09s
+(against 0.3–0.4s when rendered per request), repeat visits load in 0.2–0.75s
+with the largest paint at 0.3–1.7s, and nav clicks land in 0.2–0.4s.
+
+**Pages are built once and cached, not rendered per visit.** A page that reads
+`searchParams` is rendered on every request; one whose inputs are all in its
+path is served from the cache and **prefetched in full by every link to it**,
+so the click is instant.
+- `/`, `/states`, `/mps`, `/provenance` are static. None reads the request:
+  `FiguresBoard`, `StateRanking` and `MpDirectory` read `?ls_term=`, `?sort=`,
+  `?compare=` in the browser after hydration (server and first client render
+  agree on the default, then the URL's choice lands).
+- The desks and the work page are ISR: `generateStaticParams` returns `[]` (the
+  state desk lists its 36 from the API, falling back to `[]`), so each path is
+  rendered on first visit and cached. The desks' term moved from the query into
+  the path **invisibly**: `beforeFiles` rewrites in `next.config.ts` serve
+  `/state/X?ls_term=17` from `/state/X/t/17` (same for districts and members),
+  so every existing link keeps its address.
+- Only `/projects` and `/mps/compare` are dynamic, by nature. Never read the
+  request in the others without meaning to make them dynamic; check the route
+  table after `next build`: `○` or `●`, not `ƒ`.
+- **A cached page must never cache a failure as "not found".** `lib/api.ts`
+  throws `ApiError` with the status; pages call `notFoundOr(err)`, which shows
+  the not-found page only for a real 404 and rethrows anything else. Found when
+  a real work page was served as missing after one failed first render. A
+  streamed not-found keeps status 200 (the root `loading.tsx` starts the stream
+  first) but carries `noindex`.
+- The build prerenders 45 pages against the live API. All at once that emptied
+  the API's connection pool and failed a build, so `next.config.ts` builds two
+  pages per worker at a time and retries a failed page three times. `get()` in
+  `lib/api.ts` also retries once on a 5xx or a dropped connection.
+- `lib/api.ts` caches every GET for 1800s under the tag `api` (the record
+  changes nightly); `app/loading.tsx` answers a click in ~150ms. Member photos,
+  the emblem and the logo are cached for a day (`headers()` in
+  `next.config.ts`; Vercel serves `public/` with `max-age=0` by default).
+- **The loading cover plays once every six hours** (below), and is 1.7s.
+
+**The API's cost is the round trip to Neon, not the SQL.** A queue statement
+executes in under 1ms (EXPLAIN ANALYZE 0.77ms); from a laptop the round trip is
+~0.6s. Check with `SELECT 1` before optimising a query. What `api/db.py` does:
+- **psycopg2 keeps at most `minconn` connections idle and closes any other on
+  `putconn`** — at `minconn=1` every statement run beside another opened and
+  threw away a connection (a 1.0–3.7s TLS handshake each). The pool is built at
+  one (the constructor opens `minconn` in front of the first request, and one
+  failed handshake failed that request — it broke a deploy), then `minconn` is
+  raised to 4 and `_warm` opens the rest in the background.
+- Reads end their transaction (`rollback`), so no connection goes back "idle in
+  transaction"; TCP keepalives are set.
+- A stale connection is discarded and the next tried, up to `minconn + 1`
+  times — Neon closes idle connections together, and a single retry landed on
+  the second dead one.
+- `_borrow` queues up to 15s for a free connection rather than failing.
+- `/api/alerts` runs its rows and its total in parallel; the total is
+  remembered per filter set for 30 minutes (cleared by every decision); the
+  rows query sets `work_mem` to 32MB (it spilled ~220 MB to disk); filters,
+  the search index and the MP directory are memoised.
+
+**Global helpers must stay cheap** — they run on every page.
+- `WordLift` checks React's marker with `Object.keys`, never `for...in` (which
+  walks hundreds of inherited properties per text node); cheap tests run first;
+  the sweep stops once three pass empty after load; `[data-count]` (every
+  `CountUp`) is skipped, or it was re-wrapped every frame of its count.
+- `FoldHeight` watches the masthead and ticker with a ResizeObserver and re-runs
+  per navigation. A MutationObserver on the whole body forced a layout after
+  every DOM change anywhere (44ms in one click).
+- `ClickableSections` finds the section first and searches for links only when
+  it changes — `mouseover` fires for every word span.
+- `CountUp` builds one `Intl.NumberFormat` per count, not one per frame.
+
+## 13. Motion, measured
+
+Every rule here was found by measuring in a headless browser, not by looking:
 opacity and transform at every scroll position, frame intervals over 120
 frames, scrollY through a reload. "Looks fine" was wrong six times.
 
+**The loading cover** (`components/Splash.tsx`) is CSS-only — no state, no
+effect, no `"use client"`; a version that hid itself from a `useEffect` sat at
+0% on a slow hydration with no way to leave. It runs 1.7s: fill 1.2s on a
+symmetric curve, fade 1.3 → 1.7s, `pointer-events: none` from the first fade
+frame, `visibility: hidden` at the end. It plays **once every six hours**: the
+inline script at the top of `<body>` keeps a timestamp in localStorage and on a
+repeat visit sets `<html data-no-cover data-entered>` before first paint.
+(It was 3.3s on every full load, which put the largest paint of six pages at
+~5.2s.)
+
 **Two kinds of entrance, and never retime a running one.**
-- First load: everything on the opening screen animates on a timer after the
-  loading cover, starting at `--enter-at` (3000ms) — before that the cover is
-  opaque and the entrance plays for nobody.
+- First load: the opening screen animates after the cover, from `--enter-at`
+  (1400ms, half-way through the cover's fade).
 - Client navigation: `<html data-entered>` sets `--enter-at: 0` and shorter
-  travel (`--rise-y`, `--card-y`), because the new page has no cover and sat
-  blank for three seconds otherwise.
-- `data-entered` is set at 4500ms, **after the last first-load entrance has
-  ended**, or immediately on a navigation. Setting it while entrances run
-  changes their `animation-delay`, and a running CSS animation whose delay
-  drops by 3s is retimed on the spot — measured, every card snapped 47px → 0
-  in one frame. Never change `animation-delay`, `animation-name` or keyframe
-  custom properties on an element mid-animation.
+  travel (`--rise-y`, `--card-y`).
+- `data-entered` is set at 2900ms (1400 + 390 stagger + 960), **after the last
+  first-load entrance has ended**, or immediately on a navigation. Setting it
+  while entrances run changes their `animation-delay`, and a running animation
+  whose delay drops is retimed on the spot — every card snapped 47px → 0 in one
+  frame. Never change `animation-delay`, `animation-name` or keyframe custom
+  properties mid-animation. `ScrollReveal`'s last pass is at 1900ms. All are
+  timed off the cover; move them together.
 
 **Scroll reveals** (`[data-reveal]`, `@supports (animation-timeline: view())`):
 - Two animations on one timeline: opacity over `cover 0px → 300px`, movement
-  over `cover 0px → 680px` with `--ease`. One range could not serve both —
-  short and the arrival was invisible, long and text sat translucent while
-  read.
-- **Pixel ranges, never percentages.** A percentage of `cover` on an
-  11,225px table was 5,093px of scrolling before solid.
+  over `cover 0px → 680px`. One range could not serve both.
+- **Pixel ranges, never percentages** — a percentage of `cover` on an 11,225px
+  table was 5,093px of scrolling before solid.
 - **Longhands, with `animation-duration: auto` written out.** Lightning CSS
-  (under Tailwind v4) expands the `animation` shorthand and fills the
-  duration as `0s`, which for a scroll timeline is a zero-length effect —
-  blocks snapped 0 → 1 the instant their range began. Check the compiled
-  chunk in `.next/static/chunks/*.css` when a scroll animation does nothing.
-- The selector is `[data-reveal], .grid > [data-reveal]`: `.grid > .card`
-  (0,2,0) outranks a bare attribute (0,1,0), and the first card of every
-  grid on the overview never took a timeline until this was added.
-- `ScrollReveal` marks only blocks below the fold at load, **by layout
-  position (`offsetTop` chain × `currentCSSZoom`), never
-  `getBoundingClientRect`** — the rect includes the pending 104px entrance
-  transform, and a row at 599px was read as 765px, marked, and stuck at 61%
-  opacity in the first viewport. It marks three times (rAF, `fonts.ready`,
-  after the cover), add-only. Nothing nested inside another revealable block
-  is marked: two nested fades multiply.
-- Table rows never take a timeline; the wrap animates as one object.
+  (under Tailwind v4) expands the shorthand with `0s`, a zero-length effect on
+  a scroll timeline. Check the compiled chunk when one does nothing.
+- The selector is `[data-reveal], .grid > [data-reveal]` — `.grid > .card`
+  (0,2,0) outranks a bare attribute.
+- `ScrollReveal` marks only blocks below the fold, **by layout position
+  (`offsetTop` chain × `currentCSSZoom`), never `getBoundingClientRect`** — the
+  rect includes the pending 104px entrance transform. It marks three times,
+  add-only, and never inside another revealable block. Table rows never take a
+  timeline.
 
-**Scroll position.** `html { overflow-anchor: none }`. Chrome picked the first
-section as scroll anchor while it was 74px low in its entrance and "kept it
-in place" by scrolling every reload 103px down. Nothing here loads in above
-the reader, so anchoring guards against nothing.
+**Scroll position.** `html { overflow-anchor: none }` — Chrome anchored on a
+section still 74px low in its entrance and scrolled every reload 103px down.
 
-**The loading cover** (`components/Splash.tsx`) is CSS-only — no state, no
-effect, no `"use client"`. The first version hid itself from a `useEffect`
-timer and sat at 0% for three seconds on a slow hydration with no way to
-leave. It runs 1.7s (was 3.3s, and played on every full load, which put the
-largest paint of six pages at ~5.2s): fill 1.2s on a symmetric curve, fade
-1.3 → 1.7s, `pointer-events: none` from the first fade frame, `visibility:
-hidden` at the end. **It plays once every six hours**: the inline script at
-the top of `<body>` keeps a timestamp in localStorage and, on a repeat visit,
-sets `<html data-no-cover data-entered>` before first paint, so the page is
-simply there (owner, 2026-09-21: "fast as hell"). `--enter-at` is 1400ms,
-`data-entered` lands at 2900ms (1400 + 390 stagger + 960), `ScrollReveal`'s
-last pass at 1900ms - all timed off the cover; move them together.
+**Everything under the pointer zooms** (owner, 2026-09-17): surfaces by
+`--lift` (1.05, press 1.07); buttons, links and the single *word* under the
+pointer by `--lift-text` (1.08); on `--t-lift`/`--ease-lift`, behind one
+`hover / pointer: fine / prefers-reduced-motion: no-preference` gate. Change the
+amounts in the tokens only. Words are wrapped in `.w` spans at runtime by
+`components/WordLift.tsx` — **so never style running text with an element
+selector like `.box span`**: it matches every word (`.archgov span { display:
+block }` set a name one word to a line, and `.archdata__item span` shrank a
+counter). Give the element a class. WordLift never takes a text node from React
+(the original stays, emptied, and is rebuilt from when React writes into it)
+and never touches a node React has not hydrated (it checks for
+`__reactFiber$`; wrapping first was React error #418).
 
-**Performance budget, measured on `/alerts`:** 2 backdrop-filters on the
-whole page (masthead, ticker), 0 `background-attachment: fixed`, and the only
-gradient pseudo-elements are the ticker's two static end fades, 60fps. What broke it before: 17 backdrop-filters, a fixed
-body background repainting on every scroll frame, a CSS `mask-image` over a
-canvas that repaints every frame (33ms frames → 16.7ms without; the fade is
-done per point instead), and a canvas reaching under the masthead so its
-backdrop blur recomputed every frame. The same mask trap was found again on
-2026-09-20 in the ticker: a `mask-image` fading the ends of a strip that moves
-every frame made the strip repaint every frame and held the overview near
-30fps once scrolled past the hero. The fades are now two static gradients over
-the strip, and the track has `will-change: transform`. `HeroField` draws at
-30fps - the field drifts at 9px a second, so 60 looks the same, and its
-backing store is ~1.7 million pixels cleared per frame. `body::before` is the
-one fixed wash layer. Anything that keeps drawing must stop when off-screen or the tab is
-hidden (`HeroField`, `Cursor` both do).
+**The six figures drift**: ±8px, six periods from 4.6s to 6.6s with negative
+delays, paused under the pointer, absent under reduced motion. On `transform`,
+not `translate` — `translate` carries the hover lift, and an animation's fill
+beats a declaration.
 
-**Zoom.** The root is zoomed, and it bites three times. `clientX/Y` are screen
-pixels while elements move in the root's zoomed pixels — divide by
-`el.currentCSSZoom`. `getBoundingClientRect` is zoom-adjusted, `offsetTop`
-and `clientWidth` are not — a canvas backing store is `clientWidth ×
-currentCSSZoom × devicePixelRatio`. And viewport units are scaled like any
-other length: `100dvh` at 1.33 rendered 1436px tall in a 1080px window, so
-`--zoom` is set beside `zoom` and `.viewport-column` divides it back out.
+**The architecture runs**: packets travel every arrow (a wrapper the size of
+its arrow translated by 100% of itself), the six nightly stations light in
+turn, the step numbers pulse 1 to 7, the weight bars fill (25% = full) and a
+needle sweeps the risk bar — transform and opacity only, 16.7ms median frames.
+Paused unless `components/ArchLive.tsx` sets `[data-live]` (on screen); absent
+under reduced motion.
 
-**Everything under the pointer zooms** (owner's call, 2026-09-17): surfaces by
-`--lift` (1.05, press 1.07), the single *word* under the pointer, buttons and
-links by `--lift-text` (1.08 — a word is small and needs twice a surface's growth
-to read as a zoom), on `--t-lift`/`--ease-lift`. **Table rows do not zoom**
-(2026-09-20): the row was the only hover on the page that changed the page's
-own geometry, and at the foot of the queue the owner saw it shake. Rows still
-tint on hover; `--lift-row` is unused. Words
-are wrapped in `.w` spans at runtime by `components/WordLift.tsx` - **so never
-style running text with an element selector like `.box span`**: it matches
-every word, and `.archgov span { display: block }` set the Ministry's name one
-word to a line. Give the element a class. WordLift must
-keep two promises: it never takes a text node away from React (the original
-stays in place, emptied, and the words are rebuilt from it when React writes
-into it — that is what keeps a term switch updating the lede), and it never
-touches a node React has not hydrated (the page streams in behind the layout;
-wrapping first was React error #418 and the boundary re-rendered — it checks
-for React's `__reactFiber$` mark and sweeps for ten seconds after load). All
-of it sits behind one `hover / pointer: fine / prefers-reduced-motion:
-no-preference` gate. Change the amount in the tokens, nowhere else.
+**Performance budget**: 2 backdrop-filters on a page (masthead, ticker), no
+`background-attachment: fixed`, `body::before` the one fixed wash layer; the
+only gradient pseudo-elements are the ticker's two static end fades. What broke
+it before: 17 backdrop-filters; a fixed background repainting every scroll
+frame; a `mask-image` over something that moves every frame (the hero canvas,
+then the ticker — each held the page near 30fps; the fades are painted once
+now, and the ticker track has `will-change: transform`). `HeroField` draws at
+30fps (its drift is 9px/s; its backing store is ~1.7M pixels). Anything that
+keeps moving stops when off-screen or the tab is hidden (`HeroField`,
+`ArchLive`).
 
-**The six figures drift** (owner's call, 2026-09-17): ±8px, six periods from
-4.6s to 6.6s with negative delays so they never look like one object
-breathing, paused under the pointer, and absent under reduced motion. On
-`transform`, not the `translate` property — `translate` carries the shared
-hover lift, and an animation's fill state beats a plain declaration, so a
-float there would silently eat it.
-
-**The architecture on Sources snakes** (owner's call, 2026-09-21): 1 -> 2,
-down into 3 under the right end of 2, 3 -> 4 right to left, down into 5 under
-the left end of 4, 5 -> 6 -> 7. A centred down-arrow landed 2 on 4 and 4 on 6.
-Each turn is its own grid shaped like the row below it, arrow in the column of
-the step it enters, so it lands on that step at any width; the row-2 arrow is
-flipped with `scale: -1 1`, which reverses its packet too. Measured by
-geometry, not by eye: each down-arrow starts inside the step above and ends
-inside the one below, at 1440 and 1280.
-
-**It also runs** (owner's call, same day): packets
-travel every arrow, the six nightly stations light in turn (0.6s apart), the
-step numbers pulse 1 to 7, the weight bars fill to their share (25% = full)
-and a needle sweeps the risk bar. Transform, `translate`, `scale` and opacity
-only - measured 16.7ms median frames while it runs. A packet is a wrapper the
-size of its arrow translated by 100% of itself, which is the arrow's length at
-any size. Everything is paused unless `components/ArchLive.tsx` has set
-`[data-live]` (an IntersectionObserver on the diagram), and none of it exists
-under reduced motion, where the bars sit at their final width.
+**Zoom.** The root is zoomed. `clientX/Y` are screen pixels while elements move
+in zoomed pixels — divide by `el.currentCSSZoom`. `getBoundingClientRect` is
+zoom-adjusted, `offsetTop` and `clientWidth` are not (a canvas backing store is
+`clientWidth × currentCSSZoom × devicePixelRatio`). `100dvh` at 1.33 rendered
+1436px in a 1080px window, so `--zoom` is set beside `zoom` and
+`.viewport-column` divides it out.
 
 **Independent transform properties.** `scale` wraps `transform`: a ring at
 `transform: translate(449px)` with `scale: 1.55` drew at 696px. Position with
-the `translate` property (applied outermost) when `scale` is also in play.
-
-**Every section with a link opens it from anywhere inside** (owner's call,
-2026-09-21). One delegated listener, `components/ClickableSections.tsx`,
-mounted in the layout, rather than a stretched link per component: a plain
-click on a table row opens the row's first link (always its subject - the
-district, member or work; later links are context), and on a card, list item
-or article opens its link if all its links go to one place. A section with
-several destinations is left alone rather than guessed. Clicks on links,
-buttons, form fields, `<summary>`, an open `<details>`, the decision buttons'
-gaps and the map keep their own behaviour; selecting text never navigates;
-ctrl/cmd/shift-click opens a tab. The pointer is marked by the same test on
-entry (`[data-section-link]` joins the ring cursor's rule), so the cursor
-never promises a click that does nothing. The real `<a>` elements are
-untouched, so keyboard and screen readers see no change.
+`translate` when `scale` is in play.
 
 **Sticky and stacking.** `.data-table thead th { top: 0 }` — the wrap owns the
-scroll, so a topbar offset parks the header across row 1. `.topbar` is
-`z-index: 1100` because Leaflet stacks 200–1000 and painted over the nav at
-40.
+scroll. `.topbar` is `z-index: 1100` because Leaflet stacks 200–1000.
 
-**The pointer is the operating system's, in the owner's red.** It was a dot
-and a trailing ring moved by JavaScript over a hidden native arrow
-(`components/Cursor.tsx`, deleted 2026-09-18). A pointer the page paints can
-only move after the event is delivered, the handler runs and a frame is
-painted — always one to three frames behind the hand, on every page — and
-the ring was built to trail further; the owner read it as the whole site
-being laggy. It is now two SVG cursor images in CSS (at rest, and an opened
-ring over anything clickable), drawn by the OS at hardware rate with no
-script. The clickable rule is `html :is(a, button, …)` at (0,1,1), because
-component rules like `.review-btn { cursor: pointer }` beat a bare `button`.
-Main-thread cost was never the problem: measured on `/alerts` with a
-synthetic pointer sweep and a scroll, zero long animation frames.
-
-**The term switcher is not a navigation at all.** The overview renders *every*
-scope's figures on the server (three cached `api.overview` reads) and hands
-all three to `components/FiguresBoard.tsx`; switching is a `useState` and
-`history.replaceState`, with no fetch, no navigation and no server work —
-measured, 0 network requests and the DOM updated within 20ms. Two earlier
-passes tried to *hide* the latency instead (a `<Link>`, which tore the page
-down for `loading.tsx`'s skeleton; then `router.replace` in a
-`startTransition`, which kept the page but still waited on the round trip)
-and both still read as lag, because they were lag. The figures carry
-`key={term}` so the cards are replaced rather than updated — that is what
-makes `CountUp` run again. It wears the nav's pill island a size down
-(`.nav--inline`), and the active rule matches any `aria-current`, so a filter
-can say "true" where a page says "page". `TERMS` lives in `lib/terms.ts`:
-a plain value exported from a `"use client"` module reaches the server as a
-client reference, and `TERMS.find is not a function` is what that looks like.
-
-**The queue's cost is the API, not the page.** Measured 2026-09-18: the
-client does ~200ms of main-thread work on `/alerts`; `/api/alerts` took
-1.1–1.3s in production and ~3s from a laptop, because it is two statements
-(the rows and the total) each a round trip to Neon. They now run together
-on a thread pool — which doubled the connections one request holds and
-exhausted the pool of 8 during a build (seven pages prerendered at once),
-so `db.py` now pools 16 and queues for up to 5s rather than raising; the
-total is remembered per filter set for thirty minutes
-(cleared by every decision, which moves the status counts); `/api/filters`
-is remembered for ten; and the rows query sets `work_mem` to 32MB locally,
-which stops its sort spilling ~220MB to disk. Paging went from ~3s to ~1s
-locally. A decision flips its button at once (`useOptimistic`) instead of
-sitting disabled through the write and the re-render.
-
-**Then the connections, measured 2026-09-20.** A queue statement executes in
-under 1ms on Neon (EXPLAIN ANALYZE: 0.77ms); from a laptop its wall time was
-the round trip, 0.6s, and whole endpoints still took 1.9s and cold filtered
-pages 3–7s. The rest was **opening connections**: the pool started at one, a
-page runs two or three statements at once, and each extra one paid a fresh
-TLS handshake of 1.0–3.7s; and reads never ended their transaction, so
-connections went back "idle in transaction" and were cut off and reopened.
-`db.py` now keeps four, sets TCP keepalives, and rolls back after every
-read. **psycopg2 keeps at most `minconn` connections idle and closes any
-other on `putconn`** - so at `minconn=1` every statement run beside another
-opened and threw away a connection, every time; that was the real cost. The
-pool is built at one (the constructor opens `minconn` up front, in front of
-the first request, and one failed handshake failed that request - which is
-what broke the 2026-09-21 web deploy), then `minconn` is raised to 4 and
-`_warm` opens the other three in the background, where a failure costs
-nothing. Measured: three parallel statements in one round trip, four idle
-kept. (An earlier note here blamed the 2026-09-20 nightly's deadlock on those
-idle connections. It was wrong: see "The refresh must not fight the site" in
-§3.)
-
-The web's `get()` retries once on a 5xx or a dropped connection. Web and
-API deploy from the same push, and the web's build prerenders `/provenance`
-against an API that may be cold-starting that second. Endpoints went to one round trip (0.64s locally) and a cold
-filtered page to 0.67–1.03s. Anything slower locally is the link to Neon, not
-the code - check with `SELECT 1` before optimising a query.
-
-**The queue streams.** `app/projects/page.tsx` renders the filter bar and the
-download from the URL alone and puts the tiles and the table each behind a
-`<Suspense>` keyed on the filters, with ghost cards and rows as fallbacks, so
-the shell's first byte is 20–40ms whatever the database is doing. A filter
-change is a `router.replace` inside `useTransition`: while it is pending the
-bar carries `aria-busy`, a thin indeterminate sweep runs along its top edge
-and the tiles and table drop to 45% (`.queue-screen:has(...)`, no state
-outside the bar) - measured, on screen 156ms after the change.
-
-**Pages are built once and cached, not rendered per visit** (2026-09-21). A
-page that reads `searchParams` is rendered on every request (0.3-0.4s to first
-byte in production); a page whose inputs are all in its path is served from
-the cache (0.09s) and **prefetched in full by every link to it**, so the click
-is instant. So:
-- `/`, `/states`, `/mps`, `/provenance` are static (revalidated with the
-  30-minute data cache). None reads the request: FiguresBoard,
-  StateRanking and MpDirectory read `?ls_term=`, `?sort=`, `?compare=` in the
-  browser after hydration (server and first client render agree on the
-  default, then the URL's choice lands). "Rank by" on States is a state
-  change now, not a server round trip per click.
-- The desks and the work page are ISR: `generateStaticParams` returns `[]`,
-  so each path is rendered on its first visit and cached. The desks' term
-  moved from the query into the path **invisibly**: `beforeFiles` rewrites in
-  `next.config.ts` serve `/state/X?ls_term=17` from `/state/X/t/17` (and the
-  same for districts and members), so every existing link keeps its address.
-  Measured: repeat visits 5-14ms locally.
-- Only `/projects` (filters) and `/mps/compare` stay dynamic, by nature.
-- The 36 state desks are built with the site (`generateStaticParams` lists
-  them from the API; on an API failure it returns `[]` and they render on
-  first visit instead). All at once, that emptied the API's pool and failed
-  a build, so `next.config.ts` builds two pages per worker at a time and
-  retries a failed page three times, and `db._borrow` queues 15s, not 5.
-- Member names shown anywhere go through `cleanName` (Parliament's spelling)
-  or `cleanPortalName` (`lib/names.ts`, for the browser): the portal writes
-  "(17LS)", "(EX17LS)", "(17th Lok Sabha)" into names, and the state desk
-  printed them.
-- **A cached page must never cache a failure as "not found".** `lib/api.ts`
-  throws `ApiError` with the status; pages call `notFoundOr(err)`, which
-  shows the not-found page only for a real 404 and rethrows anything else,
-  so a transient API error is a retryable `app/error.tsx`, not a missing
-  work frozen into the cache. Found when a real work page was being served
-  as missing after one failed first render. `app/not-found.tsx` and
-  `app/error.tsx` are ours now, not Next's bare defaults. Status stays 200 on
-  a streamed not-found (the root `loading.tsx` starts the stream first) but
-  the page carries `noindex`.
-- Never read the request in these pages again without meaning to make them
-  dynamic. Check the route table after `next build`: `○` or `●`, not `ƒ`.
-- **A page that uses a new API endpoint is built against the old API.** Web
-  and API deploy from the same push, at the same moment, so a static page
-  prerenders against whatever API was live - on 2026-09-21 the overview's
-  forecast card was built while `/api/forecast/late` did not exist yet, and
-  its `.catch(() => null)` left the card out. It heals at the next 30-minute
-  revalidation; to heal it at once, redeploy the web project alone
-  (`npx vercel redeploy <latest web deployment url> --target production`).
-
-**Two global helpers were costing every page.** `WordLift`'s fiber check
-used `for...in` over each DOM node - hundreds of inherited properties per
-text node, every 250ms for ten seconds; it is `Object.keys` now, the cheap
-tests run first, and the sweep stops once three pass empty after load.
-`FoldHeight` had a MutationObserver on the whole body that measured, forcing
-a layout, after every DOM change anywhere (44ms in one "Rank by" click); it
-watches the masthead and ticker with a ResizeObserver and re-runs per
-navigation. `CountUp` spans carry `data-count`, which WordLift skips - it was
-rebuilding a counter's word spans on every frame of its count.
-
-**Navigation.** `app/loading.tsx` answers a click in ~150ms; `lib/api.ts`
-caches every GET for 1800s under the tag `api` (the record changes nightly),
-and `app/alerts/actions.ts` calls `updateTag("api")` after a review so the
-reviewer reads their own write. Measured: 130–550ms per click warm, against
-1.3–9.3s cold plus 3.5s blank before.
-
-**A headless screenshot is not the viewport.** Measured 2026-09-17: with
-`--window-size=1440,810`, the page's `innerHeight`, `clientHeight` and
-`visualViewport.height` are all 715 — Windows Chrome's own chrome is 95px —
-while `--screenshot` renders an 810-tall image. Anything whose height depends
-on the viewport reads 95px wrong in a screenshot, and four contradictory
-measurements of this fold came from trusting one. Measure such things from a
-page that loads the site in an iframe of a stated size, where the iframe's
-height is the viewport; screenshots stay good for everything else.
-
-**Local verification.** `next start` serves the chunks it started with: after
-every `next build`, kill the server **by PID** (`ps -eo pid,args | grep
-next-server`) and start it again, or you will measure the previous build for
-an hour. `pkill -f "next start"` matches the shell that runs it and kills
-that instead. The API on :8000 and the web on :3100 are the local pair; the
-web reads `web/.env.local`.
+**A headless screenshot is not the viewport.** With `--window-size=1440,810`
+the page's `innerHeight` is 715 (Windows Chrome's own chrome is 95px) while
+`--screenshot` renders 810 tall. Measure anything viewport-sized from a page
+that loads the site in an iframe of a stated size.
 
 ---
 
