@@ -361,13 +361,22 @@ matter of weight and contrast. Icons (lucide) and the stack's logos
 block anywhere. Do not bring the dark palette back.
 
 **Phones and tablets are refused outright** (owner: phones 2026-09-15,
-tablets 2026-09-22): the inline script at the top of `<body>` sets
-`<html data-phone>` and `.phone-wall` shows one sentence in place of the page.
-It must survive "Desktop site", which rewrites the user agent, so the second
-test is hardware: a coarse primary pointer (a touchscreen laptop's primary
-pointer is its trackpad, so laptops pass). iPadOS Safari calls itself
-"Macintosh", so a Mac with touch points is the third. Do not replace any of it
-with a width query — the desktop-site viewport is 980px wide.
+tablets 2026-09-22, and again the same day after both still opened one). Two
+independent walls, because each can fail on its own:
+- The inline script at the top of `<body>` sets `<html data-phone>` before the
+  first paint. Three tests: the user agent; a coarse primary pointer; and a
+  real touch screen (`maxTouchPoints > 0`) on a screen whose short side is
+  1024px or less, which is what "Desktop site" cannot fake — on some Android
+  builds it rewrites the user agent *and* reports a fine pointer with hover.
+  The screen bound is what keeps touchscreen laptops open.
+- A pure-CSS rule, `@media (pointer: coarse) and (hover: none)`, which holds
+  with no JavaScript at all: a cached page, blocked scripts, an in-app
+  browser. A touchscreen laptop's primary pointer is its trackpad, so it is
+  untouched.
+
+Do not replace either with a width query — the desktop-site viewport is 980px
+wide. `videos/kasauti-demo/tools/wall.mjs` checks eleven devices against any
+URL, including both walls with JavaScript off; run it after touching either.
 
 Geist and Geist Mono. `zoom: 1.33` at ≥1024px, `1.15` at 700–1023px, none
 below. Tables scroll inside their own container; the page body never scrolls
