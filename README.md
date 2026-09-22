@@ -9,10 +9,17 @@
 
 <p align="center">
   <a href="https://mplads-risk-monitor-web.vercel.app"><b>Live prototype</b></a> ·
-  <a href="https://drive.google.com/file/d/1z27mUvNq-KbGzCK_8p_dpdtpBMCligM6/view?usp=drivesdk"><b>Demo video</b></a> ·
+  <a href="media/kasauti-demo.mp4"><b>Demo video</b></a> ·
   <a href="https://github.com/fbivinay/SIH-HACKATHON"><b>GitHub</b></a> ·
   <a href="https://mplads-risk-monitor.vercel.app/api/overview">API</a>
 </p>
+
+## Demo video
+
+https://github.com/fbivinay/SIH-HACKATHON/raw/main/media/kasauti-demo.mp4
+
+<p align="center"><a href="media/kasauti-demo.mp4"><img src="media/kasauti-demo.jpg" width="820" alt="Kasauti demo video — 2 minutes 30 seconds, recorded on the live site"></a><br>
+<sub>2 min 30 s · recorded on the live site · voice-over and captions · <a href="media/kasauti-demo.mp4">open the video</a></sub></p>
 
 ---
 
@@ -222,11 +229,11 @@ data/       schema.sql · load_real_data.py (loader) · scoring.py (scorer) ·
             detectors.py · sectors.py + llm_sectors.py · vendors.py · mps.py ·
             pg_retry.py · sector_cache.json (committed) · snapshot/ · tests
 scripts/    fetch_mplads.py · apply_schema.py · classify_sectors.py ·
-            verify_mospi.py · verify_states.py · fetch_mp_profiles.py ·
-            build_sih_deck.py · preview_deck.py
+            verify_mospi.py · fetch_mp_profiles.py — the nightly refresh's steps
 web/        Next.js app — app/ (pages), components/, lib/,
             data/mp_profiles.json and public/mps/ (member photographs)
-docs/deck/  the SIH idea deck, built from the live database
+docs/deck/  the SIH idea deck and the architecture diagram
+media/      the demo video
 .github/workflows/refresh-data.yml   the nightly refresh
 CLAUDE.md   how the system works, and the rules it learned the hard way
 ```
@@ -266,12 +273,6 @@ python3 -m pytest data api -q
 
 Run one database writer at a time: never the loader and the scorer together,
 and never while the nightly refresh may be running.
-
-## The deck
-
-`scripts/build_sih_deck.py` fills the SIH idea template with figures read from
-the live database at build time, and refuses to build on a missing or zero
-figure — so the deck and the running system never disagree.
 
 ---
 
