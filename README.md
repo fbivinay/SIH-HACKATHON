@@ -1,213 +1,251 @@
-<p align="center"><img src="web/public/logo.png" width="180" alt="Kasauti"></p>
+<p align="center"><img src="web/public/logo.png" width="170" alt="Kasauti"></p>
 
-# Kasauti — AI-powered MPLADS verification
+<h1 align="center">Kasauti — AI-powered MPLADS verification</h1>
 
-A *kasauti* (कसौटी) is the touchstone a jeweller rubs gold against to judge it.
-The stone destroys nothing and accuses nothing — it says which pieces are worth
-assaying. That is the claim this system makes about an MPLADS work, and the one
-it refuses to make.
+<p align="center">
+  <b>Smart India Hackathon 2026 · Problem Statement SIH26102 · Ministry of Statistics and Programme Implementation</b><br>
+  Team <b>Git Happens</b> · built by R Vinay Kumar and team
+</p>
 
-Built for Smart India Hackathon 2026, problem statement **SIH26102** (Ministry
-of Statistics and Programme Implementation): read the MPLADS record, score every
-work against comparable works, detect cost overruns, delays, duplicates and
-deviations from norms, and hand officials a ranked list of what to verify.
-
-| | |
-|---|---|
-| Web | https://mplads-risk-monitor-web.vercel.app |
-| API | https://mplads-risk-monitor.vercel.app/api/overview |
-| Data | 250,839 works and 272,263 payments across the 17th and 18th Lok Sabha, refreshed nightly |
-| Last refresh | 10 Sept 2026, 22:16 UTC — 250,839 loaded, 250,839 scored, 417 rows rejected |
+<p align="center">
+  <a href="https://mplads-risk-monitor-web.vercel.app"><b>Live prototype</b></a> ·
+  <a href="https://drive.google.com/file/d/1z27mUvNq-KbGzCK_8p_dpdtpBMCligM6/view?usp=drivesdk"><b>Demo video</b></a> ·
+  <a href="https://github.com/fbivinay/SIH-HACKATHON"><b>GitHub</b></a> ·
+  <a href="https://mplads-risk-monitor.vercel.app/api/overview">API</a>
+</p>
 
 ---
 
-## What it does
+A *kasauti* (कसौटी) is the touchstone a jeweller rubs gold against. The stone
+destroys nothing and accuses nothing — it says which pieces are worth assaying.
+That is the claim this system makes about every MPLADS work, and the one it
+refuses to make.
 
-Every work in the published MPLADS record gets a **risk score from 0 to 100**,
-built from five components that are each a property of the work itself:
+Kasauti reads the **entire published MPLADS record**, scores every work against
+comparable works, explains every flag in the record's own figures, and hands
+Members of Parliament, State Nodal Authorities, District Authorities and the
+Ministry a ranked list of what to verify — refreshed every night.
 
-| Component | Weight | What it measures | How |
-|---|---|---|---|
-| Cost | 25% | Sanctioned amount against the median for the same sector in the same district | Peer comparison, blended (`max`) with a scikit-learn **Isolation Forest** over amount, delay and spend |
-| Delay | 25% | Days past expected completion | Published recommendation and completion dates; a work with no schedule scores 0, not high |
-| Duplication | 20% | Near-identical wording to another work nearby | **Sentence-BERT** (`all-MiniLM-L6-v2`) embeddings, cosine ≥ 0.94, same district and sector |
-| Agency | 15% | The implementing agency's delay rate, vendor concentration and oldest pending payment | Herfindahl-Hirschman index over the agency's vendor spend, per Lok Sabha term |
-| Compliance | 15% | Deviations from the scheme's stated rules | Rule checks with the basis stated in words — never an invented clause number |
+| The record, as of 21 Sept 2026 | |
+|---|---|
+| Works analysed | **2,50,839** (17th and 18th Lok Sabha) |
+| Vendor payments analysed | **2,72,263** |
+| Works in the review queue (score 40+) | **48,296**, of which **2,316** high risk |
+| Works likely to run late (next 90 days) | **1,800** at 132 agencies |
+| Works breaching a compliance rule | **37,284** |
+| Members of Parliament | **788** in the 18th Lok Sabha, with photographs |
+| Refresh | nightly, 01:00 IST |
 
-Bands: **LOW** < 40, **MEDIUM** 40–70, **HIGH** ≥ 70. The review queue is every
-work at 40 and above. Today that is 48,296 works, 2,316 of them HIGH.
+---
 
-Sectors — the peer group a cost is compared inside — come from keyword rules
-over the work description (22 named sectors), and where the rules cannot decide, from
-**Gemini** (`gemini-flash-lite-latest`). The model labels; it never scores,
-ranks or flags. Its 41,691 answers are cached in `data/sector_cache.json`,
-which is committed so a clone scores correctly with no API key at all.
+## The problem, and how Kasauti answers it
 
-Four **cohort detectors** describe agencies and members rather than works, and
-are shown separately, never folded into a work's score:
+The problem statement asks for an AI-powered platform that detects anomalies,
+fraud and inefficiencies in MPLADS works. Here is where each part of the brief
+lives in the system:
 
-| | Detector | Finding |
+| The brief asks for | Kasauti |
+|---|---|
+| ML, AI and advanced analytics | Isolation Forest, Sentence-BERT embeddings, Gemini, and four statistical detectors |
+| Cost overruns and deviations from norms | Every work's cost against the median of the same sector in the same district, plus an Isolation Forest |
+| Duplicate works | Near-identical descriptions in the same district and sector (Sentence-BERT, similarity ≥ 0.94) |
+| Delayed projects | Days past the completion date the record publishes |
+| Irregularities in fund utilisation and payments | Agency vendor concentration and unpaid bills; year-end payment bursts; first-digit (Benford) anomalies; idle allocation; uniform sanction amounts |
+| Risk-based alerts, high-risk cases highlighted | A ranked review queue with the reason for every flag, decisions and an audit trail |
+| Trend analysis | Money paid month by month, and how much lands in March, the year-end |
+| Early warning | Agencies holding open works that have paid nobody in 180 days |
+| Predictive insights | Works likely to miss their due date, from their agency's own record |
+| Automated compliance monitoring | Scheme rules checked on every work every night, with breach counts |
+| Dashboards for MPs, State Nodal Authorities, District Authorities, the Ministry | A desk for every member, every state and every district, and a national overview |
+| Transparency, accountability, less manual monitoring | Every figure traceable to the record; CSV export of any filtered queue; nightly automation |
+
+---
+
+## How a work is scored
+
+Every work gets a **risk score from 0 to 100**, built from five components, each
+a property of the work itself:
+
+| Component | Weight | What it measures |
 |---|---|---|
-| D-01 | Year-end payment burst | An agency paying most of its invoices in March |
-| D-02 | First-digit anomaly | Sanction amounts whose leading digits diverge from their peers (Benford MAD, peer-relative) |
-| D-03 | Idle allocation | A member with a large share of their allocation never committed to any work |
-| D-04 | Uniform sanction amount | An agency sanctioning the same round figure again and again |
+| **Cost** | 25% | Sanctioned amount against the median for the same sector in the same district (at least eight comparable works), blended with an **Isolation Forest** over amount, delay and spend |
+| **Delay** | 25% | Days past the expected completion date; a work with no published schedule scores zero, not high |
+| **Duplication** | 20% | Near-identical wording to another work nearby — **Sentence-BERT** (`all-MiniLM-L6-v2`) cosine similarity ≥ 0.94, same district and sector |
+| **Agency** | 15% | The implementing agency's delay rate, vendor concentration (Herfindahl-Hirschman index over its payments) and oldest unpaid bill |
+| **Compliance** | 15% | The scheme's checkable rules, each stating in words what it rests on |
 
-Every threshold was calibrated on this data's own distribution and carries a
-comment in the code saying so.
+Bands: **Low** below 40 · **Medium** 40–70 · **High** 70 and above. The review
+queue is every work at 40 and above.
 
-## Where the data comes from, and how that is checked
+A work's peers are defined by its **sector**, read from its description by
+keyword rules and, only where the rules cannot decide, by **Gemini**. Gemini
+labels; it never scores, ranks or flags, and it is allowed to answer "Other" —
+it did so 5,167 times rather than guess. All 41,691 of its answers are cached in
+the repository, so the system scores identically with no API key.
+
+**Every threshold was measured on this data's own distribution**, not borrowed
+from a textbook, and each carries a comment in the code saying how.
+
+### Beyond the score: patterns across agencies and members
+
+Four detectors describe an **agency or a member**, not a work, and are never
+added to any work's score — a pattern across an agency says nothing about any
+single one of its works:
+
+| | Detector | Looks for |
+|---|---|---|
+| D-01 | Year-end payment burst | An agency paying a large share of its year's invoices in March |
+| D-02 | First-digit anomaly | Payment amounts that stray from Benford's law, ranked against other agencies (the whole population fails the textbook test) |
+| D-03 | Idle allocation | A member's allocation never committed to any work, well above the typical share |
+| D-04 | Uniform sanction amount | An agency sanctioning one identical figure again and again |
+
+### Trends, the forecast and early warnings
+
+- **When the money moves** — payments month by month; the share paid in March
+  fell from 37.7% to 12.0% to 9.5% over three years.
+- **Likely to run late** — works due in the next 90 days at agencies in the worst
+  quarter by how many of their open works are already overdue (the cut is that
+  day's 75th percentile). Completed works in the record carry no due date, so
+  an agency's past on-time record cannot be measured; its current backlog is
+  the best evidence the record holds. A forecast about agencies, never part of
+  a work's score.
+- **Gone quiet** — agencies holding 20 or more open works that have paid nobody
+  in 180 days: money committed where nothing is moving.
+- **Compliance, checked every night** — every rule with its breach count, and
+  one click to the breaching works.
+
+### What it will not tell you
+
+- **It does not allege wrongdoing.** A score is a comparison — it says a work
+  does not resemble works like it. Every flag names the rows it came from, so
+  it can be argued with.
+- **It invents no fields.** MPLADS publishes no progress percentage,
+  beneficiary count, geo-tag or bill value, so none is shown. The source
+  publishes one figure per completed work as both sanction and expenditure, so
+  an overspend-against-sanction rule cannot fire, and the site says so.
+- **It forecasts only from the record**, never from assumptions, and no
+  forecast enters a score.
+- **No model decides alone.** The score is deterministic and rule-weighted; no
+  model output becomes a risk number.
+
+---
+
+## The site
+
+Next.js 16 on Vercel. Light, monochrome, and **colour only ever means risk**.
+Desktops, laptops and tablets only — phones are shown a note instead, even with
+"Desktop site" switched on.
+
+| Page | What it holds |
+|---|---|
+| **Overview** `/` | The national figures with a term switcher (17th, 18th, both); how the score is made; what it will not tell you; trends and early warnings |
+| **Projects** `/projects` | The review queue — or every work — with search, state, band, term and review-status filters; status tiles that filter; the reasons for every flag; **Escalate / Verified / Dismiss** decisions (press again to clear) with an audit trail; CSV download of any filtered set |
+| **One work** `/projects/[id]` | Why it was flagged: each component, its comparable works, the reasons, and the decision history |
+| **States** `/states` | A risk map of India filling the first screen; click any state for its desk; every state ranked by paid-out, committed, completion, allocation or works to verify |
+| **State desk** `/state/[state]` | The state's money, its districts, its members, what the money built, population-level signals and its highest-scoring works |
+| **District desk** `/district/[state]/[district]` | Its implementing agencies with vendor concentration, its members, what was built, agency signals and works to look at first |
+| **MPs** `/mps` | All 788 members of the 18th Lok Sabha (and the 17th), with photographs, party, house and seat; search, filters and sorting; **compare up to four side by side** |
+| **Member desk** `/mp/[id]` | Allocation, committed, paid, never committed and awaiting payment; works; sectors; flags at member level; highest-scoring works |
+| **Sources** `/provenance` | An animated diagram of how the system works end to end, where the AI is, and what each detector does and does not claim |
+
+Also: a **site-wide search** (press `/`) over every state, district, agency,
+member and work; **every row and card opens from anywhere inside it**; and a
+proper not-found and error page.
+
+**Who a member is** comes from Parliament's own records at sansad.in — party,
+age, education, profession, terms and photograph — matched to all 1,110 members
+in the record and refreshed nightly. Sitting members the MPLADS portal does not
+list yet are shown with their profile and the words "No MPLADS fund record
+published for them yet", never a zero. Personal phone numbers, e-mail
+addresses, home addresses and family details in those records are never read.
+
+### Fast by construction
+
+Pages that do not depend on a query are built once and served from Vercel's
+edge cache, and every link prefetches its page in full, so a click is instant.
+Measured on the live site: cached pages answer in about **0.09 s**, repeat visits
+load in 0.2–0.75 s, and navigation lands in 0.2–0.4 s. Everything that moves is
+transform- and opacity-only, pauses when off screen, and is absent for visitors
+who prefer reduced motion.
+
+---
+
+## Where the data comes from
 
 The problem statement designates `mplads.mospi.gov.in`. That portal serves
 totals, states and member names openly, but individual works only through an
-OTP-gated citizen rating form, one member in one ward at a time; there is no
-bulk export. We load **Empowered Indian's** export of the same record
-(`scripts/fetch_mplads.py`, both terms explicitly — the API defaults to the
-18th), and on every refresh `scripts/verify_mospi.py` **reconciles our figures
-against the official dashboard's own endpoints**. Both hops are shown on
-`/provenance`: ours-to-source, which is our responsibility, and
-source-to-MoSPI, which is upstream lag. Per-state money figures are read from
-the source's own aggregates rather than recomputed, so any row can be checked
-against the source — `scripts/verify_states.py`, 36 of 36 states matching
-exactly on allocation, expenditure, amount recommended, member count and
-completed works.
+OTP-gated citizen form, one member in one ward at a time — there is no bulk
+export. Kasauti therefore loads **Empowered Indian's** machine-readable export
+of the same record, and **reconciles its figures against the official MoSPI
+dashboard's own endpoints every night**, keeping two differences apart: ours
+against the source (our responsibility) and the source against MoSPI (upstream
+lag). Per-state and per-member money figures are the source's own aggregates,
+not recomputed — 36 of 36 states match exactly.
 
 ## The nightly refresh
 
-`.github/workflows/refresh-data.yml` runs at **19:30 UTC (01:00 IST)** on
-GitHub Actions (Vercel functions cap at 300 s; scoring takes ~20 min on a
-runner), against the same Neon Postgres the deployed API reads:
+`.github/workflows/refresh-data.yml` runs every night at 19:30 UTC (01:00 IST)
+on GitHub Actions, against the Neon Postgres database the live API reads:
 
-1. **Fetch** both terms from the source; fall back to the committed snapshot in
-   `data/snapshot/` with a loud warning if the source produces nothing.
-2. **Apply schema** (`data/schema.sql`, idempotent).
-3. **Load** (`data/load_real_data.py`) — every input frame is parsed before
-   anything is written; rejected rows are recorded, not dropped silently.
-4. **Label new sectors** (`scripts/classify_sectors.py`) using the
-   `GEMINI_API_KEY` repository secret, and **commit the cache** so the
-   repository stays self-sufficient. Without the secret the step says why and
-   skips; new works land in "Other", which is a real peer group.
-5. **Score** (`data/scoring.py`) — writes `project_scores` with `TRUNCATE` +
-   `INSERT` in **one transaction**, so readers see the whole previous run or the
-   whole new one and the site is never blank while it works.
-6. **Reconcile** against MoSPI and record the result in `source_reconciliation`.
+1. **Fetch** both Lok Sabha terms from the source.
+2. **Apply the schema** — only if it has changed, so a normal night takes no
+   locks on the tables the site is reading.
+3. **Load** — every input file is validated before anything is written; bad
+   rows are recorded with a reason, never dropped silently; nothing is
+   rewritten if the extract is unchanged.
+4. **Label new sectors** with Gemini, and commit the labels to the repository.
+5. **Score** every work, swapped in with one transaction so the site is never
+   blank while it works.
+6. **Reconcile** against the MoSPI dashboard.
+7. **Refresh member profiles** from Parliament's records, and commit any change.
 
-Concurrency is locked to one run at a time. A killed run records itself as
-failed rather than leaving the dashboard half-refreshed.
+Every write retries on a lock conflict with a visitor's query, one run at a
+time is enforced, and a failed run records itself as failed.
 
-## The interface
+---
 
-Next.js 16.3.3, React 19.2, Tailwind v4, deployed on Vercel. Monochrome, Geist
-and Geist Mono; colour means risk, with one deliberate exception — the words
-"AI powered" are dark red and the dot beside them green.
+## Built with
 
-Seven pages in the nav, in this order:
-
-| Page | Route | What it holds |
-|---|---|---|
-| Overview | `/` | The headline figures with a term switcher, the risk split, **where the AI is** (the three models, each with what it decides and what it does not), what the score is made of, what it will not tell you |
-| Projects | `/projects` | The review queue (every work ≥ 40) and, with **All works** chosen, the whole record — filterable by search, state, district, sector, band, term, status, minimum score and member; CSV export; a decision trail per work, written with a review token. Replaces the old Works and Alerts pages; `/alerts` redirects here, and each row shows three reasons with the rest behind "Read more" |
-| States | `/states` | Opens on the risk map of India, filling the screen (Leaflet choropleth, click a state for its desk; `/map` redirects here), then every state ranked, with paid rate (expenditure / allocated) and committed rate (recommended / allocated) shown apart, because the source publishes one number under both names |
-| Agencies | `/analysis` | Implementing agencies ranked by average risk with vendor share; the "gone quiet" list (no payment in 180 days); members ranked by idle allocation |
-| Sources | `/provenance` | The reconciliation chain, the official interface (nine endpoints, which are open and which OTP-gated), rejects, and the blind spots — fields MPLADS does not publish (progress %, beneficiaries, geo-tags, bill values) and which the site therefore never invents |
-
-Plus desks per state (`/state/[state]`), district (`/district/[state]/[district]`)
-and member (`/mp/[id]`), and a page per work (`/projects/[id]`) headed
-**AI powered · gemini-flash-lite — Why was this flagged?**, where each reason is
-tagged with the method that produced it.
-
-How it moves, and what that cost to get right:
-
-- A **CSS-only loading cover** (3.3 s, a bar and a counting percentage) that
-  cannot hang, because it depends on nothing that loads behind it. The page
-  assembles in view as the cover lifts.
-- **Scroll-driven arrivals** (`animation-timeline: view()`): opacity completes
-  over 300 px of travel so text is solid while it is read, movement eases out
-  over 680 px so the settle is visible. Only blocks below the fold at load take
-  a timeline, marked by layout position rather than the drawn box.
-- **Figures count up**, re-triggered on every viewport entry.
-- A **risk ticker** in the masthead carrying the highest-scoring works.
-- An instant **loading state** on every nav click, and API reads cached for
-  five minutes so a click lands in 130–550 ms rather than the one to nine
-  seconds a cold database query takes. Submitting a review expires the cache.
-- A **field of drifting points** behind the overview headline — one 2D canvas,
-  four hundred points, under a millisecond a frame, stopped when off-screen.
-- A **dot-and-ring pointer** on devices with a fine pointer; the ring trails
-  the dot, opens over links, closes when pressed, and steps aside for text
-  fields.
-- Every one of these was measured in a headless browser — frame intervals,
-  opacity at every scroll position, scroll position through a reload — before
-  it was called done. Two backdrop-filters on the whole page, no fixed
-  backgrounds, no gradient pseudo-elements, 60 fps.
-
-## The API
-
-FastAPI + psycopg2, on Vercel Python. Every read goes through the
-`projects_scored` view, which joins source tables to derived ones.
-
-```
-GET  /api/overview                 headline figures, ?ls_term=17|18
-GET  /api/search/index             every state, district, agency and member, for the site search
-GET  /api/search/works             works matching a query, ranked by where it sits in the name
-GET  /api/projects                 the record, filterable and paged
-GET  /api/projects/{id}            one work
-GET  /api/projects/by-key          one work by its stable work_key
-GET  /api/filters                  filter options
-GET  /api/map/states               risk by state for the map
-GET  /api/states                   states ranked
-GET  /api/states/{state}           state desk
-GET  /api/districts                districts ranked
-GET  /api/districts/{state}/{d}    district desk
-GET  /api/mps                      members
-GET  /api/mps/{mp_id}              member desk
-GET  /api/agencies                 agencies with vendor concentration
-GET  /api/alerts                   the review queue
-GET  /api/alerts/summary           queue counts
-GET  /api/alerts/export            the queue as CSV
-POST /api/alerts/review            record a decision (X-Review-Token)
-GET  /api/alerts/history           the decision trail for a work
-GET  /api/detectors                the four cohort detectors and their limits
-GET  /api/detectors/findings       their findings
-GET  /api/trends                   time series, ?state=
-GET  /api/compliance               the rule book and the blind spots
-GET  /api/provenance               the reconciliation chain
-GET  /api/data-freshness           when the last refresh finished
-```
+| | |
+|---|---|
+| Interface | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Leaflet — on Vercel |
+| API | FastAPI (Python), psycopg2 — on Vercel |
+| Data | PostgreSQL (Neon), pandas |
+| AI and statistics | scikit-learn (Isolation Forest), Sentence-BERT (`all-MiniLM-L6-v2`), Google Gemini, Benford analysis, Herfindahl-Hirschman index |
+| Automation | GitHub Actions (nightly), Vercel (deploy on every push) |
 
 ## Repository
 
 ```
-api/            FastAPI service (main.py, db.py) and its tests
-data/           schema.sql; load_real_data.py; scoring.py; detectors.py;
-                sectors.py (keyword rules); llm_sectors.py (Gemini);
-                vendors.py; mps.py; sector_cache.json (committed);
-                snapshot/ (committed extracts); tests
-scripts/        fetch_mplads.py; classify_sectors.py; verify_mospi.py;
-                verify_states.py; build_sih_deck.py; screenshot.mjs
-web/            Next.js app — app/ (routes), components/, lib/api.ts
-docs/deck/      the SIH idea deck, built from the database by build_sih_deck.py
-docs/superpowers/  original design spec and implementation plan
-graphify-out/   a knowledge graph of the codebase (graphify)
+api/        FastAPI service (main.py, db.py) and its tests
+data/       schema.sql · load_real_data.py (loader) · scoring.py (scorer) ·
+            detectors.py · sectors.py + llm_sectors.py · vendors.py · mps.py ·
+            pg_retry.py · sector_cache.json (committed) · snapshot/ · tests
+scripts/    fetch_mplads.py · apply_schema.py · classify_sectors.py ·
+            verify_mospi.py · verify_states.py · fetch_mp_profiles.py ·
+            build_sih_deck.py · preview_deck.py
+web/        Next.js app — app/ (pages), components/, lib/,
+            data/mp_profiles.json and public/mps/ (member photographs)
+docs/deck/  the SIH idea deck, built from the live database
 .github/workflows/refresh-data.yml   the nightly refresh
-CLAUDE.md       the rules this project learned the hard way
+CLAUDE.md   how the system works, and the rules it learned the hard way
 ```
 
 ## Running it
 
-Secrets live only in `.env` at the repository root, gitignored. **Quote the
-values** — `DATABASE_URL` contains `&`.
+Secrets live only in `.env` at the repository root (gitignored). Quote the
+values — the database URL contains `&`.
 
 ```
-DATABASE_URL="postgres://..."        # Neon
-REVIEW_TOKEN="..."                   # lets the web app record decisions
+DATABASE_URL="postgres://..."     # Neon Postgres
+REVIEW_TOKEN="..."                # lets the web app record decisions
 ```
 
 `web/.env.local` points the web app at the API
 (`NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` locally). No Gemini key is
-needed for anything that already works; it belongs only in the `GEMINI_API_KEY`
-GitHub secret.
+needed to run anything; the sector labels are committed.
 
-```
+```bash
 # API
 cd api && pip install -r requirements.txt
 python3 -m uvicorn main:app --port 8000
@@ -215,22 +253,30 @@ python3 -m uvicorn main:app --port 8000
 # Web
 cd web && npm install && npm run dev
 
-# Load and score against your own Postgres (~50 min for scoring, ~2.5 GB)
+# Load and score against your own Postgres (scoring takes ~50 minutes)
 pip install -r data/requirements.txt
 python3 scripts/fetch_mplads.py --out mplads-data
+python3 scripts/apply_schema.py
 python3 data/load_real_data.py
 python3 data/scoring.py
 
-# Tests: 139, against the live database, ~2.5 minutes
+# Tests — 147, against the live database, 3–6 minutes
 python3 -m pytest data api -q
 ```
 
-One database actor at a time: never run the loader and the scorer together,
-and never start either while the nightly Action may be running.
+Run one database writer at a time: never the loader and the scorer together,
+and never while the nightly refresh may be running.
 
 ## The deck
 
-`scripts/build_sih_deck.py` fills the official SIH idea template
-(`docs/deck/SIH26102-MPLADS-SIH-Idea.pptx`) with figures read from the database
-at build time. It refuses to build on a null or zero, because it shipped stale
-twice when the numbers were typed in.
+`scripts/build_sih_deck.py` fills the SIH idea template with figures read from
+the live database at build time, and refuses to build on a missing or zero
+figure — so the deck and the running system never disagree.
+
+---
+
+<p align="center">
+  Kasauti says which works are worth a site visit — never which are false.<br>
+  MPLADS programme data via Empowered Indian, which aggregates the official MoSPI portal.
+  Not affiliated with any ministry.
+</p>
