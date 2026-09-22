@@ -3092,17 +3092,17 @@ html[data-no-cover] .splash { display: none; }
 }
 
 /* ---------------------------------------------------------------------------
-   Phones are refused. The working screens are tables 456px wide at their
-   narrowest, and the owner chose a wall over a squeeze: a phone gets one
-   sentence and nothing else, even with "Desktop site" on.
+   Phones and tablets are refused (owner, 2026-09-15 for phones, 2026-09-22
+   for tablets). The working screens are tables 456px wide at their
+   narrowest, and the owner chose a wall over a squeeze: a touch device gets
+   one sentence and nothing else, even with "Desktop site" on.
 
    The flag is `<html data-phone>`, set by the inline script at the top of
-   <body> before anything paints. Detection there is two tests OR-ed: the
-   user agent (iPhone, or Android's "Mobile" token), which "Desktop site"
-   rewrites; and coarse-pointer hardware whose screen is taller than 5:3,
-   which it cannot rewrite - phones are 2:1 or taller, tablets 16:10 or
-   squarer. ponytail: a 16:9 Android tablet reads as a phone; none is
-   current enough to matter. */
+   <body> before anything paints. Three tests OR-ed: the user agent (iPhone,
+   iPad, Android, "Mobi", "Tablet"), which "Desktop site" rewrites; a coarse
+   primary pointer, which it cannot - a touchscreen laptop's primary pointer
+   is its trackpad, so laptops still pass; and a "Macintosh" that has touch
+   points, which is how iPadOS Safari describes itself. */
 .phone-wall { display: none; }
 html[data-phone] body > :not(.phone-wall) { display: none !important; }
 html[data-phone] .phone-wall {
