@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-24T22:42:44Z",
+ "fetched_at": "2026-09-25T22:44:35Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -8574,7 +8574,7 @@
    "party": "Indian National Congress",
    "party_short": "INC",
    "gender": "Female",
-   "age": 42,
+   "age": 43,
    "qualification": "Professional Post Graduate",
    "profession": "POLITICAL AND SOCIAL WORKER, FARMER",
    "terms_served": 1,
@@ -10820,7 +10820,7 @@
   "ab517b5ae1586384": {
    "sansad_id": 5143,
    "source": "Lok Sabha",
-   "name": "Atul Kumar Rai",
+   "name": "Atul Kumar Singh",
    "party": "Bahujan Samaj Party",
    "party_short": "BSP",
    "gender": "Male",
@@ -16751,7 +16751,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Female",
-   "age": 53,
+   "age": 54,
    "qualification": null,
    "profession": null,
    "terms_served": 3,
