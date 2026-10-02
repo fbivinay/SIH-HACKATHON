@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-01T23:24:31Z",
+ "fetched_at": "2026-10-02T23:13:12Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -1869,7 +1869,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Male",
-   "age": 58,
+   "age": 59,
    "qualification": "Post Graduate",
    "profession": "BUSINESSPERSON",
    "terms_served": 3,
@@ -10809,7 +10809,7 @@
    "party": "Dravida Munnetra Kazhagam",
    "party_short": "DMK",
    "gender": "Male",
-   "age": 64,
+   "age": 65,
    "qualification": "Post Graduate",
    "profession": "Agriculturist",
    "terms_served": 1,
@@ -11649,7 +11649,7 @@
    "party": "Indian National Congress",
    "party_short": "INC",
    "gender": "Female",
-   "age": 81,
+   "age": 82,
    "qualification": "Graduate",
    "profession": "SOCIAL WORKER",
    "terms_served": 4,
