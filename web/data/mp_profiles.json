@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-03T22:23:46Z",
+ "fetched_at": "2026-10-04T22:29:52Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -1539,7 +1539,7 @@
    "party": "Indian National Congress",
    "party_short": "INC",
    "gender": "Male",
-   "age": 75,
+   "age": 76,
    "qualification": "Under Graduate",
    "profession": "Agriculturist",
    "terms_served": 2,
@@ -7149,7 +7149,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Female",
-   "age": 47,
+   "age": 48,
    "qualification": "Post Graduate",
    "profession": null,
    "terms_served": 1,
@@ -12054,7 +12054,7 @@
    "party": "All India Trinamool Congress",
    "party_short": "AITC",
    "gender": "Female",
-   "age": 56,
+   "age": 57,
    "qualification": "Graduate",
    "profession": "Film Artist, BUSINESSPERSON, Poet, Producer and Director, Writer",
    "terms_served": 4,
