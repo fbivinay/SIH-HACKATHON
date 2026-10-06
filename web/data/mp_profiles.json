@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-04T22:29:52Z",
+ "fetched_at": "2026-10-06T00:58:08Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -3730,7 +3730,7 @@
    "party_short": "CPI(M)",
    "gender": "Male",
    "age": 56,
-   "qualification": "Inter/Higher Secondary",
+   "qualification": "Graduate",
    "profession": "Writer",
    "terms_served": 2,
    "lok_sabhas": "17,18",
@@ -4869,7 +4869,7 @@
    "party": "Hindustani Awam Morcha (Secular)",
    "party_short": "HAM (S)",
    "gender": "Male",
-   "age": 81,
+   "age": 82,
    "qualification": "Graduate",
    "profession": "Social Activist",
    "terms_served": 1,
@@ -10975,7 +10975,7 @@
    "party_short": "INC",
    "gender": "Male",
    "age": 43,
-   "qualification": null,
+   "qualification": "Post Graduate",
    "profession": null,
    "terms_served": 2,
    "lok_sabhas": "17,18",
@@ -15356,7 +15356,7 @@
    "gender": "Male",
    "age": 65,
    "qualification": null,
-   "profession": null,
+   "profession": "Advocate, Advocate",
    "terms_served": 2,
    "lok_sabhas": "17,18",
    "status": "Sitting",
