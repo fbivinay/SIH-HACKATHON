@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-11T23:07:42Z",
+ "fetched_at": "2026-10-13T01:36:23Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -834,7 +834,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Male",
-   "age": 51,
+   "age": 52,
    "qualification": null,
    "profession": null,
    "terms_served": 1,
@@ -16797,6 +16797,24 @@
    "seat": null,
    "state": "West Bengal",
    "photo": "/mps/rs-2678.webp"
+  },
+  "rs-2680": {
+   "sansad_id": 2680,
+   "source": "Rajya Sabha",
+   "name": "Rukmini Mallik",
+   "party": "Bharatiya Janata Party",
+   "party_short": "BJP",
+   "gender": "Female",
+   "age": null,
+   "qualification": null,
+   "profession": null,
+   "terms_served": 2,
+   "rs_term": "2026-2032",
+   "status": "Sitting",
+   "house": "Rajya Sabha",
+   "seat": null,
+   "state": "West Bengal",
+   "photo": "/mps/rs-2680.webp"
   },
   "rs-2681": {
    "sansad_id": 2681,
