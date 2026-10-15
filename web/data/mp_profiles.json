@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-14T22:34:10Z",
+ "fetched_at": "2026-10-15T22:38:07Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -253,8 +253,8 @@
    "qualification": null,
    "profession": null,
    "terms_served": 2,
-   "rs_term": "2024-2030",
-   "status": "Sitting",
+   "rs_term": "2024-2026",
+   "status": "Resignation",
    "photo": "/mps/04323db4d835c24b.webp"
   },
   "04b67171391936e3": {
@@ -3189,7 +3189,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Female",
-   "age": 41,
+   "age": 42,
    "qualification": null,
    "profession": null,
    "terms_served": 1,
@@ -3339,7 +3339,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Male",
-   "age": 64,
+   "age": 65,
    "qualification": "Professional Graduate",
    "profession": "CONSULTANT",
    "terms_served": 2,
@@ -7419,7 +7419,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Female",
-   "age": 77,
+   "age": 78,
    "qualification": "Matric",
    "profession": "Artist",
    "terms_served": 3,
@@ -9309,7 +9309,7 @@
    "party": "Zoram Peoples Movement",
    "party_short": "ZPM",
    "gender": "Male",
-   "age": 62,
+   "age": 63,
    "qualification": null,
    "profession": null,
    "terms_served": 1,
