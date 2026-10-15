@@ -400,7 +400,7 @@ def mps(limit: int = Query(100, le=1000)):
     )
 
 
-# The one forecast the published record supports (CLAUDE.md §1: nothing it
+# The one forecast the published record supports (project rule 1: nothing it
 # does not publish). Completed works carry only a completion date - no
 # recommendation or due date - so an agency's past on-time record cannot be
 # measured. Open works do carry a due date, and an agency whose open works are
@@ -496,7 +496,7 @@ def mp_directory(ls_term: int = Query(18, ge=17, le=18)):
     members - and it is one term at a time, because a member's two terms are
     two different allocations and adding them would compare nothing.
 
-    Money is the source's own per-MP aggregate (CLAUDE.md §6); the works
+    Money is the source's own per-MP aggregate (project rule 6); the works
     columns count what we hold for the member. Remembered for thirty minutes:
     the record changes once a night.
     """

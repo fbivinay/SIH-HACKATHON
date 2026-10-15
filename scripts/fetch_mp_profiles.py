@@ -310,7 +310,7 @@ def unlisted(matched: dict, term18_ids: set, ls18: list[dict], rs: list[dict], o
     Lok Sabha member - is in Parliament and not yet in MPLADS. They are still
     members, and a page of "every member" that leaves them out is wrong. They
     are listed with Parliament's profile and no money at all: nothing is
-    shown for a figure the source does not publish (CLAUDE.md §1).
+    shown for a figure the source does not publish (project rule 1).
     """
     used = {(p["source"], p["sansad_id"]) for k, p in matched.items() if k in term18_ids}
     # Our spelling of each state, so the page's state filter finds them.

@@ -232,7 +232,6 @@ web/        Next.js app — app/ (pages), components/, lib/,
             data/mp_profiles.json and public/mps/ (member photographs)
 docs/deck/  the SIH idea deck and the architecture diagram
 .github/workflows/refresh-data.yml   the nightly refresh
-CLAUDE.md   how the system works, and the rules it learned the hard way
 ```
 
 ## Running it
