@@ -3100,9 +3100,9 @@ html[data-no-cover] .splash { display: none; }
    The flag is `<html data-phone>`, set by the inline script at the top of
    <body> before anything paints. Three tests OR-ed: the user agent (iPhone,
    iPad, Android, "Mobi", "Tablet"), which "Desktop site" rewrites; a coarse
-   primary pointer, which it cannot - a touchscreen laptop's primary pointer
-   is its trackpad, so laptops still pass; and a "Macintosh" that has touch
-   points, which is how iPadOS Safari describes itself. */
+   pointer with no fine pointer anywhere, which it cannot - a touchscreen
+   laptop still has its trackpad, so laptops pass; and a "Macintosh" that has
+   touch points, which is how iPadOS Safari describes itself. */
 /* The wall itself: always styled, shown only by the two rules below. */
 .phone-wall {
   display: none;

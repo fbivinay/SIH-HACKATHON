@@ -34,6 +34,22 @@ export const metadata: Metadata = {
   },
   description:
     "Reads every MPLADS work, scores the ones that do not resemble their peers, and hands officials a ranked list of what to verify.",
+  metadataBase: new URL("https://mplads-risk-monitor-web.vercel.app"),
+  openGraph: {
+    type: "website",
+    url: "/",
+    title: "Kasauti — AI-powered MPLADS verification",
+    description:
+      "Every MPLADS work checked against its peers: a ranked list of what officials should verify. Smart India Hackathon 2026, SIH26102.",
+    images: [{ url: "/og.png", width: 1440, height: 756 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kasauti — AI-powered MPLADS verification",
+    description:
+      "Every MPLADS work checked against its peers: a ranked list of what officials should verify. Smart India Hackathon 2026, SIH26102.",
+    images: ["/og.png"],
+  },
 };
 
 // Light only, whatever the OS or browser asks for: this writes the
@@ -88,15 +104,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           dangerouslySetInnerHTML={{
             __html:
-              // Three tests, because "Desktop site" can rewrite the first two
-              // at once (user agent, and on some Android builds the pointer
-              // and hover media queries). A real touch screen is the one
-              // thing it does not fake: maxTouchPoints stays above zero. The
-              // screen bound keeps touchscreen laptops out of it.
-              '(function(){var n=navigator,u=n.userAgent,s=screen,' +
-              'touch=n.maxTouchPoints>0&&Math.min(s.width,s.height)<=1024;' +
-              'if(/iPhone|iPad|Android|Mobi|Tablet|Silk|Kindle|PlayBook|BB10/i.test(u)||' +
-              'matchMedia("(pointer: coarse)").matches||touch)' +
+              // Phones and tablets by user agent; iPadOS, which asks for the
+              // desktop site and calls itself "Macintosh", by its touch
+              // points; and any touch-only screen whose "Desktop site" mode
+              // rewrote the user agent, because it still has no fine pointer.
+              // Touchscreen laptops keep their trackpad, so they always pass.
+              '(function(){var n=navigator,u=n.userAgent,' +
+              'mq=function(q){return matchMedia(q).matches};' +
+              'if((n.userAgentData&&n.userAgentData.mobile)||' +
+              '/iPhone|iPad|iPod|Android|Mobi|Tablet|Silk|Kindle|PlayBook|BB10|Opera Mini|IEMobile|webOS/i.test(u)||' +
+              '(/Macintosh/.test(u)&&n.maxTouchPoints>1)||' +
+              '(mq("(pointer: coarse)")&&!mq("(any-pointer: fine)")))' +
               'document.documentElement.dataset.phone="1";' +
               // The loading cover plays once, then not again for six hours:
               // on a repeat visit, a reload or a link opened in a new tab the
