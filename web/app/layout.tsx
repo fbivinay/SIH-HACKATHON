@@ -114,7 +114,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               'if((n.userAgentData&&n.userAgentData.mobile)||' +
               '/iPhone|iPad|iPod|Android|Mobi|Tablet|Silk|Kindle|PlayBook|BB10|Opera Mini|IEMobile|webOS/i.test(u)||' +
               '(/Macintosh/.test(u)&&n.maxTouchPoints>1)||' +
-              '(mq("(pointer: coarse)")&&!mq("(any-pointer: fine)")))' +
+              '(mq("(pointer: coarse)")&&!mq("(any-pointer: fine)"))||(navigator.maxTouchPoints>0&&(Math.min(screen.width,screen.height)<600||(/Linux (arm|aarch)|Android/i.test(navigator.platform)&&!/CrOS/.test(navigator.userAgent)))))' +
               'document.documentElement.dataset.phone="1";' +
               // The loading cover plays once, then not again for six hours:
               // on a repeat visit, a reload or a link opened in a new tab the
