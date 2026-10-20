@@ -51,6 +51,15 @@ app.add_middleware(
 )
 
 
+# ClaudeBot followed the site's links here too from 2026-10-19, and every hit
+# is a function run on Vercel's free CPU. vercel.json routes every path to this
+# app, so a static file would never be served. Every other crawler, search
+# engines included, stays allowed.
+@app.get("/robots.txt", include_in_schema=False)
+def robots_txt():
+    return Response("User-agent: ClaudeBot\nDisallow: /\n", media_type="text/plain")
+
+
 @app.get("/api/overview")
 def overview(ls_term: Optional[int] = Query(None, ge=17, le=18)):
     """Headline figures, optionally for one Lok Sabha term.

@@ -1,0 +1,5 @@
+# ClaudeBot opened every page about every 2 seconds from 2026-10-19. Each visit
+# renders the page and calls the API on Vercel, which used up the free CPU.
+# Every other crawler, search engines included, stays allowed.
+User-agent: ClaudeBot
+Disallow: /
