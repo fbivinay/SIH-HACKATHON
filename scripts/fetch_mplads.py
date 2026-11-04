@@ -15,6 +15,7 @@ Usage:
 import argparse
 import csv
 import datetime
+import http.client
 import io
 import pathlib
 import sys
@@ -100,6 +101,24 @@ def verify(out_path):
     return count
 
 
+def fetch_verified(endpoint, out_path, attempts=3):
+    """merge_terms + verify, refetching the whole dataset if either fails.
+
+    The source sits behind Cloudflare, which can end a 200 response early: on
+    2026-11-04 term 18 stopped after 261 rows, mid-row. open_export's retries
+    never see that, so the nightly run died on a glitch gone a minute later.
+    """
+    for attempt in range(1, attempts + 1):
+        try:
+            _, rows = merge_terms(endpoint, out_path)
+            return rows, verify(out_path)
+        except (SystemExit, OSError, csv.Error, http.client.HTTPException) as exc:
+            if attempt == attempts:
+                raise
+            print(f"\n  attempt {attempt} failed ({exc}); refetching", file=sys.stderr)
+            time.sleep(30 * attempt)
+
+
 def self_check():
     """Merge logic survives quoted commas and embedded newlines. No network."""
     sample = '"Work ID","Work Description"\r\n1,"Road, phase 2\nsecond line"\r\n'
@@ -116,6 +135,16 @@ def self_check():
             body = list(csv.reader(fh))
         assert body[1][1] == "Road, phase 2\nsecond line", body[1]
         assert body[1][2] == "17" and body[2][2] == "18", body
+
+        # A stream cut mid-row is refetched, not fatal.
+        cut = sample[:sample.index("\r\n") + 3]  # header, then one field of a row
+        streams = iter([cut, sample, sample, sample])
+        globals()["open_export"] = lambda endpoint, ls_term, attempts=3: io.StringIO(next(streams))
+        real_sleep, time.sleep = time.sleep, lambda s: None
+        try:
+            assert fetch_verified("fake", tmp) == (len(TERMS), len(TERMS))
+        finally:
+            time.sleep = real_sleep
         tmp.unlink()
     finally:
         globals()["open_export"] = real_open
@@ -148,8 +177,7 @@ def main():
             print(f"{endpoint}: {out_path.name} exists, skipping (--force to redo)")
             continue
         print(f"{endpoint}:")
-        _, rows = merge_terms(endpoint, out_path)
-        verified = verify(out_path)
+        rows, verified = fetch_verified(endpoint, out_path)
         size_mb = out_path.stat().st_size / 1e6
         print(f"  -> {out_path.name}  {verified} rows  {size_mb:.1f} MB")
         assert verified == rows, (verified, rows)
