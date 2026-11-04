@@ -1,3 +1,6 @@
+# CPU-only torch. The default PyPI wheel pulls ~4 GB of CUDA libraries that the
+# GitHub runner (no GPU) never uses, and filled its disk on 2026-11-04.
+--extra-index-url https://download.pytorch.org/whl/cpu
 pandas
 scikit-learn
 sentence-transformers
