@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-06T00:32:02Z",
+ "fetched_at": "2026-11-06T23:49:54Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -609,7 +609,7 @@
    "party": "Makkal Needhi Maiam",
    "party_short": "MNM",
    "gender": "Male",
-   "age": 71,
+   "age": 72,
    "qualification": null,
    "profession": null,
    "terms_served": 1,
@@ -2949,7 +2949,7 @@
    "party": "Indian National Congress",
    "party_short": "INC",
    "gender": "Male",
-   "age": 53,
+   "age": 54,
    "qualification": null,
    "profession": null,
    "terms_served": 1,
@@ -3624,7 +3624,7 @@
    "party": "All India Trinamool Congress",
    "party_short": "AITC",
    "gender": "Male",
-   "age": 38,
+   "age": 39,
    "qualification": "Post Graduate",
    "profession": "SOCIAL WORKER",
    "terms_served": 3,
@@ -4469,7 +4469,7 @@
    "profession": "Other",
    "terms_served": 1,
    "lok_sabhas": "18",
-   "status": "Sitting",
+   "status": "Resigned",
    "photo": "/mps/451b49d128d6543a.webp"
   },
   "455b9a82b6a288ce": {
@@ -10404,7 +10404,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Male",
-   "age": 78,
+   "age": 79,
    "qualification": null,
    "profession": null,
    "terms_served": 1,
@@ -11874,7 +11874,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Male",
-   "age": 48,
+   "age": 49,
    "qualification": "Professional Post Graduate",
    "profession": "BUSINESSPERSON, Agriculturist",
    "terms_served": 2,
@@ -16941,6 +16941,24 @@
    "seat": null,
    "state": "Gujarat",
    "photo": "/mps/rs-2700.webp"
+  },
+  "rs-2718": {
+   "sansad_id": 2718,
+   "source": "Rajya Sabha",
+   "name": "Hardeep Singh Puri",
+   "party": "Bharatiya Janata Party",
+   "party_short": "BJP",
+   "gender": "Male",
+   "age": null,
+   "qualification": null,
+   "profession": null,
+   "terms_served": 1,
+   "rs_term": "2026-2030",
+   "status": "Sitting",
+   "house": "Rajya Sabha",
+   "seat": null,
+   "state": "Madhya Pradesh",
+   "photo": null
   }
  }
 }
