@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-08T23:03:04Z",
+ "fetched_at": "2026-11-10T02:22:59Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -15249,7 +15249,7 @@
    "party": "Indian National Congress",
    "party_short": "INC",
    "gender": "Male",
-   "age": 64,
+   "age": 65,
    "qualification": "Inter/Higher Secondary",
    "profession": "Agriculturist",
    "terms_served": 1,
@@ -16958,7 +16958,7 @@
    "house": "Rajya Sabha",
    "seat": null,
    "state": "Madhya Pradesh",
-   "photo": null
+   "photo": "/mps/rs-2718.webp"
   }
  }
 }
