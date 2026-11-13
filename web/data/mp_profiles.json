@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-12T01:40:00Z",
+ "fetched_at": "2026-11-13T00:41:09Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -16819,7 +16819,7 @@
   "rs-2680": {
    "sansad_id": 2680,
    "source": "Rajya Sabha",
-   "name": "Rukmini Mallik",
+   "name": "Rukmini Mallick",
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Female",
@@ -16827,7 +16827,7 @@
    "qualification": null,
    "profession": null,
    "terms_served": 2,
-   "rs_term": "2026-2032",
+   "rs_term": "2026-2026",
    "status": "Sitting",
    "house": "Rajya Sabha",
    "seat": null,
