@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-15T23:30:48Z",
+ "fetched_at": "2026-11-17T02:36:22Z",
  "source": "https://sansad.in (Lok Sabha and Rajya Sabha member records)",
  "profiles": {
   "00455a68130c0b92": {
@@ -219,7 +219,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Male",
-   "age": 50,
+   "age": 51,
    "qualification": null,
    "profession": null,
    "terms_served": 3,
@@ -2133,13 +2133,13 @@
    "photo": "/mps/2167c2c53a7c2a22.webp"
   },
   "22419eb67791df79": {
-   "sansad_id": 2371,
+   "sansad_id": 2437,
    "source": "Rajya Sabha",
-   "name": "Hardeep Singh Puri",
+   "name": "Arun Singh",
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Male",
-   "age": 74,
+   "age": 61,
    "qualification": null,
    "profession": null,
    "terms_served": 2,
@@ -9579,7 +9579,7 @@
    "party": "Indian National Congress",
    "party_short": "INC",
    "gender": "Male",
-   "age": 63,
+   "age": 64,
    "qualification": "Graduate",
    "profession": "Agricultural and Animal Husbandry",
    "terms_served": 1,
@@ -14874,7 +14874,7 @@
    "party": "Bharatiya Janata Party",
    "party_short": "BJP",
    "gender": "Male",
-   "age": 71,
+   "age": 72,
    "qualification": null,
    "profession": null,
    "terms_served": 1,
@@ -16762,6 +16762,24 @@
    "state": null,
    "photo": "/mps/rs-2269.webp"
   },
+  "rs-2371": {
+   "sansad_id": 2371,
+   "source": "Rajya Sabha",
+   "name": "Hardeep Singh Puri",
+   "party": "Bharatiya Janata Party",
+   "party_short": "BJP",
+   "gender": "Male",
+   "age": 74,
+   "qualification": null,
+   "profession": null,
+   "terms_served": 3,
+   "rs_term": "2026-2030",
+   "status": "Sitting",
+   "house": "Rajya Sabha",
+   "seat": null,
+   "state": "Madhya Pradesh",
+   "photo": "/mps/rs-2371.webp"
+  },
   "rs-2507": {
    "sansad_id": 2507,
    "source": "Rajya Sabha",
@@ -16941,24 +16959,6 @@
    "seat": null,
    "state": "Gujarat",
    "photo": "/mps/rs-2700.webp"
-  },
-  "rs-2718": {
-   "sansad_id": 2718,
-   "source": "Rajya Sabha",
-   "name": "Hardeep Singh Puri",
-   "party": "Bharatiya Janata Party",
-   "party_short": "BJP",
-   "gender": "Male",
-   "age": null,
-   "qualification": null,
-   "profession": null,
-   "terms_served": 1,
-   "rs_term": "2026-2030",
-   "status": "Sitting",
-   "house": "Rajya Sabha",
-   "seat": null,
-   "state": "Madhya Pradesh",
-   "photo": "/mps/rs-2718.webp"
   }
  }
 }
